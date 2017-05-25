@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<meta charset="utf-8" />
+</head>
+<body>
+<th:block th:fragment="content(pager, pageNoFieldId)">
+	<ul th:if="${pager.totalPageCount>0}" th:attr="data-page_no_field_id=${pageNoFieldId},data-cur_page_no=${pager.currentPageNo},data-total_page_count=${pager.totalPageCount}"
+			class="pagination pagination-sm no-margin pull-right">
+		<li><a href="#" onclick="return goto_page(event, 'first');" title="第一页"><i class="fa fa-angle-double-left"/></a></li>
+		<li><a href="#" onclick="return goto_page(event, 'prev');" title="上一页"><i class="fa fa-angle-left"/></a></li>
+		<li th:each="pageItem : ${pager.pageItems}" th:class="${pageItem.styleClass}">
+			<a href="#" th:onclick="${'return goto_page(event, ' + pageItem.text + ');'}" th:text="${pageItem.text}"></a>
+		</li>
+		<li><a href="#" onclick="return goto_page(event, 'next');" title="下一页"><i class="fa fa-angle-right"/></a></li>
+		<li><a href="#" onclick="return goto_page(event, 'last');" title="最后一页"><i class="fa fa-angle-double-right"/></a></li>
+		<li><a href="javascript:void(0)" th:text="${pager.currentPageNo + '页 / ' + pager.totalPageCount + '页'}"></a></li>
+	</ul>
+</th:block>
+</body>
+</html>

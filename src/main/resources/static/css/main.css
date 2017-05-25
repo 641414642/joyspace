@@ -1,0 +1,84 @@
+﻿html, body, div, span, applet, object, iframe, h1, h2, h3, h4, h5, h6, p, blockquote,
+pre, a, abbr, acronym, address, big, cite, code, del, dfn, em, img, ins, kbd, q, s, samp,
+small, strike, strong, sub, sup, tt, var, b, u, i, center, dl, dt, dd, ol, ul, li, fieldset,
+form, label, legend, caption, article, aside, canvas,xmp,
+details, embed, figure, figcaption, footer, header, menu, nav, output, ruby, section, summary, time, mark, audio, video{
+    font-family:'Helvetica Neue', Helvetica, 'Microsoft Yahei', 'Hiragino Sans GB', 'WenQuanYi Micro Hei', sans-serif;
+}
+
+.modalDialog {
+    display: table;
+    height: 100%;
+    margin: 0 auto;
+    position: relative;
+}
+
+.btn {
+    cursor: pointer;
+}
+
+.row{
+    min-width:930px;
+}
+.accordion ul.nav {
+    display: block;
+    margin: 0;
+}
+
+.label {
+    color: #666;
+}
+
+.label-success {
+    color: #666;
+}
+
+body, input {
+    margin: 0;
+    font-family: '微软雅黑', 'Microsoft YaHei';
+}
+
+.hide {
+    display: none;
+}
+
+.bgImg {
+    position: fixed;
+    width: 100%;
+    height: 100%;
+}
+
+.bgImg1 {
+    position: fixed;
+    right: 100px;
+    top: 50px;
+    width: 227px;
+    z-index:1;
+}
+.login-btn{
+    width: 100%;
+    margin-top: 27px;
+    height: 54px;
+    line-height: 54px;
+    border: none;
+    outline: none;
+    cursor: pointer;
+    text-align: center;
+    background: #98bf40;
+    color: #fff;
+    font-size: 20px;
+    border-radius: 3px;
+}
+.center {
+  text-align: center;
+}
+.text-center {
+  text-align: center;
+}
+@media screen and (max-width:1300px){
+    .input-daterange{
+        max-width:370px;
+        display:inline-flex;
+    }
+}
+

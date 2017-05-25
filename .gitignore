@@ -1,0 +1,8 @@
+/build/
+/log/
+/session_store/
+/.idea/
+/.gradle/
+/JoySpace.ipr
+/JoySpace.iws
+/gradle-app.setting
