@@ -139,7 +139,7 @@
 						<li><a href="#"><i class="fa fa-circle-o"></i>店面列表</a></li>
 					</ul>
 				</li>
-				<li class="treeview">
+				<li th:class="${viewCat=='pay_mgr' ? 'treeview active' : 'treeview'}" class="treeview">
 					<a href="../widgets.html">
 						<i class="fa fa-th"></i> <span>支付管理</span>
 						<span class="pull-right-container">
@@ -148,7 +148,7 @@
 					</a>
 					<ul class="treeview-menu">
 						<li><a href="#"><i class="fa fa-circle-o"></i>新增微信支付</a></li>
-						<li><a href="#"><i class="fa fa-circle-o"></i>微信支付列表</a></li>
+						<li th:class="${viewContent=='wxpay_list' ? 'active' : ''}"><a href="#" th:href="@{/wx_pay/list}"><i class="fa fa-circle-o"></i>微信支付列表</a></li>
 						<li><a href="#"><i class="fa fa-circle-o"></i>新增支付宝支付</a></li>
 						<li><a href="#"><i class="fa fa-circle-o"></i>支付宝支付列表</a></li>
 						<li><a href="#"><i class="fa fa-circle-o"></i>店铺支付方式列表</a></li>
@@ -203,6 +203,7 @@
 	<div class="content-wrapper" th:switch="${viewContent}">
 		<div th:case="'manager_list'" th:include="manager/list :: content"></div>
 		<div th:case="'manager'" th:include="manager/list :: content"></div>
+		<div th:case="'wxpay_list'" th:include="pay/wxpay_list :: content"></div>
 <!--
 		<div th:case="'system_info'" th:include="system/info :: content"></div>
 		<div th:case="'system_account'" th:include="system/account:: content"></div>

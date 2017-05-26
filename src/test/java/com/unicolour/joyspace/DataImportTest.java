@@ -1,7 +1,9 @@
 package com.unicolour.joyspace;
 
 import com.unicolour.joyspace.dao.ManagerDao;
+import com.unicolour.joyspace.dao.WeiXinPayConfigDao;
 import com.unicolour.joyspace.model.Manager;
+import com.unicolour.joyspace.model.WeiXinPayConfig;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -20,11 +22,10 @@ import java.util.Calendar;
 //@TestPropertySource(locations="classpath:test.properties")
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class DataImportTest {
-	@Autowired
-	PasswordEncoder passwordEncoder;
+	@Autowired PasswordEncoder passwordEncoder;
 
-	@Autowired
-	ManagerDao managerDao;
+	@Autowired ManagerDao managerDao;
+	@Autowired WeiXinPayConfigDao weiXinPayConfigDao;
 
 	/** 导入管理员测试 */
 	@Test
@@ -61,6 +62,40 @@ public class DataImportTest {
 					manager.setPassword(passwordEncoder.encode(rs.getString("PassWord")));
 
 					managerDao.save(manager);
+				}
+			}
+		}
+	}
+
+	/** 导入微信支付 */
+	@Test
+	public void importWxPayConfig() throws IOException, SQLException {
+		DriverManager.registerDriver(new com.microsoft.sqlserver.jdbc.SQLServerDriver());
+
+		String dbURL = "jdbc:sqlserver://localhost;databaseName=EPSON";
+		String pass = "Uni1Colour2";
+		try (Connection conn = DriverManager.getConnection(dbURL, "sa", pass)) {
+			try (Statement stat = conn.createStatement()) {
+				ResultSet rs = stat.executeQuery("select * from WeiXinPayConfig");
+				while (rs.next()) {
+					WeiXinPayConfig wxPay = new WeiXinPayConfig();
+
+					int id = rs.getInt("Id");
+					String name = rs.getString("Name");
+					boolean enable = rs.getBoolean("IsEnable");
+					String appId = rs.getString("AppId");
+					String mchId = rs.getString("MchId");
+					String keyVal = rs.getString("KeyVal");
+					String appSecret = rs.getString("AppSecret");
+
+					wxPay.setAppId(appId);
+					wxPay.setAppSecret(appSecret);
+					wxPay.setMchId(mchId);
+					wxPay.setName(name);
+					wxPay.setEnabled(enable);
+					wxPay.setKeyVal(keyVal);
+
+					weiXinPayConfigDao.save(wxPay);
 				}
 			}
 		}
