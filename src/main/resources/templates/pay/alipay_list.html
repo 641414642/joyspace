@@ -22,12 +22,12 @@
 				<form th:action="@{/ali_pay/list}" method="get" target="_self">
 					<input type="hidden" id="pageNoField" name="pageno" />
 					<div class="pull-left">
-						用户名: <input type="text" name="name" th:value="${inputAliPayName}" />
-						<button type="submit" class="btn btn-primary btn-sm">查询</button>
-						<a href="#" th:href="@{/ali_pay/list}" class="btn btn-success btn-sm">重置</a>
+						名称: <input type="text" name="name" th:value="${inputAliPayName}" />
+						<button type="submit" class="btn btn-default btn-sm">查询</button>
+						<a href="#" th:href="@{/ali_pay/list}" class="btn btn-default btn-sm">重置</a>
 					</div>
 					<div class="pull-right">
-						<a href="#" th:href="@{/ali_pay/edit(id=0)}" class="btn btn-block btn-default" onclick="return editAliPay(event)">新建</a>
+						<a href="#" th:href="@{/ali_pay/edit(id=0)}" class="btn btn-primary btn-sm" onclick="return editAliPay(event)">新建</a>
 					</div>
 				</form>
 			</div>
