@@ -1,8 +1,10 @@
 package com.unicolour.joyspace.controller;
 
+import com.unicolour.joyspace.dao.AliPayConfigDao;
 import com.unicolour.joyspace.dao.ManagerDao;
 import com.unicolour.joyspace.dao.WeiXinPayConfigDao;
 import com.unicolour.joyspace.dto.LoginManagerDetail;
+import com.unicolour.joyspace.model.AliPayConfig;
 import com.unicolour.joyspace.model.Manager;
 import com.unicolour.joyspace.model.WeiXinPayConfig;
 import com.unicolour.joyspace.service.ManagerService;
@@ -29,8 +31,11 @@ public class PaymentController {
 	@Autowired
 	WeiXinPayConfigDao weiXinPayConfigDao;
 
+	@Autowired
+	AliPayConfigDao aliPayConfigDao;
+
 	@RequestMapping("/wx_pay/list")
-	public ModelAndView adminUserList(
+	public ModelAndView wxPayList(
 			ModelAndView modelAndView,
 			@RequestParam(name="name", required=false, defaultValue="") String name,
 			@RequestParam(name="pageno", required=false, defaultValue="1") int pageno) {
@@ -103,4 +108,79 @@ public class PaymentController {
 		return true;
 	}
 
+	@RequestMapping("/ali_pay/list")
+	public ModelAndView aliPayList(
+			ModelAndView modelAndView,
+			@RequestParam(name="name", required=false, defaultValue="") String name,
+			@RequestParam(name="pageno", required=false, defaultValue="1") int pageno) {
+
+		Pageable pageable = new PageRequest(pageno - 1, 20);
+		Page<AliPayConfig> aliPayCfgs = name == null || name.equals("") ?
+				aliPayConfigDao.findAll(pageable) :
+				aliPayConfigDao.findByName(name, pageable);
+
+		modelAndView.getModel().put("inputAliPayName", name);
+
+		Pager pager = new Pager(aliPayCfgs.getTotalPages(), 7, pageno-1);
+		modelAndView.getModel().put("pager", pager);
+
+		modelAndView.getModel().put("alipay_configs", aliPayCfgs.getContent());
+
+		modelAndView.getModel().put("viewCat", "pay_mgr");
+		modelAndView.getModel().put("viewContent", "alipay_list");
+		modelAndView.setViewName( "layout");
+
+		return modelAndView;
+	}
+
+	@RequestMapping(path="/ali_pay/edit", method=RequestMethod.GET)
+	public ModelAndView editAliPay(
+			ModelAndView modelAndView,
+			@RequestParam(name="id", required=true) int id) {
+		AliPayConfig aliPay = null;
+		if (id > 0) {
+			aliPay = aliPayConfigDao.findOne(id);
+		}
+
+		if (aliPay == null) {
+			aliPay = new AliPayConfig();
+		}
+
+		modelAndView.getModel().put("aliPay", aliPay);
+		modelAndView.setViewName("/pay/alipay_edit :: content");
+
+		return modelAndView;
+	}
+
+	@RequestMapping(path="/ali_pay/edit", method=RequestMethod.POST)
+	@ResponseBody
+	public boolean editAliPay(
+			@RequestParam(name="id", required=true) int id,
+			@RequestParam(name="name", required=true) String name,
+			@RequestParam(name="partner", required=true) String partner,
+			@RequestParam(name="sellerEmail", required=true) String sellerEmail,
+			@RequestParam(name="keyVal", required=true) String keyVal,
+			@RequestParam(name="inputCharset", required=true) String inputCharset,
+			@RequestParam(name="signType", required=true) String signType,
+			@RequestParam(name="enabled", required=false, defaultValue = "false") boolean enabled) {
+		AliPayConfig aliPay = null;
+		if (id > 0) {
+			aliPay = aliPayConfigDao.findOne(id);
+		}
+
+		if (aliPay == null) {
+			aliPay = new AliPayConfig();
+			aliPay.setName(name);
+		}
+
+		aliPay.setPartner(partner);
+		aliPay.setSellerEmail(sellerEmail);
+		aliPay.setKeyVal(keyVal);
+		aliPay.setInputCharset(inputCharset);
+		aliPay.setSignType(signType);
+		aliPay.setEnabled(enabled);
+
+		aliPayConfigDao.save(aliPay);
+		return true;
+	}
 }
