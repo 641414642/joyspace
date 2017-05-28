@@ -57,6 +57,11 @@ public class ManagerController {
 		return modelAndView;
 	}
 
+	@RequestMapping(path="/manager/change_pass", method=RequestMethod.GET)
+	public String changePassword() {
+		return "/manager/change_pass :: content";
+	}
+
 	@RequestMapping(path="/manager/change_pass", method=RequestMethod.POST)
 	@ResponseBody
 	public boolean changePassword(@RequestParam(name="newPass", required=true) String newPassword) {

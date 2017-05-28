@@ -28,7 +28,7 @@ public class PaymentController {
 
 	@Autowired
 	WeiXinPayConfigDao weiXinPayConfigDao;
-	
+
 	@RequestMapping("/wx_pay/list")
 	public ModelAndView adminUserList(
 			ModelAndView modelAndView,
@@ -53,4 +53,54 @@ public class PaymentController {
 
 		return modelAndView;
 	}
+
+	@RequestMapping(path="/wx_pay/edit", method=RequestMethod.GET)
+	public ModelAndView editWeiXinPay(
+			ModelAndView modelAndView,
+			@RequestParam(name="id", required=true) int id) {
+		WeiXinPayConfig wxPay = null;
+		if (id > 0) {
+			wxPay = weiXinPayConfigDao.findOne(id);
+		}
+
+		if (wxPay == null) {
+			wxPay = new WeiXinPayConfig();
+		}
+
+		modelAndView.getModel().put("wxPay", wxPay);
+		modelAndView.setViewName("/pay/wxpay_edit :: content");
+
+		return modelAndView;
+	}
+
+	@RequestMapping(path="/wx_pay/edit", method=RequestMethod.POST)
+	@ResponseBody
+	public boolean editWeiXinPay(
+			@RequestParam(name="id", required=true) int id,
+			@RequestParam(name="name", required=true) String name,
+			@RequestParam(name="appId", required=true) String appId,
+			@RequestParam(name="mchId", required=true) String mchId,
+			@RequestParam(name="keyVal", required=true) String keyVal,
+			@RequestParam(name="appSecret", required=true) String appSecret,
+			@RequestParam(name="enabled", required=false, defaultValue = "false") boolean enabled) {
+		WeiXinPayConfig wxPay = null;
+		if (id > 0) {
+			wxPay = weiXinPayConfigDao.findOne(id);
+		}
+
+		if (wxPay == null) {
+			wxPay = new WeiXinPayConfig();
+			wxPay.setName(name);
+		}
+
+		wxPay.setAppId(appId);
+		wxPay.setMchId(mchId);
+		wxPay.setKeyVal(keyVal);
+		wxPay.setAppSecret(appSecret);
+		wxPay.setEnabled(enabled);
+
+		weiXinPayConfigDao.save(wxPay);
+		return true;
+	}
+
 }
