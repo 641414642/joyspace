@@ -40,7 +40,7 @@ public class ManagerServiceImpl implements ManagerService {
 	}
 
 	@Override
-	public Manager createUser(String userName, String password, String fullName, String cellPhone) {
+	public Manager createManager(String userName, String password, String fullName, String cellPhone) {
 		Manager manager = new Manager();
 		
 		manager.setUserName(userName);

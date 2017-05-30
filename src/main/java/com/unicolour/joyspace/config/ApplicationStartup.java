@@ -22,7 +22,7 @@ public class ApplicationStartup implements ApplicationListener<ApplicationReadyE
 		//创建管理员用户
 		Iterable<Manager> managers = managerDao.findAll();
 		if (!managers.iterator().hasNext()) {
-			managerService.createUser("admin", "123456", "管理员", "");
+			managerService.createManager("admin", "123456", "管理员", "");
 		}
 	}
 }
