@@ -69,7 +69,7 @@
 							<!-- Menu Footer-->
 							<li class="user-footer">
 								<div class="pull-left">
-									<a href="#" th:href="@{/manager/change_pass}" onclick="return changePassword(event)" class="btn btn-default btn-flat">修改密码</a>
+									<a href="#" th:attr="data-url=@{/manager/change_pass}" onclick="return changePassword(event)" class="btn btn-default btn-flat">修改密码</a>
 								</div>
 								<div class="pull-right">
 									<a href="#" th:href="@{/logout}" class="btn btn-default btn-flat">退出</a>

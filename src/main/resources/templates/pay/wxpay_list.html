@@ -27,7 +27,7 @@
 						<a href="#" th:href="@{/wx_pay/list}" class="btn btn-default btn-sm">重置</a>
 					</div>
 					<div class="pull-right">
-						<a href="#" th:href="@{/wx_pay/edit(id=0)}" class="btn btn-primary btn-sm" onclick="return editWxPay(event)">新建</a>
+						<a href="#" th:attr="data-url=@{/wx_pay/edit(id=0)}" class="btn btn-primary btn-sm" onclick="return editWxPay(event)">新建</a>
 					</div>
 				</form>
 			</div>
@@ -46,7 +46,7 @@
 						<td th:if="${wxpay.enabled}"><span class="label label-success">启用</span></td>
 						<td th:unless="${wxpay.enabled}"><span class="label label-danger">禁用</span></td>
 						<td>
-							<a href="#" th:href="@{/wx_pay/edit(id=${wxpay.id})}" onclick="return editWxPay(event)">修改</a>
+							<a href="#" th:attr="data-url=@{/wx_pay/edit(id=${wxpay.id})}" onclick="return editWxPay(event)">修改</a>
 						</td>
 					</tr>
 				</table>

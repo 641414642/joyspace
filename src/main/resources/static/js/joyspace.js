@@ -40,7 +40,7 @@ $('#changePwdModal').on('show.bs.modal', function () {
 //显示对话框
 function showModal(event, onloadfunc) {
     var source = event.target || event.srcElement;
-    $('#modalTemplate .modal-dialog').load($(source).attr('href'), function() {
+    $('#modalTemplate .modal-dialog').load($(source).data('url'), function() {
         $('#modalTemplate').modal('show');
         if (onloadfunc) {
             onloadfunc();
@@ -49,32 +49,26 @@ function showModal(event, onloadfunc) {
     return false;
 }
 
-//修改密码
-function changePassword(event) {
+function showPostFormModal(event, formId, modalSyleClass, reload, validateFunc) {
+    $('#modalTemplate').removeClass().addClass("modal fade");
+
+    if (modalSyleClass) {
+        $('#modalTemplate').addClass(modalSyleClass);
+    }
+
     showModal(event, function() {
-        $('#changePassForm').submit(function (ev) {
-            var frm = $('#changePassForm');
-            var newPass = $('#new-pass');
-            var repeatNewPass = $('#repeat-new-pass');
-
-            $('#changePwdModal .form-group').removeClass('has-error');
-            $('#changePwdModal .help-block').text('');
-
-            if (newPass.val().length < 6) {
-                newPass.closest('.form-group').addClass('has-error');
-                newPass.siblings('.help-block').text('密码长度不能小于6个字符');
-            }
-            else if (newPass.val() != repeatNewPass.val()) {
-                repeatNewPass.closest('.form-group').addClass('has-error');
-                repeatNewPass.siblings('.help-block').text('两次输入的密码不一致');
-            }
-            else {
+        var frm = $('#' + formId);
+        frm.submit(function (ev) {
+            if (typeof validateFunc !== "function" || validateFunc()) {
                 $.ajax({
                     type: frm.attr('method'),
                     url: frm.attr('action'),
                     data: frm.serialize(),
                     success: function (data) {
                         $('#modalTemplate').modal('hide');
+                        if (reload) {
+                            window.location.reload();
+                        }
                     }
                 });
             }
@@ -84,4 +78,28 @@ function changePassword(event) {
     });
 
     return false;
+}
+
+function changePassword(event) {
+    return showPostFormModal(event, 'changePassForm', null, false, function() {
+        var newPass = $('#new-pass');
+        var repeatNewPass = $('#repeat-new-pass');
+
+        $('#changePassForm .form-group').removeClass('has-error');
+        $('#changePassForm .help-block').text('');
+
+        if (newPass.val().length < 6) {
+            newPass.closest('.form-group').addClass('has-error');
+            newPass.siblings('.help-block').text('密码长度不能小于6个字符');
+            return false;
+        }
+        else if (newPass.val() != repeatNewPass.val()) {
+            repeatNewPass.closest('.form-group').addClass('has-error');
+            repeatNewPass.siblings('.help-block').text('两次输入的密码不一致');
+            return false;
+        }
+        else {
+            return true;
+        }
+    });
 }
