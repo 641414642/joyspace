@@ -1,14 +1,16 @@
 buildscript {
-    ext.kotlin_version = '1.1.2-4'
     ext {
+		kotlin_version = '1.1.2-4'
 		springBootVersion = '1.5.3.RELEASE'
 	}
 	repositories {
 		mavenCentral()
+		jcenter()
 	}
 	dependencies {
 		classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:${kotlin_version}")
+		classpath("org.asciidoctor:asciidoctor-gradle-plugin:1.5.3")
     }
 }
 
@@ -17,6 +19,7 @@ apply plugin: 'kotlin'
 apply plugin: 'eclipse'
 apply plugin: 'org.springframework.boot'
 apply plugin: 'war'
+apply plugin: 'org.asciidoctor.convert'
 
 war {
 	baseName = 'joyspace'
@@ -28,6 +31,16 @@ jar {
 	version = '0.0.1-SNAPSHOT'
 }
 
+asciidoctor {
+	outputDir "build/asciidoc"
+	sourceDir 'src/asciidoc'
+	sources {
+		include 'index.adoc'
+	}
+	dependsOn test
+}
+
+
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
@@ -37,13 +50,14 @@ repositories {
 
 
 dependencies {
-	compile("org.springframework.boot:spring-boot-starter-thymeleaf")
+	compile('org.springframework.boot:spring-boot-starter-thymeleaf')
 	compile('org.springframework.boot:spring-boot-starter-data-jpa')
 	compile('org.springframework.boot:spring-boot-starter-security')
 	compile('org.springframework.boot:spring-boot-starter-web')
 	compile('org.apache.poi:poi-ooxml:3.15')
+	compile("org.jetbrains.kotlin:kotlin-stdlib-jre8:${kotlin_version}")
 	runtime('mysql:mysql-connector-java')
 	testCompile('org.springframework.boot:spring-boot-starter-test')
 	testCompile('com.microsoft.sqlserver:mssql-jdbc:6.1.0.jre8')
-    compile "org.jetbrains.kotlin:kotlin-stdlib-jre8:$kotlin_version"
+	testCompile("org.springframework.restdocs:spring-restdocs-mockmvc")
 }

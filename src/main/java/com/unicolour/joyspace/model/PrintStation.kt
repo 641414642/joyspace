@@ -21,6 +21,11 @@ class PrintStation {
     @NotNull
     var address: String = ""
 
+    /** 微信二维码 */
+    @Column(length = 255)
+    @NotNull
+    var wxQrCode: String = ""
+
     /** 经度 */
     @Column
     @NotNull

@@ -1,0 +1,40 @@
+= 悦印API文档
+
+== 自助打印机
+
+=== 根据二维码查找自助打印机
+
+*请求参数:*
+
+include::snippets/printStation/find-print-station-by-qr-code/request-parameters.adoc[]
+
+*找到*
+
+request:
+include::snippets/printStation/find-print-station-by-qr-code/http-request.adoc[]
+
+response:
+include::snippets/printStation/find-print-station-by-qr-code/http-response.adoc[]
+
+*没有找到*
+
+request:
+include::snippets/printStation/find-print-station-by-qr-code404/http-request.adoc[]
+
+response:
+include::snippets/printStation/find-print-station-by-qr-code404/http-response.adoc[]
+
+== 产品
+
+=== 查找指定自助打印机支持的产品列表
+
+*请求参数:*
+
+include::snippets/printStation/find-product-by-print-station-id/request-parameters.adoc[]
+
+request:
+include::snippets/printStation/find-product-by-print-station-id/http-request.adoc[]
+
+response:
+include::snippets/printStation/find-product-by-print-station-id/http-response.adoc[]
+
