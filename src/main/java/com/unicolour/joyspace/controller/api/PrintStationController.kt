@@ -2,6 +2,7 @@ package com.unicolour.joyspace.controller.api
 
 import com.unicolour.joyspace.dao.PrintStationDao
 import com.unicolour.joyspace.model.PrintStation
+import com.unicolour.joyspace.service.ProductService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Controller
@@ -16,6 +17,9 @@ class PrintStationController {
     @Autowired
     var printStationDao: PrintStationDao? = null
 
+    @Autowired
+    var productService: ProductService? = null
+
     @RequestMapping("/api/printStation/findByQrCode", method = arrayOf(RequestMethod.GET))
     @ResponseBody
     fun findByQrCode(@RequestParam("qrCode") qrCode: String) : ResponseEntity<PrintStationDTO> {
@@ -28,10 +32,10 @@ class PrintStationController {
             val ps = PrintStationDTO()
 
             ps.sn = printStation.sn
-            ps.address = printStation.address
+            ps.address = printStation.position?.address
             ps.wxQrCode = printStation.wxQrCode
-            ps.latitude = printStation.latitude
-            ps.longitude = printStation.longitude
+            ps.latitude = printStation.position?.latitude
+            ps.longitude = printStation.position?.longitude
 
             return ResponseEntity.ok(ps)
         }
@@ -42,13 +46,13 @@ class PrintStationDTO(
         /** 编号 */
         var sn: String = "",
         /** 地址 */
-        var address: String = "",
+        var address: String? = "",
         /** 微信二维码 */
         var wxQrCode: String = "",
         /** 经度 */
-        var longitude: Double = 0.0,
+        var longitude: Double? = 0.0,
         /** 纬度 */
-        var latitude: Double = 0.0
+        var latitude: Double? = 0.0
 )
 
 

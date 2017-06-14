@@ -2,6 +2,10 @@ package com.unicolour.joyspace.model
 
 import javax.persistence.*
 import javax.validation.constraints.NotNull
+import javax.persistence.JoinColumn
+import javax.persistence.FetchType
+
+
 
 /** 打印自助机 */
 @Entity
@@ -16,33 +20,12 @@ class PrintStation {
     @NotNull
     var sn: String = ""
 
-    /** 地址 */
-    @Column(length = 255)
-    @NotNull
-    var address: String = ""
-
     /** 微信二维码 */
     @Column(length = 255)
     @NotNull
     var wxQrCode: String = ""
 
-    /** 经度 */
-    @Column
-    @NotNull
-    var longitude: Double = 0.0
-
-    /** 纬度 */
-    @Column
-    @NotNull
-    var latitude: Double = 0.0
-
-    /** 属于哪个商家 */
-    @Column
-    @NotNull
-    var companyId: Int = 0
-
-    /** 价目表ID */
-    @Column
-    @NotNull
-    var priceListId: Int? = null
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "position_id")
+    val position: Position? = null
 }
