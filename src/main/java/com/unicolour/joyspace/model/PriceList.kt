@@ -14,4 +14,7 @@ class PriceList {
     @Column(length = 50)
     @NotNull
     var name: String = ""
+
+    @OneToMany(mappedBy = "priceList")
+    lateinit var priceListItems: List<PriceListItem>
 }

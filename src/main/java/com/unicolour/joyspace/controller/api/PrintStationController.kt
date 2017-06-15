@@ -1,58 +1,62 @@
 package com.unicolour.joyspace.controller.api
 
 import com.unicolour.joyspace.dao.PrintStationDao
+import com.unicolour.joyspace.dto.*
 import com.unicolour.joyspace.model.PrintStation
+import com.unicolour.joyspace.service.PrintStationService
 import com.unicolour.joyspace.service.ProductService
+import com.unicolour.joyspace.util.getBaseUrl
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.ResponseEntity
-import org.springframework.stereotype.Controller
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RequestMethod
-import org.springframework.web.bind.annotation.RequestParam
-import org.springframework.web.bind.annotation.ResponseBody
+import org.springframework.web.bind.annotation.*
+import javax.servlet.http.HttpServletRequest
 
 
-@Controller
+@RestController
 class PrintStationController {
     @Autowired
-    var printStationDao: PrintStationDao? = null
+    lateinit var printStationDao: PrintStationDao
 
     @Autowired
-    var productService: ProductService? = null
+    lateinit var printStationService: PrintStationService
+
+    @Autowired
+    lateinit var productService: ProductService
 
     @RequestMapping("/api/printStation/findByQrCode", method = arrayOf(RequestMethod.GET))
-    @ResponseBody
-    fun findByQrCode(@RequestParam("qrCode") qrCode: String) : ResponseEntity<PrintStationDTO> {
-        val printStation: PrintStation? = printStationDao!!.findByWxQrCode(qrCode);
+    fun findByQrCode(request: HttpServletRequest, @RequestParam("qrCode") qrCode: String) : ResponseEntity<PrintStationDTO> {
+        val printStation: PrintStation? = printStationDao.findByWxQrCode(qrCode);
 
         if (printStation == null) {
             return ResponseEntity.notFound().build()
         }
         else {
-            val ps = PrintStationDTO()
+            val baseUrl = getBaseUrl(request)
+            val priceMap: Map<Int, Int> = printStationService.getPriceMap(printStation)
+            val productsOfPrintStation: List<ProductDTO> =
+                    productService.getProductsOfPrintStation(printStation.id).map { it.product.productToDTO(baseUrl, priceMap) }
 
-            ps.sn = printStation.sn
-            ps.address = printStation.position?.address
-            ps.wxQrCode = printStation.wxQrCode
-            ps.latitude = printStation.position?.latitude
-            ps.longitude = printStation.position?.longitude
+            val ps: PrintStationDetailDTO = printStation.printStationToDetailDTO(productsOfPrintStation)
+            return ResponseEntity.ok(ps)
+        }
+    }
 
+    @RequestMapping("/api/printStation/{id}", method = arrayOf(RequestMethod.GET))
+    fun findById(request: HttpServletRequest, @PathVariable("id") id: Int) : ResponseEntity<PrintStationDTO> {
+        val printStation: PrintStation? = printStationDao.findOne(id);
+
+        if (printStation == null) {
+            return ResponseEntity.notFound().build()
+        }
+        else {
+            val baseUrl = getBaseUrl(request)
+            val priceMap: Map<Int, Int> = printStationService.getPriceMap(printStation)
+            val productsOfPrintStation: List<ProductDTO> =
+                    productService.getProductsOfPrintStation(printStation.id).map { it.product.productToDTO(baseUrl, priceMap) }
+
+            val ps: PrintStationDetailDTO = printStation.printStationToDetailDTO(productsOfPrintStation)
             return ResponseEntity.ok(ps)
         }
     }
 }
-
-class PrintStationDTO(
-        /** 编号 */
-        var sn: String = "",
-        /** 地址 */
-        var address: String? = "",
-        /** 微信二维码 */
-        var wxQrCode: String = "",
-        /** 经度 */
-        var longitude: Double? = 0.0,
-        /** 纬度 */
-        var latitude: Double? = 0.0
-)
-
 

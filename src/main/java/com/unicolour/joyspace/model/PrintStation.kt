@@ -25,7 +25,10 @@ class PrintStation {
     @NotNull
     var wxQrCode: String = ""
 
+    @Column(name = "position_id", insertable = false, updatable = false)
+    var positionId: Int = 0
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "position_id")
-    val position: Position? = null
+    lateinit var position: Position
 }

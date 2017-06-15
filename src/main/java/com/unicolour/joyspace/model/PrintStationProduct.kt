@@ -11,11 +11,21 @@ class PrintStationProduct {
     @GeneratedValue(strategy = GenerationType.AUTO)
     var id: Int = 0
 
-    @Column
-    @NotNull
+
+    @Column(name = "print_station_id", insertable = false, updatable = false)
     var printStationId: Int = 0
 
-    @Column
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "print_station_id")
     @NotNull
+    lateinit var printStation: PrintStation
+
+
+    @Column(name = "product_id", insertable = false, updatable = false)
     var productId: Int = 0
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "product_id")
+    @NotNull
+    lateinit var product: Product
 }

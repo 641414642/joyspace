@@ -16,25 +16,25 @@ import org.springframework.web.context.WebApplicationContext;
 
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.documentationConfiguration;
+import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
 import static org.springframework.restdocs.operation.preprocess.Preprocessors.preprocessRequest;
 import static org.springframework.restdocs.operation.preprocess.Preprocessors.preprocessResponse;
 import static org.springframework.restdocs.operation.preprocess.Preprocessors.prettyPrint;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
 import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
+import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
 import static org.springframework.restdocs.request.RequestDocumentation.requestParameters;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
-@AutoConfigureRestDocs(outputDir = "src/asciidoc/snippets/printStation")
-public class PrintStationApiTest {
+public class ApiTest {
 
     @Rule
     public JUnitRestDocumentation restDoc =
-            new JUnitRestDocumentation("src/asciidoc/snippets/printStation");
+            new JUnitRestDocumentation("src/asciidoc/snippets/api");
 
     @Autowired
     private WebApplicationContext context;
@@ -66,6 +66,26 @@ public class PrintStationApiTest {
                 .param("qrCode", "https://mp.weixin.qq.com/a/~~wu3hXzBSt64~plUyoOB9Iyf8mEHP9BrkLA~~"))
                 .andDo(print())
                 .andExpect(status().isOk())
+                .andDo(document);
+    }
+
+    @Test
+    public void findPrintStationById() throws Exception {
+        this.document.snippets(
+                pathParameters(parameterWithName("id").description("自助机id"))
+        );
+
+        this.mockMvc.perform(get("/api/printStation/{id}", 1))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andDo(document);
+    }
+
+    @Test
+    public void findPrintStationById404() throws Exception {
+        this.mockMvc.perform(get("/api/printStation/{id}",10000))
+                .andDo(print())
+                .andExpect(status().isNotFound())
                 .andDo(document);
     }
 
