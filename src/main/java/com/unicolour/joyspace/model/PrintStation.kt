@@ -31,4 +31,16 @@ class PrintStation {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "position_id")
     lateinit var position: Position
+
+    //region 店面
+    /** 店面ID */
+    @Column(name = "company_id", insertable = false, updatable = false)
+    var companyId: Int = 0
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "company_id")
+    @NotNull
+    lateinit var company: Company
+    //endregion
+
 }

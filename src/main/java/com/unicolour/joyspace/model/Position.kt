@@ -35,14 +35,16 @@ class Position {
     @NotNull
     var companyId: Int = 0
 
+    //region 价目表列
     /** 价目表ID */
     @Column(name = "price_list_id", insertable = false, updatable = false)
-    var priceListId: Int = 0
+    var priceListId: Int? = null
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "price_list_id")
     @NotNull
-    lateinit var priceList: PriceList
+    var priceList: PriceList? = null
+    //endregion
 
     @OneToMany(mappedBy = "position")
     lateinit var printStations: List<PrintStation>

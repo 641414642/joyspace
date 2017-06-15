@@ -2,6 +2,7 @@ package com.unicolour.joyspace.service.impl;
 
 import com.unicolour.joyspace.dao.ManagerDao;
 import com.unicolour.joyspace.dto.LoginManagerDetail;
+import com.unicolour.joyspace.model.Company;
 import com.unicolour.joyspace.model.Manager;
 import com.unicolour.joyspace.service.ManagerService;
 import com.unicolour.joyspace.util.Utils;
@@ -40,7 +41,7 @@ public class ManagerServiceImpl implements ManagerService {
 	}
 
 	@Override
-	public Manager createManager(String userName, String password, String fullName, String cellPhone) {
+	public Manager createManager(String userName, String password, String fullName, String cellPhone, Company defCompany) {
 		Manager manager = new Manager();
 		
 		manager.setUserName(userName);
@@ -49,29 +50,13 @@ public class ManagerServiceImpl implements ManagerService {
 		manager.setCellPhone(cellPhone);
 		manager.setCreateTime(Calendar.getInstance());
 		manager.setEnabled(true);
+		manager.setCompany(defCompany);
 		
 		managerDao.save(manager);
 		
 		//operationLogService.addOperationLog("创建用户：" + manager.getUserName());
 		
 		return manager;
-	}
-
-	@Override
-	public Manager editUser(int id, String fullName, String cellPhone) {
-		Manager manager = managerDao.findById(id);
-
-		if (manager != null) {
-			manager.setFullName(fullName);
-			manager.setCellPhone(cellPhone);
-			managerDao.save(manager);
-
-			//operationLogService.addOperationLog("修改用户：" + manager.getUserName());
-			return manager;
-		}
-		else {
-			return null;
-		}
 	}
 
 	@Override
