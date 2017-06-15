@@ -24,4 +24,17 @@ class CompanyServiceImpl : CompanyService {
 
         return company
     }
+
+    override fun updateCompany(companyId: Int, name: String): Boolean {
+        val company = companyDao.findOne(companyId)
+        if (company != null) {
+            company.name = name
+            companyDao.save(company)
+
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
 }
