@@ -120,7 +120,6 @@
 						</span>
 					</a>
 					<ul class="treeview-menu">
-						<li><a href="#"><i class="fa fa-circle-o"></i>新增管理员</a></li>
 						<li th:class="${viewContent=='manager_list' ? 'active' : ''}"><a href="#" th:href="@{/manager/list}"><i class="fa fa-circle-o"></i>管理员列表</a></li>
 					</ul>
 				</li>
@@ -133,10 +132,8 @@
 						</span>
 					</a>
 					<ul class="treeview-menu">
-						<li><a href="#"><i class="fa fa-circle-o"></i>新增会员</a></li>
 						<li><a href="#"><i class="fa fa-circle-o"></i>会员列表</a></li>
-						<li><a href="#"><i class="fa fa-circle-o"></i>新增店面</a></li>
-						<li><a href="#"><i class="fa fa-circle-o"></i>店面列表</a></li>
+						<li th:class="${viewContent=='company_list' ? 'active' : ''}"><a href="#" th:href="@{/company/list}"><i class="fa fa-circle-o"></i>投放商列表</a></li>
 					</ul>
 				</li>
 				<li th:class="${viewCat=='pay_mgr' ? 'treeview active' : 'treeview'}" class="treeview">
@@ -203,6 +200,7 @@
 		<div th:case="'manager'" th:include="manager/list :: content"></div>
 		<div th:case="'wxpay_list'" th:include="pay/wxpay_list :: content"></div>
 		<div th:case="'alipay_list'" th:include="pay/alipay_list :: content"></div>
+		<div th:case="'company_list'" th:include="company/list :: content"></div>
 <!--
 		<div th:case="'system_info'" th:include="system/info :: content"></div>
 		<div th:case="'system_account'" th:include="system/account:: content"></div>
