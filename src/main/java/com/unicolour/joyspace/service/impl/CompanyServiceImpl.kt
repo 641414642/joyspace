@@ -4,6 +4,7 @@ import com.unicolour.joyspace.dao.CompanyDao
 import com.unicolour.joyspace.model.Company
 import com.unicolour.joyspace.model.PriceList
 import com.unicolour.joyspace.service.CompanyService
+import com.unicolour.joyspace.service.ManagerService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import java.util.*
@@ -13,7 +14,15 @@ class CompanyServiceImpl : CompanyService {
     @Autowired
     lateinit var companyDao: CompanyDao
 
-    override fun createCompany(name: String, defPriceList: PriceList?): Company {
+    @Autowired
+    lateinit var managerService: ManagerService
+
+    override fun createCompany(name: String, defPriceList: PriceList?,
+                               username: String,
+                               fullname: String,
+                               phone: String,
+                               email: String,
+                               password: String): Company {
         val company = Company();
 
         company.name = name;
@@ -21,6 +30,8 @@ class CompanyServiceImpl : CompanyService {
         company.defaultPriceList = defPriceList
 
         companyDao.save(company)
+
+        managerService.createManager(username, password, fullname, phone, email, company)
 
         return company
     }

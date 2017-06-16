@@ -48,6 +48,32 @@
                         <input type="text" th:readonly="${!create}" name="name" class="form-control" id="name" th:value="${company.name}" />
                         <span class="help-block"></span>
                     </div>
+                    <div class="form-group">
+                        <label for="user_name" class="control-label">管理员登录帐号:</label>
+                        <input type="text" th:readonly="${!create}" name="username" class="form-control" id="user_name" />
+                        <span class="help-block"></span>
+                    </div>
+                    <div class="form-group">
+                        <label for="full_name" class="control-label">姓名:</label>
+                        <input type="text" name="fullname" class="form-control" id="full_name" />
+                        <span class="help-block"></span>
+                    </div>
+                    <div class="form-group">
+                        <label for="password" class="control-label">密码:</label>
+                        <input type="password" name="password" class="form-control" id="password" />
+                        <span class="help-block"></span>
+                    </div>
+                    <div class="form-group">
+                        <label for="phone" class="control-label">电话:</label>
+                        <input type="text" name="phone" class="form-control" id="phone" />
+                        <span class="help-block"></span>
+                    </div>
+                    <div class="form-group">
+                        <label for="email" class="control-label">邮件:</label>
+                        <input type="text" name="email" class="form-control" id="email" />
+                        <span class="help-block"></span>
+                    </div>
+
                 </div>
                 <div class="modal-footer">
                     <button type="submit" class="btn btn-primary">确定</button>

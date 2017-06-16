@@ -28,17 +28,10 @@ public class ApplicationStartup implements ApplicationListener<ApplicationReadyE
 
 	@Override
 	public void onApplicationEvent(final ApplicationReadyEvent event) {
-		//创建缺省店面
+		//创建缺省店面和管理员
 		Iterable<Company> companies = companyDao.findAll();
 		if (!companies.iterator().hasNext()) {
-			companyService.createCompany("缺省店面", null);
-		}
-
-		//创建管理员用户
-		Iterable<Manager> managers = managerDao.findAll();
-		if (!managers.iterator().hasNext()) {
-			Company defCompany = companyDao.findAll().iterator().next();
-			managerService.createManager("admin", "123456", "管理员", "", defCompany);
+			companyService.createCompany("缺省店面", null, "admin", "管理员", "", "", "123456");
 		}
 	}
 }

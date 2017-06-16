@@ -41,16 +41,17 @@ public class ManagerServiceImpl implements ManagerService {
 	}
 
 	@Override
-	public Manager createManager(String userName, String password, String fullName, String cellPhone, Company defCompany) {
+	public Manager createManager(String userName, String password, String fullName, String cellPhone, String email, Company company) {
 		Manager manager = new Manager();
 		
 		manager.setUserName(userName);
 		manager.setFullName(fullName);
 		manager.setPassword(passwordEncoder.encode(password));
 		manager.setCellPhone(cellPhone);
+		manager.setEmail(email);
 		manager.setCreateTime(Calendar.getInstance());
 		manager.setEnabled(true);
-		manager.setCompany(defCompany);
+		manager.setCompany(company);
 		
 		managerDao.save(manager);
 		
