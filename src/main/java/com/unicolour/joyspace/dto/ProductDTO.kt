@@ -15,18 +15,3 @@ class ProductDTO(
         var price: Int = 0,
         var thumbnailUrl: String = ""
 )
-
-fun Product.productToDTO(baseUrl: String, priceMap: Map<Int, Int>) : ProductDTO =
-    ProductDTO(
-            id = this.id,
-            name = this.name,
-            type = this.type,
-            sn = this.sn,
-            resolutionX = this.resolutionX,
-            resolutionY = this.resolutionY,
-            imageRequired = this.minImageCount,
-            remark = this.remark,
-            price = priceMap.getOrDefault(this.id, this.defaultPrice),
-            thumbnailUrl = "${baseUrl}/assets/product/thumb/${this.sn}.jpg"
-    )
-

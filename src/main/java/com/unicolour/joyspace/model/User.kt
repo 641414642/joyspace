@@ -15,29 +15,29 @@ class User {
     /** 用户 */
     @NotNull
     @Column(length = 200)
-    private var userName: String? = null
+    var userName: String? = null
 
     /** 微信OpenID */
     @NotNull
     @Column(length = 200)
-    private var wxOpenId: String? = null
+    var wxOpenId: String? = null
 
     /** 真实姓名 */
     @Column(length = 80)
-    private var fullName: String? = null
+    var fullName: String? = null
 
     @Column
-    private var sex: Byte = 0     //0 男   1 女
+    var sex: Byte = 0     //1 男   2 女   其他值 未知
 
     @Column(length = 80)
-    private var email: String? = null
+    var email: String? = null
 
     @Column(length = 50)
-    private var phone: String? = null
+    var phone: String? = null
 
     @NotNull
-    private var createTime: Calendar? = null
+    lateinit var createTime: Calendar
 
     @NotNull
-    private var enabled: Boolean = false
+    var enabled: Boolean = false
 }

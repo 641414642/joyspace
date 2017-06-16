@@ -56,6 +56,10 @@ public class ApiTest {
                 .build();
     }
 
+    /**
+     * 根据二维码查找自助机
+     * @throws Exception
+     */
     @Test
     public void findPrintStationByQrCode() throws Exception {
         this.document.snippets(
@@ -69,6 +73,10 @@ public class ApiTest {
                 .andDo(document);
     }
 
+    /**
+     * 根据id查找自助机
+     * @throws Exception
+     */
     @Test
     public void findPrintStationById() throws Exception {
         this.document.snippets(
@@ -81,6 +89,10 @@ public class ApiTest {
                 .andDo(document);
     }
 
+    /**
+     * 根据id查找自助机, 没找到404
+     * @throws Exception
+     */
     @Test
     public void findPrintStationById404() throws Exception {
         this.mockMvc.perform(get("/api/printStation/{id}",10000))
@@ -89,6 +101,10 @@ public class ApiTest {
                 .andDo(document);
     }
 
+    /**
+     * * 根据二维码查找自助机, 没找到404
+     * @throws Exception
+     */
     @Test
     public void findPrintStationByQrCode404() throws Exception {
         this.mockMvc.perform(get("/api/printStation/findByQrCode")
@@ -98,6 +114,10 @@ public class ApiTest {
                 .andDo(document);
     }
 
+    /**
+     * 根据id查找产品
+     * @throws Exception
+     */
     @Test
     public void findProductByPrintStationId() throws Exception {
         this.document.snippets(
@@ -110,4 +130,48 @@ public class ApiTest {
                 .andExpect(status().isOk())
                 .andDo(document);
     }
+
+    /**
+     * 根据id查找产品, 没找到404
+     * @throws Exception
+     */
+    @Test
+    public void findProductByPrintStationId404() throws Exception {
+        this.mockMvc.perform(get("/api/product/findByPrintStation")
+                .param("printStationId", "10000"))
+                .andDo(print())
+                .andExpect(status().isNotFound())
+                .andDo(document);
+    }
+
+    /**
+     * 根据openId查找用户
+     * @throws Exception
+     */
+    @Test
+    public void findUserByOpenId() throws Exception {
+        this.document.snippets(
+                requestParameters(parameterWithName("openId").description("微信用户OpenID"))
+        );
+
+        this.mockMvc.perform(get("/api/user/findByOpenId")
+                .param("openId", "ljAldSfg234lasW63dDdfsdf"))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andDo(document);
+    }
+
+    /**
+     * 根据openId查找用户, 没找到404
+     * @throws Exception
+     */
+    @Test
+    public void findUserByOpenId404() throws Exception {
+        this.mockMvc.perform(get("/api/user/findByOpenId")
+                .param("openId", "asWd254DG3asdf4asfg123"))
+                .andDo(print())
+                .andExpect(status().isNotFound())
+                .andDo(document);
+    }
+
 }
