@@ -30,10 +30,16 @@ class Position {
     @NotNull
     var latitude: Double = 0.0
 
-    /** 属于哪个商家 */
-    @Column
-    @NotNull
+    //region 店面
+    /** 店面ID */
+    @Column(name = "company_id", insertable = false, updatable = false)
     var companyId: Int = 0
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "company_id")
+    @NotNull
+    lateinit var company: Company
+    //endregion
 
     //region 价目表列
     /** 价目表ID */

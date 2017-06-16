@@ -4,6 +4,10 @@ import java.util.*
 import javax.persistence.*
 import javax.validation.constraints.NotNull
 
+const val USER_SEX_MALE: Byte = 1
+const val USER_SEX_FEMALE: Byte = 2
+const val USER_SEX_UNKNOWN: Byte = 0
+
 /** 最终用户 */
 @Entity
 @Table(name = "user")
@@ -27,7 +31,7 @@ class User {
     var fullName: String? = null
 
     @Column
-    var sex: Byte = 0     //1 男   2 女   其他值 未知
+    var sex: Byte = USER_SEX_UNKNOWN     //1 男   2 女   其他值 未知
 
     @Column(length = 80)
     var email: String? = null

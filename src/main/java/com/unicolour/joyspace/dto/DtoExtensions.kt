@@ -1,8 +1,6 @@
 package com.unicolour.joyspace.dto
 
-import com.unicolour.joyspace.model.PrintStation
-import com.unicolour.joyspace.model.Product
-import com.unicolour.joyspace.model.User
+import com.unicolour.joyspace.model.*
 
 fun User.userToDTO(): UserDTO =
         UserDTO(
@@ -11,8 +9,8 @@ fun User.userToDTO(): UserDTO =
             wxOpenId = this.wxOpenId,
             fullName = this.fullName,
             sex = when(this.sex) {
-                1.toByte() -> "M"
-                2.toByte() -> "F"
+                USER_SEX_MALE -> "M"
+                USER_SEX_FEMALE -> "F"
                 else -> "N/A"
             },
             phone = this.phone,

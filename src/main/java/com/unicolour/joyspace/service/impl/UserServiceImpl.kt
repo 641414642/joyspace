@@ -2,6 +2,9 @@ package com.unicolour.joyspace.service.impl
 
 import com.unicolour.joyspace.dao.UserDao
 import com.unicolour.joyspace.dto.UserDTO
+import com.unicolour.joyspace.model.USER_SEX_FEMALE
+import com.unicolour.joyspace.model.USER_SEX_MALE
+import com.unicolour.joyspace.model.USER_SEX_UNKNOWN
 import com.unicolour.joyspace.model.User
 import com.unicolour.joyspace.service.UserService
 import org.springframework.beans.factory.annotation.Autowired
@@ -31,9 +34,9 @@ class UserServiceImpl : UserService {
         retUser.wxOpenId = user.wxOpenId
         retUser.fullName = user.fullName
         retUser.sex = when (user.sex) {
-            "M" -> 1.toByte()
-            "F" -> 2.toByte()
-            else -> 0.toByte()
+            "M" -> USER_SEX_MALE
+            "F" -> USER_SEX_FEMALE
+            else -> USER_SEX_UNKNOWN
         }
         retUser.email = user.email
         retUser.phone = user.phone

@@ -15,6 +15,16 @@ class PriceList {
     @NotNull
     var name: String = ""
 
+    //region 店面
+    /** 店面ID */
+    @Column(name = "company_id", insertable = false, updatable = false)
+    var companyId: Int = 0
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "company_id")
+    var company: Company? = null
+    //endregion
+
     @OneToMany(mappedBy = "priceList")
     lateinit var priceListItems: List<PriceListItem>
 }

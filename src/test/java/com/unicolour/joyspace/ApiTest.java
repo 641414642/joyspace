@@ -1,14 +1,17 @@
 package com.unicolour.joyspace;
 
+import com.unicolour.joyspace.dao.PrintStationDao;
+import com.unicolour.joyspace.model.PrintStation;
+import com.unicolour.joyspace.service.TestService;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.restdocs.JUnitRestDocumentation;
 import org.springframework.restdocs.mockmvc.RestDocumentationResultHandler;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -20,7 +23,6 @@ import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuild
 import static org.springframework.restdocs.operation.preprocess.Preprocessors.preprocessRequest;
 import static org.springframework.restdocs.operation.preprocess.Preprocessors.preprocessResponse;
 import static org.springframework.restdocs.operation.preprocess.Preprocessors.prettyPrint;
-import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
 import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
 import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
@@ -30,6 +32,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
+@TestPropertySource(locations="classpath:test.properties")
 public class ApiTest {
 
     @Rule
@@ -39,8 +42,13 @@ public class ApiTest {
     @Autowired
     private WebApplicationContext context;
 
-    private MockMvc mockMvc;
+    @Autowired
+    private TestService testService;
 
+    @Autowired
+    private PrintStationDao printStationDao;
+
+    private MockMvc mockMvc;
     private RestDocumentationResultHandler document;
 
     @Before
@@ -54,6 +62,8 @@ public class ApiTest {
                 .apply(documentationConfiguration(this.restDoc))
                 //.apply(springSecurity())
                 .build();
+
+        testService.clearOldTestDataAndCreateNewTestData();
     }
 
     /**
@@ -83,7 +93,9 @@ public class ApiTest {
                 pathParameters(parameterWithName("id").description("自助机id"))
         );
 
-        this.mockMvc.perform(get("/api/printStation/{id}", 1))
+        PrintStation printStation = printStationDao.findAll().iterator().next();
+
+        this.mockMvc.perform(get("/api/printStation/{id}", printStation.getId()))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andDo(document);
@@ -124,8 +136,10 @@ public class ApiTest {
                 requestParameters(parameterWithName("printStationId").description("自助机id"))
         );
 
+        PrintStation printStation = printStationDao.findAll().iterator().next();
+
         this.mockMvc.perform(get("/api/product/findByPrintStation")
-                .param("printStationId", "1"))
+                .param("printStationId", String.valueOf(printStation.getId())))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andDo(document);
@@ -138,7 +152,7 @@ public class ApiTest {
     @Test
     public void findProductByPrintStationId404() throws Exception {
         this.mockMvc.perform(get("/api/product/findByPrintStation")
-                .param("printStationId", "10000"))
+                .param("printStationId", "10000000"))
                 .andDo(print())
                 .andExpect(status().isNotFound())
                 .andDo(document);
