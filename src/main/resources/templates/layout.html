@@ -158,8 +158,8 @@
 			            </span>
 					</a>
 					<ul class="treeview-menu">
+						<li th:class="${viewContent=='product_list' ? 'active' : ''}"><a href="#" th:href="@{/product/list}"><i class="fa fa-circle-o"></i>产品列表</a></li>
 						<li th:class="${viewContent=='priceList_list' ? 'active' : ''}"><a href="#" th:href="@{/priceList/list}"><i class="fa fa-circle-o"></i>价目表</a></li>
-						<li><a href="#"><i class="fa fa-circle-o"></i>店面销售产品列表</a></li>
 					</ul>
 				</li>
 				<li class="treeview">
@@ -202,6 +202,7 @@
 		<div th:case="'alipay_list'" th:include="pay/alipay_list :: content"></div>
 		<div th:case="'company_list'" th:include="company/list :: content"></div>
 		<div th:case="'priceList_list'" th:include="priceList/list :: content"></div>
+		<div th:case="'product_list'" th:include="product/list :: content"></div>
 		<div th:case="*"></div>
 		<!-- /.content -->
 	</div>

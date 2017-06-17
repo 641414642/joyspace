@@ -42,10 +42,10 @@ class CompanyServiceImpl : CompanyService {
             company.name = name
             companyDao.save(company)
 
-            return true;
+            return true
         }
         else {
-            return false;
+            return false
         }
     }
 }

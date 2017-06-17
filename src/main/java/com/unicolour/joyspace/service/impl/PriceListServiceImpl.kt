@@ -73,7 +73,6 @@ open class PriceListServiceImpl : PriceListService {
         val priceList = priceListDao.findOne(id)
         if (priceList != null) {
             priceList.name = name;
-            priceList.company = null;
 
             priceListDao.save(priceList)
 

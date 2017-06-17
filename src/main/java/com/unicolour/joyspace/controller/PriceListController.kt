@@ -26,9 +26,6 @@ class PriceListController {
     lateinit var priceListService: PriceListService
 
     @Autowired
-    lateinit var managerService: ManagerService
-
-    @Autowired
     lateinit var productDao: ProductDao
 
     @RequestMapping("/priceList/list")

@@ -13,5 +13,6 @@ class ProductDTO(
         var imageRequired: Int = 0,
         var remark: String? = null,
         var price: Int = 0,
-        var thumbnailUrl: String = ""
+        var thumbnailUrl: String = "",
+        var previewUrl: String = ""
 )

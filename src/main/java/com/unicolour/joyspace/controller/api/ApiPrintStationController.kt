@@ -13,7 +13,7 @@ import javax.servlet.http.HttpServletRequest
 
 
 @RestController
-class PrintStationController {
+class ApiPrintStationController {
     @Autowired
     lateinit var printStationDao: PrintStationDao
 

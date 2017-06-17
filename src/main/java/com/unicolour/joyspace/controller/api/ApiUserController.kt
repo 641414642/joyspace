@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*
 
 
 @RestController
-class UserController {
+class ApiUserController {
     @Autowired
     lateinit var userDao: UserDao
 

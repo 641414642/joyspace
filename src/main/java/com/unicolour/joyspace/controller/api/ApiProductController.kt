@@ -14,7 +14,7 @@ import javax.servlet.http.HttpServletRequest
 
 
 @RestController
-class ProductController {
+class ApiProductController {
     @Autowired
     lateinit var productDao: ProductDao
 

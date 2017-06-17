@@ -53,6 +53,7 @@ fun Product.productToDTO(baseUrl: String, priceMap: Map<Int, Int>) : ProductDTO 
                 imageRequired = this.minImageCount,
                 remark = this.remark,
                 price = priceMap.getOrDefault(this.id, this.defaultPrice),
-                thumbnailUrl = "${baseUrl}/assets/product/thumb/${this.sn}.jpg"
+                thumbnailUrl = "${baseUrl}/assets/product/thumb/${this.sn}.jpg",
+                previewUrl = "${baseUrl}/assets/product/preview/${this.sn}.jpg"
         )
 
