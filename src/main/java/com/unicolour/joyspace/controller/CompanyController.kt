@@ -29,17 +29,17 @@ class CompanyController {
             @RequestParam(name = "pageno", required = false, defaultValue = "1") pageno: Int): ModelAndView {
 
         val pageable = PageRequest(pageno - 1, 20)
-        val users = if (name == null || name == "")
+        val companies = if (name == null || name == "")
             companyDao.findAll(pageable)
         else
             companyDao.findByName(name, pageable)
 
         modelAndView.model.put("inputCompanyName", name)
 
-        val pager = Pager(users.totalPages, 7, pageno - 1)
+        val pager = Pager(companies.totalPages, 7, pageno - 1)
         modelAndView.model.put("pager", pager)
 
-        modelAndView.model.put("users", users.content)
+        modelAndView.model.put("companies", companies.content)
 
         modelAndView.model.put("viewCat", "user_mgr")
         modelAndView.model.put("viewContent", "company_list")

@@ -8,8 +8,6 @@ import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 
 public interface ManagerDao extends PagingAndSortingRepository<Manager, Integer> {
-	Manager findById(int id);
-
 	Page<Manager> findAll(Pageable pageRequest);
 
 	@Query("SELECT u FROM Manager u WHERE LOWER(u.userName) LIKE LOWER(CONCAT('%', :name, '%')) OR LOWER(u.fullName) LIKE LOWER(CONCAT('%', :name, '%'))")

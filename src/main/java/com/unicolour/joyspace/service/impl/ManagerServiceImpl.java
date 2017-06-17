@@ -7,7 +7,9 @@ import com.unicolour.joyspace.model.Manager;
 import com.unicolour.joyspace.service.ManagerService;
 import com.unicolour.joyspace.util.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -23,9 +25,6 @@ public class ManagerServiceImpl implements ManagerService {
 	
 	@Autowired
 	PasswordEncoder passwordEncoder;
-
-	private static final String OLD_USER_PASSWORD_KEY = "%^TSD#$#DSRygf46";
-	private static final String OLD_MANAGER_PASSWORD_KEY = "cd433d$%^B^ffdH";
 
 	@Override
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
@@ -62,7 +61,7 @@ public class ManagerServiceImpl implements ManagerService {
 
 	@Override
 	public boolean resetPassword(int userId, String password) {
-		Manager manager = managerDao.findById(userId);
+		Manager manager = managerDao.findOne(userId);
 		
 		if (manager != null) {
 			manager.setPassword(passwordEncoder.encode(password));
@@ -83,15 +82,19 @@ public class ManagerServiceImpl implements ManagerService {
 			if (passwordEncoder.matches(password, manager.getPassword())) {
 				return manager;
 			}
-			else if (passwordEncoder.matches(oldPasswordEncode(password), manager.getPassword())) {
-				return manager;
-			}
 		}
 
 		return null;
 	}
 
-	private CharSequence oldPasswordEncode(String password) {
-		return Utils.calcMD5Hash(password + OLD_MANAGER_PASSWORD_KEY).toLowerCase();
+	@Override
+	public LoginManagerDetail getLoginManager() {
+		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+		if (auth != null && auth.getPrincipal() instanceof LoginManagerDetail) {
+			return (LoginManagerDetail) auth.getPrincipal();
+		}
+		else {
+			return null;
+		}
 	}
 }

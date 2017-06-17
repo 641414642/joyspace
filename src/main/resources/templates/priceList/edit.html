@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta charset="utf-8" />
+    <!-- Bootstrap 3.3.6 -->
+    <link rel="stylesheet" href="../../static/thirdparty/bootstrap/css/bootstrap.min.css" th:href="@{/thirdparty/bootstrap/css/bootstrap.min.css}" />
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="../../static/thirdparty/fontawesome/css/font-awesome.min.css" th:href="@{/thirdparty/fontawesome/css/font-awesome.min.css}" />
+    <!-- Ionicons -->
+    <link rel="stylesheet" href="../../static/thirdparty/ionicons/css/ionicons.min.css" th:href="@{/thirdparty/ionicons/css/ionicons.min.css}" />
+    <!-- Theme style -->
+    <link rel="stylesheet" href="../../static/thirdparty/adminlte/css/AdminLTE.min.css" th:href="@{/thirdparty/adminlte/css/AdminLTE.min.css}" />
+    <!-- AdminLTE Skins. Choose a skin from the css/skins
+         folder instead of downloading all of them to reduce the load. -->
+    <link rel="stylesheet" href="../../static/thirdparty/adminlte/css/skins/_all-skins.min.css" th:href="@{/thirdparty/adminlte/css/skins/_all-skins.min.css}" />
+
+    <!-- jQuery 2.2.3 -->
+    <script src="../../static/thirdparty/plugins/jQuery/jquery-2.2.3.min.js" th:src="@{/thirdparty/plugins/jQuery/jquery-2.2.3.min.js}"></script>
+    <!-- Bootstrap 3.3.6 -->
+    <script src="../../static/thirdparty/bootstrap/js/bootstrap.min.js" th:src="@{/thirdparty/bootstrap/js/bootstrap.min.js}"></script>
+    <!-- SlimScroll -->
+    <script src="../../static/thirdparty/plugins/slimScroll/jquery.slimscroll.min.js" th:src="@{/thirdparty/plugins/slimScroll/jquery.slimscroll.min.js}"></script>
+    <!-- FastClick -->
+    <script src="../../static/thirdparty/plugins/fastclick/fastclick.js" th:src="@{/thirdparty/plugins/fastclick/fastclick.js}"></script>
+    <!-- AdminLTE App -->
+    <script src="../../static/thirdparty/adminlte/js/app.min.js" th:src="@{/thirdparty/adminlte/js/app.min.js}"></script>
+
+    <script type="text/javascript">
+		$(document).ready(function() {
+			$('#editDialog').modal('show');
+		});
+	</script>
+</head>
+<body>
+<div class="modal fade" role="dialog" id="editDialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content" th:fragment="content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+                <h4 class="modal-title" th:text="${modeDisplay}"></h4>
+            </div>
+            <form id="editPriceListForm" th:action="@{/priceList/edit}" method="post">
+                <input type="hidden" name="id" th:value="${priceList.id}" />
+                <input type="hidden" name="productIds" th:value="${productIds}" />
+                <div class="modal-body">
+                    <div th:if="${mode != 'view'}" class="form-group">
+                        <label for="name" class="control-label">名称:</label>
+                        <input type="text" th:readonly="${mode=='view'}" name="name" class="form-control" id="name" th:value="${priceList.name}" />
+                        <span class="help-block"></span>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label">价格列表:</label>
+                        <table class="table table-bordered" th:classappend="${mode != 'view'} ? 'table-striped' : ''">
+                            <tr>
+                                <th>产品名称</th>
+                                <th>缺省价格(元)</th>
+                                <th>价目表价格(元)</th>
+                            </tr>
+                            <tr th:each="row : ${rows}">
+                                <td th:text="${row.productName}"></td>
+                                <td th:text="${row.defPrice}"></td>
+                                <td th:if="${mode == 'view'}" th:text="${row.listPrice}"></td>
+                                <td th:if="${mode != 'view'}">
+                                    <input th:name="${'product_' + row.productId}" th:value="${row.listPrice}" type="text" name="fullname" class="form-control" style="width:5em" />
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+                <div th:if="${mode != 'view'}" class="modal-footer">
+                    <button type="submit" class="btn btn-primary">确定</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                </div>
+                <div th:if="${mode == 'view'}" class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-dismiss="modal">关闭</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+</body>
+</html>

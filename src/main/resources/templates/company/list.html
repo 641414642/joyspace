@@ -43,7 +43,7 @@
 						<th>创建时间</th>
 						<th>操作</th>
 					</tr>
-					<tr th:each="company : ${users}">
+					<tr th:each="company : ${companies}">
 						<td th:text="${company.id}"></td>
 						<td th:text="${company.name}"></td>
 						<td th:text="${company.createTime == null ? '' : #calendars.format(company.createTime, 'yyyy-MM-dd HH:mm')}"></td>

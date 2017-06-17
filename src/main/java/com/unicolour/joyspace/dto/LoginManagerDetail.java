@@ -10,19 +10,19 @@ public class LoginManagerDetail extends User {
 	private static final long serialVersionUID = 2697760667638615654L;
 
 	private final String fullName;
-	private final int userId;
+	private final int managerId;
 	private Calendar createTime;
 
-	public LoginManagerDetail(int userId, Calendar createTime, String fullName, String username, String password, boolean enabled, boolean accountNonExpired,
+	public LoginManagerDetail(int managerId, Calendar createTime, String fullName, String username, String password, boolean enabled, boolean accountNonExpired,
 							  boolean credentialsNonExpired, boolean accountNonLocked, Collection<? extends GrantedAuthority> authorities) {
 		super(username, password, enabled, accountNonExpired, credentialsNonExpired, accountNonLocked, authorities);
-		this.userId = userId;
+		this.managerId = managerId;
 		this.fullName = fullName;
 		this.createTime = createTime;
 	}
 	
-	public int getUserId() {
-		return userId;
+	public int getManagerId() {
+		return managerId;
 	}
 
 	public String getFullName() {

@@ -1,5 +1,6 @@
 package com.unicolour.joyspace.model
 
+import java.util.*
 import javax.persistence.*
 import javax.validation.constraints.NotNull
 
@@ -18,12 +19,16 @@ class PriceList {
     //region 店面
     /** 店面ID */
     @Column(name = "company_id", insertable = false, updatable = false)
-    var companyId: Int = 0
+    var companyId: Int? = null
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "company_id")
     var company: Company? = null
     //endregion
+
+    @NotNull
+    @Column
+    lateinit var createTime: Calendar
 
     @OneToMany(mappedBy = "priceList")
     lateinit var priceListItems: List<PriceListItem>

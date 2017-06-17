@@ -68,7 +68,7 @@ public class ManagerController {
 		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 		if (auth != null && auth.getPrincipal() instanceof LoginManagerDetail) {
 			LoginManagerDetail userDetail = (LoginManagerDetail) auth.getPrincipal();
-			return managerService.resetPassword(userDetail.getUserId(), newPassword);
+			return managerService.resetPassword(userDetail.getManagerId(), newPassword);
 		}
 		else {
 			return false;

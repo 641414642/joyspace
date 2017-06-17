@@ -115,6 +115,7 @@ class TestServiceImpl : TestService {
         //价格列表
         val priceListDef = PriceList()
         priceListDef.name = "缺省价目表"
+        priceListDef.createTime = Calendar.getInstance()
         priceListDef.company = company
         priceListDao.save(priceListDef)
 
@@ -132,6 +133,7 @@ class TestServiceImpl : TestService {
 
         val priceList618 = PriceList()
         priceList618.name = "618促销"
+        priceList618.createTime = Calendar.getInstance()
         priceList618.company = company
         priceListDao.save(priceList618)
 

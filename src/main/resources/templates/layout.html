@@ -149,7 +149,7 @@
 						<li><a href="#"><i class="fa fa-circle-o"></i>店铺支付方式列表</a></li>
 					</ul>
 				</li>
-				<li class="treeview">
+				<li th:class="${viewCat=='product_mgr' ? 'treeview active' : 'treeview'}" class="treeview">
 					<a href="#">
 						<i class="fa fa-pie-chart"></i>
 						<span>产品管理</span>
@@ -158,7 +158,7 @@
 			            </span>
 					</a>
 					<ul class="treeview-menu">
-						<li><a href="#"><i class="fa fa-circle-o"></i>新增店面销售产品</a></li>
+						<li th:class="${viewContent=='priceList_list' ? 'active' : ''}"><a href="#" th:href="@{/priceList/list}"><i class="fa fa-circle-o"></i>价目表</a></li>
 						<li><a href="#"><i class="fa fa-circle-o"></i>店面销售产品列表</a></li>
 					</ul>
 				</li>
@@ -201,11 +201,7 @@
 		<div th:case="'wxpay_list'" th:include="pay/wxpay_list :: content"></div>
 		<div th:case="'alipay_list'" th:include="pay/alipay_list :: content"></div>
 		<div th:case="'company_list'" th:include="company/list :: content"></div>
-<!--
-		<div th:case="'system_info'" th:include="system/info :: content"></div>
-		<div th:case="'system_account'" th:include="system/account:: content"></div>
-		<div th:case="'system_log'" th:include="system/log:: content"></div>
--->
+		<div th:case="'priceList_list'" th:include="priceList/list :: content"></div>
 		<div th:case="*"></div>
 		<!-- /.content -->
 	</div>
