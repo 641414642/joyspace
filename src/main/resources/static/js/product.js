@@ -1,4 +1,9 @@
-//添加投放地点
+//添加编辑自助机
+function createOrEditPrintStation(event) {
+    return showPostFormModal(event, 'editPrintStationForm', null, true);
+}
+
+//添加编辑投放地点
 function createOrEditPosition(event) {
     return showPostFormModal(event, 'editPositionForm', null, true);
 }
