@@ -48,7 +48,6 @@ class Position {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "price_list_id")
-    @NotNull
     var priceList: PriceList? = null
     //endregion
 

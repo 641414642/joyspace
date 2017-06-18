@@ -3,7 +3,6 @@ package com.unicolour.joyspace.controller
 import com.unicolour.joyspace.dao.PriceListDao
 import com.unicolour.joyspace.dao.ProductDao
 import com.unicolour.joyspace.model.PriceList
-import com.unicolour.joyspace.service.ManagerService
 import com.unicolour.joyspace.service.PriceListService
 import com.unicolour.joyspace.util.Pager
 import org.springframework.beans.factory.annotation.Autowired
@@ -106,7 +105,7 @@ class PriceListController {
             @RequestParam(name = "productIds", required = true) productIds: String
     ): Boolean {
 
-        var productIdPriceMap = productIds.split(',')
+        val productIdPriceMap = productIds.split(',')
                 .associateBy({ it.toInt() }, { request.getParameter("product_${it}") })
 
         if (id <= 0) {
