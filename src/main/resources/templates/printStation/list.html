@@ -52,6 +52,7 @@
 						<td th:text="${printStation.company?.name}"></td>
 						<td th:text="${printStation.position.name}"></td>
 						<td>
+							<a href="#" th:attr="data-qrcode=${printStation.wxQrCode}" onclick="return showPrintStationQrCode(event, true)" style="padding-right:5px">二维码</a>
 							<a href="#" th:attr="data-url=@{/printStation/edit(id=${printStation.id},mode='edit')}" onclick="return createOrEditPrintStation(event, true)">编辑</a>
 						</td>
 					</tr>
@@ -64,6 +65,7 @@
 	</section>
 
 	<script src="../../static/js/product.js" th:src="@{/js/product.js}"></script>
+	<script src="../../static/js/qrcode.min.js" th:src="@{/js/qrcode.min.js}"></script>
 </div>
 </body>
 </html>
