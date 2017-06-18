@@ -7,9 +7,13 @@ import com.unicolour.joyspace.service.TestService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import java.util.*
+import javax.persistence.EntityManager
 
 @Service
 class TestServiceImpl : TestService {
+    @Autowired
+    lateinit var em: EntityManager
+
     @Autowired
     lateinit var companyService: CompanyService
 
@@ -41,9 +45,8 @@ class TestServiceImpl : TestService {
     lateinit var printStationProductDao: PrintStationProductDao
 
     override fun clearOldTestDataAndCreateNewTestData() {
-        val userCount = userDao.count()
-        if (userCount > 1) {
-            throw IllegalAccessException("可能是生产环境")
+        if (!isTestDatabase()) {
+            throw IllegalAccessException("不是测试数据库")
         }
 
         //清除旧数据
@@ -179,6 +182,13 @@ class TestServiceImpl : TestService {
         psp3.printStation = ps
         psp3.product = product3
         printStationProductDao.save(psp3)
+    }
+
+    override fun isTestDatabase(): Boolean {
+        val sql = "SELECT name FROM test_flag WHERE ID = 1"
+        val query = em.createNativeQuery(sql)
+        val name = query.singleResult as String
+        return name == "TestDB"
     }
 
 }
