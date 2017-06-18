@@ -42,6 +42,7 @@
             </div>
             <form id="editPrintStationForm" th:action="@{/printStation/edit}" method="post">
                 <input type="hidden" name="id" th:value="${printStation.id}" />
+                <input type="hidden" name="productIds" th:value="${productIds}" />
                 <div class="modal-body">
                     <div class="form-group">
                         <label for="sn" class="control-label">编号:</label>
@@ -63,6 +64,17 @@
                             </option>
                         </select>
                         <span class="help-block"></span>
+                    </div>
+                    <div class="form-group">
+                        <label for="position" class="control-label">产品:</label>
+
+                        <div>
+                            <div style="display:inline-block; margin-right:20px" class="checkbox" th:each="product : ${products}">
+                                <label>
+                                    <input type="checkbox" th:checked="${product.selected}" th:name="${'product_' + product.productId}" th:text="${product.productName}"/>
+                                </label>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div class="modal-footer">

@@ -2,6 +2,8 @@ package com.unicolour.joyspace.controller
 
 import com.unicolour.joyspace.dao.PositionDao
 import com.unicolour.joyspace.dao.PrintStationDao
+import com.unicolour.joyspace.dao.PrintStationProductDao
+import com.unicolour.joyspace.dao.ProductDao
 import com.unicolour.joyspace.model.PrintStation
 import com.unicolour.joyspace.service.PrintStationService
 import com.unicolour.joyspace.util.Pager
@@ -13,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMethod
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.ResponseBody
 import org.springframework.web.servlet.ModelAndView
+import javax.servlet.http.HttpServletRequest
 
 @Controller
 class PrintStationController {
@@ -25,6 +28,12 @@ class PrintStationController {
 
     @Autowired
     lateinit var positionDao: PositionDao
+
+    @Autowired
+    lateinit var productDao: ProductDao
+
+    @Autowired
+    lateinit var printStationProductDao: PrintStationProductDao
 
     @RequestMapping("/printStation/list")
     fun printStationList(
@@ -58,18 +67,25 @@ class PrintStationController {
             @RequestParam(name = "id", required = true) id: Int
     ): ModelAndView {
 
+        var supportedProductIdSet: Set<Int> = emptySet<Int>()
+
         var printStation: PrintStation? = null
         if (id > 0) {
             printStation = printStationDao.findOne(id)
+            supportedProductIdSet = printStationProductDao.findByPrintStationId(id).map { it.productId }.toHashSet()
         }
 
         if (printStation == null) {
             printStation = PrintStation()
         }
 
+        val allProducts = productDao.findAll().map { ProductItem(it.id, it.name, supportedProductIdSet.contains(it.id)) }
+
         modelAndView.model.put("create", id <= 0)
         modelAndView.model.put("printStation", printStation)
         modelAndView.model.put("positions", positionDao.findAll())
+        modelAndView.model.put("products", allProducts)
+        modelAndView.model.put("productIds", allProducts.map { it.productId }.joinToString(separator = ","))
         modelAndView.viewName = "/printStation/edit :: content"
 
         return modelAndView
@@ -78,18 +94,31 @@ class PrintStationController {
     @RequestMapping(path = arrayOf("/printStation/edit"), method = arrayOf(RequestMethod.POST))
     @ResponseBody
     fun editPrintStation(
+            request: HttpServletRequest,
             @RequestParam(name = "id", required = true) id: Int,
             @RequestParam(name = "sn", required = true) sn: String,
             @RequestParam(name = "wxQrCode", required = true) wxQrCode: String,
-            @RequestParam(name = "positionId", required = true) positionId: Int
+            @RequestParam(name = "positionId", required = true) positionId: Int,
+            @RequestParam(name = "productIds", required = true) productIds: String
     ): Boolean {
 
+        val selectedProductIds = productIds
+                .split(',')
+                .filter { !request.getParameter("product_${it}").isNullOrBlank() }
+                .map { it.toInt() }
+                .toSet()
+
         if (id <= 0) {
-            printStationService.createPrintStation(sn, wxQrCode, positionId)
+            printStationService.createPrintStation(sn, wxQrCode, positionId, selectedProductIds)
             return true
         } else {
-            return printStationService.updatePrintStation(id, sn, wxQrCode, positionId)
+            return printStationService.updatePrintStation(id, sn, wxQrCode, positionId, selectedProductIds)
         }
     }
 }
 
+data class ProductItem(
+        val productId: Int,
+        val productName: String,
+        val selected: Boolean
+)
