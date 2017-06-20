@@ -76,17 +76,17 @@ class ProductController {
             @RequestParam(name = "name", required = true) name: String,
             @RequestParam(name = "sn", required = true) sn: String,
             @RequestParam(name = "remark", required = true) remark: String,
-            @RequestParam(name = "resX", required = true) resX: Int,
-            @RequestParam(name = "resY", required = true) resY: Int,
+            @RequestParam(name = "width", required = true) width: Double,
+            @RequestParam(name = "height", required = true) height: Double,
             @RequestParam(name = "defPrice", required = true) defPrice: Double,
             @RequestParam(name = "minImgCount", required = true) minImgCount: Int
     ): Boolean {
 
         if (id <= 0) {
-            productService.createProduct(name, sn, remark, resX, resY, defPrice, minImgCount)
+            productService.createProduct(name, sn, remark, width, height, defPrice, minImgCount)
             return true
         } else {
-            return productService.updateProduct(id, name, sn, remark, resX, resY, defPrice, minImgCount)
+            return productService.updateProduct(id, name, sn, remark, width, height, defPrice, minImgCount)
         }
     }
 

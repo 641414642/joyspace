@@ -85,8 +85,8 @@ class TestServiceImpl : TestService {
         product1.minImageCount = 1
         product1.name = "五寸照片"
         product1.remark = "5寸彩色照片"
-        product1.resolutionX = 5000
-        product1.resolutionY = 3000
+        product1.width = 50.0
+        product1.height = 30.0
         product1.sn = "PHOTO_5"
         product1.type = ProductType.PHOTO.value
         productDao.save(product1)
@@ -97,8 +97,8 @@ class TestServiceImpl : TestService {
         product2.minImageCount = 2
         product2.name = "六寸照片"
         product2.remark = "6寸彩色照片"
-        product2.resolutionX = 6000
-        product2.resolutionY = 4000
+        product2.width = 60.0
+        product2.height = 40.0
         product2.sn = "PHOTO_4"
         product2.type = ProductType.PHOTO.value
         productDao.save(product2)
@@ -109,8 +109,8 @@ class TestServiceImpl : TestService {
         product3.minImageCount = 3
         product3.name = "七寸照片"
         product3.remark = "7寸彩色照片"
-        product3.resolutionX = 7000
-        product3.resolutionY = 5000
+        product3.width = 70.0
+        product3.height = 50.0
         product3.sn = "PHOTO_7"
         product3.type = ProductType.PASSPORT_PHOTO.value
         productDao.save(product3)

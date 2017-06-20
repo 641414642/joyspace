@@ -2,7 +2,6 @@ package com.unicolour.joyspace.service.impl
 
 import com.unicolour.joyspace.dao.PrintStationProductDao
 import com.unicolour.joyspace.dao.ProductDao
-import com.unicolour.joyspace.dto.productToDTO
 import com.unicolour.joyspace.model.PrintStationProduct
 import com.unicolour.joyspace.model.Product
 import com.unicolour.joyspace.service.ProductService
@@ -30,13 +29,13 @@ open class ProductServiceImpl : ProductService {
 
     @Transactional
     override fun updateProduct(id: Int, name: String, sn: String, remark: String,
-                               resX: Int, resY: Int, defPrice: Double, minImgCount: Int): Boolean {
+                               width: Double, height: Double, defPrice: Double, minImgCount: Int): Boolean {
         val product = productDao.findOne(id)
         if (product != null) {
             product.name = name
             product.sn = sn
-            product.resolutionX = resX
-            product.resolutionY = resY
+            product.width = width
+            product.height = height
             product.defaultPrice = (defPrice * 100).toInt()
             product.minImageCount = minImgCount
             product.enabled = true
@@ -53,13 +52,13 @@ open class ProductServiceImpl : ProductService {
 
     @Transactional
     override fun createProduct(name: String, sn: String, remark: String,
-                               resX: Int, resY: Int, defPrice: Double, minImgCount: Int): Product? {
+                               width: Double, height: Double, defPrice: Double, minImgCount: Int): Product? {
         val product = Product()
 
         product.name = name
         product.sn = sn
-        product.resolutionX = resX
-        product.resolutionY = resY
+        product.width = width
+        product.height = height
         product.defaultPrice = (defPrice * 100).toInt()
         product.minImageCount = minImgCount
         product.enabled = true

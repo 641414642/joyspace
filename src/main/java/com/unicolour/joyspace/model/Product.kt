@@ -25,15 +25,15 @@ class Product {
     @NotNull
     var sn: String = ""
 
-    /** 产品分辨率X */
+    /** 产品宽度(mm) */
     @Column
     @NotNull
-    var resolutionX: Int = 0;
+    var width: Double = 0.0;
 
-    /** 产品分辨率Y */
+    /** 产品高度(mm) */
     @Column
     @NotNull
-    var resolutionY: Int = 0;
+    var height: Double = 0.0;
 
     /** 最小图片数量 */
     @Column
