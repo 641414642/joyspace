@@ -5,6 +5,7 @@ import com.unicolour.joyspace.model.*
 import com.unicolour.joyspace.service.CompanyService
 import com.unicolour.joyspace.service.TestService
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import java.util.*
 import javax.persistence.EntityManager
@@ -44,6 +45,9 @@ class TestServiceImpl : TestService {
     @Autowired
     lateinit var printStationProductDao: PrintStationProductDao
 
+    @Autowired
+    lateinit var passwordEncoder: PasswordEncoder
+
     override fun clearOldTestDataAndCreateNewTestData() {
         if (!isTestDatabase()) {
             throw IllegalAccessException("不是测试数据库")
@@ -76,6 +80,7 @@ class TestServiceImpl : TestService {
         user.sex = USER_SEX_MALE
         user.userName = "zhangsan"
         user.wxOpenId = "ljAldSfg234lasW63dDdfsdf"
+        user.password = passwordEncoder.encode("123456")
         userDao.save(user)
 
         //产品
