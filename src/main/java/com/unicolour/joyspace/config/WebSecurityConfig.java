@@ -33,6 +33,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 				"/css/**",
 				"/fonts/**",
 				"/api/**",
+				"/graphql",
 		};
         http
         	.csrf().disable()

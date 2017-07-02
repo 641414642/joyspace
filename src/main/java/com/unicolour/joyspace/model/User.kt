@@ -22,7 +22,6 @@ class User {
     var userName: String? = null
 
     /** 微信OpenID */
-    @NotNull
     @Column(length = 200)
     var wxOpenId: String? = null
 
@@ -44,4 +43,8 @@ class User {
 
     @NotNull
     var enabled: Boolean = false
+
+    @NotNull
+    @Column(length = 128)
+    lateinit var password: String
 }

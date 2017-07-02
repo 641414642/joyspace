@@ -4,9 +4,12 @@ import com.unicolour.joyspace.dao.*
 import com.unicolour.joyspace.model.PriceListItem
 import com.unicolour.joyspace.model.PrintStation
 import com.unicolour.joyspace.model.PrintStationProduct
+import com.unicolour.joyspace.model.Product
 import com.unicolour.joyspace.service.ManagerService
 import com.unicolour.joyspace.service.PriceListService
 import com.unicolour.joyspace.service.PrintStationService
+import graphql.schema.DataFetcher
+import graphql.schema.DataFetchingEnvironment
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import javax.transaction.Transactional
@@ -33,6 +36,7 @@ open class PrintStationServiceImpl : PrintStationService {
 
     @Autowired
     lateinit var printStationProductDao: PrintStationProductDao
+
 
     override fun getPriceMap(printStation: PrintStation?): Map<Int, Int> {
         val priceListItems: List<PriceListItem> = priceListService.getPriceListItems(printStation?.position?.priceListId)
@@ -98,6 +102,19 @@ open class PrintStationServiceImpl : PrintStationService {
         }
         else {
             return false
+        }
+    }
+
+    override fun getDataFetchers(): Map<String, DataFetcher<Any>> {
+        return mapOf(
+                "products" to DataFetcher<Any> { env -> printStationProductDao.findByPrintStationId(env.getSource<PrintStation>().id).map { it.product } }
+        )
+    }
+
+    override fun getPrintStationDataFetcher(): DataFetcher<PrintStation> {
+        return DataFetcher<PrintStation> { environment ->
+            val printStationId = environment.getArgument<Int>("printStationId")
+            printStationDao.findOne(printStationId)
         }
     }
 }

@@ -6,8 +6,10 @@ import com.unicolour.joyspace.dao.PriceListDao
 import com.unicolour.joyspace.model.Position
 import com.unicolour.joyspace.model.PriceList
 import com.unicolour.joyspace.model.PriceListItem
+import com.unicolour.joyspace.model.PrintStation
 import com.unicolour.joyspace.service.ManagerService
 import com.unicolour.joyspace.service.PositionService
+import graphql.schema.DataFetcher
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import java.util.*

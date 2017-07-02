@@ -1,0 +1,155 @@
+schema {
+    query: QueryType
+    mutation: MutationType
+}
+
+#查询
+type QueryType {
+    #根据id查找自助打印机
+    printStation(printStationId: Int!): PrintStation
+}
+
+#增删改操作
+type MutationType {
+    #用户登录
+    login(phoneNumber: String!, password: String!) : LoginUser
+
+    #发送注册验证码
+    sendRegVerifyCode(phoneNumber: String!) : SendVerifyCodeResult!
+
+    #用户注册
+    userRegister(userName: String!, password: String!, phoneNumber: String!, verifyCode: String!, email: String) : UserRegisterResult!
+}
+
+#用户注册请求的结果
+enum UserRegisterResult {
+    #注册成功
+    SUCCEED
+
+    #手机号码已经注册过
+    PHONE_NUMBER_ALREADY_REGISTERED
+
+    #用户名已经注册过
+    USER_NAME_ALREADY_REGISTERED
+
+    #无效或过期的验证码
+    INVALID_VERIFY_CODE
+
+    #服务器错误
+    SERVER_ERROR
+}
+
+#发送验证码请求的结果
+enum SendVerifyCodeResult {
+    #发送成功
+    SEND
+
+    #发送失败
+    FAILED
+
+    #请求太频繁(请等待60秒以后再试)
+    RETRY_LATER
+
+    #手机号码已经注册过
+    PHONE_NUMBER_ALREADY_REGISTERED
+
+    #服务器错误
+    SERVER_ERROR
+}
+
+#登录用户
+type LoginUser {
+    #手机号码
+    phone: String!
+
+    #用户名
+    userName: String
+
+    #邮件地址
+    email: String
+
+    #授权码
+    authToken: String!
+}
+
+#投放商
+type Company {
+    name: String!
+}
+
+#投放地点
+type Position {
+    name: String!
+
+    #地址
+    address: String!
+
+    #经度
+    longitude: Float!
+
+    #纬度
+    latitude: Float!
+
+    #此地点的自助机列表
+    printStations: [PrintStation!]
+}
+
+#产品
+type Product {
+    id: Int!
+    name: String!
+    type: ProductType!
+
+    #编号
+    sn: String!
+
+    #宽度（毫米）
+    width: Float!
+
+    #高度（毫米）
+    height: Float!
+
+    #最少需要照片张数
+    imageRequired: Int!
+
+    #描述
+    remark: String
+
+    #产品价格（单位是分）
+    price: Int
+
+    #小缩略图url
+    thumbnailUrl: String!
+
+    #展示图url
+    previewUrl: [String!]
+}
+
+#产品类型
+enum ProductType {
+    #普通照片
+    PHOTO
+
+    #证件照
+    ID_PHOTO
+
+    #模板拼图
+    TEMPLATE
+}
+
+#自助打印机
+type PrintStation {
+    #编号
+    sn: String!
+
+    #投放地点
+    position: Position!
+
+    #属于哪个投放商
+    company: Company!
+
+    #支持的产品列表
+    products: [Product!]
+}
+
+

@@ -112,7 +112,7 @@ class TestServiceImpl : TestService {
         product3.width = 70.0
         product3.height = 50.0
         product3.sn = "PHOTO_7"
-        product3.type = ProductType.PASSPORT_PHOTO.value
+        product3.type = ProductType.ID_PHOTO.value
         productDao.save(product3)
 
         //价格列表

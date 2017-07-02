@@ -2,9 +2,12 @@ package com.unicolour.joyspace.service.impl
 
 import com.unicolour.joyspace.dao.PrintStationProductDao
 import com.unicolour.joyspace.dao.ProductDao
+import com.unicolour.joyspace.model.PrintStation
 import com.unicolour.joyspace.model.PrintStationProduct
 import com.unicolour.joyspace.model.Product
+import com.unicolour.joyspace.model.ProductType
 import com.unicolour.joyspace.service.ProductService
+import graphql.schema.DataFetcher
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
@@ -90,6 +93,19 @@ open class ProductServiceImpl : ProductService {
         }
 
         return false
+    }
+
+    override fun getDataFetcher(fieldName: String): DataFetcher<Any> {
+        return DataFetcher<Any> { environment ->
+            val product = environment.getSource<Product>()
+            when (fieldName) {
+                "type" -> {
+                    val type = ProductType.values().find{ it.value == product.type }
+                    if (type == null) null else type.name
+                }
+                else -> null
+            }
+        }
     }
 }
 

@@ -56,6 +56,11 @@ class Product {
 
 /** 产品类别 */
 enum class ProductType(val value:Int, val dispName:String) {
-    PHOTO(0, "照片输出"),
-    PASSPORT_PHOTO(1, "证件照")
+    PHOTO(0, "普通照片"),
+    ID_PHOTO(1, "证件照"),
+    TEMPLATE(2, "模板拼图");
+
+    fun typeOf(value: Int) {
+
+    }
 }
