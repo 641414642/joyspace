@@ -15,46 +15,26 @@ type MutationType {
     login(phoneNumber: String!, password: String!) : LoginUser
 
     #发送注册验证码
-    sendRegVerifyCode(phoneNumber: String!) : SendVerifyCodeResult!
+    sendRegVerifyCode(phoneNumber: String!) : RequestResult!
 
     #用户注册
-    userRegister(userName: String!, password: String!, phoneNumber: String!, verifyCode: String!, email: String) : UserRegisterResult!
+    userRegister(userName: String!, password: String!, phoneNumber: String!, verifyCode: String!, email: String) : RequestResult!
 }
 
-#用户注册请求的结果
-enum UserRegisterResult {
-    #注册成功
-    SUCCEED
+#请求的结果的通用类型
+type RequestResult{
+    #结果代码
+    #0: 成功
+    #1: 手机号码已经注册过
+    #2: 用户名已经注册过
+    #3: 无效或过期的验证码
+    #4: 请求太频繁(请等待60秒以后再试)
+    #5: 发送验证码失败
+    #100: 服务器错误
+    result: Int!
 
-    #手机号码已经注册过
-    PHONE_NUMBER_ALREADY_REGISTERED
-
-    #用户名已经注册过
-    USER_NAME_ALREADY_REGISTERED
-
-    #无效或过期的验证码
-    INVALID_VERIFY_CODE
-
-    #服务器错误
-    SERVER_ERROR
-}
-
-#发送验证码请求的结果
-enum SendVerifyCodeResult {
-    #发送成功
-    SEND
-
-    #发送失败
-    FAILED
-
-    #请求太频繁(请等待60秒以后再试)
-    RETRY_LATER
-
-    #手机号码已经注册过
-    PHONE_NUMBER_ALREADY_REGISTERED
-
-    #服务器错误
-    SERVER_ERROR
+    #结果的描述 (语言: zh, en ...)
+    description(language: String) : String!
 }
 
 #登录用户

@@ -1,5 +1,6 @@
 package com.unicolour.joyspace.service.impl
 
+import com.unicolour.joyspace.dto.GraphQLRequestResult
 import com.unicolour.joyspace.service.GraphQLService
 import com.unicolour.joyspace.service.PrintStationService
 import com.unicolour.joyspace.service.ProductService
@@ -57,6 +58,16 @@ class GraphQLServiceImpl : GraphQLService {
                     typeWiring.dataFetcher("login", userService.getLoginDataFetcher())
                     typeWiring.dataFetcher("sendRegVerifyCode", userService.getSendRegVerifyCodeDataFetcher())
                     typeWiring.dataFetcher("userRegister", userService.getUserRegisterDataFetcher())
+                })
+                .type("RequestResult", { typeWiring ->
+                    typeWiring.dataFetcher("description", { environment ->
+                        val result = environment.getSource<GraphQLRequestResult>()
+                        val language = environment.getArgument<String>("language")
+                        when (language) {
+                            "zh" -> result.resultCode.desc
+                            else -> result.resultCode.descEn
+                        }
+                    })
                 })
                 .type("PrintStation", { typeWiring ->
                     typeWiring.dataFetchers(printStationService.getDataFetchers())

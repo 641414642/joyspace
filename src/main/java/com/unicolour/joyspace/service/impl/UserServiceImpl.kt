@@ -1,6 +1,8 @@
 package com.unicolour.joyspace.service.impl
 
 import com.unicolour.joyspace.dao.UserDao
+import com.unicolour.joyspace.dto.GraphQLRequestResult
+import com.unicolour.joyspace.dto.ResultCode
 import com.unicolour.joyspace.dto.UserDTO
 import com.unicolour.joyspace.model.USER_SEX_FEMALE
 import com.unicolour.joyspace.model.USER_SEX_MALE
@@ -11,6 +13,7 @@ import graphql.schema.DataFetcher
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
+import sun.security.provider.certpath.BuildStep.SUCCEED
 import java.util.*
 
 @Service
@@ -31,16 +34,16 @@ class UserServiceImpl : UserService {
     }
 
     //发送注册验证码
-    override fun getSendRegVerifyCodeDataFetcher(): DataFetcher<String> {
-        return DataFetcher<String> { env ->
+    override fun getSendRegVerifyCodeDataFetcher(): DataFetcher<GraphQLRequestResult> {
+        return DataFetcher<GraphQLRequestResult> { env ->
             val phoneNumber = env.getArgument<String>("phoneNumber")
             sendVerifyCode(phoneNumber)
         }
     }
 
-    private fun sendVerifyCode(phoneNumber: String): String {
+    private fun sendVerifyCode(phoneNumber: String): GraphQLRequestResult {
         //XXX
-        return "SEND"
+        return GraphQLRequestResult(ResultCode.SUCCESS)
 
 //        #发送失败
 //        FAILED
@@ -57,8 +60,8 @@ class UserServiceImpl : UserService {
     }
 
 
-    override fun getUserRegisterDataFetcher(): DataFetcher<String> {
-        return DataFetcher<String> { env ->
+    override fun getUserRegisterDataFetcher(): DataFetcher<GraphQLRequestResult> {
+        return DataFetcher<GraphQLRequestResult> { env ->
             val phoneNumber = env.getArgument<String>("phoneNumber")
             val userName = env.getArgument<String>("userName")
             val password = env.getArgument<String>("password")
@@ -71,19 +74,19 @@ class UserServiceImpl : UserService {
 
     //用户注册
     private fun userRegister(userName: String, password: String,
-                             phoneNumber: String, verifyCode: String, email: String?): String {
+                             phoneNumber: String, verifyCode: String, email: String?): GraphQLRequestResult {
         if (verifyCode != "123456") {
-            return "INVALID_VERIFY_CODE"
+            return GraphQLRequestResult(ResultCode.INVALID_VERIFY_CODE)
         }
         else {
             var user = userDao.findByPhone(phoneNumber)
             if (user != null) {
-                return "PHONE_NUMBER_ALREADY_REGISTERED"
+                return GraphQLRequestResult(ResultCode.PHONE_NUMBER_ALREADY_REGISTERED)
             }
 
             user = userDao.findByUserName(userName)
             if (user != null) {
-                return "USER_NAME_ALREADY_REGISTERED"
+                return GraphQLRequestResult(ResultCode.USER_NAME_ALREADY_REGISTERED)
             }
 
             user = User()
@@ -97,7 +100,7 @@ class UserServiceImpl : UserService {
 
             userDao.save(user)
 
-            return "SUCCEED"
+            return GraphQLRequestResult(ResultCode.SUCCESS)
         }
 //XXX
 //        #注册成功
