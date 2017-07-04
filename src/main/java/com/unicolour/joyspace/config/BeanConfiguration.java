@@ -8,6 +8,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.crypto.password.StandardPasswordEncoder;
+import org.springframework.web.client.RestTemplate;
 
 @Configuration
 @EnableScheduling
@@ -25,5 +26,10 @@ public class BeanConfiguration {
     @Bean
     public ObjectMapper objectMapper() {
         return new ObjectMapper();
+    }
+
+    @Bean
+    public RestTemplate restTemplate() {
+        return new RestTemplate();
     }
 }

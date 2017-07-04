@@ -1,28 +1,45 @@
 package com.unicolour.joyspace.service.impl
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.unicolour.joyspace.dao.UserDao
+import com.unicolour.joyspace.dao.UserLoginSessionDao
 import com.unicolour.joyspace.dto.GraphQLRequestResult
 import com.unicolour.joyspace.dto.ResultCode
 import com.unicolour.joyspace.dto.UserDTO
-import com.unicolour.joyspace.model.USER_SEX_FEMALE
-import com.unicolour.joyspace.model.USER_SEX_MALE
-import com.unicolour.joyspace.model.USER_SEX_UNKNOWN
-import com.unicolour.joyspace.model.User
+import com.unicolour.joyspace.dto.WxLoginResult
+import com.unicolour.joyspace.model.*
 import com.unicolour.joyspace.service.UserService
 import graphql.schema.DataFetcher
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Value
+import org.springframework.http.HttpMethod
+import org.springframework.http.HttpStatus
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
-import sun.security.provider.certpath.BuildStep.SUCCEED
+import org.springframework.web.client.RestTemplate
 import java.util.*
+import javax.transaction.Transactional
+
 
 @Service
-class UserServiceImpl : UserService {
+open class UserServiceImpl : UserService {
+    @Value("\${com.unicolour.wxAppId}")
+    lateinit var wxAppId: String
+
+    @Value("\${com.unicolour.wxAppSecret}")
+    lateinit var wxAppSecret: String
+
     @Autowired
     lateinit var passwordEncoder: PasswordEncoder
 
-    private val tokenUserIdMap: MutableMap<String, Int> = HashMap()
-    private val userIdTokenMap: MutableMap<Int, String> = HashMap()
+    @Autowired
+    lateinit var userLoginSessionDao: UserLoginSessionDao
+
+    @Autowired
+    lateinit var restTemplate: RestTemplate
+
+    @Autowired
+    lateinit var objectMapper: ObjectMapper
 
     //登录
     override fun getLoginDataFetcher(): DataFetcher<User> {
@@ -122,29 +139,91 @@ class UserServiceImpl : UserService {
     override fun getAuthTokenDataFetcher(): DataFetcher<String> {
         return DataFetcher<String> { env ->
             val user = env.getSource<User>()
-            userIdTokenMap[user.id]
+            userLoginSessionDao.findByUserId(user.id)?.id
         }
     }
 
+    //app用户登录
+    @Transactional
     override fun login(phoneNumber: String, password: String): User? {
         val user = userDao.findByPhone(phoneNumber)
         if (user != null) {
             if (passwordEncoder.matches(password, user.password)) {
-                if (userIdTokenMap.containsKey(user.id)) {
-                    val oldToken = userIdTokenMap[user.id]
-                    tokenUserIdMap.remove(oldToken)
-                    userIdTokenMap.remove(user.id)
+                var session = userLoginSessionDao.findByUserId(user.id)
+                if (session == null) {
+                    session = UserLoginSession()
+                    session.id = UUID.randomUUID().toString().replace("-", "")
+                    session.userId = user.id
                 }
 
-                val token = UUID.randomUUID().toString().replace("-", "")
-                tokenUserIdMap[token] = user.id
-                userIdTokenMap[user.id] = token
+                session.expireTime = Calendar.getInstance()
+                session.expireTime.add(Calendar.SECOND, 3600)
+                userLoginSessionDao.save(session)
 
                 return user
             }
         }
 
         return null
+    }
+
+    //微信用户登录
+    @Transactional
+    override fun wxLogin(code: String): WxLoginResult {
+        val resp = restTemplate.exchange(
+                "https://api.weixin.qq.com/sns/jscode2session" +
+                        "?appid={appid}&secret={secret}&js_code={js_code}&grant_type={grant_type}",
+                HttpMethod.GET,
+                null,
+                String::class.java,
+                mapOf(
+                        "appid" to wxAppId,
+                        "secret" to wxAppSecret,
+                        "js_code" to code,
+                        "grant_type" to "authorization_code"
+                )
+        )
+
+        if (resp != null && resp.statusCode == HttpStatus.OK) {
+            val bodyStr = resp.body
+            val body: JSCode2SessionResult = objectMapper.readValue(bodyStr, JSCode2SessionResult::class.java)
+
+            if (body.errcode == 0 && body.openid != null && body.session_key != null) {
+                var user = userDao.findByWxOpenId(body.openid!!)
+                if (user == null) {
+                    user = User()
+                    user.userName = body.openid
+                    user.password = passwordEncoder.encode(body.openid)
+                    user.phone = null
+                    user.email = null
+                    user.enabled = true
+                    user.sex = USER_SEX_UNKNOWN
+                    user.createTime = Calendar.getInstance()
+                    userDao.save(user)
+                }
+
+                var session = userLoginSessionDao.findByUserId(user.id)
+                if (session == null) {
+                    session = UserLoginSession()
+                    session.id = UUID.randomUUID().toString().replace("-", "")
+                    session.userId = user.id
+                }
+
+                session.wxSessionKey = body.session_key!!
+                session.wxOpenId = body.openid!!
+
+                session.expireTime = Calendar.getInstance()
+                session.expireTime.add(Calendar.SECOND, 3600)
+
+                userLoginSessionDao.save(session)
+
+                return WxLoginResult(sessionId = session.id)
+            } else {
+                return WxLoginResult(errcode = body.errcode, errmsg = body.errmsg)
+            }
+        }
+
+        return WxLoginResult(errcode = -1, errmsg = "")
     }
 
     @Autowired
@@ -181,3 +260,9 @@ class UserServiceImpl : UserService {
     }
 }
 
+data class JSCode2SessionResult(
+        var openid: String? = null,
+        var session_key: String? = null,
+        var errcode: Int? = 0,
+        var errmsg: String? = null
+)

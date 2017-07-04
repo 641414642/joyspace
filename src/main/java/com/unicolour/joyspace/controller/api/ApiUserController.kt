@@ -1,37 +1,25 @@
 package com.unicolour.joyspace.controller.api
 
 import com.unicolour.joyspace.dao.UserDao
-import com.unicolour.joyspace.dto.UserDTO
-import com.unicolour.joyspace.dto.userToDTO
-import com.unicolour.joyspace.model.User
+import com.unicolour.joyspace.dto.WxLoginResult
 import com.unicolour.joyspace.service.UserService
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.annotation.*
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestMethod
+import org.springframework.web.bind.annotation.RequestParam
+import org.springframework.web.bind.annotation.RestController
 
 
 @RestController
 class ApiUserController {
     @Autowired
-    lateinit var userDao: UserDao
-
-    @Autowired
     lateinit var userService: UserService
 
-    @RequestMapping("/api/user", method = arrayOf(RequestMethod.POST))
-    fun createOrEditUser(@RequestBody user: UserDTO) : ResponseEntity<UserDTO> {
-        val retUser: User = userService.createOrUpdateUser(user)
-        return ResponseEntity.ok(retUser.userToDTO())
-    }
-
-    @RequestMapping("/api/user/findByOpenId", method = arrayOf(RequestMethod.GET))
-    fun findUserByWeiXinOpenId(@RequestParam("openId") openId: String) : ResponseEntity<UserDTO> {
-        val retUser: User? = userDao.findByWxOpenId(openId)
-        if (retUser == null) {
-            return ResponseEntity.notFound().build()
-        }
-        else {
-            return ResponseEntity.ok(retUser.userToDTO())
-        }
+    @RequestMapping("/api/user/login", method = arrayOf(RequestMethod.POST))
+    fun wxUserLogin(@RequestParam("code") code: String) : ResponseEntity<WxLoginResult> {
+        val result = userService.wxLogin(code)
+        return ResponseEntity.ok(result)
     }
 }
