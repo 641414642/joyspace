@@ -10,9 +10,6 @@ import java.nio.charset.StandardCharsets
 import javax.servlet.http.HttpServletRequest
 import java.util.HashMap
 
-
-
-
 @RestController
 class GraphQLController {
     @Autowired

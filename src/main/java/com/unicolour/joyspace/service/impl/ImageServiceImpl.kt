@@ -1,21 +1,19 @@
 package com.unicolour.joyspace.service.impl
 
-import com.unicolour.joyspace.dao.UserDao
 import com.unicolour.joyspace.dao.UserImageFileDao
 import com.unicolour.joyspace.dao.UserLoginSessionDao
 import com.unicolour.joyspace.dto.ImageInfo
-import com.unicolour.joyspace.dto.productToDTO
 import com.unicolour.joyspace.model.UserImageFile
 import com.unicolour.joyspace.service.ImageService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import org.springframework.web.multipart.MultipartFile
-import java.awt.RenderingHints
-import java.awt.image.BufferedImage
+import java.io.BufferedReader
 import java.io.File
+import java.io.InputStreamReader
 import java.util.*
-import javax.imageio.ImageIO
+import java.util.regex.Pattern
 
 @Service
 class ImageServiceImpl : ImageService {
@@ -34,6 +32,9 @@ class ImageServiceImpl : ImageService {
         if (session == null) {
             return ImageInfo(0,0, 0, "", 0, 0, 1, "用户未登录")
         }
+        else if (imgFile == null) {
+            return ImageInfo(0,0, 0, "", 0, 0, 2, "没有图片文件")
+        }
         else {
             val fileName = UUID.randomUUID().toString().replace("-", "")
             val filePath = "user/${session.userId}/${sessionId}/${fileName}"
@@ -41,37 +42,59 @@ class ImageServiceImpl : ImageService {
             val thumbFile = File(assetsDir, "${filePath}.thumb.jpg")
             file.parentFile.mkdirs()
 
-            imgFile?.transferTo(file)
+            imgFile.transferTo(file)
 
-            val img = ImageIO.read(file)
-            val imgWid = img.width
-            val imgHei = img.height
+            val pb = ProcessBuilder(
+                    "magick.exe",
+                    file.absolutePath,
+                    "-thumbnail",
+                    "${thumbMaxWidth}x${thumbMaxHeight}",
+                    "-identify",
+                    thumbFile.absolutePath)
 
-            val scale = minOf(thumbMaxWidth.toDouble() / imgWid.toDouble(), thumbMaxHeight.toDouble() / imgHei.toDouble())
-            val thumbWid = (imgWid * scale).toInt()
-            val thumbHei = (imgHei * scale).toInt()
+            val process = pb.start()
 
-            val thumbImg = BufferedImage(thumbWid, thumbHei, BufferedImage.TYPE_INT_RGB)
-            val g = thumbImg.createGraphics()
-            g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR)
-            g.drawImage(img, 0, 0, thumbWid, thumbHei, null)
-            g.dispose()
+            var retStr:String = "";
+            BufferedReader(InputStreamReader(process.inputStream)).use { reader ->
+                retStr = reader.readText()
+            }
 
-            ImageIO.write(thumbImg, "jpg", thumbFile)
+            val retCode = process.waitFor()
 
-            val thumbUrl = "${baseUrl}/assets/${filePath}.thumb.jpg"
+            if (retCode != 0) {
+                return ImageInfo(0,0, 0, "", 0, 0, 3, retStr)
+            }
+            else {
+                val patternStr = Pattern.quote(file.absolutePath) + "\\s(\\w+)\\s(\\d+)x(\\d+)=>(\\d+)x(\\d+).*"
+                val pattern = Pattern.compile(patternStr)
+                val matcher = pattern.matcher(retStr)
 
-            val userImgFile = UserImageFile()
-            userImgFile.fileName = fileName
-            userImgFile.width = imgWid
-            userImgFile.height = imgHei
-            userImgFile.sessionId = sessionId
-            userImgFile.uploadTime = Calendar.getInstance()
-            userImgFile.userId = session.userId
+                matcher.find()
 
-            userImageFileDao.save(userImgFile)
+                val imgType = matcher.group(1).toLowerCase()
+                val imgWid = matcher.group(2).toInt()
+                val imgHei = matcher.group(3).toInt()
+                val thumbWid = matcher.group(4).toInt()
+                val thumbHei = matcher.group(5).toInt()
 
-            return ImageInfo(userImgFile.id, imgWid, imgHei, thumbUrl, thumbWid, thumbHei)
+                val thumbUrl = "${baseUrl}/assets/${filePath}.thumb.jpg"
+
+                val fileWithExt = File(assetsDir, "${filePath}.${imgType}")
+                file.renameTo(fileWithExt)
+
+                val userImgFile = UserImageFile()
+                userImgFile.type = imgType
+                userImgFile.fileName = fileName
+                userImgFile.width = imgWid
+                userImgFile.height = imgHei
+                userImgFile.sessionId = sessionId
+                userImgFile.uploadTime = Calendar.getInstance()
+                userImgFile.userId = session.userId
+
+                userImageFileDao.save(userImgFile)
+
+                return ImageInfo(userImgFile.id, imgWid, imgHei, thumbUrl, thumbWid, thumbHei)
+            }
         }
     }
 }

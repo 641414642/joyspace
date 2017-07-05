@@ -20,6 +20,10 @@ class UserImageFile {
     @Column(length = 50)
     lateinit var fileName: String
 
+    @NotNull
+    @Column(length = 10)
+    lateinit var type: String
+
     @Column
     @NotNull
     var userId: Int = 0
