@@ -157,34 +157,34 @@ public class ApiTest {
                 .andDo(document);
     }
 
-    /**
-     * 根据openId查找用户
-     * @throws Exception
-     */
-    @Test
-    public void findUserByOpenId() throws Exception {
-        this.document.snippets(
-                requestParameters(parameterWithName("openId").description("微信用户OpenID"))
-        );
-
-        this.mockMvc.perform(get("/api/user/findByOpenId")
-                .param("openId", "ljAldSfg234lasW63dDdfsdf"))
-                .andDo(print())
-                .andExpect(status().isOk())
-                .andDo(document);
-    }
-
-    /**
-     * 根据openId查找用户, 没找到404
-     * @throws Exception
-     */
-    @Test
-    public void findUserByOpenId404() throws Exception {
-        this.mockMvc.perform(get("/api/user/findByOpenId")
-                .param("openId", "asWd254DG3asdf4asfg123"))
-                .andDo(print())
-                .andExpect(status().isNotFound())
-                .andDo(document);
-    }
+//    /**
+//     * 根据openId查找用户
+//     * @throws Exception
+//     */
+//    @Test
+//    public void findUserByOpenId() throws Exception {
+//        this.document.snippets(
+//                requestParameters(parameterWithName("openId").description("微信用户OpenID"))
+//        );
+//
+//        this.mockMvc.perform(get("/api/user/findByOpenId")
+//                .param("openId", "ljAldSfg234lasW63dDdfsdf"))
+//                .andDo(print())
+//                .andExpect(status().isOk())
+//                .andDo(document);
+//    }
+//
+//    /**
+//     * 根据openId查找用户, 没找到404
+//     * @throws Exception
+//     */
+//    @Test
+//    public void findUserByOpenId404() throws Exception {
+//        this.mockMvc.perform(get("/api/user/findByOpenId")
+//                .param("openId", "asWd254DG3asdf4asfg123"))
+//                .andDo(print())
+//                .andExpect(status().isNotFound())
+//                .andDo(document);
+//    }
 
 }
