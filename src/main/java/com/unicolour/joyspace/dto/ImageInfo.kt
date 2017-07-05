@@ -2,6 +2,7 @@ package com.unicolour.joyspace.dto
 
 /** 上传图片的返回信息 */
 data class ImageInfo(
+        var imageId: Int = 0,
         var width: Int = 0,
         var height: Int = 0,
         var thumbUrl: String = "",
