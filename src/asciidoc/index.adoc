@@ -75,25 +75,3 @@ include::snippets/api/find-product-by-print-station-id404/http-request.adoc[]
 response:
 include::snippets/api/find-product-by-print-station-id404/http-response.adoc[]
 
-== 用户
-
-=== 按照微信OpenID查找对应的用户
-
-*请求参数:*
-include::snippets/api/find-user-by-open-id/request-parameters.adoc[]
-
-*找到用户*
-
-request:
-include::snippets/api/find-user-by-open-id/http-request.adoc[]
-
-response:
-include::snippets/api/find-user-by-open-id/http-response.adoc[]
-
-*没有找到指定openId对应的用户*
-
-request:
-include::snippets/api/find-user-by-open-id404/http-request.adoc[]
-
-response:
-include::snippets/api/find-user-by-open-id404/http-response.adoc[]
