@@ -1,5 +1,6 @@
 package com.unicolour.joyspace.service.impl
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.unicolour.joyspace.dao.UserDao
 import com.unicolour.joyspace.dao.UserLoginSessionDao
@@ -260,9 +261,11 @@ open class UserServiceImpl : UserService {
     }
 }
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 data class JSCode2SessionResult(
         var openid: String? = null,
         var session_key: String? = null,
+        var expires_in: String? = null,
         var errcode: Int? = 0,
         var errmsg: String? = null
 )
