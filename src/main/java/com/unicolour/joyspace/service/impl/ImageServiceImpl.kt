@@ -2,6 +2,7 @@ package com.unicolour.joyspace.service.impl
 
 import com.unicolour.joyspace.dao.UserImageFileDao
 import com.unicolour.joyspace.dao.UserLoginSessionDao
+import com.unicolour.joyspace.dto.CommonRequestResult
 import com.unicolour.joyspace.dto.ImageInfo
 import com.unicolour.joyspace.model.UserImageFile
 import com.unicolour.joyspace.service.ImageService
@@ -94,6 +95,35 @@ class ImageServiceImpl : ImageService {
                 userImageFileDao.save(userImgFile)
 
                 return ImageInfo(userImgFile.id, imgWid, imgHei, thumbUrl, thumbWid, thumbHei)
+            }
+        }
+    }
+
+    override fun deleteImage(sessionId: String, imageId: Int): CommonRequestResult {
+        val session = userLoginSession.findOne(sessionId);
+
+        if (session == null) {
+            return CommonRequestResult(1, "用户未登录")
+        }
+        else {
+            val imageFile =  userImageFileDao.findOne(imageId);
+            if (imageFile == null) {
+                return CommonRequestResult(2, "图片不存在")
+            }
+            else if (imageFile.userId != session.userId) {
+                return CommonRequestResult(3, "图片不属于当前登录用户")
+            }
+            else {
+                val filePath = "user/${imageFile.userId}/${imageFile.sessionId}/${imageFile.fileName}"
+                val file = File(assetsDir, "${filePath}/.${imageFile.type}")
+                val thumbFile = File(assetsDir, "${filePath}.thumb.jpg")
+
+                file.delete()
+                thumbFile.delete()
+
+                userImageFileDao.delete(imageFile)
+
+                return CommonRequestResult(0, null)
             }
         }
     }
