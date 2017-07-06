@@ -25,10 +25,10 @@ class ImageServiceImpl : ImageService {
     lateinit var userImageFileDao: UserImageFileDao
 
     @Autowired
-    lateinit var userLoginSession: UserLoginSessionDao
+    lateinit var userLoginSessionDao: UserLoginSessionDao
 
     override fun uploadImage(sessionId: String, thumbMaxWidth: Int, thumbMaxHeight: Int, imgFile: MultipartFile?, baseUrl: String): ImageInfo {
-        val session = userLoginSession.findOne(sessionId);
+        val session = userLoginSessionDao.findOne(sessionId);
 
         if (session == null) {
             return ImageInfo(0,0, 0, "", 0, 0, 1, "用户未登录")
@@ -100,7 +100,7 @@ class ImageServiceImpl : ImageService {
     }
 
     override fun deleteImage(sessionId: String, imageId: Int): CommonRequestResult {
-        val session = userLoginSession.findOne(sessionId);
+        val session = userLoginSessionDao.findOne(sessionId);
 
         if (session == null) {
             return CommonRequestResult(1, "用户未登录")
