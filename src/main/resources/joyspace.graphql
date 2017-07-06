@@ -7,6 +7,9 @@ schema {
 type QueryType {
     #根据id查找自助打印机
     printStation(printStationId: Int!): PrintStation
+
+    #查找指定自助机的待打印订单
+    getPrintOrder(printStationId: Int!, updateTimeAfter: Int!): PrintOrder
 }
 
 #增删改操作
@@ -132,4 +135,35 @@ type PrintStation {
     products: [Product!]
 }
 
+#用户上传图片
+type UserImageFile {
+    #类型
+    type: String!
 
+    #宽度(像素)
+    width: Int!
+
+    #高度(像素)
+    height: Int!
+
+    #下载url
+    url: String!
+}
+
+#订单项目
+type PrintOrderItem {
+    #打印份数
+    copies: Int!
+
+    #图片文件
+    imageFiles: [UserImageFile!]
+
+    #产品
+    product: Product!
+}
+
+#订单
+type PrintOrder {
+    id: Int!
+    printOrderItems: [PrintOrderItem!]
+}

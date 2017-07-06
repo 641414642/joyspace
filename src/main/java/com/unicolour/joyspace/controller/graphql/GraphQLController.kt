@@ -3,6 +3,7 @@ package com.unicolour.joyspace.controller.graphql
 import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.unicolour.joyspace.service.GraphQLService
+import com.unicolour.joyspace.util.getBaseUrl
 import graphql.GraphQL
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.*
@@ -42,7 +43,8 @@ class GraphQLController {
             arguments = objectMapper.readValue(variables, typeRef)
         }
 
-        val result = graphQL.execute(query, operationName, null, arguments)
+        val context = hashMapOf<String, Any>( "baseUrl" to getBaseUrl(request))
+        val result = graphQL.execute(query, operationName, context, arguments)
         return result
     }
 
@@ -81,7 +83,8 @@ class GraphQLController {
 
         val arguments: Map<String, Any>? = if (graphQLRequest == null) emptyMap() else graphQLRequest.variables
 
-        val result = graphQL.execute(query, operationName, null, arguments)
+        val context = hashMapOf<String, Any>( "baseUrl" to getBaseUrl(request))
+        val result = graphQL.execute(query, operationName, context, arguments)
 
         return result
     }

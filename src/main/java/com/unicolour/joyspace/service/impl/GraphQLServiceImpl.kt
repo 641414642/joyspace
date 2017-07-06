@@ -1,10 +1,7 @@
 package com.unicolour.joyspace.service.impl
 
 import com.unicolour.joyspace.dto.GraphQLRequestResult
-import com.unicolour.joyspace.service.GraphQLService
-import com.unicolour.joyspace.service.PrintStationService
-import com.unicolour.joyspace.service.ProductService
-import com.unicolour.joyspace.service.UserService
+import com.unicolour.joyspace.service.*
 import graphql.schema.GraphQLSchema
 import graphql.schema.idl.RuntimeWiring
 import graphql.schema.idl.SchemaGenerator
@@ -25,6 +22,12 @@ class GraphQLServiceImpl : GraphQLService {
 
     @Autowired
     lateinit var userService: UserService
+
+    @Autowired
+    lateinit var printOrderService: PrintOrderService
+
+    @Autowired
+    lateinit var imageService: ImageService
 
     @Autowired
     lateinit var appContext: ApplicationContext
@@ -53,6 +56,7 @@ class GraphQLServiceImpl : GraphQLService {
         return RuntimeWiring.newRuntimeWiring()
                 .type("QueryType", { typeWiring ->
                     typeWiring.dataFetcher("printStation", printStationService.getPrintStationDataFetcher())
+                    typeWiring.dataFetcher("getPrintOrder", printOrderService.getPrintOrderDataFetcher())
                 })
                 .type("MutationType", { typeWiring ->
                     typeWiring.dataFetcher("login", userService.getLoginDataFetcher())
@@ -77,6 +81,12 @@ class GraphQLServiceImpl : GraphQLService {
                 })
                 .type("LoginUser", { typeWiring ->
                     typeWiring.dataFetcher("authToken", userService.getAuthTokenDataFetcher())
+                })
+                .type("PrintOrderItem", { typeWiring ->
+                    typeWiring.dataFetcher("imageFiles", printOrderService.getImageFilesDataFetcher())
+                })
+                .type("UserImageFile", { typeWiring ->
+                    typeWiring.dataFetcher("url", imageService.getImageFileUrlDataFetcher())
                 })
                 .build()
     }

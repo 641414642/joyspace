@@ -6,6 +6,7 @@ import com.unicolour.joyspace.dto.CommonRequestResult
 import com.unicolour.joyspace.dto.ImageInfo
 import com.unicolour.joyspace.model.UserImageFile
 import com.unicolour.joyspace.service.ImageService
+import graphql.schema.DataFetcher
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
@@ -15,6 +16,7 @@ import java.io.File
 import java.io.InputStreamReader
 import java.util.*
 import java.util.regex.Pattern
+import kotlin.collections.HashMap
 
 @Service
 class ImageServiceImpl : ImageService {
@@ -72,7 +74,10 @@ class ImageServiceImpl : ImageService {
 
                 matcher.find()
 
-                val imgType = matcher.group(1).toLowerCase()
+                var imgType = matcher.group(1).toLowerCase()
+                if (imgType == "jpeg") {
+                    imgType = "jpg"
+                }
                 val imgWid = matcher.group(2).toInt()
                 val imgHei = matcher.group(3).toInt()
                 val thumbWid = matcher.group(4).toInt()
@@ -125,6 +130,15 @@ class ImageServiceImpl : ImageService {
 
                 return CommonRequestResult(0, null)
             }
+        }
+    }
+
+    override fun getImageFileUrlDataFetcher(): DataFetcher<String> {
+        return DataFetcher { env ->
+            val imageFile = env.getSource<UserImageFile>()
+            val context = env.getContext<HashMap<String, Any>>()
+            val baseUrl = context["baseUrl"]
+            "${baseUrl}/assets/user/${imageFile.userId}/${imageFile.sessionId}/${imageFile.fileName}.${imageFile.type}"
         }
     }
 }

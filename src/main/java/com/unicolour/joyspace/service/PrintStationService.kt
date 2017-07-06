@@ -1,7 +1,6 @@
 package com.unicolour.joyspace.service
 
 import com.unicolour.joyspace.model.PrintStation
-import com.unicolour.joyspace.model.Product
 import graphql.schema.DataFetcher
 
 interface PrintStationService {

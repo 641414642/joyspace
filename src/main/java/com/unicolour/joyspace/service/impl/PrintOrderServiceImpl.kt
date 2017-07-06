@@ -10,7 +10,9 @@ import com.unicolour.joyspace.dto.OrderInput
 import com.unicolour.joyspace.model.PrintOrder
 import com.unicolour.joyspace.model.PrintOrderItem
 import com.unicolour.joyspace.model.PrintOrderState
+import com.unicolour.joyspace.model.UserImageFile
 import com.unicolour.joyspace.service.PrintOrderService
+import graphql.schema.DataFetcher
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import java.util.*
@@ -50,6 +52,7 @@ open class PrintOrderServiceImpl : PrintOrderService {
         val order = PrintOrder()
         order.companyId = printStation.companyId
         order.createTime = Calendar.getInstance()
+        order.updateTime = order.createTime
         order.printStationId = orderInput.printStationId
         order.userId = session.userId
         order.state = PrintOrderState.CREATED.value
@@ -67,5 +70,22 @@ open class PrintOrderServiceImpl : PrintOrderService {
         }
 
         return CommonRequestResult()
+    }
+
+    override fun getImageFilesDataFetcher(): DataFetcher<Array<UserImageFile>> {
+        return DataFetcher { env ->
+            val printOrderItem = env.getSource<PrintOrderItem>()
+            arrayOf(printOrderItem.userImageFile)
+        }
+    }
+
+    override fun getPrintOrderDataFetcher(): DataFetcher<PrintOrder> {
+        return DataFetcher { env ->
+            val printStationId = env.getArgument<Int>("printStationId")
+            val updateTimeAfter = Calendar.getInstance()
+            updateTimeAfter.timeInMillis = env.getArgument<Int>("updateTimeAfter").toLong()
+
+            printOrderDao.findFirstByPrintStationIdAndUpdateTimeAfter(printStationId, updateTimeAfter)
+        }
     }
 }

@@ -30,6 +30,10 @@ class PrintOrder {
     @Column
     lateinit var createTime: Calendar
 
+    @NotNull
+    @Column
+    lateinit var updateTime: Calendar
+
     @Column
     var state: Byte = PrintOrderState.CREATED.value
 
@@ -67,10 +71,15 @@ class PrintOrderItem {
     lateinit var userImageFile: UserImageFile
     //endregion
 
-    //产品id
-    @Column
-    @NotNull
+    //region 产品
+    @Column(name = "product_id", insertable = false, updatable = false)
     var productId: Int = 0
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "product_id")
+    @NotNull
+    lateinit var product: Product
+    //endregion
 
     //打印份数
     @Column
