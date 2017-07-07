@@ -9,7 +9,7 @@ type QueryType {
     printStation(printStationId: Int!): PrintStation
 
     #查找指定自助机的待打印订单
-    getPrintOrder(printStationId: Int!, updateTimeAfter: Int!): PrintOrder
+    getPrintOrder(printStationId: Int!, idAfter: Int!): PrintOrder
 }
 
 #增删改操作
@@ -139,6 +139,9 @@ type PrintStation {
 type UserImageFile {
     #类型
     type: String!
+
+    #文件名
+    fileName: String!
 
     #宽度(像素)
     width: Int!

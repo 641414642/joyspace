@@ -82,10 +82,9 @@ open class PrintOrderServiceImpl : PrintOrderService {
     override fun getPrintOrderDataFetcher(): DataFetcher<PrintOrder> {
         return DataFetcher { env ->
             val printStationId = env.getArgument<Int>("printStationId")
-            val updateTimeAfter = Calendar.getInstance()
-            updateTimeAfter.timeInMillis = env.getArgument<Int>("updateTimeAfter").toLong()
+            val idAfter = env.getArgument<Int>("idAfter")
 
-            printOrderDao.findFirstByPrintStationIdAndUpdateTimeAfter(printStationId, updateTimeAfter)
+            printOrderDao.findFirstByPrintStationIdAndIdAfter(printStationId, idAfter)
         }
     }
 }
