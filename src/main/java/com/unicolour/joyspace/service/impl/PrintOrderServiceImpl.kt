@@ -1,10 +1,6 @@
 package com.unicolour.joyspace.service.impl
 
-import com.unicolour.joyspace.dao.PrintOrderDao
-import com.unicolour.joyspace.dao.PrintOrderItemDao
-import com.unicolour.joyspace.dao.PrintStationDao
-import com.unicolour.joyspace.dao.UserImageFileDao
-import com.unicolour.joyspace.dao.UserLoginSessionDao
+import com.unicolour.joyspace.dao.*
 import com.unicolour.joyspace.dto.CommonRequestResult
 import com.unicolour.joyspace.dto.OrderInput
 import com.unicolour.joyspace.model.PrintOrder
@@ -35,6 +31,9 @@ open class PrintOrderServiceImpl : PrintOrderService {
     @Autowired
     lateinit var userImageFileDao: UserImageFileDao
 
+    @Autowired
+    lateinit var productDao: ProductDao
+
     @Transactional
     override fun createOrder(orderInput: OrderInput): CommonRequestResult {
         val session = userLoginSessionDao.findOne(orderInput.sessionId)
@@ -63,7 +62,7 @@ open class PrintOrderServiceImpl : PrintOrderService {
             val newOrderItem = PrintOrderItem()
             newOrderItem.copies = orderItem.copies
             newOrderItem.printOrder = order
-            newOrderItem.productId = orderItem.productId
+            newOrderItem.product = productDao.findOne(orderItem.productId)
             newOrderItem.userImageFile = userImageFileDao.findOne(orderItem.imageFileId)
 
             printOrderItemDao.save(newOrderItem)
