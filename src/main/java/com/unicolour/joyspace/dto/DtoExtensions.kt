@@ -32,6 +32,7 @@ fun PrintStation.printStationToDTO(): PrintStationDTO {
 fun PrintStation.printStationToDetailDTO(productsOfPrintStation: List<ProductDTO>): PrintStationDetailDTO {
     val ps = PrintStationDetailDTO()
 
+    ps.id = this.id
     ps.sn = this.sn
     ps.address = this.position.address
     ps.wxQrCode = this.wxQrCode
