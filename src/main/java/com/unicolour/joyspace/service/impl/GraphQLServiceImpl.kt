@@ -1,6 +1,7 @@
 package com.unicolour.joyspace.service.impl
 
 import com.unicolour.joyspace.dto.GraphQLRequestResult
+import com.unicolour.joyspace.model.PrintOrderState
 import com.unicolour.joyspace.service.*
 import graphql.schema.GraphQLSchema
 import graphql.schema.idl.RuntimeWiring
@@ -62,6 +63,8 @@ class GraphQLServiceImpl : GraphQLService {
                     typeWiring.dataFetcher("login", userService.getLoginDataFetcher())
                     typeWiring.dataFetcher("sendRegVerifyCode", userService.getSendRegVerifyCodeDataFetcher())
                     typeWiring.dataFetcher("userRegister", userService.getUserRegisterDataFetcher())
+                    typeWiring.dataFetcher("printOrderDownloaded", printOrderService.getUpdateOrderStateDataFetcher(PrintOrderState.DOWNLOADED))
+                    typeWiring.dataFetcher("printOrderPrinted", printOrderService.getUpdateOrderStateDataFetcher(PrintOrderState.PRINTED))
                 })
                 .type("RequestResult", { typeWiring ->
                     typeWiring.dataFetcher("description", { environment ->

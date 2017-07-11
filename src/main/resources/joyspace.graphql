@@ -22,6 +22,12 @@ type MutationType {
 
     #用户注册
     userRegister(userName: String!, password: String!, phoneNumber: String!, verifyCode: String!, email: String) : RequestResult!
+
+    #更新订单状态为已下载
+    printOrderDownloaded(printStationId: Int!, printOrderId: Int!) : RequestResult!
+
+    #更新订单状态为已打印
+    printOrderPrinted(printStationId: Int!, printOrderId: Int!) : RequestResult!
 }
 
 #请求的结果的通用类型
@@ -169,4 +175,5 @@ type PrintOrderItem {
 type PrintOrder {
     id: Int!
     printOrderItems: [PrintOrderItem!]
+    state: Int!
 }

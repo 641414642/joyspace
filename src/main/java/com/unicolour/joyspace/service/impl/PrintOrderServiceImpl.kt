@@ -30,6 +30,9 @@ open class PrintOrderServiceImpl : PrintOrderService {
     lateinit var printOrderDao: PrintOrderDao
 
     @Autowired
+    lateinit var userDao: UserDao
+
+    @Autowired
     lateinit var printOrderItemDao: PrintOrderItemDao
 
     @Autowired
@@ -40,6 +43,12 @@ open class PrintOrderServiceImpl : PrintOrderService {
 
     @Autowired
     lateinit var secureRandom: SecureRandom
+
+    @Value("\${com.unicolour.wxAppId}")
+    lateinit var wxAppId: String
+
+    @Value("\${com.unicolour.wxMchId}")  //商户号
+    lateinit var wxMchId: String
 
     @Transactional
     override fun createOrder(orderInput: OrderInput): CommonRequestResult {
@@ -103,6 +112,54 @@ open class PrintOrderServiceImpl : PrintOrderService {
             val idAfter = env.getArgument<Int>("idAfter")
 
             printOrderDao.findFirstByPrintStationIdAndIdAfter(printStationId, idAfter)
+        }
+    }
+
+    override fun startPayment(orderId: Int) {
+        val order = printOrderDao.findOne(orderId)
+        val user = userDao.findOne(order.userId)
+
+        var nonceStr = BigInteger(32 * 8, secureRandom).toString(36).toUpperCase()
+        if (nonceStr.length > 32) {
+            nonceStr = nonceStr.substring(0, 32)
+        }
+        val notifyUrl = "https://joyspace.uni-colour.com/wxpay/notify"
+        val ipAddress = java.net.InetAddress.getByName("joyspace.uni-colour.com")
+
+        val totalFee = 1   //XXX
+        val sign = ""
+
+        val requestParams =
+                "<xml>" +
+                "   <appid>$wxAppId</appid>" +
+                "   <attach>支付测试</attach>" +
+                "   <body>优利绚彩-照片打印</body>" +
+                "   <mch_id>$wxMchId</mch_id>" +
+                "   <nonce_str>$nonceStr</nonce_str>" +
+                "   <notify_url>$notifyUrl</notify_url>" +
+                "   <openid>${user.wxOpenId}</openid>" +
+                "   <out_trade_no>${order.orderNo}</out_trade_no>" +
+                "   <spbill_create_ip>${ipAddress.hostAddress}</spbill_create_ip>" +
+                "   <total_fee>$totalFee</total_fee>" +
+                "   <trade_type>JSAPI</trade_type>" +
+                "   <sign>$sign</sign>" +
+                "</xml>"
+    }
+
+    override fun getUpdateOrderStateDataFetcher(state: PrintOrderState): DataFetcher<CommonRequestResult> {
+        return DataFetcher { env ->
+            val printStationId = env.getArgument<Int>("printStationId")
+            val printOrderId = env.getArgument<Int>("printOrderId")
+
+            val order = printOrderDao.findOne(printOrderId)
+            if (order != null) {
+                order.state = state.value
+                printOrderDao.save(order)
+                CommonRequestResult()
+            }
+            else {
+                CommonRequestResult(1, "PrintOrder not found")
+            }
         }
     }
 }

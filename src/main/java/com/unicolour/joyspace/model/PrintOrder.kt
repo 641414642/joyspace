@@ -96,5 +96,6 @@ class PrintOrderItem {
 enum class PrintOrderState(val value: Byte) {
     CREATED(0),  //刚创建时的状态
     PAYED(1),    //用户已支付
-    PRINTED(2)   //已打印
+    DOWNLOADED(2), //已下载到自助机
+    PRINTED(3),   //已打印
 }
