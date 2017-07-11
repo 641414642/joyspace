@@ -10,7 +10,11 @@ import com.unicolour.joyspace.model.UserImageFile
 import com.unicolour.joyspace.service.PrintOrderService
 import graphql.schema.DataFetcher
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
+import java.math.BigInteger
+import java.security.SecureRandom
+import java.text.SimpleDateFormat
 import java.util.*
 import javax.transaction.Transactional
 
@@ -34,6 +38,9 @@ open class PrintOrderServiceImpl : PrintOrderService {
     @Autowired
     lateinit var productDao: ProductDao
 
+    @Autowired
+    lateinit var secureRandom: SecureRandom
+
     @Transactional
     override fun createOrder(orderInput: OrderInput): CommonRequestResult {
         val session = userLoginSessionDao.findOne(orderInput.sessionId)
@@ -49,6 +56,7 @@ open class PrintOrderServiceImpl : PrintOrderService {
         }
 
         val order = PrintOrder()
+        order.orderNo = createOrderNo()
         order.companyId = printStation.companyId
         order.createTime = Calendar.getInstance()
         order.updateTime = order.createTime
@@ -69,6 +77,17 @@ open class PrintOrderServiceImpl : PrintOrderService {
         }
 
         return CommonRequestResult()
+    }
+
+    private fun createOrderNo(): String {
+        val dateTime = SimpleDateFormat("yyyyMMdd").format(Date())
+        val randomStr = BigInteger(4 * 8, secureRandom).toString(36).toUpperCase()
+        var orderNo:String
+        do {
+            orderNo = "$dateTime-$randomStr"
+        } while (printOrderDao.existsByOrderNo(orderNo))
+
+        return orderNo
     }
 
     override fun getImageFilesDataFetcher(): DataFetcher<Array<UserImageFile>> {

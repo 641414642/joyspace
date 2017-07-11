@@ -6,4 +6,5 @@ import java.util.*
 
 interface PrintOrderDao : CrudRepository<PrintOrder, Int> {
     fun findFirstByPrintStationIdAndIdAfter(printStationId: Int, idAfter: Int): PrintOrder
+    fun existsByOrderNo(orderNo: String) : Boolean
 }
