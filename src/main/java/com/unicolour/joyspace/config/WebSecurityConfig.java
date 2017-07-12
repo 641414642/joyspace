@@ -34,6 +34,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 				"/fonts/**",
 				"/api/**",
 				"/graphql",
+				"/wxpay/notify",
 		};
         http
         	.csrf().disable()

@@ -13,7 +13,8 @@ import graphql.schema.DataFetcher
 interface PrintOrderService {
     fun createOrder(orderInput: OrderInput): PrintOrder
     fun getImageFilesDataFetcher(): DataFetcher<Array<UserImageFile>>
-    fun getPrintOrderDataFetcher(): DataFetcher<PrintOrder>
+    fun getPrintOrderDataFetcher(): DataFetcher<PrintOrder?>
     fun startPayment(orderId: Int): WxPayParams
     fun getUpdateOrderStateDataFetcher(state: PrintOrderState): DataFetcher<GraphQLRequestResult>
+    fun processWxPayNotify(requestBodyStr: String): String?
 }

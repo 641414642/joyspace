@@ -7,8 +7,12 @@ import com.unicolour.joyspace.exception.ProcessException
 import com.unicolour.joyspace.service.PrintOrderService
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
+import java.io.InputStreamReader
+import java.nio.charset.StandardCharsets
+import javax.servlet.http.HttpServletRequest
 
 
 @RestController
@@ -36,6 +40,23 @@ class ApiPrintOrderController {
         } catch(e: ProcessException) {
             e.printStackTrace()
             return ResponseEntity.ok(CreateOrderRequestResult(e.errcode, e.message))
+        }
+    }
+
+    @RequestMapping("/wxpay/notify",
+            method = arrayOf(RequestMethod.POST),
+            produces = arrayOf(MediaType.APPLICATION_XML_VALUE))
+    fun wxPayNotify(request: HttpServletRequest) : ResponseEntity<String> {
+        InputStreamReader(request.inputStream, StandardCharsets.UTF_8).use {
+            reader ->
+                val errmsg = printOrderService.processWxPayNotify(reader.readText())
+                val retCode = if (errmsg == null) "SUCCESS" else "FAIL"
+                val retMsg =  if (errmsg == null) "OK" else errmsg
+
+                return ResponseEntity.ok("<xml>" +
+                    "<return_code><![CDATA[$retCode]]></return_code>" +
+                    "<return_msg><![CDATA[$retMsg]]></return_msg>" +
+                    "</xml>")
         }
     }
 }

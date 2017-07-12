@@ -1,12 +1,7 @@
 package com.unicolour.joyspace.service.impl
 
 import com.unicolour.joyspace.dao.*
-import com.unicolour.joyspace.dto.CommonRequestResult
-import com.unicolour.joyspace.dto.GraphQLRequestResult
-import com.unicolour.joyspace.dto.OrderInput
-import com.unicolour.joyspace.dto.ResultCode
-import com.unicolour.joyspace.dto.WxPayParams
-import com.unicolour.joyspace.dto.WxUnifyOrderResult
+import com.unicolour.joyspace.dto.*
 import com.unicolour.joyspace.exception.ProcessException
 import com.unicolour.joyspace.model.PrintOrder
 import com.unicolour.joyspace.model.PrintOrderItem
@@ -20,7 +15,6 @@ import org.springframework.core.io.Resource
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
-import org.springframework.http.MediaType
 import org.springframework.stereotype.Service
 import org.springframework.web.client.RestTemplate
 import java.math.BigInteger
@@ -32,6 +26,7 @@ import java.util.*
 import javax.transaction.Transactional
 import kotlin.experimental.and
 import java.io.InputStreamReader
+import java.io.StringReader
 import javax.annotation.PostConstruct
 import javax.xml.bind.JAXBContext
 import javax.xml.bind.Unmarshaller
@@ -76,11 +71,12 @@ open class PrintOrderServiceImpl : PrintOrderService {
     lateinit var wxPayKey: String
 
     private lateinit var wxUnifyOrderResultUnmarshaller: Unmarshaller
+    private lateinit var wxPayNotifyUnmarshaller: Unmarshaller
 
     @PostConstruct
     fun initialize() {
-        val jaxbContext = JAXBContext.newInstance(WxUnifyOrderResult::class.java)
-        wxUnifyOrderResultUnmarshaller = jaxbContext.createUnmarshaller()
+        wxUnifyOrderResultUnmarshaller = JAXBContext.newInstance(WxUnifyOrderResult::class.java).createUnmarshaller()
+        wxPayNotifyUnmarshaller = JAXBContext.newInstance(WxPayNotify::class.java).createUnmarshaller()
     }
 
     @Transactional
@@ -139,7 +135,7 @@ open class PrintOrderServiceImpl : PrintOrderService {
         }
     }
 
-    override fun getPrintOrderDataFetcher(): DataFetcher<PrintOrder> {
+    override fun getPrintOrderDataFetcher(): DataFetcher<PrintOrder?> {
         return DataFetcher { env ->
             val printStationId = env.getArgument<Int>("printStationId")
             val idAfter = env.getArgument<Int>("idAfter")
@@ -180,7 +176,6 @@ open class PrintOrderServiceImpl : PrintOrderService {
         val totalFee:String = "1"   //XXX
         val requestBody = getPaymentRequestParams(TreeMap(hashMapOf<String, String>(
                 "appid" to wxAppId,
-                "attach" to "支付测试",
                 "body" to "优利绚彩-照片打印",
                 "mch_id" to wxMchId,
                 "nonce_str" to nonceStr,
@@ -234,6 +229,37 @@ open class PrintOrderServiceImpl : PrintOrderService {
                 pkg = "prepay_id=${res.prepay_id}",
                 paySign = sign
         )
+    }
+
+    @Transactional
+    override fun processWxPayNotify(requestBodyStr: String): String? {
+        //XXX 记录到文件中
+        //XXX 签名检查
+        val result = wxPayNotifyUnmarshaller.unmarshal(StringReader(requestBodyStr)) as WxPayNotify
+
+        if (result.appid != wxAppId) {
+            return "错误的AppId"
+        }
+        else if (result.mch_id != wxMchId) {
+            return "错误的商户号"
+        }
+        else if (result.out_trade_no == null) {
+            return "订单号为空"
+        }
+        else {
+            val printOrder = printOrderDao.findByOrderNo(result.out_trade_no!!)
+            if (printOrder == null) {
+                return "没有找到订单"
+            }
+            else {
+                //XXX 检查金额
+
+                printOrder.state = PrintOrderState.PAYED.value
+                printOrderDao.save(printOrder)
+
+                return null
+            }
+        }
     }
 
     private fun getPaymentRequestParams(varMap: TreeMap<String, String>): String {
