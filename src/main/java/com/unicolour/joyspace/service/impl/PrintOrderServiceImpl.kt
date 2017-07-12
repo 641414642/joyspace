@@ -2,7 +2,9 @@ package com.unicolour.joyspace.service.impl
 
 import com.unicolour.joyspace.dao.*
 import com.unicolour.joyspace.dto.CommonRequestResult
+import com.unicolour.joyspace.dto.GraphQLRequestResult
 import com.unicolour.joyspace.dto.OrderInput
+import com.unicolour.joyspace.dto.ResultCode
 import com.unicolour.joyspace.model.PrintOrder
 import com.unicolour.joyspace.model.PrintOrderItem
 import com.unicolour.joyspace.model.PrintOrderState
@@ -146,7 +148,7 @@ open class PrintOrderServiceImpl : PrintOrderService {
                 "</xml>"
     }
 
-    override fun getUpdateOrderStateDataFetcher(state: PrintOrderState): DataFetcher<CommonRequestResult> {
+    override fun getUpdateOrderStateDataFetcher(state: PrintOrderState): DataFetcher<GraphQLRequestResult> {
         return DataFetcher { env ->
             val printStationId = env.getArgument<Int>("printStationId")
             val printOrderId = env.getArgument<Int>("printOrderId")
@@ -155,10 +157,10 @@ open class PrintOrderServiceImpl : PrintOrderService {
             if (order != null) {
                 order.state = state.value
                 printOrderDao.save(order)
-                CommonRequestResult()
+                GraphQLRequestResult(ResultCode.SUCCESS)
             }
             else {
-                CommonRequestResult(1, "PrintOrder not found")
+                GraphQLRequestResult(ResultCode.PRINTER_ORDER_NOT_FOUND)
             }
         }
     }

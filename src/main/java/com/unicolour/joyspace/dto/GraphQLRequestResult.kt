@@ -17,5 +17,6 @@ enum class ResultCode(val value:Int, val desc:String, val descEn: String) {
     INVALID_VERIFY_CODE(3, "无效或过期的验证码", "Invalid verify code"),
     RETRY_LATER(4, "请求太频繁(请等待60秒以后再试)", "Retry later"),
     SEND_VERIFY_CODE_FAILED(5, "发送验证码失败", "Send verify code failed"),
-    SERVER_ERROR(100, "服务器错误", "Server error")
+    PRINTER_ORDER_NOT_FOUND(6, "没有找到指定的订单", "Print order not found"),
+    SERVER_ERROR(100, "服务器错误", "Server error"),
 }

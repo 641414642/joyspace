@@ -1,6 +1,7 @@
 package com.unicolour.joyspace.service
 
 import com.unicolour.joyspace.dto.CommonRequestResult
+import com.unicolour.joyspace.dto.GraphQLRequestResult
 import com.unicolour.joyspace.dto.OrderInput
 import com.unicolour.joyspace.model.PrintOrder
 import com.unicolour.joyspace.model.PrintOrderState
@@ -12,5 +13,5 @@ interface PrintOrderService {
     fun getImageFilesDataFetcher(): DataFetcher<Array<UserImageFile>>
     fun getPrintOrderDataFetcher(): DataFetcher<PrintOrder>
     fun startPayment(orderId: Int)
-    fun getUpdateOrderStateDataFetcher(state: PrintOrderState): DataFetcher<CommonRequestResult>
+    fun getUpdateOrderStateDataFetcher(state: PrintOrderState): DataFetcher<GraphQLRequestResult>
 }
