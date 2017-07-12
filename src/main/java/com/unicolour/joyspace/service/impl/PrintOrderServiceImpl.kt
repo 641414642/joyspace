@@ -8,6 +8,7 @@ import com.unicolour.joyspace.model.PrintOrderItem
 import com.unicolour.joyspace.model.PrintOrderState
 import com.unicolour.joyspace.model.UserImageFile
 import com.unicolour.joyspace.service.PrintOrderService
+import com.unicolour.joyspace.service.PrintStationService
 import graphql.schema.DataFetcher
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
@@ -36,6 +37,9 @@ import javax.xml.bind.Unmarshaller
 open class PrintOrderServiceImpl : PrintOrderService {
     @Autowired
     lateinit var printStationDao: PrintStationDao
+
+    @Autowired
+    lateinit var printStationService: PrintStationService
 
     @Autowired
     lateinit var userLoginSessionDao: UserLoginSessionDao
@@ -163,6 +167,9 @@ open class PrintOrderServiceImpl : PrintOrderService {
 
     override fun startPayment(orderId: Int): WxPayParams {
         val order = printOrderDao.findOne(orderId)
+        val printStation = printStationDao.findOne(order.printStationId)
+        val priceMap = printStationService.getPriceMap(printStation)
+
         val user = userDao.findOne(order.userId)
         val openId: String = user?.wxOpenId ?: ""
 
@@ -173,7 +180,12 @@ open class PrintOrderServiceImpl : PrintOrderService {
         val notifyUrl: String = "https://joyspace.uni-colour.com/wxpay/notify"
         val ipAddress: String = java.net.InetAddress.getByName("joyspace.uni-colour.com").hostAddress
 
-        val totalFee:String = "1"   //XXX
+        var totalFee:Int = 0
+        for (printOrderItem in order.printOrderItems) {
+            val orderItemFee = priceMap.getOrDefault(printOrderItem.productId, 0)   //XXX
+            totalFee += orderItemFee * printOrderItem.copies
+        }
+
         val requestBody = getPaymentRequestParams(TreeMap(hashMapOf<String, String>(
                 "appid" to wxAppId,
                 "body" to "优利绚彩-照片打印",
@@ -183,7 +195,7 @@ open class PrintOrderServiceImpl : PrintOrderService {
                 "openid" to openId,
                 "out_trade_no" to order.orderNo,
                 "spbill_create_ip" to ipAddress,
-                "total_fee" to totalFee,
+                "total_fee" to totalFee.toString(),
                 "trade_type" to "JSAPI"
         )))
 
