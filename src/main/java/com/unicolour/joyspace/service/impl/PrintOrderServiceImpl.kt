@@ -193,7 +193,8 @@ open class PrintOrderServiceImpl : PrintOrderService {
         )))
 
         val headers = HttpHeaders();
-        headers.setContentType(MediaType.TEXT_XML);
+        headers.set(HttpHeaders.CONTENT_TYPE, "text/xml;charset=UTF-8");
+
         val request = HttpEntity<String>(requestBody, headers)
         val response = restTemplate.exchange(
                 "https://api.mch.weixin.qq.com/pay/unifiedorder",
@@ -250,7 +251,7 @@ open class PrintOrderServiceImpl : PrintOrderService {
         sj.add("key=$wxPayKey")
 
         val md5Digist = MessageDigest.getInstance("MD5")
-        val sign = bytesToHexString(md5Digist.digest(sj.toString().toByteArray(StandardCharsets.US_ASCII)))
+        val sign = bytesToHexString(md5Digist.digest(sj.toString().toByteArray(StandardCharsets.UTF_8)))
 
         sb.append("<sign>$sign</sign>")
         sb.append("</xml>")
