@@ -180,9 +180,10 @@ open class PrintOrderServiceImpl : PrintOrderService {
         val notifyUrl: String = "https://joyspace.uni-colour.com/wxpay/notify"
         val ipAddress: String = java.net.InetAddress.getByName("joyspace.uni-colour.com").hostAddress
 
+        val orderItems = printOrderItemDao.findByPrintOrderId(order.id)
         var totalFee:Int = 0
-        for (printOrderItem in order.printOrderItems) {
-            val orderItemFee = priceMap.getOrDefault(printOrderItem.productId, 0)   //XXX
+        for (printOrderItem in orderItems) {
+            val orderItemFee = priceMap.getOrDefault(printOrderItem.product.id, 0)   //XXX
             totalFee += orderItemFee * printOrderItem.copies
         }
 

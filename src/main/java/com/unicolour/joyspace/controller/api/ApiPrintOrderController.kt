@@ -26,20 +26,14 @@ class ApiPrintOrderController {
     fun uploadImage(@RequestBody orderInput: OrderInput) : ResponseEntity<CreateOrderRequestResult> {
         try {
             val order = printOrderService.createOrder(orderInput)
-            try {
-                val params = printOrderService.startPayment(order.id)
-                logger.info(params.toString())
-                logger.error(params.toString())
-
-                return ResponseEntity.ok(CreateOrderRequestResult(params))
-            }
-            catch (ex: Exception) {
-                ex.printStackTrace()
-                return ResponseEntity.ok(CreateOrderRequestResult(null, 0, null))
-            }
+            val params = printOrderService.startPayment(order.id)
+            return ResponseEntity.ok(CreateOrderRequestResult(params))
         } catch(e: ProcessException) {
             e.printStackTrace()
             return ResponseEntity.ok(CreateOrderRequestResult(e.errcode, e.message))
+        }  catch (ex: Exception) {
+            ex.printStackTrace()
+            return ResponseEntity.ok(CreateOrderRequestResult(1, ex.message))
         }
     }
 
