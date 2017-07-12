@@ -194,6 +194,7 @@ open class UserServiceImpl : UserService {
                 if (user == null) {
                     user = User()
                     user.userName = body.openid
+                    user.wxOpenId = body.openid
                     user.password = passwordEncoder.encode(body.openid)
                     user.phone = null
                     user.email = null
