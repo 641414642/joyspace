@@ -144,7 +144,7 @@ open class PrintOrderServiceImpl : PrintOrderService {
             val printStationId = env.getArgument<Int>("printStationId")
             val idAfter = env.getArgument<Int>("idAfter")
 
-            printOrderDao.findFirstByPrintStationIdAndIdAfter(printStationId, idAfter)
+            printOrderDao.findFirstByPrintStationIdAndStateAndIdAfter(printStationId, PrintOrderState.PAYED.value, idAfter)
         }
     }
 
