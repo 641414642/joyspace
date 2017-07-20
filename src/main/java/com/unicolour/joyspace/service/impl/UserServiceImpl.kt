@@ -4,8 +4,10 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.unicolour.joyspace.dao.UserDao
 import com.unicolour.joyspace.dao.UserLoginSessionDao
+import com.unicolour.joyspace.dao.VerifyCodeDao
 import com.unicolour.joyspace.dto.*
 import com.unicolour.joyspace.model.*
+import com.unicolour.joyspace.service.SmsService
 import com.unicolour.joyspace.service.UserService
 import graphql.schema.DataFetcher
 import org.springframework.beans.factory.annotation.Autowired
@@ -15,6 +17,9 @@ import org.springframework.http.HttpStatus
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import org.springframework.web.client.RestTemplate
+import java.security.SecureRandom
+import java.time.Duration
+import java.time.Instant
 import java.util.*
 import javax.transaction.Transactional
 
@@ -34,10 +39,19 @@ open class UserServiceImpl : UserService {
     lateinit var userLoginSessionDao: UserLoginSessionDao
 
     @Autowired
+    lateinit var verifyCodeDao: VerifyCodeDao
+
+    @Autowired
     lateinit var restTemplate: RestTemplate
 
     @Autowired
     lateinit var objectMapper: ObjectMapper
+
+    @Autowired
+    lateinit var smsService: SmsService
+
+    @Autowired
+    lateinit var secureRandom: SecureRandom
 
     //登录
     override fun getLoginDataFetcher(): DataFetcher<AppUserLoginResult> {
@@ -58,17 +72,44 @@ open class UserServiceImpl : UserService {
     }
 
     private fun sendVerifyCode(phoneNumber: String): GraphQLRequestResult {
+        val now = Instant.now()
+        var verifyCode = verifyCodeDao.findOne(phoneNumber)
+        if (verifyCode != null) {
+            val interval = Duration.between(verifyCode.sendTime.toInstant(), now);
+            if (interval.seconds < 60) {
+                return GraphQLRequestResult(ResultCode.RETRY_LATER)
+            }
+            else {
+                verifyCode.code = String.format("%06d", secureRandom.nextInt(1000000))
+                verifyCode.sendTime = Calendar.getInstance()
+                verifyCodeDao.save(verifyCode)
+
+                smsService.send(phoneNumber,
+                        "【优利绚彩】帐号绑定验证码为:${verifyCode.code},请勿向任何人提供您收到短信验证码。")
+            }
+        }
+        else {
+            val user = userDao.findByPhone(phoneNumber)
+            if (user != null) {
+                return GraphQLRequestResult(ResultCode.PHONE_NUMBER_ALREADY_REGISTERED)
+            }
+            else {
+                verifyCode = VerifyCode()
+                verifyCode.phoneNumber = phoneNumber
+                verifyCode.code = String.format("%06d", secureRandom.nextInt(1000000))
+                verifyCode.sendTime = Calendar.getInstance()
+
+                verifyCodeDao.save(verifyCode)
+
+                smsService.send(phoneNumber,
+                        "【优利绚彩】帐号绑定验证码为:${verifyCode.code},请勿向任何人提供您收到短信验证码。")
+            }
+        }
         //XXX
         return GraphQLRequestResult(ResultCode.SUCCESS)
 
 //        #发送失败
 //        FAILED
-//
-//        #请求太频繁(请等待60秒以后再试)
-//        RETRY_LATER
-//
-//        #手机号码已经注册过
-//        PHONE_NUMBER_ALREADY_REGISTERED
 //
 //        #服务器错误
 //        SERVER_ERROR
@@ -91,7 +132,11 @@ open class UserServiceImpl : UserService {
     //用户注册
     private fun userRegister(userName: String, password: String,
                              phoneNumber: String, verifyCode: String, email: String?): GraphQLRequestResult {
-        if (verifyCode != "123456") {
+        val now = Instant.now()
+        val verifyCodeObj = verifyCodeDao.findOne(phoneNumber)
+        if (verifyCodeObj == null ||
+                verifyCodeObj.code != verifyCode ||
+                Duration.between(verifyCodeObj.sendTime.toInstant(), now).seconds > 60 * 10) {  //超过10分钟
             return GraphQLRequestResult(ResultCode.INVALID_VERIFY_CODE)
         }
         else {
@@ -115,22 +160,11 @@ open class UserServiceImpl : UserService {
             user.createTime = Calendar.getInstance()
 
             userDao.save(user)
+            verifyCodeDao.delete(verifyCodeObj)
 
             return GraphQLRequestResult(ResultCode.SUCCESS)
         }
 //XXX
-//        #注册成功
-//        SUCCEED
-//
-//        #手机号码已经注册过
-//        PHONE_NUMBER_ALREADY_REGISTERED
-//
-//        #用户名已经注册过
-//        USER_NAME_ALREADY_REGISTERED
-//
-//        #无效或过期的验证码
-//        INVALID_VERIFY_CODE
-//
 //        #服务器错误
 //        SERVER_ERROR
     }
