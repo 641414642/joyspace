@@ -19,7 +19,7 @@ class ApiImageController {
     @Autowired
     lateinit var imageService: ImageService
 
-    @RequestMapping("/api/image", method = arrayOf(RequestMethod.POST))
+    @RequestMapping(path = arrayOf("/api/image", "/app/image"), method = arrayOf(RequestMethod.POST))
     fun uploadImage(request: HttpServletRequest,
                     @RequestParam("sessionId") sessionId: String,
                     @RequestParam("thumbMaxWidth") thumbMaxWidth: Int,
@@ -30,7 +30,7 @@ class ApiImageController {
         return ResponseEntity.ok(imgInfo)
     }
 
-    @RequestMapping("/api/image", method = arrayOf(RequestMethod.DELETE))
+    @RequestMapping(path = arrayOf("/api/image", "app/image"), method = arrayOf(RequestMethod.DELETE))
     fun deleteImage(@RequestParam("sessionId") sessionId: String,
                     @RequestParam("imageId") imageId: Int) : ResponseEntity<CommonRequestResult> {
         val result = imageService.deleteImage(sessionId, imageId)

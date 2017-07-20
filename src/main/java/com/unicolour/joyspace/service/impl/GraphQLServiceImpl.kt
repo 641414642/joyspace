@@ -82,9 +82,6 @@ class GraphQLServiceImpl : GraphQLService {
                 .type("Product", { typeWiring ->
                     typeWiring.dataFetcher("type", productService.getDataFetcher("type"))
                 })
-                .type("LoginUser", { typeWiring ->
-                    typeWiring.dataFetcher("authToken", userService.getAuthTokenDataFetcher())
-                })
                 .type("PrintOrderItem", { typeWiring ->
                     typeWiring.dataFetcher("imageFiles", printOrderService.getImageFilesDataFetcher())
                 })

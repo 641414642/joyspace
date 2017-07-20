@@ -1,0 +1,82 @@
+微信用户登录:
+	POST
+	/api/user/login?code=xxxx
+	返回值: {
+			   "errcode": 0,
+				"errmsg": null,
+				"sessionId": "c96aa7ff47c941b881ba068faf7b617c"
+			}
+
+微信用户信息注册:
+	POST
+	/api/user/reg
+	RequestBody:
+		{
+			"nickName" : "xxxx",
+			"avatarUrl" : "xxxx",
+			"gender" : x,
+			"province" : "xxxx",
+			"city" : "xxxx"
+			"country" : "xxxx"
+		}
+	返回值:  {
+				"errcode" : 0,
+				"errmsg" : null
+			}
+
+上传图片：
+	POST
+	/api/image
+	content-type:  multipart/form-data
+	参数： sessionId   登录返回的sessionId
+		  thumbMaxWidth     生成的缩略图的最大宽度
+		  thumbMaxHeight    生成的缩略图的最大高度  (生成的缩略图会保存原图比例，尺寸不超过这两个参数定义的大小)
+		  image         图片文件内容
+	返回值:   {
+				"imageId": 6,
+				"width": 6000,   //原图尺寸
+				"height": 2315,   //原图尺寸
+				"thumbUrl": "http://localhost:6060/assets/user/1/D8F219B9D0C0470C961074650E79D3DC/e2fee30d51cc481ab8a4e7f3419014b7.thumb.jpg",   //缩略图url
+				"thumbWidth": 200,      //缩略图尺寸
+				"thumbHeight": 77,      //缩略图尺寸
+				"errcode": 0,
+				"errmsg": null
+			 }
+删除上传的图片:
+	DELETE
+	/api/image?imageId=xxx&sessionId=xxxx
+	返回值:
+			{
+				"errcode" : 0,
+				"errmsg" : null
+			}
+下单:
+	POST
+	/api/order
+	RequestBody:
+		{
+		  "sessionId" : "xxxxxxxxx",
+		  "printStationId" : x,
+		  "orderItems" : {
+			{ 
+				"productId" : x,
+				"imageFileId" : x,
+				"copies": x
+			},
+			{ "productId" : x, "imageFileId" : x, "copies": x },
+			{ "productId" : x, "imageFileId" : x, "copies": x }
+			...
+		  }
+		}
+	返回:
+	{
+		"errcode" : 0,
+		"errmsg": null,
+		"wxPayParams": {
+			"timeStamp" : "1499865120",
+			"nonceStr": "asdfasdfasdfas",
+			"pkg": "prepay_id=wx23423452345dfgl",
+			"paySign" : "6354ldgsgadfas"
+		}
+	}
+		

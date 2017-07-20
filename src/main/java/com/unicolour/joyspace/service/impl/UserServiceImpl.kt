@@ -4,10 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.unicolour.joyspace.dao.UserDao
 import com.unicolour.joyspace.dao.UserLoginSessionDao
-import com.unicolour.joyspace.dto.GraphQLRequestResult
-import com.unicolour.joyspace.dto.ResultCode
-import com.unicolour.joyspace.dto.UserDTO
-import com.unicolour.joyspace.dto.WxLoginResult
+import com.unicolour.joyspace.dto.*
 import com.unicolour.joyspace.model.*
 import com.unicolour.joyspace.service.UserService
 import graphql.schema.DataFetcher
@@ -43,11 +40,12 @@ open class UserServiceImpl : UserService {
     lateinit var objectMapper: ObjectMapper
 
     //登录
-    override fun getLoginDataFetcher(): DataFetcher<User> {
-        return DataFetcher<User> { env ->
+    override fun getLoginDataFetcher(): DataFetcher<AppUserLoginResult> {
+        return DataFetcher<AppUserLoginResult> { env ->
             val phoneNumber = env.getArgument<String>("phoneNumber")
+            val userName = env.getArgument<String>("userName")
             val password = env.getArgument<String>("password")
-            login(phoneNumber, password)
+            login(userName, phoneNumber, password)
         }
     }
 
@@ -137,17 +135,20 @@ open class UserServiceImpl : UserService {
 //        SERVER_ERROR
     }
 
-    override fun getAuthTokenDataFetcher(): DataFetcher<String> {
-        return DataFetcher<String> { env ->
-            val user = env.getSource<User>()
-            userLoginSessionDao.findByUserId(user.id)?.id
-        }
-    }
-
     //app用户登录
     @Transactional
-    override fun login(phoneNumber: String, password: String): User? {
-        val user = userDao.findByPhone(phoneNumber)
+    override fun login(userName: String?, phoneNumber:String?, password: String): AppUserLoginResult {
+            val user =
+            if (!phoneNumber.isNullOrEmpty()) {
+                userDao.findByPhone(phoneNumber!!)
+            }
+            else if (!userName.isNullOrEmpty()) {
+                userDao.findByUserName(userName!!)
+            }
+            else {
+                null
+            }
+
         if (user != null) {
             if (passwordEncoder.matches(password, user.password)) {
                 var session = userLoginSessionDao.findByUserId(user.id)
@@ -161,11 +162,27 @@ open class UserServiceImpl : UserService {
                 session.expireTime.add(Calendar.SECOND, 3600)
                 userLoginSessionDao.save(session)
 
-                return user
+                return AppUserLoginResult(sessionId = session.id, userInfo = user)
+            }
+            else {
+                if (!phoneNumber.isNullOrEmpty()) {
+                    return AppUserLoginResult(result = 1, description = "手机号或密码错误")
+                }
+                else {
+                    return AppUserLoginResult(result = 2, description = "用户名或密码错误")
+                }
             }
         }
 
-        return null
+        if (!phoneNumber.isNullOrEmpty()) {
+            return AppUserLoginResult(result = 1, description = "手机号或密码错误")
+        }
+        else if (!userName.isNullOrEmpty()) {
+            return AppUserLoginResult(result = 2, description = "用户名或密码错误")
+        }
+        else {
+            return AppUserLoginResult(result = 3, description = "请输入用户名或手机号")
+        }
     }
 
     //微信用户登录

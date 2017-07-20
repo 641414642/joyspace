@@ -1,0 +1,61 @@
+App发送验证码:
+	POST
+		/app/user/sendRegVerifyCode?phoneNumber=xxxxxxxxx
+	返回值: 
+		{
+			"result": 0,
+			"description": "xxxxxxx"
+		}
+
+App用户登录:
+	POST
+		/app/user/login?userName=xxxx&password=xxxxxxx
+		或
+		/app/user/login?phoneNumber=xxxx&password=xxxxxxx
+	返回值: 
+		{
+			"result": 0,
+			"description": null,
+			"sessionId": "xxxxxxxxxxxxxxxxxxxxx",
+			"userInfo": {
+				"phone": "xxxxxxxx",
+				"userName": "xxxxxxxx",
+				"email": "xxxxxxxxx"
+			}
+		}
+
+App用户注册:
+	POST
+		/app/user/register?phoneNumber=xxxxxxx&userName=xxxxxxxx&password=xxxxxx&verifyCode=xxxxxxx&email=xxxxxxxxxx
+	返回值:
+		{
+			"result": 0,
+			"description": "xxxxxxx"
+		}
+
+上传图片：
+	POST
+		/app/image
+		content-type:  multipart/form-data
+	参数：sessionId   登录返回的sessionId
+		  thumbMaxWidth     生成的缩略图的最大宽度
+		  thumbMaxHeight    生成的缩略图的最大高度  (生成的缩略图会保存原图比例，尺寸不超过这两个参数定义的大小)
+		  image         图片文件内容
+	返回值:   {
+				"imageId": 6,
+				"width": 6000,   //原图尺寸
+				"height": 2315,   //原图尺寸
+				"thumbUrl": "http://localhost:6060/assets/user/1/D8F219B9D0C0470C961074650E79D3DC/e2fee30d51cc481ab8a4e7f3419014b7.thumb.jpg",   //缩略图url
+				"thumbWidth": 200,      //缩略图尺寸
+				"thumbHeight": 77,      //缩略图尺寸
+				"errcode": 0,
+				"errmsg": null
+			 }
+删除上传的图片:
+	DELETE
+		/app/image?imageId=xxx&sessionId=xxxx
+	返回值:
+			{
+				"errcode" : 0,
+				"errmsg" : null
+			}
