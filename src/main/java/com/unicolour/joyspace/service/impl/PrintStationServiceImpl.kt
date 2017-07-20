@@ -36,9 +36,9 @@ open class PrintStationServiceImpl : PrintStationService {
     @Autowired
     lateinit var printStationProductDao: PrintStationProductDao
 
-    override fun getPriceMap(printStation: PrintStation?): Map<Int, Int> {
-        val priceListItems: List<PriceListItem> = priceListService.getPriceListItems(printStation?.position?.priceListId)
-        val defPriceListItems: List<PriceListItem> = priceListService.getPriceListItems(printStation?.company?.defaultPriceListId)
+    override fun getPriceMap(printStation: PrintStation): Map<Int, Int> {
+        val priceListItems: List<PriceListItem> = priceListService.getPriceListItems(printStation.position.priceListId)
+        val defPriceListItems: List<PriceListItem> = priceListService.getPriceListItems(printStation.company.defaultPriceListId)
 
         val priceMap: MutableMap<Int, Int> = HashMap()
         for (priceListItem in defPriceListItems) {
@@ -54,12 +54,11 @@ open class PrintStationServiceImpl : PrintStationService {
 
 
     @Transactional
-    override fun createPrintStation(sn: String, wxQrCode: String, positionId: Int, selectedProductIds: Set<Int>): PrintStation? {
+    override fun createPrintStation(wxQrCode: String, positionId: Int, selectedProductIds: Set<Int>): PrintStation? {
         val loginManager = managerService.loginManager
         val manager = managerDao.findOne(loginManager.managerId)
 
         val printStation = PrintStation()
-        printStation.sn = sn
         printStation.wxQrCode = wxQrCode
         printStation.company = manager.company
         printStation.position = positionDao.findOne(positionId)
@@ -78,11 +77,10 @@ open class PrintStationServiceImpl : PrintStationService {
     }
 
     @Transactional
-    override fun updatePrintStation(id: Int, sn: String, wxQrCode: String, positionId: Int, selectedProductIds: Set<Int>): Boolean {
+    override fun updatePrintStation(id: Int, wxQrCode: String, positionId: Int, selectedProductIds: Set<Int>): Boolean {
         val printStation = printStationDao.findOne(id)
 
         if (printStation != null) {
-            printStation.sn = sn
             printStation.wxQrCode = wxQrCode
             printStation.position = positionDao.findOne(positionId)
 

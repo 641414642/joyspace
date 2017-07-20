@@ -1,0 +1,14 @@
+.product_img_block {
+    display: inline-block;
+    text-align: center;
+    margin: 10px;
+}
+
+.product_img_block .img_display {
+    width: 100px;
+    height: 100px;
+    background-size: cover;
+    border-radius: 5px;
+    background-color: #cccccc;
+    background-position: center;
+}

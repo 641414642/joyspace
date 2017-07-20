@@ -15,11 +15,6 @@ class PrintStation {
     @GeneratedValue(strategy = GenerationType.AUTO)
     var id: Int = 0
 
-    /** 编号 */
-    @Column(length = 50)
-    @NotNull
-    var sn: String = ""
-
     /** 微信二维码 */
     @Column(length = 255)
     @NotNull

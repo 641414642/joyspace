@@ -89,9 +89,6 @@ type Product {
     name: String!
     type: ProductType!
 
-    #编号
-    sn: String!
-
     #宽度（毫米）
     width: Float!
 
@@ -108,7 +105,7 @@ type Product {
     price: Int
 
     #小缩略图url
-    thumbnailUrl: String!
+    thumbnailUrl: [String!]
 
     #展示图url
     previewUrl: [String!]
@@ -128,9 +125,6 @@ enum ProductType {
 
 #自助打印机
 type PrintStation {
-    #编号
-    sn: String!
-
     #投放地点
     position: Position!
 

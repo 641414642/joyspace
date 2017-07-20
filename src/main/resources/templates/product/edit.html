@@ -49,11 +49,6 @@
                         <span class="help-block"></span>
                     </div>
                     <div class="form-group">
-                        <label for="sn" class="control-label">编号:</label>
-                        <input type="text" name="sn" class="form-control" id="sn" th:value="${product.sn}" />
-                        <span class="help-block"></span>
-                    </div>
-                    <div class="form-group">
                         <label for="width" class="control-label">宽度(毫米):</label>
                         <input type="text" name="width" style="display:inline-block" class="form-control" id="width" th:value="${product.width}" />
                         <span class="help-block"></span>
@@ -114,6 +109,66 @@
                     <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
                 </div>
             </form>
+        </div>
+    </div>
+</div>
+<div class="modal fade" role="dialog" id="imgMgrDlg">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content" th:fragment="manageImageFiles">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+                <h4 class="modal-title" th:text="图片管理"></h4>
+                <iframe name="target_iframe" src="about:blank" th:src="@{/empty}" style="display:none"></iframe>
+            </div>
+            <div class="modal-body">
+                <h5>缩略图</h5>
+                <div>
+                    <div class="product_img_block" th:each="thumbImg : ${thumbImages}">
+                        <a th:href="${thumbImg.url}" target="_blank">
+                            <div class="img_display" th:style="'background-image: url(' + ${thumbImg.url} + ')'"></div>
+                        </a>
+                        <form target="target_iframe" method="post" th:action="@{/product/deleteImageFile}">
+                            <input type="hidden" name="imgFileId" th:value="${thumbImg.id}" />
+                            <a href="#" onclick="return deleteProductImage(event)">删除</a>
+                        </form>
+                    </div>
+                    <div class="product_img_block">
+                        <form id="uploadProductThumbImgFileForm" target="target_iframe" method="post" th:action="@{/product/uploadImageFile}" enctype="multipart/form-data">
+                            <input type="hidden" name="id" th:value="${productId}" />
+                            <input type="hidden" name="type" th:value="thumb" />
+                            <div class="img_display">
+                                <input id="productThumbImgFileInput" style="margin:0; padding:0; cursor:pointer; opacity:0; width:100%; height:100%;" type="file" accept="image/jpeg,image/png" name="imageFile" />
+                            </div>
+                            <span>&nbsp;</span>
+                        </form>
+                    </div>
+                </div>
+                <h5>预览图</h5>
+                <div>
+                    <div class="product_img_block" th:each="prevImg : ${previewImages}">
+                        <a th:href="${prevImg.url}" target="_blank">
+                            <div class="img_display" th:style="'background-image: url(' + ${prevImg.url} + ')'"></div>
+                        </a>
+                        <form target="target_iframe" method="post" th:action="@{/product/deleteImageFile}">
+                            <input type="hidden" name="imgFileId" th:value="${prevImg.id}" />
+                            <a href="#" onclick="return deleteProductImage(event)">删除</a>
+                        </form>
+                    </div>
+                    <div class="product_img_block">
+                        <form id="uploadProductPrevImgFileForm" target="target_iframe" method="post" th:action="@{/product/uploadImageFile}" enctype="multipart/form-data">
+                            <input type="hidden" name="id" th:value="${productId}" />
+                            <input type="hidden" name="type" th:value="preview" />
+                            <div class="img_display">
+                                <input id="productPrevImgFileInput" style="margin:0; padding:0; cursor:pointer; opacity:0; width:100%; height:100%;" type="file" accept="image/jpeg,image/png" name="imageFile" />
+                            </div>
+                            <span>&nbsp;</span>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-dismiss="modal">关闭</button>
+            </div>
         </div>
     </div>
 </div>

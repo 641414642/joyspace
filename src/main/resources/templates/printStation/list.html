@@ -39,7 +39,6 @@
 				<table class="table table-bordered table-striped">
 					<tr>
 						<th>ID</th>
-						<th>编号</th>
 						<th>微信二维码</th>
 						<th>投放商</th>
 						<th>投放地点</th>
@@ -47,7 +46,6 @@
 					</tr>
 					<tr th:each="printStation : ${printStations}">
 						<td th:text="${printStation.id}"></td>
-						<td th:text="${printStation.sn}"></td>
 						<td th:text="${printStation.wxQrCode}"></td>
 						<td th:text="${printStation.company?.name}"></td>
 						<td th:text="${printStation.position.name}"></td>

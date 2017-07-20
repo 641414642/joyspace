@@ -20,7 +20,6 @@ fun User.userToDTO(): UserDTO =
 fun PrintStation.printStationToDTO(): PrintStationDTO {
     val ps = PrintStationDTO()
 
-    ps.sn = this.sn
     ps.address = this.position.address
     ps.wxQrCode = this.wxQrCode
     ps.latitude = this.position.latitude
@@ -33,7 +32,6 @@ fun PrintStation.printStationToDetailDTO(productsOfPrintStation: List<ProductDTO
     val ps = PrintStationDetailDTO()
 
     ps.id = this.id
-    ps.sn = this.sn
     ps.address = this.position.address
     ps.wxQrCode = this.wxQrCode
     ps.latitude = this.position.latitude
@@ -43,18 +41,22 @@ fun PrintStation.printStationToDetailDTO(productsOfPrintStation: List<ProductDTO
     return ps
 }
 
-fun Product.productToDTO(baseUrl: String, priceMap: Map<Int, Int>) : ProductDTO =
-        ProductDTO(
-                id = this.id,
-                name = this.name,
-                type = this.type,
-                sn = this.sn,
-                width = this.width,
-                height = this.height,
-                imageRequired = this.minImageCount,
-                remark = this.remark,
-                price = priceMap.getOrDefault(this.id, this.defaultPrice),
-                thumbnailUrl = "${baseUrl}/assets/product/thumb/${this.sn}.jpg",
-                previewUrl = "${baseUrl}/assets/product/preview/${this.sn}.jpg"
-        )
+fun Product.productToDTO(baseUrl: String, priceMap: Map<Int, Int>) : ProductDTO {
+    val thumbUrls = this.imageFiles.filter { it.type == ProductImageFileType.THUMB.value }.map { "${baseUrl}/assets/product/images/${it.id}.${it.fileType}" }
+    val previewUrls = this.imageFiles.filter { it.type == ProductImageFileType.PREVIEW.value }.map { "${baseUrl}/assets/product/images/${it.id}.${it.fileType}" }
 
+    return ProductDTO(
+            id = this.id,
+            name = this.name,
+            type = this.type,
+            width = this.width,
+            height = this.height,
+            imageRequired = this.minImageCount,
+            remark = this.remark,
+            price = priceMap.getOrDefault(this.id, this.defaultPrice),
+            thumbnailUrl = thumbUrls.firstOrNull(),
+            previewUrl = previewUrls.firstOrNull(),
+            thumbnailUrls = thumbUrls,
+            previewUrls = previewUrls
+    )
+}

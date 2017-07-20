@@ -1,9 +1,12 @@
 package com.unicolour.joyspace.controller
 
 import com.unicolour.joyspace.dao.ProductDao
+import com.unicolour.joyspace.dao.ProductImageFileDao
 import com.unicolour.joyspace.model.Product
+import com.unicolour.joyspace.model.ProductImageFileType
 import com.unicolour.joyspace.service.ProductService
 import com.unicolour.joyspace.util.Pager
+import com.unicolour.joyspace.util.getBaseUrl
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Controller
@@ -13,12 +16,16 @@ import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.ResponseBody
 import org.springframework.web.multipart.MultipartFile
 import org.springframework.web.servlet.ModelAndView
+import javax.servlet.http.HttpServletRequest
 
 @Controller
 class ProductController {
 
     @Autowired
     lateinit var productDao: ProductDao
+
+    @Autowired
+    lateinit var productImageFileDao: ProductImageFileDao
 
     @Autowired
     lateinit var productService: ProductService
@@ -74,7 +81,6 @@ class ProductController {
     fun editProduct(
             @RequestParam(name = "id", required = true) id: Int,
             @RequestParam(name = "name", required = true) name: String,
-            @RequestParam(name = "sn", required = true) sn: String,
             @RequestParam(name = "remark", required = true) remark: String,
             @RequestParam(name = "width", required = true) width: Double,
             @RequestParam(name = "height", required = true) height: Double,
@@ -83,34 +89,56 @@ class ProductController {
     ): Boolean {
 
         if (id <= 0) {
-            productService.createProduct(name, sn, remark, width, height, defPrice, minImgCount)
+            productService.createProduct(name, remark, width, height, defPrice, minImgCount)
             return true
         } else {
-            return productService.updateProduct(id, name, sn, remark, width, height, defPrice, minImgCount)
+            return productService.updateProduct(id, name, remark, width, height, defPrice, minImgCount)
         }
     }
 
-    @RequestMapping(path = arrayOf("/product/uploadImages"), method = arrayOf(RequestMethod.GET))
+    @RequestMapping(path = arrayOf("/product/manageImageFiles"), method = arrayOf(RequestMethod.GET))
     @ResponseBody
-    fun uploadProductImages(
+    fun manageImageFiles(
+            request: HttpServletRequest,
             modelAndView: ModelAndView,
-            @RequestParam(name = "id", required = true) id: Int): ModelAndView {
-        modelAndView.model.put("productId", id)
-        modelAndView.viewName = "/product/edit :: uploadImageFiles"
+            @RequestParam(name = "productId", required = true) productId: Int): ModelAndView {
+
+        class PreviewImageFileDTO(val url: String, val id: Int)
+
+        val baseUrl = getBaseUrl(request)
+
+        modelAndView.model.put("productId", productId)
+
+        val thumbImages = productImageFileDao.findByProductIdAndType(productId = productId, type = ProductImageFileType.THUMB.value)
+        val prevImages = productImageFileDao.findByProductIdAndType(productId = productId, type = ProductImageFileType.PREVIEW.value)
+
+        modelAndView.model.put("thumbImages", thumbImages.map {
+            PreviewImageFileDTO("${baseUrl}/assets/product/images/${it.id}.${it.fileType}", it.id)
+        })
+        modelAndView.model.put("previewImages", prevImages.map {
+            PreviewImageFileDTO("${baseUrl}/assets/product/images/${it.id}.${it.fileType}", it.id)
+        })
+
+        modelAndView.viewName = "/product/edit :: manageImageFiles"
+
         return modelAndView
     }
 
-    @RequestMapping(path = arrayOf("/product/uploadImages"), method = arrayOf(RequestMethod.POST))
+    @RequestMapping(path = arrayOf("/product/uploadImageFile"), method = arrayOf(RequestMethod.POST))
     @ResponseBody
     fun uploadProductImages(
-            modelAndView: ModelAndView,
             @RequestParam(name = "id", required = true) id: Int,
-            @RequestParam("thumbImgFile") thumbImgFile: MultipartFile?,
-            @RequestParam("previewImgFile") previewImgFile: MultipartFile?
-    ): ModelAndView {
-        productService.uploadProductImageFiles(id, thumbImgFile, previewImgFile)
+            @RequestParam(name = "type", required = true) type: String,
+            @RequestParam("imageFile") imageFile: MultipartFile?
+    ): Boolean {
+        val imgType = if (type == "thumb") ProductImageFileType.THUMB else ProductImageFileType.PREVIEW
+        productService.uploadProductImageFile(id, imgType, imageFile)
+        return true
+    }
 
-        modelAndView.viewName = "product/uploaded"
-        return modelAndView
+    @RequestMapping(path = arrayOf("/product/deleteImageFile"), method = arrayOf(RequestMethod.POST))
+    @ResponseBody
+    fun deleteProductImages(@RequestParam(name = "imgFileId", required = true) imgFileId: Int): Boolean {
+        return productService.deleteProductImageFile(imgFileId)
     }
 }

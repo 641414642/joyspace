@@ -3,8 +3,6 @@ package com.unicolour.joyspace.dto
 open class PrintStationDTO {
     /** ID */
     var id: Int = 0
-    /** 编号 */
-    var sn: String = ""
     /** 地址 */
     var address: String = ""
     /** 微信二维码 */

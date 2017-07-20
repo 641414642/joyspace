@@ -14,10 +14,26 @@ function createOrEditProduct(event) {
 }
 
 //上传图片文件
-function uploadProductImageFiles(event) {
+function manageProductImageFiles(event) {
     $('#modalTemplate').removeClass().addClass("modal fade");
-    showModal(event);
+    showModal(event, function() {
+        $('#productPrevImgFileInput').change(function() {
+          $('#uploadProductPrevImgFileForm').submit();
+        });
+
+        $('#productThumbImgFileInput').change(function() {
+          $('#uploadProductThumbImgFileForm').submit();
+        });
+    });
     return false;
+}
+
+//删除图片
+function deleteProductImage(event) {
+    if (confirm("您确定要删除此图片吗?")) {
+        var source = event.target || event.srcElement;
+        $(source).closest('form').submit();
+    }
 }
 
 //查看价目表

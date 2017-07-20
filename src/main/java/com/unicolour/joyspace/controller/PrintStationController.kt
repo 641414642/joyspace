@@ -38,16 +38,10 @@ class PrintStationController {
     @RequestMapping("/printStation/list")
     fun printStationList(
             modelAndView: ModelAndView,
-            @RequestParam(name = "sn", required = false, defaultValue = "") sn: String?,
             @RequestParam(name = "pageno", required = false, defaultValue = "1") pageno: Int): ModelAndView {
 
         val pageable = PageRequest(pageno - 1, 20)
-        val printStations = if (sn == null || sn == "")
-            printStationDao.findAll(pageable)
-        else
-            printStationDao.findBySn(sn, pageable)
-
-        modelAndView.model.put("inputPrintStationSn", sn)
+        val printStations = printStationDao.findAll(pageable)
 
         val pager = Pager(printStations.totalPages, 7, pageno - 1)
         modelAndView.model.put("pager", pager)
@@ -96,7 +90,6 @@ class PrintStationController {
     fun editPrintStation(
             request: HttpServletRequest,
             @RequestParam(name = "id", required = true) id: Int,
-            @RequestParam(name = "sn", required = true) sn: String,
             @RequestParam(name = "wxQrCode", required = true) wxQrCode: String,
             @RequestParam(name = "positionId", required = true) positionId: Int,
             @RequestParam(name = "productIds", required = true) productIds: String
@@ -109,10 +102,10 @@ class PrintStationController {
                 .toSet()
 
         if (id <= 0) {
-            printStationService.createPrintStation(sn, wxQrCode, positionId, selectedProductIds)
+            printStationService.createPrintStation(wxQrCode, positionId, selectedProductIds)
             return true
         } else {
-            return printStationService.updatePrintStation(id, sn, wxQrCode, positionId, selectedProductIds)
+            return printStationService.updatePrintStation(id, wxQrCode, positionId, selectedProductIds)
         }
     }
 }

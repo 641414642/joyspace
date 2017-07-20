@@ -92,7 +92,6 @@ class TestServiceImpl : TestService {
         product1.remark = "5寸彩色照片"
         product1.width = 50.0
         product1.height = 30.0
-        product1.sn = "PHOTO_5"
         product1.type = ProductType.PHOTO.value
         productDao.save(product1)
 
@@ -104,7 +103,6 @@ class TestServiceImpl : TestService {
         product2.remark = "6寸彩色照片"
         product2.width = 60.0
         product2.height = 40.0
-        product2.sn = "PHOTO_4"
         product2.type = ProductType.PHOTO.value
         productDao.save(product2)
 
@@ -116,7 +114,6 @@ class TestServiceImpl : TestService {
         product3.remark = "7寸彩色照片"
         product3.width = 70.0
         product3.height = 50.0
-        product3.sn = "PHOTO_7"
         product3.type = ProductType.ID_PHOTO.value
         productDao.save(product3)
 
@@ -168,7 +165,6 @@ class TestServiceImpl : TestService {
         val ps = PrintStation()
         ps.company = company
         ps.position = pos
-        ps.sn = "PS001"
         ps.wxQrCode = "https://mp.weixin.qq.com/a/~~wu3hXzBSt64~plUyoOB9Iyf8mEHP9BrkLA~~"
         printStationDao.save(ps)
 

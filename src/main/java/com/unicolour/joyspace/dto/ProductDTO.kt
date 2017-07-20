@@ -13,6 +13,8 @@ class ProductDTO(
         var imageRequired: Int = 0,
         var remark: String? = null,
         var price: Int = 0,
-        var thumbnailUrl: String = "",
-        var previewUrl: String = ""
+        var thumbnailUrl: String? = null,
+        var previewUrl: String? = null,
+        var thumbnailUrls: List<String> = emptyList(),
+        var previewUrls: List<String> = emptyList()
 )
