@@ -82,36 +82,7 @@
         </div>
     </div>
 </div>
-<div class="modal fade" role="dialog" id="uplaodDialog">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content" th:fragment="uploadImageFiles">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
-                <h4 class="modal-title" th:text="上传图片文件"></h4>
-                <iframe name="target_iframe" src="about:blank" th:src="@{/empty}" style="display:none"></iframe>
-            </div>
-            <form id="uploadImageFilesForm" th:action="@{/product/uploadImages}" method="post" target="target_iframe" enctype="multipart/form-data">
-                <input type="hidden" name="id" th:value="${productId}" />
-                <div class="modal-body">
-                    <div class="form-group">
-                        <label for="thumbImgFile" class="control-label">缩略图文件:</label>
-                        <input type="file" id="thumbImgFile" name="thumbImgFile" accept=".jpg" />
-                        <span class="help-block"></span>
-                    </div>
-                    <div class="form-group">
-                        <label for="previewImgFile" class="control-label">预览图文件:</label>
-                        <input type="file" id="previewImgFile" name="previewImgFile" accept=".jpg" />
-                        <span class="help-block"></span>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="submit" class="btn btn-primary">确定</button>
-                    <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
+
 <div class="modal fade" role="dialog" id="imgMgrDlg">
     <div class="modal-dialog" role="document">
         <div class="modal-content" th:fragment="manageImageFiles">
@@ -145,7 +116,7 @@
                 </div>
                 <h5>预览图</h5>
                 <div>
-                    <div class="product_img_block" th:each="prevImg : ${previewImages}">
+                    <div class="product_img_block" th:each="prevImg : ${previewImages}"  th:attr="data-imgFileId=${prevImg.id}" >
                         <a th:href="${prevImg.url}" target="_blank">
                             <div class="img_display" th:style="'background-image: url(' + ${prevImg.url} + ')'"></div>
                         </a>

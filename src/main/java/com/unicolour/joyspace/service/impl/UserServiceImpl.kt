@@ -22,6 +22,9 @@ import java.time.Duration
 import java.time.Instant
 import java.util.*
 import javax.transaction.Transactional
+import org.springframework.transaction.support.TransactionTemplate
+
+
 
 
 @Service
@@ -53,6 +56,9 @@ open class UserServiceImpl : UserService {
     @Autowired
     lateinit var secureRandom: SecureRandom
 
+    @Autowired
+    lateinit var transactionTemplate: TransactionTemplate
+
     //登录
     override fun getLoginDataFetcher(): DataFetcher<AppUserLoginResult> {
         return DataFetcher<AppUserLoginResult> { env ->
@@ -67,7 +73,7 @@ open class UserServiceImpl : UserService {
     override fun getSendRegVerifyCodeDataFetcher(): DataFetcher<GraphQLRequestResult> {
         return DataFetcher<GraphQLRequestResult> { env ->
             val phoneNumber = env.getArgument<String>("phoneNumber")
-            sendVerifyCode(phoneNumber)
+            transactionTemplate.execute { sendVerifyCode(phoneNumber) }
         }
     }
 

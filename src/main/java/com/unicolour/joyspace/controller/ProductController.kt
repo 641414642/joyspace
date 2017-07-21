@@ -137,8 +137,12 @@ class ProductController {
     }
 
     @RequestMapping(path = arrayOf("/product/deleteImageFile"), method = arrayOf(RequestMethod.POST))
-    @ResponseBody
-    fun deleteProductImages(@RequestParam(name = "imgFileId", required = true) imgFileId: Int): Boolean {
-        return productService.deleteProductImageFile(imgFileId)
+    fun deleteProductImages(
+            modelAndView: ModelAndView,
+            @RequestParam(name = "imgFileId", required = true) imgFileId: Int): ModelAndView {
+        productService.deleteProductImageFile(imgFileId)
+        modelAndView.model["imgFileId"] = imgFileId
+        modelAndView.viewName = "/product/imageFileDeleted"
+        return modelAndView
     }
 }
