@@ -12,3 +12,10 @@
     background-color: #cccccc;
     background-position: center;
 }
+
+.product_img_block .img_display.upload {
+    background-image: url(../img/upload.png);
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: auto;
+}

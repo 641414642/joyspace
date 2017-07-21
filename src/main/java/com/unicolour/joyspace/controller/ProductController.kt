@@ -103,8 +103,6 @@ class ProductController {
             modelAndView: ModelAndView,
             @RequestParam(name = "productId", required = true) productId: Int): ModelAndView {
 
-        class PreviewImageFileDTO(val url: String, val id: Int)
-
         val baseUrl = getBaseUrl(request)
 
         modelAndView.model.put("productId", productId)
@@ -125,15 +123,28 @@ class ProductController {
     }
 
     @RequestMapping(path = arrayOf("/product/uploadImageFile"), method = arrayOf(RequestMethod.POST))
-    @ResponseBody
     fun uploadProductImages(
+            request: HttpServletRequest,
+            modelAndView: ModelAndView,
             @RequestParam(name = "id", required = true) id: Int,
             @RequestParam(name = "type", required = true) type: String,
             @RequestParam("imageFile") imageFile: MultipartFile?
-    ): Boolean {
+    ): ModelAndView {
+        val baseUrl = getBaseUrl(request)
+
         val imgType = if (type == "thumb") ProductImageFileType.THUMB else ProductImageFileType.PREVIEW
-        productService.uploadProductImageFile(id, imgType, imageFile)
-        return true
+        val uploadedImgFile = productService.uploadProductImageFile(id, imgType, imageFile)
+
+        if (uploadedImgFile != null) {
+            modelAndView.model["imageUploadDivId"] = when (type) {
+                "thumb" -> "thumbImgUpload"
+                else -> "prevImgUpload"
+            }
+            modelAndView.viewName = "/product/imageFileUploaded"
+            modelAndView.model["uploadedImg"] = PreviewImageFileDTO("${baseUrl}/assets/product/images/${uploadedImgFile.id}.${uploadedImgFile.fileType}", uploadedImgFile.id)
+        }
+
+        return modelAndView
     }
 
     @RequestMapping(path = arrayOf("/product/deleteImageFile"), method = arrayOf(RequestMethod.POST))
@@ -146,3 +157,5 @@ class ProductController {
         return modelAndView
     }
 }
+
+internal class PreviewImageFileDTO(val url: String, val id: Int)

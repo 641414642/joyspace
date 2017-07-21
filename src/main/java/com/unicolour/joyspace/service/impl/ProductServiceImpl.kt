@@ -78,7 +78,7 @@ open class ProductServiceImpl : ProductService {
     }
 
     @Transactional
-    override fun uploadProductImageFile(id: Int, type: ProductImageFileType, imageFile: MultipartFile?): Boolean {
+    override fun uploadProductImageFile(id: Int, type: ProductImageFileType, imageFile: MultipartFile?): ProductImageFile? {
         val product = productDao.findOne(id)
         if (product != null) {
             if (imageFile != null) {
@@ -126,13 +126,13 @@ open class ProductServiceImpl : ProductService {
 
                     val fileWithExt = File(assetsDir, "/product/images/${productImgFile.id}.$imgType")
                     file.renameTo(fileWithExt)
+
+                    return productImgFile
                 }
             }
-
-            return true
         }
 
-        return false
+        return null
     }
 
     override fun deleteProductImageFile(imgFileId: Int): Boolean {
