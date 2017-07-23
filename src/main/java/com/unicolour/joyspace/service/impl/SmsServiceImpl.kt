@@ -12,12 +12,11 @@ open class SmsServiceImpl : SmsService {
     @Value("\${com.unicolour.joyspace.smsServiceUrl}")
     lateinit var smsServiceUrl: String
 
-    override fun send(phoneNumber: String, content: String): Boolean {
+    override fun send(phoneNumber: String, content: String): Pair<Int, String?> {
         val url = URL(String.format(smsServiceUrl,
                 URLEncoder.encode(phoneNumber, "UTF-8"),
                 URLEncoder.encode(content, "UTF-8")))
 
-        println(url)
         val conn = url.openConnection() as HttpURLConnection
 
         conn.inputStream.use {
@@ -30,10 +29,14 @@ open class SmsServiceImpl : SmsService {
                 }
             } while (r != -1)
 
-            println(buf)
+            val t = buf.indexOf(',')
+            if (t == -1) {
+                return Pair(buf.toString().toInt(10), null)
+            }
+            else {
+                return Pair(buf.substring(0, t).toInt(10), buf.substring(t+1))
+            }
         }
-
-        return true
     }
 }
 

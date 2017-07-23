@@ -2,6 +2,7 @@ package com.unicolour.joyspace.service.impl
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.unicolour.joyspace.controller.ManagerController
 import com.unicolour.joyspace.dao.UserDao
 import com.unicolour.joyspace.dao.UserLoginSessionDao
 import com.unicolour.joyspace.dao.VerifyCodeDao
@@ -10,25 +11,28 @@ import com.unicolour.joyspace.model.*
 import com.unicolour.joyspace.service.SmsService
 import com.unicolour.joyspace.service.UserService
 import graphql.schema.DataFetcher
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
+import org.springframework.transaction.support.TransactionTemplate
 import org.springframework.web.client.RestTemplate
 import java.security.SecureRandom
 import java.time.Duration
 import java.time.Instant
 import java.util.*
 import javax.transaction.Transactional
-import org.springframework.transaction.support.TransactionTemplate
-
-
 
 
 @Service
 open class UserServiceImpl : UserService {
+    companion object {
+        val logger = LoggerFactory.getLogger(UserServiceImpl::class.java)
+    }
+
     @Value("\${com.unicolour.wxAppId}")
     lateinit var wxAppId: String
 
@@ -78,6 +82,8 @@ open class UserServiceImpl : UserService {
     }
 
     private fun sendVerifyCode(phoneNumber: String): GraphQLRequestResult {
+        val smsTpl = "【优利绚彩】帐号绑定验证码为:%s,请勿向任何人提供您收到的短信验证码。"
+
         val now = Instant.now()
         var verifyCode = verifyCodeDao.findOne(phoneNumber)
         if (verifyCode != null) {
@@ -90,8 +96,13 @@ open class UserServiceImpl : UserService {
                 verifyCode.sendTime = Calendar.getInstance()
                 verifyCodeDao.save(verifyCode)
 
-                smsService.send(phoneNumber,
-                        "【优利绚彩】帐号绑定验证码为:${verifyCode.code},请勿向任何人提供您收到短信验证码。")
+                val sendResult = smsService.send(phoneNumber, String.format(smsTpl, verifyCode.code))
+                if (sendResult.first != 3) {
+                    logger.error("Send SMS error, PhoneNumber: $phoneNumber, ResponseCode: ${sendResult.first}, ResponseId: ${sendResult.second}")
+                }
+                else {
+                    logger.info("Send SMS success, PhoneNumber: $phoneNumber, ResponseCode: ${sendResult.first}, ResponseId: ${sendResult.second}")
+                }
             }
         }
         else {
@@ -107,8 +118,13 @@ open class UserServiceImpl : UserService {
 
                 verifyCodeDao.save(verifyCode)
 
-                smsService.send(phoneNumber,
-                        "【优利绚彩】帐号绑定验证码为:${verifyCode.code},请勿向任何人提供您收到短信验证码。")
+                val sendResult = smsService.send(phoneNumber, String.format(smsTpl, verifyCode.code))
+                if (sendResult.first != 3) {
+                    logger.error("Send SMS error, PhoneNumber: $phoneNumber, ResponseCode: ${sendResult.first}, ResponseId: ${sendResult.second}")
+                }
+                else {
+                    logger.info("Send SMS success, PhoneNumber: $phoneNumber, ResponseCode: ${sendResult.first}, ResponseId: ${sendResult.second}")
+                }
             }
         }
         //XXX
