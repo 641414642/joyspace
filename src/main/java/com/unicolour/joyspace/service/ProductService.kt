@@ -11,11 +11,9 @@ interface ProductService {
 
     fun getProductsOfPrintStation(printStationId: Int) : List<PrintStationProduct>
 
-    fun createProduct(name: String, remark: String,
-                      width: Double, height: Double, defPrice: Double, minImgCount: Int) : Product?
+    fun createProduct(name: String, remark: String, defPrice: Double, templateName: String) : Product?
 
-    fun updateProduct(id: Int, name: String, remark:String,
-                      width: Double, height: Double, defPrice: Double, minImgCount: Int): Boolean
+    fun updateProduct(id: Int, name: String, remark:String, defPrice: Double, templateName: String): Boolean
 
     fun getDataFetcher(fieldName:String): DataFetcher<Any>
 

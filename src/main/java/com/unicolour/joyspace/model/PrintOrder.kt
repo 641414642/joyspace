@@ -60,21 +60,12 @@ class PrintOrderItem {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "print_order_id")
-    @NotNull
-    lateinit var printOrder: PrintOrder
+    var printOrder: PrintOrder? = null
     //endregion
 
-    //region 图片文件
-    //图片文件id
-    @Column(name = "user_image_file_id", insertable = false, updatable = false)
-    @NotNull
-    var userImageFileId: Int = 0
-
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_image_file_id")
-    @NotNull
-    lateinit var userImageFile: UserImageFile
-    //endregion
+    //图片文件
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "orderItem")
+    lateinit var userImageFiles: List<UserImageFile>
 
     //region 产品
     @Column(name = "product_id", insertable = false, updatable = false)

@@ -113,7 +113,6 @@ open class PrintOrderServiceImpl : PrintOrderService {
             newOrderItem.copies = orderItem.copies
             newOrderItem.printOrder = order
             newOrderItem.product = productDao.findOne(orderItem.productId)
-            newOrderItem.userImageFile = userImageFileDao.findOne(orderItem.imageFileId)
 
             printOrderItemDao.save(newOrderItem)
         }
@@ -135,7 +134,7 @@ open class PrintOrderServiceImpl : PrintOrderService {
     override fun getImageFilesDataFetcher(): DataFetcher<Array<UserImageFile>> {
         return DataFetcher { env ->
             val printOrderItem = env.getSource<PrintOrderItem>()
-            arrayOf(printOrderItem.userImageFile)
+            printOrderItem.userImageFiles.toTypedArray()
         }
     }
 

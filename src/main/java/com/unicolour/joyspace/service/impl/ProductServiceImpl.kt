@@ -3,9 +3,9 @@ package com.unicolour.joyspace.service.impl
 import com.unicolour.joyspace.dao.PrintStationProductDao
 import com.unicolour.joyspace.dao.ProductDao
 import com.unicolour.joyspace.dao.ProductImageFileDao
-import com.unicolour.joyspace.dto.ImageInfo
 import com.unicolour.joyspace.model.*
 import com.unicolour.joyspace.service.ProductService
+import com.unicolour.joyspace.service.TemplateService
 import graphql.schema.DataFetcher
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
@@ -18,6 +18,11 @@ import java.io.InputStreamReader
 import java.util.*
 import java.util.regex.Pattern
 import javax.transaction.Transactional
+import org.apache.poi.util.DocumentHelper.newDocumentBuilder
+import org.w3c.dom.Element
+import javax.xml.parsers.DocumentBuilderFactory
+import kotlin.collections.HashSet
+
 
 @Service
 open class ProductServiceImpl : ProductService {
@@ -33,48 +38,59 @@ open class ProductServiceImpl : ProductService {
     @Autowired
     lateinit var productImgFileDao: ProductImageFileDao
 
+    @Autowired
+    lateinit var templateService: TemplateService
+
     override fun getProductsOfPrintStation(printStationId: Int): List<PrintStationProduct> {
         return printStationProductDao.findByPrintStationId(printStationId)
     }
 
     @Transactional
-    override fun updateProduct(id: Int, name: String, remark: String,
-                               width: Double, height: Double, defPrice: Double, minImgCount: Int): Boolean {
+    override fun updateProduct(id: Int, name: String, remark: String, defPrice: Double, templateName: String): Boolean {
         val product = productDao.findOne(id)
         if (product != null) {
+            val tplInfo = templateService.getTemplateInfo(templateName)
+
+            if (tplInfo != null) {
+                product.name = name
+                product.templateName = templateName;
+                product.width = tplInfo.widthInMM
+                product.height = tplInfo.heightInMM
+                product.defaultPrice = (defPrice * 100).toInt()
+                product.minImageCount = tplInfo.minImageCount
+                product.enabled = true
+                product.remark = remark
+
+                productDao.save(product)
+                return true
+            }
+        }
+
+        return false
+    }
+
+    @Transactional
+    override fun createProduct(name: String, remark: String, defPrice: Double, templateName: String): Product? {
+        val tplInfo = templateService.getTemplateInfo(templateName)
+
+        if (tplInfo != null) {
+            val product = Product()
+
             product.name = name
-            product.width = width
-            product.height = height
+            product.templateName = templateName;
+            product.width = tplInfo.widthInMM
+            product.height = tplInfo.heightInMM
             product.defaultPrice = (defPrice * 100).toInt()
-            product.minImageCount = minImgCount
+            product.minImageCount = tplInfo.minImageCount
             product.enabled = true
             product.remark = remark
 
             productDao.save(product)
 
-            return true
+            return product
         }
-        else {
-            return false
-        }
-    }
 
-    @Transactional
-    override fun createProduct(name: String, remark: String,
-                               width: Double, height: Double, defPrice: Double, minImgCount: Int): Product? {
-        val product = Product()
-
-        product.name = name
-        product.width = width
-        product.height = height
-        product.defaultPrice = (defPrice * 100).toInt()
-        product.minImageCount = minImgCount
-        product.enabled = true
-        product.remark = remark
-
-        productDao.save(product)
-
-        return product
+        return null
     }
 
     @Transactional

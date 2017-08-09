@@ -15,6 +15,10 @@ class Product {
     @NotNull
     var name: String = ""
 
+    @Column(length = 50)
+    @NotNull
+    var templateName: String = ""
+
     /** 类型 */
     @Column
     @NotNull

@@ -22,11 +22,22 @@ class ApiImageController {
     @RequestMapping(path = arrayOf("/api/image", "/app/image"), method = arrayOf(RequestMethod.POST))
     fun uploadImage(request: HttpServletRequest,
                     @RequestParam("sessionId") sessionId: String,
-                    @RequestParam("thumbMaxWidth") thumbMaxWidth: Int,
-                    @RequestParam("thumbMaxHeight") thumbMaxHeight: Int,
                     @RequestParam("image") imgFile: MultipartFile?) : ResponseEntity<ImageInfo> {
         val baseUrl = getBaseUrl(request)
-        val imgInfo = imageService.uploadImage(sessionId, thumbMaxWidth, thumbMaxHeight, imgFile, baseUrl)
+        val imgInfo = imageService.uploadImage(sessionId, imgFile, baseUrl)
+
+        return ResponseEntity.ok(imgInfo)
+    }
+
+    @RequestMapping(path = arrayOf("/api/image/resize", "/app/image/resize"), method = arrayOf(RequestMethod.POST))
+    fun resizeImage(request: HttpServletRequest,
+                    @RequestParam("sessionId") sessionId: String,
+                    @RequestParam("width") width: Int,
+                    @RequestParam("height") height: Int,
+                    @RequestParam("imageId") imageId: Int) : ResponseEntity<ImageInfo> {
+        val baseUrl = getBaseUrl(request)
+        val imgInfo = imageService.resizeImage(sessionId, imageId, width, height, baseUrl)
+
         return ResponseEntity.ok(imgInfo)
     }
 

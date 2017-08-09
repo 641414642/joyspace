@@ -1,7 +1,6 @@
 package com.unicolour.joyspace.service.impl
 
-import com.unicolour.joyspace.dao.UserImageFileDao
-import com.unicolour.joyspace.dao.UserLoginSessionDao
+import com.unicolour.joyspace.dao.*
 import com.unicolour.joyspace.dto.CommonRequestResult
 import com.unicolour.joyspace.dto.ImageInfo
 import com.unicolour.joyspace.model.UserImageFile
@@ -29,31 +28,30 @@ class ImageServiceImpl : ImageService {
     @Autowired
     lateinit var userLoginSessionDao: UserLoginSessionDao
 
-    override fun uploadImage(sessionId: String, thumbMaxWidth: Int, thumbMaxHeight: Int, imgFile: MultipartFile?, baseUrl: String): ImageInfo {
+    @Autowired
+    lateinit var productDao: ProductDao
+
+    override fun uploadImage(sessionId: String, imgFile: MultipartFile?, baseUrl: String): ImageInfo {
         val session = userLoginSessionDao.findOne(sessionId);
 
         if (session == null) {
-            return ImageInfo(0,0, 0, "", 0, 0, 1, "用户未登录")
+            return ImageInfo(1, "用户未登录")
         }
         else if (imgFile == null) {
-            return ImageInfo(0,0, 0, "", 0, 0, 2, "没有图片文件")
+            return ImageInfo(2, "没有图片文件")
         }
         else {
             val fileName = UUID.randomUUID().toString().replace("-", "")
             val filePath = "user/${session.userId}/${sessionId}/${fileName}"
             val file = File(assetsDir, filePath)
-            val thumbFile = File(assetsDir, "${filePath}.thumb.jpg")
             file.parentFile.mkdirs()
 
             imgFile.transferTo(file)
 
             val pb = ProcessBuilder(
                     "magick.exe",
-                    file.absolutePath,
-                    "-thumbnail",
-                    "${thumbMaxWidth}x${thumbMaxHeight}",
-                    "-identify",
-                    thumbFile.absolutePath)
+                    "identify",
+                    file.absolutePath)
 
             val process = pb.start()
 
@@ -65,10 +63,10 @@ class ImageServiceImpl : ImageService {
             val retCode = process.waitFor()
 
             if (retCode != 0) {
-                return ImageInfo(0,0, 0, "", 0, 0, 3, retStr)
+                return ImageInfo(3, retStr)
             }
             else {
-                val patternStr = Pattern.quote(file.absolutePath) + "\\s(\\w+)\\s(\\d+)x(\\d+)=>(\\d+)x(\\d+).*"
+                val patternStr = Pattern.quote(file.absolutePath) + "\\s(\\w+)\\s(\\d+)x(\\d+)\\s.*"
                 val pattern = Pattern.compile(patternStr)
                 val matcher = pattern.matcher(retStr)
 
@@ -80,13 +78,12 @@ class ImageServiceImpl : ImageService {
                 }
                 val imgWid = matcher.group(2).toInt()
                 val imgHei = matcher.group(3).toInt()
-                val thumbWid = matcher.group(4).toInt()
-                val thumbHei = matcher.group(5).toInt()
 
-                val thumbUrl = "${baseUrl}/assets/${filePath}.thumb.jpg"
 
                 val fileWithExt = File(assetsDir, "${filePath}.${imgType}")
                 file.renameTo(fileWithExt)
+
+                val url = "${baseUrl}/assets/${filePath}.${imgType}"
 
                 val userImgFile = UserImageFile()
                 userImgFile.type = imgType
@@ -99,7 +96,85 @@ class ImageServiceImpl : ImageService {
 
                 userImageFileDao.save(userImgFile)
 
-                return ImageInfo(userImgFile.id, imgWid, imgHei, thumbUrl, thumbWid, thumbHei)
+                return ImageInfo(0, null, userImgFile.id, imgWid, imgHei, url)
+            }
+        }
+    }
+
+    override fun resizeImage(sessionId: String, imageId: Int, width: Int, height: Int, baseUrl: String): ImageInfo {
+        val session = userLoginSessionDao.findOne(sessionId);
+
+        if (session == null) {
+            return ImageInfo(1, "用户未登录")
+        }
+        else {
+            val userImg = userImageFileDao.findOne(imageId)
+            if (userImg == null) {
+                return ImageInfo(2, "没有找到指定ID对应的图片")
+            }
+            else if (userImg.userId != session.userId) {
+                return ImageInfo(3, "不是此用户的图片")
+            }
+            else {
+                val srcFilePath = "user/${userImg.userId}/${userImg.sessionId}/${userImg.fileName}.${userImg.type}"
+                val srcFile = File(assetsDir, srcFilePath)
+
+                if (!srcFile.exists()) {
+                    return ImageInfo(4, "图片文件已删除")
+                }
+                else {
+                    val destFileName = UUID.randomUUID().toString().replace("-", "")
+                    val destFilePath = "user/${session.userId}/${sessionId}/${destFileName}.jpg"
+
+                    val destFile = File(assetsDir, destFilePath)
+                    srcFile.parentFile.mkdirs()
+
+                    val pb = ProcessBuilder(
+                            "magick.exe",
+                            srcFile.absolutePath,
+                            "-thumbnail",
+                            "${width}x${height}!",
+                            "-identify",
+                            destFile.absolutePath)
+
+                    val process = pb.start()
+
+                    var retStr:String = "";
+                    BufferedReader(InputStreamReader(process.inputStream)).use { reader ->
+                        retStr = reader.readText()
+                    }
+
+                    val retCode = process.waitFor()
+
+                    if (retCode != 0) {
+                        return ImageInfo(5, retStr)
+                    }
+                    else {
+                        val patternStr = Pattern.quote(srcFile.absolutePath) + "\\s\\w+\\s\\d+x\\d+=>(\\d+)x(\\d+).*"
+                        val pattern = Pattern.compile(patternStr)
+                        val matcher = pattern.matcher(retStr)
+
+                        matcher.find()
+
+                        val destImgWid = matcher.group(1).toInt()
+                        val destImgHei = matcher.group(2).toInt()
+
+                        val destUrl = "${baseUrl}/assets/${destFilePath}"
+
+                        val userImgFile = UserImageFile()
+                        userImgFile.type = "jpg"
+                        userImgFile.fileName = destFileName
+                        userImgFile.width = destImgWid
+                        userImgFile.height = destImgHei
+                        userImgFile.sessionId = sessionId
+                        userImgFile.uploadTime = Calendar.getInstance()
+                        userImgFile.userId = session.userId
+
+                        userImageFileDao.save(userImgFile)
+
+                        return ImageInfo(0, null, userImgFile.id, destImgWid, destImgHei, destUrl)
+                    }
+                }
             }
         }
     }
@@ -140,5 +215,9 @@ class ImageServiceImpl : ImageService {
             val baseUrl = context["baseUrl"]
             "${baseUrl}/assets/user/${imageFile.userId}/${imageFile.sessionId}/${imageFile.fileName}.${imageFile.type}"
         }
+    }
+
+    override fun getImageUrl(baseUrl: String, userImgFile: UserImageFile): String {
+        return "${baseUrl}/assets/user/${userImgFile.userId}/${userImgFile.sessionId}/${userImgFile.fileName}.${userImgFile.type}"
     }
 }

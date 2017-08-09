@@ -5,9 +5,11 @@ import com.unicolour.joyspace.dao.ProductImageFileDao
 import com.unicolour.joyspace.model.Product
 import com.unicolour.joyspace.model.ProductImageFileType
 import com.unicolour.joyspace.service.ProductService
+import com.unicolour.joyspace.service.TemplateService
 import com.unicolour.joyspace.util.Pager
 import com.unicolour.joyspace.util.getBaseUrl
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.RequestMapping
@@ -16,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.ResponseBody
 import org.springframework.web.multipart.MultipartFile
 import org.springframework.web.servlet.ModelAndView
+import java.io.File
 import javax.servlet.http.HttpServletRequest
 
 @Controller
@@ -29,6 +32,9 @@ class ProductController {
 
     @Autowired
     lateinit var productService: ProductService
+
+    @Autowired
+    lateinit var templateService: TemplateService
 
     @RequestMapping("/product/list")
     fun productList(
@@ -69,6 +75,8 @@ class ProductController {
             product = Product()
         }
 
+        modelAndView.model["templates"] = templateService.getTemplateNames()
+
         modelAndView.model.put("create", id <= 0)
         modelAndView.model.put("product", product)
         modelAndView.viewName = "/product/edit :: content"
@@ -82,17 +90,15 @@ class ProductController {
             @RequestParam(name = "id", required = true) id: Int,
             @RequestParam(name = "name", required = true) name: String,
             @RequestParam(name = "remark", required = true) remark: String,
-            @RequestParam(name = "width", required = true) width: Double,
-            @RequestParam(name = "height", required = true) height: Double,
             @RequestParam(name = "defPrice", required = true) defPrice: Double,
-            @RequestParam(name = "minImgCount", required = true) minImgCount: Int
+            @RequestParam(name = "template", required = true) templateName: String
     ): Boolean {
 
         if (id <= 0) {
-            productService.createProduct(name, remark, width, height, defPrice, minImgCount)
+            productService.createProduct(name, remark, defPrice, templateName)
             return true
         } else {
-            return productService.updateProduct(id, name, remark, width, height, defPrice, minImgCount)
+            return productService.updateProduct(id, name, remark, defPrice, templateName)
         }
     }
 

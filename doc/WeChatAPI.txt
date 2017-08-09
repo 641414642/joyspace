@@ -24,24 +24,7 @@
 				"errmsg" : null
 			}
 
-上传图片：
-	POST
-	/api/image
-	content-type:  multipart/form-data
-	参数： sessionId   登录返回的sessionId
-		  thumbMaxWidth     生成的缩略图的最大宽度
-		  thumbMaxHeight    生成的缩略图的最大高度  (生成的缩略图会保存原图比例，尺寸不超过这两个参数定义的大小)
-		  image         图片文件内容
-	返回值:   {
-				"imageId": 6,
-				"width": 6000,   //原图尺寸
-				"height": 2315,   //原图尺寸
-				"thumbUrl": "http://localhost:6060/assets/user/1/D8F219B9D0C0470C961074650E79D3DC/e2fee30d51cc481ab8a4e7f3419014b7.thumb.jpg",   //缩略图url
-				"thumbWidth": 200,      //缩略图尺寸
-				"thumbHeight": 77,      //缩略图尺寸
-				"errcode": 0,
-				"errmsg": null
-			 }
+
 删除上传的图片:
 	DELETE
 	/api/image?imageId=xxx&sessionId=xxxx
@@ -80,3 +63,80 @@
 		}
 	}
 		
+
+-------------------------------------------------------------------------
+上传图片： (上传原图和缩略图都用这个)
+	POST
+	/api/image
+	content-type:  multipart/form-data
+	参数： sessionId   登录返回的sessionId
+		  image         图片文件内容
+	返回值:   {
+               "errcode": 0,        //错误代码, 0表示成功
+               "errmsg": null,
+               "imageId": xxx,
+               "width": xxxx,        //宽度和高度
+               "height": xxxx,
+               "url": "http://xxxxxxxxxxxxxxxx.jpg"
+           }
+缩放图片:
+    POST
+    /api/image/resize
+    参数:
+        sessionId
+        width   //要缩放到的宽度(像素)
+        height   //要缩放到的高度(像素)
+        imageId  //要缩放的图片的id
+    返回值:
+         {
+             "errcode": 0,
+             "errmsg": null,
+             "imageId": xx,   //缩放后的新图片的id
+             "width": xxx,
+             "height": xxx,
+             "url": "http://xxxxxxxxxxxx.jpg"
+         }
+
+获取产品需要上传的图片的信息:
+    GET
+    /api/product/images
+    参数:
+        productId    //产品id
+    返回值: (json数组)
+    [
+        {
+            "name": "照片1",
+            "width": 100,    //单位mm
+            "height": 200    //单位mm
+        },
+        {
+            "name": "照片2",
+            "width": 80,
+            "height": 60
+        },
+        ...
+    ]
+
+
+生成成品的预览图：
+    POST
+    /api/product/preview
+    content-type:  application/json
+    参数: (POST body， json格式)
+        {
+            "sessionId": "xxxxxxxxxxxxxxxxxxxx",
+            "productId": xx,
+            "images" : [
+                { "imageId": xxx, "name": "xxx" },    //imageid 是上面的上传图片接口返回的，  name对应获取产品需要上传的图片接口返回值中的name
+                { "imageId": xxx, "name": "xxx" },
+                { "imageId": xxx, "name": "xxx" },
+                ...
+            ]
+        }
+    返回: (json 对象)
+        {
+            "errcode": 0,
+            "errmsg": null,
+            "svgUrl": "https://xxxxxxxxxxxxxxxxxxxxxxxxx.svg",   //这个是给app用的svg格式的模板
+            "jpgUrl": "https://xxxxxxxxxxxxxxxxxxxxxxxxx.jpg"    //jpg格式预览图
+        }

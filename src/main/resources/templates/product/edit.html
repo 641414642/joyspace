@@ -49,18 +49,13 @@
                         <span class="help-block"></span>
                     </div>
                     <div class="form-group">
-                        <label for="width" class="control-label">宽度(毫米):</label>
-                        <input type="text" name="width" style="display:inline-block" class="form-control" id="width" th:value="${product.width}" />
-                        <span class="help-block"></span>
-                    </div>
-                    <div class="form-group">
-                        <label for="height" class="control-label">高度(毫米):</label>
-                        <input type="text" name="height" style="display:inline-block" class="form-control" id="height" th:value="${product.height}" />
-                        <span class="help-block"></span>
-                    </div>
-                    <div class="form-group">
-                        <label for="minImgCount" class="control-label">最小图片数量:</label>
-                        <input type="text" name="minImgCount" class="form-control" id="minImgCount" th:value="${product.minImageCount}" />
+                        <label for="template" class="control-label">模板:</label>
+                        <select name="template" class="form-control" id="template">
+                            <option th:each="tpl : ${templates}"
+                                    th:value="${tpl}"
+                                    th:text="${tpl}">
+                            </option>
+                        </select>
                         <span class="help-block"></span>
                     </div>
                     <div class="form-group">

@@ -4,6 +4,8 @@ import java.util.Calendar
 import javax.persistence.*
 
 import javax.validation.constraints.NotNull
+import javax.persistence.JoinColumn
+import javax.persistence.FetchType
 
 @Entity
 @Table(name = "user_image_file")
@@ -39,4 +41,8 @@ class UserImageFile {
     @Column
     @NotNull
     var height: Int = 0
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "order_item_id")
+    var orderItem: PrintOrderItem? = null
 }
