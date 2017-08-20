@@ -29,6 +29,7 @@ import javax.xml.transform.stream.StreamResult
 @Service
 class TemplateServiceImpl : TemplateService {
 
+
     @Value("\${com.unicolour.joyspace.assetsDir}")
     lateinit var assetsDir: String
 

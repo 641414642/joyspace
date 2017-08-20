@@ -48,10 +48,7 @@ class ImageServiceImpl : ImageService {
 
             imgFile.transferTo(file)
 
-            val pb = ProcessBuilder(
-                    "magick.exe",
-                    "identify",
-                    file.absolutePath)
+            val pb = ProcessBuilder("identify", file.absolutePath)
 
             val process = pb.start()
 
@@ -130,7 +127,7 @@ class ImageServiceImpl : ImageService {
                     srcFile.parentFile.mkdirs()
 
                     val pb = ProcessBuilder(
-                            "magick.exe",
+                            "convert",
                             srcFile.absolutePath,
                             "-thumbnail",
                             "${width}x${height}!",
