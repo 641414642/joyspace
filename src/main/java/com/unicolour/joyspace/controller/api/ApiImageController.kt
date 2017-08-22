@@ -41,6 +41,22 @@ class ApiImageController {
         return ResponseEntity.ok(imgInfo)
     }
 
+    @RequestMapping(path = arrayOf("/api/image/rotateAndCrop", "/app/image/rotateAndCrop"), method = arrayOf(RequestMethod.POST))
+    fun rotateAndCropImage(request: HttpServletRequest,
+                           @RequestParam("sessionId") sessionId: String,
+                           @RequestParam("imageId") imageId: Int,
+                           @RequestParam("angleDeg") angleDeg: Double,
+                           @RequestParam("cropX") cropX: Double,
+                           @RequestParam("cropY") cropY: Double,
+                           @RequestParam("cropWid") cropWid: Double,
+                           @RequestParam("cropHei") cropHei: Double
+    ): ResponseEntity<ImageInfo> {
+        val baseUrl = getBaseUrl(request)
+        val imgInfo = imageService.rotateAndCropImage(sessionId, imageId, angleDeg, cropX, cropY, cropWid, cropHei, baseUrl)
+
+        return ResponseEntity.ok(imgInfo)
+    }
+
     @RequestMapping(path = arrayOf("/api/image", "app/image"), method = arrayOf(RequestMethod.DELETE))
     fun deleteImage(@RequestParam("sessionId") sessionId: String,
                     @RequestParam("imageId") imageId: Int) : ResponseEntity<CommonRequestResult> {

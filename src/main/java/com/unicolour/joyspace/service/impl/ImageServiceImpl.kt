@@ -15,6 +15,7 @@ import java.io.File
 import java.io.InputStreamReader
 import java.util.*
 import java.util.regex.Pattern
+import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
 
 @Service
@@ -98,30 +99,35 @@ class ImageServiceImpl : ImageService {
         }
     }
 
-    override fun resizeImage(sessionId: String, imageId: Int, width: Int, height: Int, baseUrl: String): ImageInfo {
+    private fun processImage(sessionId: String, imageId: Int, process : (userImgFile: UserImageFile, srcFile: File) -> ImageInfo) : ImageInfo {
         val session = userLoginSessionDao.findOne(sessionId);
 
         if (session == null) {
             return ImageInfo(1, "用户未登录")
-        }
-        else {
+        } else {
             val userImg = userImageFileDao.findOne(imageId)
             if (userImg == null) {
                 return ImageInfo(2, "没有找到指定ID对应的图片")
-            }
-            else if (userImg.userId != session.userId) {
+            } else if (userImg.userId != session.userId) {
                 return ImageInfo(3, "不是此用户的图片")
-            }
-            else {
+            } else {
                 val srcFilePath = "user/${userImg.userId}/${userImg.sessionId}/${userImg.fileName}.${userImg.type}"
                 val srcFile = File(assetsDir, srcFilePath)
 
                 if (!srcFile.exists()) {
                     return ImageInfo(4, "图片文件已删除")
+                } else {
+                    return process(userImg, srcFile)
                 }
-                else {
+            }
+        }
+    }
+
+    override fun resizeImage(sessionId: String, imageId: Int, width: Int, height: Int, baseUrl: String): ImageInfo {
+        return processImage(sessionId, imageId,
+                { userImgFile, srcFile ->
                     val destFileName = UUID.randomUUID().toString().replace("-", "")
-                    val destFilePath = "user/${session.userId}/${sessionId}/${destFileName}.jpg"
+                    val destFilePath = "user/${userImgFile.userId}/${sessionId}/${destFileName}.jpg"
 
                     val destFile = File(assetsDir, destFilePath)
                     srcFile.parentFile.mkdirs()
@@ -136,7 +142,7 @@ class ImageServiceImpl : ImageService {
 
                     val process = pb.start()
 
-                    var retStr:String = "";
+                    var retStr: String = "";
                     BufferedReader(InputStreamReader(process.inputStream)).use { reader ->
                         retStr = reader.readText()
                     }
@@ -144,9 +150,8 @@ class ImageServiceImpl : ImageService {
                     val retCode = process.waitFor()
 
                     if (retCode != 0) {
-                        return ImageInfo(5, retStr)
-                    }
-                    else {
+                        ImageInfo(5, retStr)
+                    } else {
                         val patternStr = Pattern.quote(srcFile.absolutePath) + "\\s\\w+\\s\\d+x\\d+=>(\\d+)x(\\d+).*"
                         val pattern = Pattern.compile(patternStr)
                         val matcher = pattern.matcher(retStr)
@@ -158,22 +163,101 @@ class ImageServiceImpl : ImageService {
 
                         val destUrl = "${baseUrl}/assets/${destFilePath}"
 
-                        val userImgFile = UserImageFile()
-                        userImgFile.type = "jpg"
-                        userImgFile.fileName = destFileName
-                        userImgFile.width = destImgWid
-                        userImgFile.height = destImgHei
-                        userImgFile.sessionId = sessionId
-                        userImgFile.uploadTime = Calendar.getInstance()
-                        userImgFile.userId = session.userId
+                        val newUserImgFile = UserImageFile()
+                        newUserImgFile.type = "jpg"
+                        newUserImgFile.fileName = destFileName
+                        newUserImgFile.width = destImgWid
+                        newUserImgFile.height = destImgHei
+                        newUserImgFile.sessionId = sessionId
+                        newUserImgFile.uploadTime = Calendar.getInstance()
+                        newUserImgFile.userId = newUserImgFile.userId
 
-                        userImageFileDao.save(userImgFile)
+                        userImageFileDao.save(newUserImgFile)
 
-                        return ImageInfo(0, null, userImgFile.id, destImgWid, destImgHei, destUrl)
+                        ImageInfo(0, null, newUserImgFile.id, destImgWid, destImgHei, destUrl)
                     }
                 }
-            }
-        }
+        )
+    }
+
+    override fun rotateAndCropImage(sessionId: String, imageId: Int,
+                                    angleDeg: Double,
+                                    cropX: Double, cropY: Double, cropWid: Double, cropHei: Double,
+                                    baseUrl: String): ImageInfo {
+        return processImage(sessionId, imageId,
+                { userImgFile, srcFile ->
+                    val result = rotateAndCropCalculation(userImgFile.width, userImgFile.height, angleDeg)
+
+                    val destFileName = UUID.randomUUID().toString().replace("-", "")
+                    val destFilePath = "user/${userImgFile.userId}/${sessionId}/${destFileName}.jpg"
+
+                    val destFile = File(assetsDir, destFilePath)
+                    srcFile.parentFile.mkdirs()
+
+                    val commandList = ArrayList<String>()
+                    commandList += "convert"
+
+                    if (angleDeg != 0.0) {
+                        commandList += "-rotate"
+                        commandList += angleDeg.toString()
+                    }
+
+                    val innerRectX = result.innerRect.p1.x
+                    val innerRectY = result.innerRect.p1.y
+                    val innerRectWid = result.innerRect.width
+                    val innterRectHei = result.innerRect.height
+
+                    val cx = (innerRectX + innerRectWid * cropX + 0.5).toInt()
+                    val cy = (innerRectY + + innterRectHei * cropY + 0.5).toInt()
+                    val cw = (innerRectWid * cropWid + 0.5).toInt()
+                    val ch = (innterRectHei * cropHei + 0.5).toInt()
+
+                    commandList += "-crop"
+                    commandList += "${cw}x${ch}+${cx}+${cy}"
+
+                    commandList += "-identify"
+                    commandList += destFile.absolutePath
+
+                    val pb = ProcessBuilder(commandList)
+
+                    val process = pb.start()
+
+                    var retStr: String = "";
+                    BufferedReader(InputStreamReader(process.inputStream)).use { reader ->
+                        retStr = reader.readText()
+                    }
+
+                    val retCode = process.waitFor()
+
+                    if (retCode != 0) {
+                        ImageInfo(5, retStr)
+                    } else {
+                        val patternStr = Pattern.quote(srcFile.absolutePath) + "\\s\\w+\\s\\d+x\\d+=>(\\d+)x(\\d+).*"
+                        val pattern = Pattern.compile(patternStr)
+                        val matcher = pattern.matcher(retStr)
+
+                        matcher.find()
+
+                        val destImgWid = matcher.group(1).toInt()
+                        val destImgHei = matcher.group(2).toInt()
+
+                        val destUrl = "${baseUrl}/assets/${destFilePath}"
+
+                        val newUserImgFile = UserImageFile()
+                        newUserImgFile.type = "jpg"
+                        newUserImgFile.fileName = destFileName
+                        newUserImgFile.width = destImgWid
+                        newUserImgFile.height = destImgHei
+                        newUserImgFile.sessionId = sessionId
+                        newUserImgFile.uploadTime = Calendar.getInstance()
+                        newUserImgFile.userId = newUserImgFile.userId
+
+                        userImageFileDao.save(newUserImgFile)
+
+                        ImageInfo(0, null, newUserImgFile.id, destImgWid, destImgHei, destUrl)
+                    }
+                }
+        )
     }
 
     override fun deleteImage(sessionId: String, imageId: Int): CommonRequestResult {
@@ -218,3 +302,4 @@ class ImageServiceImpl : ImageService {
         return "${baseUrl}/assets/user/${userImgFile.userId}/${userImgFile.sessionId}/${userImgFile.fileName}.${userImgFile.type}"
     }
 }
+
