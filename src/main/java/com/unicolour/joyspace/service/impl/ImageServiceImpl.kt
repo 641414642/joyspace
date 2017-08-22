@@ -49,7 +49,7 @@ class ImageServiceImpl : ImageService {
 
             imgFile.transferTo(file)
 
-            val pb = ProcessBuilder("identify", file.absolutePath)
+            val pb = ProcessBuilder("magick", "identify", file.absolutePath)
 
             val process = pb.start()
 
@@ -133,6 +133,7 @@ class ImageServiceImpl : ImageService {
                     srcFile.parentFile.mkdirs()
 
                     val pb = ProcessBuilder(
+                            "magick",
                             "convert",
                             srcFile.absolutePath,
                             "-thumbnail",
@@ -195,11 +196,15 @@ class ImageServiceImpl : ImageService {
                     srcFile.parentFile.mkdirs()
 
                     val commandList = ArrayList<String>()
+
+                    commandList += "magick"
                     commandList += "convert"
+                    commandList += srcFile.absolutePath
 
                     if (angleDeg != 0.0) {
                         commandList += "-rotate"
                         commandList += angleDeg.toString()
+                        commandList += "+repage"
                     }
 
                     val innerRectX = result.innerRect.p1.x
@@ -214,6 +219,7 @@ class ImageServiceImpl : ImageService {
 
                     commandList += "-crop"
                     commandList += "${cw}x${ch}+${cx}+${cy}"
+                    commandList += "+repage"
 
                     commandList += "-identify"
                     commandList += destFile.absolutePath
