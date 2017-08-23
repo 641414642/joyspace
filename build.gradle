@@ -58,7 +58,6 @@ dependencies {
 	compile("org.jetbrains.kotlin:kotlin-stdlib-jre8:${kotlin_version}")
 	compile('com.graphql-java:graphql-java:3.0.0')
 	compile('org.apache.xmlgraphics:batik-rasterizer:1.9.1')
-	compile('fr.avianey.apache-xmlgraphics:batik:1.8')
 	runtime('mysql:mysql-connector-java')
 	testCompile('org.springframework.boot:spring-boot-starter-test')
 	testCompile('com.microsoft.sqlserver:mssql-jdbc:6.1.0.jre8')
