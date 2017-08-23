@@ -187,6 +187,11 @@ class ImageServiceImpl : ImageService {
                                     baseUrl: String): ImageInfo {
         return processImage(sessionId, imageId,
                 { userImgFile, srcFile ->
+                    if (angleDeg == 0.0 && cropX == 0.0 && cropY == 0.0 && cropWid == 1.0 && cropHei == 1.0) {
+                        val destUrl = "${baseUrl}/assets/user/${userImgFile.userId}/${userImgFile.sessionId}/${userImgFile.fileName}.${userImgFile.type}"
+                        return@processImage ImageInfo(0, null, userImgFile.id, userImgFile.width, userImgFile.height, destUrl)
+                    }
+
                     val result = rotateAndCropCalculation(userImgFile.width, userImgFile.height, angleDeg)
 
                     val destFileName = UUID.randomUUID().toString().replace("-", "")
@@ -210,12 +215,12 @@ class ImageServiceImpl : ImageService {
                     val innerRectX = result.innerRect.p1.x
                     val innerRectY = result.innerRect.p1.y
                     val innerRectWid = result.innerRect.width
-                    val innterRectHei = result.innerRect.height
+                    val innerRectHei = result.innerRect.height
 
                     val cx = (innerRectX + innerRectWid * cropX + 0.5).toInt()
-                    val cy = (innerRectY + + innterRectHei * cropY + 0.5).toInt()
+                    val cy = (innerRectY + + innerRectHei * cropY + 0.5).toInt()
                     val cw = (innerRectWid * cropWid + 0.5).toInt()
-                    val ch = (innterRectHei * cropHei + 0.5).toInt()
+                    val ch = (innerRectHei * cropHei + 0.5).toInt()
 
                     commandList += "-crop"
                     commandList += "${cw}x${ch}+${cx}+${cy}"
@@ -242,10 +247,27 @@ class ImageServiceImpl : ImageService {
                         val pattern = Pattern.compile(patternStr)
                         val matcher = pattern.matcher(retStr)
 
-                        matcher.find()
+                        val destImgWid: Int
+                        val destImgHei: Int
 
-                        val destImgWid = matcher.group(1).toInt()
-                        val destImgHei = matcher.group(2).toInt()
+                        if (matcher.find()) {
+                            destImgWid = matcher.group(1).toInt()
+                            destImgHei = matcher.group(2).toInt()
+                        }
+                        else {
+                            val patternStr1 = Pattern.quote(srcFile.absolutePath) + "\\s\\w+\\s(\\d+)x(\\d+).*"
+                            val pattern1 = Pattern.compile(patternStr1)
+                            val matcher1 = pattern1.matcher(retStr)
+
+                            if (matcher1.find()) {
+                                destImgWid = matcher1.group(1).toInt()
+                                destImgHei = matcher1.group(2).toInt()
+                            }
+                            else {
+                                destImgWid = 0
+                                destImgHei = 0
+                            }
+                        }
 
                         val destUrl = "${baseUrl}/assets/${destFilePath}"
 
