@@ -14,7 +14,7 @@ interface PrintOrderService {
     fun createOrder(orderInput: OrderInput): PrintOrder
     fun getImageFilesDataFetcher(): DataFetcher<Array<UserImageFile>>
     fun getPrintOrderDataFetcher(): DataFetcher<PrintOrder?>
-    fun startPayment(orderId: Int): WxPayParams
+    fun startPayment(orderId: Int, baseUrl:String): WxPayParams
     fun getUpdateOrderStateDataFetcher(state: PrintOrderState): DataFetcher<GraphQLRequestResult>
     fun processWxPayNotify(requestBodyStr: String): String?
 }

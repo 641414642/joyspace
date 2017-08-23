@@ -28,6 +28,7 @@ import javax.transaction.Transactional
 import kotlin.experimental.and
 import java.io.InputStreamReader
 import java.io.StringReader
+import java.net.URL
 import javax.annotation.PostConstruct
 import javax.xml.bind.JAXBContext
 import javax.xml.bind.Unmarshaller
@@ -168,7 +169,7 @@ open class PrintOrderServiceImpl : PrintOrderService {
         }
     }
 
-    override fun startPayment(orderId: Int): WxPayParams {
+    override fun startPayment(orderId: Int, baseUrl:String): WxPayParams {
         val order = printOrderDao.findOne(orderId)
         val printStation = printStationDao.findOne(order.printStationId)
         val priceMap = printStationService.getPriceMap(printStation)
@@ -180,8 +181,8 @@ open class PrintOrderServiceImpl : PrintOrderService {
         if (nonceStr.length > 32) {
             nonceStr = nonceStr.substring(0, 32)
         }
-        val notifyUrl: String = "https://joyspace.uni-colour.com/wxpay/notify"
-        val ipAddress: String = java.net.InetAddress.getByName("joyspace.uni-colour.com").hostAddress
+        val notifyUrl = "$baseUrl/wxpay/notify"
+        val ipAddress: String = java.net.InetAddress.getByName(URL(baseUrl).host).hostAddress
 
         val orderItems = printOrderItemDao.findByPrintOrderId(order.id)
         var totalFee:Int = 0
@@ -215,7 +216,10 @@ open class PrintOrderServiceImpl : PrintOrderService {
 
 
         InputStreamReader(response.body.inputStream, StandardCharsets.UTF_8).use {
-            val result = wxUnifyOrderResultUnmarshaller.unmarshal(InputStreamReader(response.body.inputStream, StandardCharsets.UTF_8)) as WxUnifyOrderResult
+            val resultStr = String(response.body.inputStream.readBytes(), StandardCharsets.UTF_8)
+            println(resultStr)
+
+            val result = wxUnifyOrderResultUnmarshaller.unmarshal(StringReader(resultStr)) as WxUnifyOrderResult
 
             if (result.return_code == "SUCCESS" && result.result_code == "SUCCESS") {
                 return createWxPayParams(result, nonceStr)
