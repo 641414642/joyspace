@@ -115,6 +115,10 @@ open class PrintOrderServiceImpl : PrintOrderService {
             newOrderItem.product = productDao.findOne(orderItem.productId)
 
             printOrderItemDao.save(newOrderItem)
+
+            val userImgFile = userImageFileDao.findOne(orderItem.imageFileId)
+            userImgFile.orderItem = newOrderItem
+            userImageFileDao.save(userImgFile)
         }
 
         return order
