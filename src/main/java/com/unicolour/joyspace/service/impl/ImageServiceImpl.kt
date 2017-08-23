@@ -171,7 +171,7 @@ class ImageServiceImpl : ImageService {
                         newUserImgFile.height = destImgHei
                         newUserImgFile.sessionId = sessionId
                         newUserImgFile.uploadTime = Calendar.getInstance()
-                        newUserImgFile.userId = newUserImgFile.userId
+                        newUserImgFile.userId = userImgFile.userId
 
                         userImageFileDao.save(newUserImgFile)
 
@@ -278,7 +278,7 @@ class ImageServiceImpl : ImageService {
                         newUserImgFile.height = destImgHei
                         newUserImgFile.sessionId = sessionId
                         newUserImgFile.uploadTime = Calendar.getInstance()
-                        newUserImgFile.userId = newUserImgFile.userId
+                        newUserImgFile.userId = userImgFile.userId
 
                         userImageFileDao.save(newUserImgFile)
 
