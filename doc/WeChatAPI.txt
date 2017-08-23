@@ -92,8 +92,29 @@
              "errcode": 0,
              "errmsg": null,
              "imageId": xx,   //缩放后的新图片的id
-             "width": xxx,
-             "height": xxx,
+             "width": xxx,    //新图片宽度(像素)
+             "height": xxx,   //新图片高度(像素)
+             "url": "http://xxxxxxxxxxxx.jpg"
+         }
+
+旋转裁切图片:
+    POST
+    /api/image/rotateAndCrop
+    参数:
+        sessionId
+        imageId     //要处理的图片的id
+        angleDeg    //旋转角度 0~360
+        cropX       //裁切框x方向起始位置 (0~1)
+        cropY       //裁切框y方向起始位置 (0~1)
+        cropWid     //裁切框x方向宽度 (0~1)
+        cropHei     //裁切框y方向宽度 (0~1)
+    返回值:
+         {
+             "errcode": 0,
+             "errmsg": null,
+             "imageId": xx,   //旋转裁切后的新图片的id
+             "width": xxx,    //新图片宽度(像素)
+             "height": xxx,   //新图片高度(像素)
              "url": "http://xxxxxxxxxxxx.jpg"
          }
 
