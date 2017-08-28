@@ -10,7 +10,7 @@ const val USER_SEX_UNKNOWN: Byte = 0
 
 /** 最终用户 */
 @Entity
-@Table(name = "user")
+@Table(name = "joyspace_user")
 class User {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
