@@ -9,7 +9,7 @@ import javax.validation.constraints.NotNull
 @Table(name = "price_list")
 class PriceList {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     var id: Int = 0
 
     @Column(length = 50)

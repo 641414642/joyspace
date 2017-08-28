@@ -8,7 +8,7 @@ import javax.validation.constraints.NotNull
 @Table(name = "ali_pay_config")
 class AliPayConfig {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     var id: Int = 0
 
     @Column(length = 50)

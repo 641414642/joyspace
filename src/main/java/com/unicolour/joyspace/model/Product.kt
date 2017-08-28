@@ -8,7 +8,7 @@ import javax.validation.constraints.NotNull
 @Table(name = "product")
 class Product {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     var id: Int = 0
 
     @Column(length = 50)
@@ -69,7 +69,7 @@ enum class ProductType(val value:Int, val dispName:String) {
 @Table(name = "product_image_file")
 class ProductImageFile {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     var id: Int = 0
 
     /** 类型 0: thumb  1: preview */

@@ -13,7 +13,7 @@ const val USER_SEX_UNKNOWN: Byte = 0
 @Table(name = "joyspace_user")
 class User {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     var id: Int = 0
 
     /** 用户 */

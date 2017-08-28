@@ -12,7 +12,7 @@ import javax.persistence.FetchType
 @Table(name = "print_station")
 class PrintStation {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     var id: Int = 0
 
     /** 微信二维码 */

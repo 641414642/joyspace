@@ -11,7 +11,7 @@ import javax.persistence.FetchType
 @Table(name = "user_image_file")
 class UserImageFile {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     var id: Int = 0
 
     @NotNull

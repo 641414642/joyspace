@@ -8,7 +8,7 @@ import javax.validation.constraints.NotNull
 @Table(name = "print_station_product")
 class PrintStationProduct {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     var id: Int = 0
 
 

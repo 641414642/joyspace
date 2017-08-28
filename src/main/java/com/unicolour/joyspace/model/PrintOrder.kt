@@ -8,7 +8,7 @@ import javax.validation.constraints.NotNull
 @Table(name = "print_order")
 class PrintOrder {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     var id: Int = 0
 
     //属于哪个投放商
@@ -50,7 +50,7 @@ class PrintOrder {
 @Table(name = "print_order_item")
 class PrintOrderItem {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     var id: Int = 0
 
     //region 订单
