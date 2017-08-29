@@ -94,17 +94,22 @@ open class TemplateServiceImpl : TemplateService {
         ZipInputStream(templateFile.inputStream).use {
             var entry: ZipEntry? = it.nextEntry
             while (entry != null) {
-                var fileName = entry.name
-                if (fileName.toLowerCase().endsWith(".svg")) {
-                    fileName = "template.svg"
+                if (!entry.isDirectory) {
+                    var isTplSvgFile = false
+                    var fileName = entry.name
+                    if (fileName.toLowerCase().endsWith(".svg")) {
+                        fileName = "template.svg"
+                        isTplSvgFile = true
+                    }
 
-                    updateTemplateInfo(tpl, File(tplDir, fileName))
+                    val targetFile = File(tplDir, fileName)
+                    targetFile.parentFile.mkdirs()
+                    targetFile.outputStream().use { out -> it.copyTo(out) }
+
+                    if (isTplSvgFile) {
+                        updateTemplateInfo(tpl, targetFile)
+                    }
                 }
-
-                val targetFile = File(tplDir, fileName)
-                targetFile.parentFile.mkdirs()
-                targetFile.outputStream().use { out -> it.copyTo(out) }
-
                 entry = it.nextEntry
             }
         }
@@ -143,8 +148,6 @@ open class TemplateServiceImpl : TemplateService {
         template.width = toMM(doc.documentElement.getAttribute("width"))
         template.height = toMM(doc.documentElement.getAttribute("height"))
 
-        templateDao.save(template)
-
         val userImages = TreeMap<String, TemplateImageInfo>()
 
         eachImageElement(doc, {imgEle, title, desc ->
@@ -159,6 +162,9 @@ open class TemplateServiceImpl : TemplateService {
             }
         })
 
+        template.minImageCount = userImages.size
+
+        templateDao.save(template)
         templateImageInfoDao.save(userImages.values)
     }
 

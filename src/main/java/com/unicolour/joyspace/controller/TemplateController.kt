@@ -43,14 +43,14 @@ class TemplateController {
 
         modelAndView.model.put("templates", templates.content)
 
-        modelAndView.model.put("viewCat", "template_mgr")
+        modelAndView.model.put("viewCat", "product_mgr")
         modelAndView.model.put("viewContent", "template_list")
         modelAndView.viewName = "layout"
 
         return modelAndView
     }
 
-    @RequestMapping(path = arrayOf("/tempalte/edit"), method = arrayOf(RequestMethod.GET))
+    @RequestMapping(path = arrayOf("/template/edit"), method = arrayOf(RequestMethod.GET))
     fun editTemplate(
             modelAndView: ModelAndView,
             @RequestParam(name = "id", required = true) id: Int): ModelAndView {
