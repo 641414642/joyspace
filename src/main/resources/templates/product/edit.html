@@ -52,8 +52,9 @@
                         <label for="template" class="control-label">模板:</label>
                         <select name="template" class="form-control" id="template">
                             <option th:each="tpl : ${templates}"
-                                    th:value="${tpl}"
-                                    th:text="${tpl}">
+                                    th:value="${tpl.id}"
+                                    th:text="${tpl.name}"
+                                    th:selected="${tpl.id == product.templateId}">
                             </option>
                         </select>
                         <span class="help-block"></span>

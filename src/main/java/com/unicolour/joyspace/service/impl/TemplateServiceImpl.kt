@@ -1,13 +1,12 @@
 package com.unicolour.joyspace.service.impl
 
 import com.unicolour.joyspace.controller.api.PreviewParam
+import com.unicolour.joyspace.dao.TemplateDao
+import com.unicolour.joyspace.dao.TemplateImageInfoDao
 import com.unicolour.joyspace.dao.UserImageFileDao
 import com.unicolour.joyspace.dao.UserLoginSessionDao
-import com.unicolour.joyspace.dto.TemplateImageInfo
-import com.unicolour.joyspace.dto.TemplateInfo
 import com.unicolour.joyspace.dto.TemplatePreviewResult
-import com.unicolour.joyspace.model.UserImageFile
-import com.unicolour.joyspace.model.UserLoginSession
+import com.unicolour.joyspace.model.*
 import com.unicolour.joyspace.service.ImageService
 import com.unicolour.joyspace.service.TemplateService
 import org.apache.batik.apps.rasterizer.DestinationType
@@ -16,20 +15,22 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import org.springframework.transaction.support.TransactionTemplate
+import org.springframework.web.multipart.MultipartFile
 import org.w3c.dom.Document
 import org.w3c.dom.Element
 import java.awt.Color
 import java.io.File
 import java.util.*
+import java.util.zip.ZipEntry
+import java.util.zip.ZipInputStream
+import javax.transaction.Transactional
 import javax.xml.parsers.DocumentBuilderFactory
 import javax.xml.transform.TransformerFactory
 import javax.xml.transform.dom.DOMSource
 import javax.xml.transform.stream.StreamResult
 
 @Service
-class TemplateServiceImpl : TemplateService {
-
-
+open class TemplateServiceImpl : TemplateService {
     @Value("\${com.unicolour.joyspace.assetsDir}")
     lateinit var assetsDir: String
 
@@ -44,6 +45,12 @@ class TemplateServiceImpl : TemplateService {
 
     @Autowired
     lateinit var transactionTemplate: TransactionTemplate
+
+    @Autowired
+    lateinit var templateDao: TemplateDao
+
+    @Autowired
+    lateinit var templateImageInfoDao: TemplateImageInfoDao
 
     private fun toMM(value:String) : Double {
         if (value.endsWith("mm")) {
@@ -66,31 +73,93 @@ class TemplateServiceImpl : TemplateService {
         }
     }
 
-    override fun getTemplateInfo(templateName: String): TemplateInfo? {
-        try {
-            val templateFile = File(assetsDir, "template/$templateName/template.svg")
-            val factory = DocumentBuilderFactory.newInstance()
-            factory.isNamespaceAware = true
+    @Transactional
+    override fun createTemplate(name: String, type: ProductType, templateFile: MultipartFile) {
+        val tpl = Template()
+        tpl.currentVersion = 1
+        tpl.minImageCount = 0
+        tpl.name = name
+        tpl.type = type.value
+        tpl.width = 0.0
+        tpl.height = 0.0
 
-            val doc = factory.newDocumentBuilder().parse(templateFile)
-            val tplWid = toMM(doc.documentElement.getAttribute("width"))
-            val tplHei = toMM(doc.documentElement.getAttribute("height"))
-            val userImages = TreeMap<String, TemplateImageInfo>()
+        templateDao.save(tpl)
 
-            eachImageElement(doc, {imgEle, title, desc ->
-                if (desc == "UserImage" || desc == "用户图片" && !userImages.containsKey(title)) {
-                    val imgWid = toMM(imgEle.getAttribute("width"))
-                    val imgHei = toMM(imgEle.getAttribute("height"))
-                    userImages.put(title, TemplateImageInfo(title, imgWid, imgHei))
+        saveTemplateFiles(tpl, templateFile)
+    }
+
+    private fun saveTemplateFiles(tpl: Template, templateFile: MultipartFile) {
+        val tplDir = File(assetsDir, "template/${tpl.id}/${tpl.currentVersion}")
+
+        ZipInputStream(templateFile.inputStream).use {
+            var entry: ZipEntry? = it.nextEntry
+            while (entry != null) {
+                var fileName = entry.name
+                if (fileName.toLowerCase().endsWith(".svg")) {
+                    fileName = "template.svg"
+
+                    updateTemplateInfo(tpl, File(tplDir, fileName))
                 }
-            })
 
-            return TemplateInfo(tplWid, tplHei, userImages.size, userImages.values.toList())
+                val targetFile = File(tplDir, fileName)
+                targetFile.parentFile.mkdirs()
+                targetFile.outputStream().use { out -> it.copyTo(out) }
+
+                entry = it.nextEntry
+            }
         }
-        catch (ex: Exception) {
-            ex.printStackTrace()
-            return null
+    }
+
+    @Transactional
+    override fun updateTemplate(id: Int, name: String, type: ProductType, templateFile: MultipartFile?): Boolean {
+        val tpl = templateDao.findOne(id)
+
+        if (templateFile == null) {
+            tpl.name = name
+            tpl.type = type.value
+
+            templateDao.save(tpl)
+
+            return true
         }
+        else {
+            if (tpl != null) {
+                tpl.currentVersion++
+
+                saveTemplateFiles(tpl, templateFile)
+
+                return true
+            } else {
+                return false
+            }
+        }
+    }
+
+    private fun updateTemplateInfo(template: Template, tplSvgFile: File) {
+        val factory = DocumentBuilderFactory.newInstance()
+        factory.isNamespaceAware = true
+
+        val doc = factory.newDocumentBuilder().parse(tplSvgFile)
+        template.width = toMM(doc.documentElement.getAttribute("width"))
+        template.height = toMM(doc.documentElement.getAttribute("height"))
+
+        templateDao.save(template)
+
+        val userImages = TreeMap<String, TemplateImageInfo>()
+
+        eachImageElement(doc, {imgEle, title, desc ->
+            if (desc == "UserImage" || desc == "用户图片" && !userImages.containsKey(title)) {
+                val tplImg = TemplateImageInfo()
+                tplImg.template = template
+                tplImg.width = toMM(imgEle.getAttribute("width"))
+                tplImg.height = toMM(imgEle.getAttribute("height"))
+                tplImg.name = title
+
+                userImages.put(title, tplImg)
+            }
+        })
+
+        templateImageInfoDao.save(userImages.values)
     }
 
     private fun eachImageElement(doc: Document, imgEleCallback: (imgEle:Element, title: String, desc: String) -> Unit) {
@@ -121,7 +190,7 @@ class TemplateServiceImpl : TemplateService {
         }
     }
 
-    override fun createPreview(previewParam: PreviewParam, templateName: String, baseUrl: String): TemplatePreviewResult {
+    override fun createPreview(previewParam: PreviewParam, template: Template, baseUrl: String): TemplatePreviewResult {
         val session = userLoginSessionDao.findOne(previewParam.sessionId)
 
         if (session == null) {
@@ -136,7 +205,7 @@ class TemplateServiceImpl : TemplateService {
                 return TemplatePreviewResult(3, "不是此用户的图片")
             }
 
-            val templateFile = File(assetsDir, "template/$templateName/template.svg")
+            val templateFile = File(assetsDir, "template/${template.id}/${template.currentVersion}/template.svg")
             val factory = DocumentBuilderFactory.newInstance()
             factory.isNamespaceAware = true
 
@@ -171,7 +240,7 @@ class TemplateServiceImpl : TemplateService {
                         imgEle.setAttributeNS(
                                 xLinkNameSpace,
                                 "xlink:href",
-                                "${baseUrl}/assets/template/$templateName/$imgSrc")
+                                "${baseUrl}/assets/template/${template.id}/${template.currentVersion}/$imgSrc")
                     }
                 }
             })
@@ -232,10 +301,5 @@ class TemplateServiceImpl : TemplateService {
 
         userImageFileDao.save(userSvgImgFile)
         userImageFileDao.save(userJpgImgFile)
-    }
-
-    override fun getTemplateNames(): List<String> {
-        val templateDir = File(assetsDir, "template")
-        return templateDir.listFiles().filter { it.isDirectory }.map { it.name }
     }
 }

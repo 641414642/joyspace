@@ -13,6 +13,11 @@ function createOrEditProduct(event) {
     return showPostFormModal(event, 'editProductForm', null, true);
 }
 
+//添加编辑模板
+function createOrEditTemplate(event) {
+    return showPostFormModal(event, 'editTemplateForm', null, true);
+}
+
 //上传图片文件
 function manageProductImageFiles(event) {
     $('#modalTemplate').removeClass().addClass("modal fade");

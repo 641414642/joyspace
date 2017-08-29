@@ -46,6 +46,12 @@ class TestServiceImpl : TestService {
     lateinit var printStationProductDao: PrintStationProductDao
 
     @Autowired
+    lateinit var templateDao: TemplateDao
+
+    @Autowired
+    lateinit var templateImageInfoDao: TemplateImageInfoDao
+
+    @Autowired
     lateinit var passwordEncoder: PasswordEncoder
 
     override fun clearOldTestDataAndCreateNewTestData() {
@@ -83,38 +89,81 @@ class TestServiceImpl : TestService {
         user.password = passwordEncoder.encode("123456")
         userDao.save(user)
 
+        //模板
+        val photoTpl = Template()
+        photoTpl.currentVersion = 1
+        photoTpl.width = 500.0
+        photoTpl.height = 400.0
+        photoTpl.type = ProductType.PHOTO.value
+        photoTpl.name = "照片模板"
+        photoTpl.minImageCount = 1
+        templateDao.save(photoTpl)
+
+        val photoTplImg = TemplateImageInfo()
+        photoTplImg.width = 200.0
+        photoTplImg.height = 150.0
+        photoTplImg.name = "照片"
+        photoTplImg.template = photoTpl
+        templateImageInfoDao.save(photoTplImg);
+
+        val idPhotoTpl = Template()
+        idPhotoTpl.currentVersion = 1
+        idPhotoTpl.width = 500.0
+        idPhotoTpl.height = 400.0
+        idPhotoTpl.type = ProductType.ID_PHOTO.value
+        idPhotoTpl.name = "证件照片模板"
+        idPhotoTpl.minImageCount = 1
+        templateDao.save(idPhotoTpl)
+
+        val idPhotoTplImg = TemplateImageInfo()
+        idPhotoTplImg.width = 32.0
+        idPhotoTplImg.height = 22.0
+        idPhotoTplImg.name = "证件照片"
+        idPhotoTplImg.template = idPhotoTpl
+        templateImageInfoDao.save(idPhotoTplImg);
+
+        val composeTpl = Template()
+        composeTpl.currentVersion = 1
+        composeTpl.width = 500.0
+        composeTpl.height = 400.0
+        composeTpl.type = ProductType.TEMPLATE.value
+        composeTpl.name = "模板拼图模板"
+        composeTpl.minImageCount = 1
+        templateDao.save(composeTpl)
+
+        val composeTplImg = TemplateImageInfo()
+        composeTplImg.width = 100.0
+        composeTplImg.height = 200.0
+        composeTplImg.name = "拼图照片"
+        composeTplImg.template = composeTpl
+        templateImageInfoDao.save(composeTplImg);
+
         //产品
         val product1 = Product()
         product1.defaultPrice = 500 //5元
         product1.enabled = true
-        product1.minImageCount = 1
+        product1.company = company
         product1.name = "五寸照片"
         product1.remark = "5寸彩色照片"
-        product1.width = 50.0
-        product1.height = 30.0
-        product1.type = ProductType.PHOTO.value
+        product1.template = composeTpl
         productDao.save(product1)
 
         val product2 = Product()
         product2.defaultPrice = 600 //5元
         product2.enabled = true
-        product2.minImageCount = 2
-        product2.name = "六寸照片"
-        product2.remark = "6寸彩色照片"
-        product2.width = 60.0
-        product2.height = 40.0
-        product2.type = ProductType.PHOTO.value
+        product2.company = company
+        product2.name = "一寸证件照"
+        product2.remark = "1寸证件照"
+        product2.template = photoTpl
         productDao.save(product2)
 
         val product3 = Product()
         product3.defaultPrice = 700 //5元
         product3.enabled = true
-        product3.minImageCount = 3
-        product3.name = "七寸照片"
-        product3.remark = "7寸彩色照片"
-        product3.width = 70.0
-        product3.height = 50.0
-        product3.type = ProductType.ID_PHOTO.value
+        product3.company = company
+        product3.name = "模板拼图"
+        product3.remark = "模板拼图照片测试"
+        product3.template = composeTpl
         productDao.save(product3)
 
         //价格列表

@@ -1,9 +1,8 @@
 package com.unicolour.joyspace.service.impl
 
-import com.unicolour.joyspace.dao.PrintStationProductDao
-import com.unicolour.joyspace.dao.ProductDao
-import com.unicolour.joyspace.dao.ProductImageFileDao
+import com.unicolour.joyspace.dao.*
 import com.unicolour.joyspace.model.*
+import com.unicolour.joyspace.service.ManagerService
 import com.unicolour.joyspace.service.ProductService
 import com.unicolour.joyspace.service.TemplateService
 import graphql.schema.DataFetcher
@@ -37,23 +36,33 @@ open class ProductServiceImpl : ProductService {
     @Autowired
     lateinit var templateService: TemplateService
 
+    @Autowired
+    lateinit var managerService: ManagerService
+
+    @Autowired
+    lateinit var managerDao: ManagerDao
+
+    @Autowired
+    lateinit var templateDao: TemplateDao
+
     override fun getProductsOfPrintStation(printStationId: Int): List<PrintStationProduct> {
         return printStationProductDao.findByPrintStationId(printStationId)
     }
 
     @Transactional
-    override fun updateProduct(id: Int, name: String, remark: String, defPrice: Double, templateName: String): Boolean {
+    override fun updateProduct(id: Int, name: String, remark: String, defPrice: Double, templateId: Int): Boolean {
         val product = productDao.findOne(id)
         if (product != null) {
-            val tplInfo = templateService.getTemplateInfo(templateName)
+            val tpl = templateDao.findOne(templateId)
 
-            if (tplInfo != null) {
+            if (tpl != null) {
+                if (templateId != product.templateId) {
+                    product.version++
+                }
+
                 product.name = name
-                product.templateName = templateName;
-                product.width = tplInfo.widthInMM
-                product.height = tplInfo.heightInMM
+                product.template = tpl
                 product.defaultPrice = (defPrice * 100).toInt()
-                product.minImageCount = tplInfo.minImageCount
                 product.enabled = true
                 product.remark = remark
 
@@ -66,20 +75,22 @@ open class ProductServiceImpl : ProductService {
     }
 
     @Transactional
-    override fun createProduct(name: String, remark: String, defPrice: Double, templateName: String): Product? {
-        val tplInfo = templateService.getTemplateInfo(templateName)
+    override fun createProduct(name: String, remark: String, defPrice: Double, templateId: Int): Product? {
+        val tpl = templateDao.findOne(templateId)
 
-        if (tplInfo != null) {
+        if (tpl != null) {
+            val loginManager = managerService.loginManager
+            val manager = managerDao.findOne(loginManager.managerId)
+
             val product = Product()
 
             product.name = name
-            product.templateName = templateName;
-            product.width = tplInfo.widthInMM
-            product.height = tplInfo.heightInMM
+            product.template = tpl
             product.defaultPrice = (defPrice * 100).toInt()
-            product.minImageCount = tplInfo.minImageCount
             product.enabled = true
             product.remark = remark
+            product.version = 1
+            product.company = manager.company
 
             productDao.save(product)
 
@@ -163,7 +174,8 @@ open class ProductServiceImpl : ProductService {
             val product = environment.getSource<Product>()
             when (fieldName) {
                 "type" -> {
-                    val type = ProductType.values().find{ it.value == product.type }
+                    val tpl = product.template
+                    val type = ProductType.values().find{ it.value == tpl.type }
                     if (type == null) null else type.name
                 }
                 else -> null

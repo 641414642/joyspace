@@ -2,6 +2,7 @@ package com.unicolour.joyspace.controller
 
 import com.unicolour.joyspace.dao.ProductDao
 import com.unicolour.joyspace.dao.ProductImageFileDao
+import com.unicolour.joyspace.dao.TemplateDao
 import com.unicolour.joyspace.model.Product
 import com.unicolour.joyspace.model.ProductImageFileType
 import com.unicolour.joyspace.service.ProductService
@@ -9,7 +10,6 @@ import com.unicolour.joyspace.service.TemplateService
 import com.unicolour.joyspace.util.Pager
 import com.unicolour.joyspace.util.getBaseUrl
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.RequestMapping
@@ -18,7 +18,6 @@ import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.ResponseBody
 import org.springframework.web.multipart.MultipartFile
 import org.springframework.web.servlet.ModelAndView
-import java.io.File
 import javax.servlet.http.HttpServletRequest
 
 @Controller
@@ -35,6 +34,9 @@ class ProductController {
 
     @Autowired
     lateinit var templateService: TemplateService
+
+    @Autowired
+    lateinit var templateDao: TemplateDao
 
     @RequestMapping("/product/list")
     fun productList(
@@ -75,7 +77,7 @@ class ProductController {
             product = Product()
         }
 
-        modelAndView.model["templates"] = templateService.getTemplateNames()
+        modelAndView.model["templates"] = templateDao.findAll()
 
         modelAndView.model.put("create", id <= 0)
         modelAndView.model.put("product", product)
@@ -91,14 +93,14 @@ class ProductController {
             @RequestParam(name = "name", required = true) name: String,
             @RequestParam(name = "remark", required = true) remark: String,
             @RequestParam(name = "defPrice", required = true) defPrice: Double,
-            @RequestParam(name = "template", required = true) templateName: String
+            @RequestParam(name = "templateId", required = true) templateId: Int
     ): Boolean {
 
         if (id <= 0) {
-            productService.createProduct(name, remark, defPrice, templateName)
+            productService.createProduct(name, remark, defPrice, templateId)
             return true
         } else {
-            return productService.updateProduct(id, name, remark, defPrice, templateName)
+            return productService.updateProduct(id, name, remark, defPrice, templateId)
         }
     }
 

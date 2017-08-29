@@ -1,6 +1,5 @@
 package com.unicolour.joyspace.dto
 
-import com.unicolour.joyspace.model.Product
 import com.unicolour.joyspace.model.ProductType
 
 class ProductDTO(
@@ -13,8 +12,8 @@ class ProductDTO(
         var imageRequired: Int = 0,
         var remark: String? = null,
         var price: Int = 0,
+        var version: Int = 0,
         var thumbnailUrl: String? = null,
         var previewUrl: String? = null,
-        var thumbnailUrls: List<String> = emptyList(),
-        var previewUrls: List<String> = emptyList()
+        var thumbnailUrls: List<String> = emptyList(), var previewUrls: List<String> = emptyList()
 )

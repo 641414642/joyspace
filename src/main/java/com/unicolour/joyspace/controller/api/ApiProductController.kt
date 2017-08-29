@@ -2,10 +2,8 @@ package com.unicolour.joyspace.controller.api
 
 import com.unicolour.joyspace.dao.PrintStationDao
 import com.unicolour.joyspace.dao.ProductDao
-import com.unicolour.joyspace.dto.ProductDTO
-import com.unicolour.joyspace.dto.TemplateImageInfo
-import com.unicolour.joyspace.dto.TemplatePreviewResult
-import com.unicolour.joyspace.dto.productToDTO
+import com.unicolour.joyspace.dao.TemplateImageInfoDao
+import com.unicolour.joyspace.dto.*
 import com.unicolour.joyspace.service.PrintStationService
 import com.unicolour.joyspace.service.TemplateService
 import com.unicolour.joyspace.util.getBaseUrl
@@ -29,6 +27,9 @@ class ApiProductController {
     @Autowired
     lateinit var templateService: TemplateService
 
+    @Autowired
+    lateinit var templteImageInfoDao: TemplateImageInfoDao
+
     @RequestMapping("/api/product/findByPrintStation", method = arrayOf(RequestMethod.GET))
     fun findByPrintStation(
             request: HttpServletRequest,
@@ -48,19 +49,16 @@ class ApiProductController {
     }
 
     @RequestMapping("/api/product/images", method = arrayOf(RequestMethod.GET))
-    fun productImages(@RequestParam("productId") productId: Int): ResponseEntity<List<TemplateImageInfo>> {
+    fun productImages(@RequestParam("productId") productId: Int): ResponseEntity<List<TemplateImageInfoDTO>> {
         val product = productDao.findOne(productId)
         if (product == null) {
             return ResponseEntity.notFound().build()
         }
         else {
-            val tplInfo = templateService.getTemplateInfo(product.templateName)
-            if (tplInfo == null) {
-                return ResponseEntity.notFound().build()
-            }
-            else {
-                return ResponseEntity.ok(tplInfo.images)
-            }
+            val tplImgInfoList = templteImageInfoDao.findByTemplateId(product.templateId)
+            return ResponseEntity.ok(tplImgInfoList.map {
+                TemplateImageInfoDTO(it.name, it.width, it.height)
+            })
         }
     }
 
@@ -74,16 +72,10 @@ class ApiProductController {
             return ResponseEntity.notFound().build()
         }
         else {
-            val tplInfo = templateService.getTemplateInfo(product.templateName)
-            if (tplInfo == null) {
-                return ResponseEntity.notFound().build()
-            }
-            else {
-                val baseUrl = getBaseUrl(request)
+            val baseUrl = getBaseUrl(request)
 
-                return ResponseEntity.ok(
-                        templateService.createPreview(previewParam, product.templateName, baseUrl))
-            }
+            return ResponseEntity.ok(
+                    templateService.createPreview(previewParam, product.template, baseUrl))
         }
     }
 }

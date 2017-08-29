@@ -44,15 +44,17 @@ fun PrintStation.printStationToDetailDTO(productsOfPrintStation: List<ProductDTO
 fun Product.productToDTO(baseUrl: String, priceMap: Map<Int, Int>) : ProductDTO {
     val thumbUrls = this.imageFiles.filter { it.type == ProductImageFileType.THUMB.value }.map { "${baseUrl}/assets/product/images/${it.id}.${it.fileType}" }
     val previewUrls = this.imageFiles.filter { it.type == ProductImageFileType.PREVIEW.value }.map { "${baseUrl}/assets/product/images/${it.id}.${it.fileType}" }
+    val tpl = this.template
 
     return ProductDTO(
             id = this.id,
             name = this.name,
-            type = this.type,
-            width = this.width,
-            height = this.height,
-            imageRequired = this.minImageCount,
+            type = tpl.type,
+            width = tpl.width,
+            height = tpl.height,
+            imageRequired = tpl.minImageCount,
             remark = this.remark,
+            version = this.version,
             price = priceMap.getOrDefault(this.id, this.defaultPrice),
             thumbnailUrl = thumbUrls.firstOrNull(),
             previewUrl = previewUrls.firstOrNull(),

@@ -15,29 +15,16 @@ class Product {
     @NotNull
     var name: String = ""
 
-    @Column(length = 50)
-    @NotNull
-    var templateName: String = ""
+    //region 模板
+    /** 模板ID */
+    @Column(name = "template_id", insertable = false, updatable = false)
+    var templateId: Int = 0
 
-    /** 类型 */
-    @Column
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "template_id")
     @NotNull
-    var type: Int = ProductType.PHOTO.value;
-
-    /** 产品宽度(mm) */
-    @Column
-    @NotNull
-    var width: Double = 0.0;
-
-    /** 产品高度(mm) */
-    @Column
-    @NotNull
-    var height: Double = 0.0;
-
-    /** 最小图片数量 */
-    @Column
-    @NotNull
-    var minImageCount: Int = 0;
+    lateinit var template: Template
+    //endregion
 
     @Column
     @NotNull
@@ -54,6 +41,22 @@ class Product {
 
     @OneToMany(mappedBy = "product")
     lateinit var imageFiles: List<ProductImageFile>
+
+    /** 产品版本号 */
+    @Column
+    @NotNull
+    var version: Int = 1
+
+    //region 店面
+    /** 店面ID */
+    @Column(name = "company_id", insertable = false, updatable = false)
+    var companyId: Int = 0
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "company_id")
+    @NotNull
+    lateinit var company: Company
+    //endregion
 }
 
 /** 产品类别 */
