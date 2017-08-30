@@ -49,8 +49,8 @@
                         <span class="help-block"></span>
                     </div>
                     <div class="form-group">
-                        <label for="template" class="control-label">模板:</label>
-                        <select name="template" class="form-control" id="template">
+                        <label for="templateId" class="control-label">模板:</label>
+                        <select name="templateId" class="form-control" id="templateId">
                             <option th:each="tpl : ${templates}"
                                     th:value="${tpl.id}"
                                     th:text="${tpl.name}"

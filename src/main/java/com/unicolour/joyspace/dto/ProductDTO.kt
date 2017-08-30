@@ -6,7 +6,6 @@ class ProductDTO(
         var id: Int = 0,
         var name: String = "",
         var type: Int = ProductType.PHOTO.value,
-        var sn: String = "",
         var width: Double = 0.0,
         var height: Double = 0.0,
         var imageRequired: Int = 0,
