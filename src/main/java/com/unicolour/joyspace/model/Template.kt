@@ -39,6 +39,11 @@ class Template {
     @Column
     @NotNull
     var currentVersion: Int = 1
+
+    /** UUID */
+    @Column(length = 50)
+    @NotNull
+    var uuid: String = ""
 }
 
 /** 产品模板中的图片信息 */

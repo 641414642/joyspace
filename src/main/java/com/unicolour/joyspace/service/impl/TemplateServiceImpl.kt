@@ -1,10 +1,7 @@
 package com.unicolour.joyspace.service.impl
 
 import com.unicolour.joyspace.controller.api.PreviewParam
-import com.unicolour.joyspace.dao.TemplateDao
-import com.unicolour.joyspace.dao.TemplateImageInfoDao
-import com.unicolour.joyspace.dao.UserImageFileDao
-import com.unicolour.joyspace.dao.UserLoginSessionDao
+import com.unicolour.joyspace.dao.*
 import com.unicolour.joyspace.dto.TemplatePreviewResult
 import com.unicolour.joyspace.model.*
 import com.unicolour.joyspace.service.ImageService
@@ -20,6 +17,9 @@ import org.w3c.dom.Document
 import org.w3c.dom.Element
 import java.awt.Color
 import java.io.File
+import java.io.IOException
+import java.nio.file.Files
+import java.nio.file.StandardCopyOption
 import java.util.*
 import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
@@ -52,6 +52,9 @@ open class TemplateServiceImpl : TemplateService {
     @Autowired
     lateinit var templateImageInfoDao: TemplateImageInfoDao
 
+    @Autowired
+    lateinit var productDao: ProductDao
+
     private fun toMM(value:String) : Double {
         if (value.endsWith("mm")) {
             return value.substring(0, value.length-2).toDouble()
@@ -82,6 +85,7 @@ open class TemplateServiceImpl : TemplateService {
         tpl.type = type.value
         tpl.width = 0.0
         tpl.height = 0.0
+        tpl.uuid = UUID.randomUUID().toString().replace("-", "")
 
         templateDao.save(tpl)
 
@@ -89,9 +93,16 @@ open class TemplateServiceImpl : TemplateService {
     }
 
     private fun saveTemplateFiles(tpl: Template, templateFile: MultipartFile) {
-        val tplDir = File(assetsDir, "template/${tpl.id}/${tpl.currentVersion}")
+        val productionTplPackFile = File(assetsDir, "template/production/${tpl.id}_v${tpl.currentVersion}_${tpl.uuid}.zip")
+        productionTplPackFile.parentFile.mkdirs()
 
-        ZipInputStream(templateFile.inputStream).use {
+        templateFile.inputStream.use {
+            Files.copy(it, productionTplPackFile.toPath(), StandardCopyOption.REPLACE_EXISTING)
+        }
+
+        val tplDir = File(assetsDir, "template/preview/${tpl.id}_v${tpl.currentVersion}")
+
+        ZipInputStream(productionTplPackFile.inputStream()).use {
             var entry: ZipEntry? = it.nextEntry
             while (entry != null) {
                 if (!entry.isDirectory) {
@@ -109,10 +120,29 @@ open class TemplateServiceImpl : TemplateService {
                     if (isTplSvgFile) {
                         updateTemplateInfo(tpl, targetFile)
                     }
+                    else if (isImgFile(fileName)) {   //缩小图片
+                        val pb = ProcessBuilder("magick", "mogrify", "-resize", "500x500>", targetFile.absolutePath)    //如果宽度或高度大于1000， 才缩小图片
+                        val process = pb.start()
+                        val retCode = process.waitFor()
+
+                        if (retCode != 0) {
+                            throw IOException("缩小图片失败, 文件名: $fileName")
+                        }
+                    }
                 }
                 entry = it.nextEntry
             }
         }
+    }
+
+    private fun isImgFile(fileName: String): Boolean {
+        val name = fileName.toLowerCase()
+        return name.endsWith(".jpg") ||
+                name.endsWith(".jpeg") ||
+                name.endsWith(".png") ||
+                name.endsWith(".bmp") ||
+                name.endsWith(".tif") ||
+                name.endsWith(".tiff")
     }
 
     @Transactional
@@ -132,6 +162,10 @@ open class TemplateServiceImpl : TemplateService {
                 tpl.currentVersion++
 
                 saveTemplateFiles(tpl, templateFile)
+
+                val products = productDao.findByTemplateId(tpl.id)
+                products.forEach { it.version++ }
+                productDao.save(products)
 
                 return true
             } else {
@@ -211,7 +245,7 @@ open class TemplateServiceImpl : TemplateService {
                 return TemplatePreviewResult(3, "不是此用户的图片")
             }
 
-            val templateFile = File(assetsDir, "template/${template.id}/${template.currentVersion}/template.svg")
+            val templateFile = File(assetsDir, "template/preview/${template.id}_v${template.currentVersion}/template.svg")
             val factory = DocumentBuilderFactory.newInstance()
             factory.isNamespaceAware = true
 
@@ -246,7 +280,7 @@ open class TemplateServiceImpl : TemplateService {
                         imgEle.setAttributeNS(
                                 xLinkNameSpace,
                                 "xlink:href",
-                                "${baseUrl}/assets/template/${template.id}/${template.currentVersion}/$imgSrc")
+                                "${baseUrl}/assets/template/preview/${template.id}_v${template.currentVersion}/$imgSrc")
                     }
                 }
             })

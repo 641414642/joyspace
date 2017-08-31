@@ -10,4 +10,6 @@ import org.springframework.data.repository.query.Param
 interface ProductDao : PagingAndSortingRepository<Product, Int> {
     @Query("SELECT p FROM Product p WHERE LOWER(p.name) LIKE LOWER(CONCAT('%', :name, '%'))")
     fun findByName(@Param("name") name: String, pageable: Pageable): Page<Product>
+
+    fun findByTemplateId(id: Int): List<Product>
 }
