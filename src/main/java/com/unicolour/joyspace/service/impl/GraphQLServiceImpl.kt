@@ -81,6 +81,11 @@ class GraphQLServiceImpl : GraphQLService {
                 })
                 .type("Product", { typeWiring ->
                     typeWiring.dataFetcher("type", productService.getDataFetcher("type"))
+                    typeWiring.dataFetcher("width", productService.getDataFetcher("width"))
+                    typeWiring.dataFetcher("height", productService.getDataFetcher("height"))
+                    typeWiring.dataFetcher("imageRequired", productService.getDataFetcher("imageRequired"))
+                    typeWiring.dataFetcher("thumbnailUrl", productService.getDataFetcher("thumbnailUrl"))
+                    typeWiring.dataFetcher("previewUrl", productService.getDataFetcher("previewUrl"))
                 })
                 .type("PrintOrderItem", { typeWiring ->
                     typeWiring.dataFetcher("imageFiles", printOrderService.getImageFilesDataFetcher())

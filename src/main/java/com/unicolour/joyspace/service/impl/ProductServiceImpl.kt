@@ -170,14 +170,33 @@ open class ProductServiceImpl : ProductService {
     }
 
     override fun getDataFetcher(fieldName: String): DataFetcher<Any> {
-        return DataFetcher<Any> { environment ->
-            val product = environment.getSource<Product>()
+        return DataFetcher<Any> { env ->
+            val product = env.getSource<Product>()
             when (fieldName) {
                 "type" -> {
                     val tpl = product.template
                     val type = ProductType.values().find{ it.value == tpl.type }
                     if (type == null) null else type.name
                 }
+
+                "width" -> product.template.width
+                "height" -> product.template.height
+                "imageRequired" -> product.template.minImageCount
+                "thumbnailUrl" -> {
+                    val context = env.getContext<HashMap<String, Any>>()
+                    val baseUrl = context["baseUrl"]
+                    product.imageFiles
+                            .filter { it.type == ProductImageFileType.THUMB.value }
+                            .map { "${baseUrl}/assets/product/images/${it.id}.${it.fileType}" }
+                }
+                "previewUrl" -> {
+                    val context = env.getContext<HashMap<String, Any>>()
+                    val baseUrl = context["baseUrl"]
+                    product.imageFiles
+                            .filter { it.type == ProductImageFileType.PREVIEW.value }
+                            .map { "${baseUrl}/assets/product/images/${it.id}.${it.fileType}" }
+                }
+
                 else -> null
             }
         }
