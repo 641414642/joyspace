@@ -5,36 +5,32 @@ import com.unicolour.joyspace.dto.LoginManagerDetail
 import com.unicolour.joyspace.model.Company
 import com.unicolour.joyspace.model.Manager
 import com.unicolour.joyspace.service.ManagerService
-import com.unicolour.joyspace.util.Utils
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.security.core.Authentication
 import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.security.core.userdetails.UsernameNotFoundException
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
-
-import java.util.Arrays
-import java.util.Calendar
+import java.util.*
 
 @Service
 class ManagerServiceImpl : ManagerService {
     @Autowired
-    internal var managerDao: ManagerDao? = null
+    lateinit var managerDao: ManagerDao
 
     @Autowired
-    internal var passwordEncoder: PasswordEncoder? = null
+    lateinit var passwordEncoder: PasswordEncoder
 
     @Throws(UsernameNotFoundException::class)
     override fun loadUserByUsername(username: String): UserDetails {
-        val manager = managerDao!!.findByUserNameOrFullName(username, username)
+        val manager = managerDao.findByUserNameOrFullName(username, username)
         return if (manager != null) {
             LoginManagerDetail(
                     manager.id,
                     manager.companyId,
                     manager.createTime,
-                    manager.fullName!!,
+                    manager.fullName,
                     manager.userName,
                     manager.password,
                     manager.isEnabled,
@@ -49,14 +45,14 @@ class ManagerServiceImpl : ManagerService {
 
         manager.userName = userName
         manager.fullName = fullName
-        manager.password = passwordEncoder!!.encode(password)
+        manager.password = passwordEncoder.encode(password)
         manager.cellPhone = cellPhone
         manager.email = email
         manager.createTime = Calendar.getInstance()
         manager.isEnabled = true
         manager.company = company
 
-        managerDao!!.save(manager)
+        managerDao.save(manager)
 
         //operationLogService.addOperationLog("创建用户：" + manager.getUserName());
 
@@ -64,11 +60,11 @@ class ManagerServiceImpl : ManagerService {
     }
 
     override fun resetPassword(userId: Int, password: String): Boolean {
-        val manager = managerDao!!.findOne(userId)
+        val manager = managerDao.findOne(userId)
 
         if (manager != null) {
-            manager.password = passwordEncoder!!.encode(password)
-            managerDao!!.save(manager)
+            manager.password = passwordEncoder.encode(password)
+            managerDao.save(manager)
 
             //operationLogService.addOperationLog("重置密码：" + manager.getUserName());
             return true
@@ -78,9 +74,9 @@ class ManagerServiceImpl : ManagerService {
     }
 
     override fun login(userName: String, password: String): Manager? {
-        val manager = managerDao!!.findByUserName(userName)
+        val manager = managerDao.findByUserName(userName)
         if (manager != null) {
-            if (passwordEncoder!!.matches(password, manager.password)) {
+            if (passwordEncoder.matches(password, manager.password)) {
                 return manager
             }
         }

@@ -7,7 +7,7 @@ import java.util.*
 class LoginManagerDetail(val managerId: Int,
                          val companyId: Int,
                          val createTime: Calendar,
-                         val fullName: String,
+                         val fullName: String?,
                          username: String,
                          password: String,
                          enabled: Boolean,
