@@ -185,9 +185,9 @@ open class PrintOrderServiceImpl : PrintOrderService {
         val ipAddress: String = java.net.InetAddress.getByName(URL(baseUrl).host).hostAddress
 
         val orderItems = printOrderItemDao.findByPrintOrderId(order.id)
-        var totalFee:Int = 0
+        var totalFee = 0
         for (printOrderItem in orderItems) {
-            val orderItemFee = priceMap.getOrDefault(printOrderItem.product.id, 0)   //XXX
+            val orderItemFee:Int = priceMap.getOrElse(printOrderItem.product.id, { printOrderItem.product.defaultPrice })
             totalFee += orderItemFee * printOrderItem.copies
         }
 
