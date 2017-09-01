@@ -5,6 +5,7 @@ import com.unicolour.joyspace.dao.PrintStationDao
 import com.unicolour.joyspace.dao.PrintStationProductDao
 import com.unicolour.joyspace.dao.ProductDao
 import com.unicolour.joyspace.model.PrintStation
+import com.unicolour.joyspace.service.ManagerService
 import com.unicolour.joyspace.service.PrintStationService
 import com.unicolour.joyspace.util.Pager
 import org.springframework.beans.factory.annotation.Autowired
@@ -33,13 +34,23 @@ class PrintStationController {
     @Autowired
     lateinit var printStationProductDao: PrintStationProductDao
 
+    @Autowired
+    lateinit var managerService: ManagerService
+
     @RequestMapping("/printStation/list")
     fun printStationList(
             modelAndView: ModelAndView,
             @RequestParam(name = "pageno", required = false, defaultValue = "1") pageno: Int): ModelAndView {
 
+        val loginManager = managerService.loginManager
+
+        if (loginManager == null) {
+            modelAndView.viewName = "empty"
+            return modelAndView
+        }
+
         val pageable = PageRequest(pageno - 1, 20)
-        val printStations = printStationDao.findAll(pageable)
+        val printStations = printStationDao.findByCompanyId(loginManager.companyId, pageable)
 
         val pager = Pager(printStations.totalPages, 7, pageno - 1)
         modelAndView.model.put("pager", pager)

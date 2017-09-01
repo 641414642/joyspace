@@ -36,12 +36,18 @@ class ManagerController {
             @RequestParam(name = "pageno", required = false, defaultValue = "1") pageno: Int): ModelAndView {
 
         //		String reqPath = (String) request.getAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE);
+        val loginManager = managerService.loginManager
+
+        if (loginManager == null) {
+            modelAndView.viewName = "empty"
+            return modelAndView
+        }
 
         val pageable = PageRequest(pageno - 1, 20)
         val users = if (name == null || name == "")
-            managerDao.findAll(pageable)
+            managerDao.findByCompanyId(loginManager.companyId, pageable)
         else
-            managerDao.findByUserNameOrFullName(name, pageable)
+            managerDao.findByCompanyIdAndUserNameOrFullName(loginManager.companyId, name, pageable)
 
         modelAndView.model.put("inputUserName", name)
 

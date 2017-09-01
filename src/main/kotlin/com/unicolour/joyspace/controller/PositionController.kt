@@ -3,6 +3,7 @@ package com.unicolour.joyspace.controller
 import com.unicolour.joyspace.dao.PositionDao
 import com.unicolour.joyspace.dao.PriceListDao
 import com.unicolour.joyspace.model.Position
+import com.unicolour.joyspace.service.ManagerService
 import com.unicolour.joyspace.service.PositionService
 import com.unicolour.joyspace.util.Pager
 import org.springframework.beans.factory.annotation.Autowired
@@ -26,17 +27,27 @@ class PositionController {
     @Autowired
     lateinit var priceListDao: PriceListDao
 
+    @Autowired
+    lateinit var managerService: ManagerService
+
     @RequestMapping("/position/list")
     fun positionList(
             modelAndView: ModelAndView,
             @RequestParam(name = "name", required = false, defaultValue = "") name: String?,
             @RequestParam(name = "pageno", required = false, defaultValue = "1") pageno: Int): ModelAndView {
 
+        val loginManager = managerService.loginManager
+
+        if (loginManager == null) {
+            modelAndView.viewName = "empty"
+            return modelAndView
+        }
+
         val pageable = PageRequest(pageno - 1, 20)
         val positions = if (name == null || name == "")
-            positionDao.findAll(pageable)
+            positionDao.findByCompanyId(loginManager.companyId, pageable)
         else
-            positionDao.findByName(name, pageable)
+            positionDao.findByCompanyIdAndName(loginManager.companyId, name, pageable)
 
         modelAndView.model.put("inputPositionName", name)
 
