@@ -2,7 +2,7 @@ package com.unicolour.joyspace.util
 
 import java.util.ArrayList
 
-class Pager(totalPageCount: Int, visiblePageCount: Int, currentPageIndex: Int) {
+class Pager(val totalPageCount: Int, visiblePageCount: Int, currentPageIndex: Int) {
     val currentPageNo: Int
 
     val pageItems = ArrayList<PageItem>()

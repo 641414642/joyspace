@@ -15,9 +15,9 @@ class LoginManagerNameAttrFilter : Filter {
     override fun doFilter(req: ServletRequest, res: ServletResponse, chain: FilterChain) {
         val auth: Authentication? = SecurityContextHolder.getContext().authentication
 
-        val userDetail: LoginManagerDetail? = auth?.principal as LoginManagerDetail
+        val userDetail = auth?.principal
 
-        if (userDetail != null) {
+        if (userDetail is LoginManagerDetail) {
             val dispName = if (userDetail.fullName.isNullOrEmpty()) auth.name else userDetail.fullName
             val regTime = userDetail.createTime.format()
 
