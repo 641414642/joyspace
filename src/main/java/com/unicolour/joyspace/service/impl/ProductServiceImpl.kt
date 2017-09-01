@@ -196,6 +196,7 @@ open class ProductServiceImpl : ProductService {
                             .filter { it.type == ProductImageFileType.PREVIEW.value }
                             .map { "${baseUrl}/assets/product/images/${it.id}.${it.fileType}" }
                 }
+                "userImages" -> product.template.userImages
 
                 else -> null
             }

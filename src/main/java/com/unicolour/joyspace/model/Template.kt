@@ -44,6 +44,9 @@ class Template {
     @Column(length = 50)
     @NotNull
     var uuid: String = ""
+
+    @OneToMany(mappedBy = "template")
+    lateinit var userImages: List<TemplateImageInfo>
 }
 
 /** 产品模板中的图片信息 */

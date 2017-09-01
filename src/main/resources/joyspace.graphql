@@ -126,7 +126,23 @@ type Product {
 
     #展示图url
     previewUrl: [String!]
+
+    #产品用户图片信息
+    userImages: [ProductUserImage!]
 }
+
+# 产品用户图片信息
+type ProductUserImage {
+    #图片名称
+    name: String!
+
+    #需要的图片宽度(mm)
+    width: Float!,
+
+    #需要的图片高度(mm)
+    height: Float!
+}
+
 
 #产品类型
 enum ProductType {
