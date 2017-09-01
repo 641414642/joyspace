@@ -5,6 +5,7 @@ import com.unicolour.joyspace.dao.ProductImageFileDao
 import com.unicolour.joyspace.dao.TemplateDao
 import com.unicolour.joyspace.model.Product
 import com.unicolour.joyspace.model.ProductImageFileType
+import com.unicolour.joyspace.service.ManagerService
 import com.unicolour.joyspace.service.ProductService
 import com.unicolour.joyspace.service.TemplateService
 import com.unicolour.joyspace.util.Pager
@@ -33,7 +34,7 @@ class ProductController {
     lateinit var productService: ProductService
 
     @Autowired
-    lateinit var templateService: TemplateService
+    lateinit var managerService: ManagerService
 
     @Autowired
     lateinit var templateDao: TemplateDao
@@ -44,11 +45,18 @@ class ProductController {
             @RequestParam(name = "name", required = false, defaultValue = "") name: String?,
             @RequestParam(name = "pageno", required = false, defaultValue = "1") pageno: Int): ModelAndView {
 
+        val loginManager = managerService.loginManager
+
+        if (loginManager == null) {
+            modelAndView.viewName = "empty"
+            return modelAndView
+        }
+
         val pageable = PageRequest(pageno - 1, 20)
         val products = if (name == null || name == "")
-            productDao.findAll(pageable)
+            productDao.findByCompanyId(loginManager.companyId, pageable)
         else
-            productDao.findByName(name, pageable)
+            productDao.findByCompanyIdAndName(loginManager.companyId, name, pageable)
 
         modelAndView.model.put("inputProductName", name)
 

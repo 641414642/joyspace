@@ -56,6 +56,10 @@ open class PrintStationServiceImpl : PrintStationService {
     @Transactional
     override fun createPrintStation(wxQrCode: String, positionId: Int, selectedProductIds: Set<Int>): PrintStation? {
         val loginManager = managerService.loginManager
+        if (loginManager == null) {
+            return null
+        }
+
         val manager = managerDao.findOne(loginManager.managerId)
 
         val printStation = PrintStation()

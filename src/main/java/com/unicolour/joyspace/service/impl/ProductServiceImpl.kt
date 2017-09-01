@@ -76,10 +76,10 @@ open class ProductServiceImpl : ProductService {
 
     @Transactional
     override fun createProduct(name: String, remark: String, defPrice: Double, templateId: Int): Product? {
+        val loginManager = managerService.loginManager
         val tpl = templateDao.findOne(templateId)
 
-        if (tpl != null) {
-            val loginManager = managerService.loginManager
+        if (tpl != null && loginManager != null) {
             val manager = managerDao.findOne(loginManager.managerId)
 
             val product = Product()

@@ -32,6 +32,10 @@ open class PositionServiceImpl : PositionService {
     @Transactional
     override fun createPosition(name: String, address: String, longitude: Double, latitude: Double, priceListId: Int): Position? {
         val loginManager = managerService.loginManager
+        if (loginManager == null) {
+            return null
+        }
+        
         val manager = managerDao.findOne(loginManager.managerId)
 
         val position = Position()

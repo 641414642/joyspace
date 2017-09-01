@@ -42,6 +42,10 @@ open class PriceListServiceImpl : PriceListService {
     @Transactional
     override fun createPriceList(name: String, productIdPriceMap: Map<Int, String>): PriceList? {
         val loginManager = managerService.loginManager
+        if (loginManager == null) {
+            return null
+        }
+
         val manager = managerDao.findOne(loginManager.managerId)
 
         val priceList = PriceList()
