@@ -56,6 +56,22 @@ class ApiImageController {
 
         return ResponseEntity.ok(imgInfo)
     }
+    @RequestMapping(path = arrayOf("/api/image/transform"), method = arrayOf(RequestMethod.POST))
+    fun transformImage(request: HttpServletRequest,
+                           @RequestParam("sessionId") sessionId: String,
+                           @RequestParam("imageId") imageId: Int,
+                           @RequestParam("imageRatio") imageRatio: Double,
+                           @RequestParam("initialRotate") initialRotate: Int,
+                           @RequestParam("translateX") translateX: Int,
+                           @RequestParam("translateY") translateY: Int,
+                           @RequestParam("scale") scale: Double,
+                           @RequestParam("rotate") rotate: Double
+    ): ResponseEntity<ImageInfo> {
+        val baseUrl = getBaseUrl(request)
+        val imgInfo = imageService.transformImage(sessionId, imageId, imageRatio, initialRotate, translateX, translateY, scale, rotate, baseUrl)
+
+        return ResponseEntity.ok(imgInfo)
+    }
 
     @RequestMapping(path = arrayOf("/api/image", "app/image"), method = arrayOf(RequestMethod.DELETE))
     fun deleteImage(@RequestParam("sessionId") sessionId: String,

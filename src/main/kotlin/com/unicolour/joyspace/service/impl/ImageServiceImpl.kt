@@ -123,6 +123,65 @@ class ImageServiceImpl : ImageService {
         }
     }
 
+    override fun transformImage(sessionId: String, imageId: Int, imageRatio:Double, initialRotate: Int, translateX: Int,
+                                translateY: Int, scale: Double, rotate: Double, baseUrl: String): ImageInfo? {
+        return processImage(sessionId, imageId,
+                { userImgFile, srcFile ->
+                    val destFileName = UUID.randomUUID().toString().replace("-", "")
+                    val destFilePath = "user/${userImgFile.userId}/${sessionId}/${destFileName}.jpg"
+
+                    val destFile = File(assetsDir, destFilePath)
+                    srcFile.parentFile.mkdirs()
+
+                    val pb = ProcessBuilder(
+                            "magick",
+                            "convert",
+                            srcFile.absolutePath,
+                            "-thumbnail",
+                            "${width}x${height}!",
+                            "-identify",
+                            destFile.absolutePath)
+
+                    val process = pb.start()
+
+                    var retStr: String = "";
+                    BufferedReader(InputStreamReader(process.inputStream)).use { reader ->
+                        retStr = reader.readText()
+                    }
+
+                    val retCode = process.waitFor()
+
+                    if (retCode != 0) {
+                        ImageInfo(5, retStr)
+                    } else {
+                        val patternStr = Pattern.quote(srcFile.absolutePath) + "\\s\\w+\\s\\d+x\\d+=>(\\d+)x(\\d+).*"
+                        val pattern = Pattern.compile(patternStr)
+                        val matcher = pattern.matcher(retStr)
+
+                        matcher.find()
+
+                        val destImgWid = matcher.group(1).toInt()
+                        val destImgHei = matcher.group(2).toInt()
+
+                        val destUrl = "${baseUrl}/assets/${destFilePath}"
+
+                        val newUserImgFile = UserImageFile()
+                        newUserImgFile.type = "jpg"
+                        newUserImgFile.fileName = destFileName
+                        newUserImgFile.width = destImgWid
+                        newUserImgFile.height = destImgHei
+                        newUserImgFile.sessionId = sessionId
+                        newUserImgFile.uploadTime = Calendar.getInstance()
+                        newUserImgFile.userId = userImgFile.userId
+
+                        userImageFileDao.save(newUserImgFile)
+
+                        ImageInfo(0, null, newUserImgFile.id, destImgWid, destImgHei, destUrl)
+                    }
+                }
+        )
+    }
+
     override fun resizeImage(sessionId: String, imageId: Int, width: Int, height: Int, baseUrl: String): ImageInfo {
         return processImage(sessionId, imageId,
                 { userImgFile, srcFile ->
