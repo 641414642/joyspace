@@ -64,25 +64,28 @@ open class UserServiceImpl : UserService {
     lateinit var transactionTemplate: TransactionTemplate
 
     //登录
-    override fun getLoginDataFetcher(): DataFetcher<AppUserLoginResult> {
-        return DataFetcher<AppUserLoginResult> { env ->
-            val phoneNumber = env.getArgument<String>("phoneNumber")
-            val userName = env.getArgument<String>("userName")
-            val password = env.getArgument<String>("password")
-            login(userName, phoneNumber, password)
+    override val loginDataFetcher: DataFetcher<AppUserLoginResult>
+        get() {
+            return DataFetcher<AppUserLoginResult> { env ->
+                val phoneNumber = env.getArgument<String>("phoneNumber")
+                val userName = env.getArgument<String>("userName")
+                val password = env.getArgument<String>("password")
+                login(userName, phoneNumber, password)
+            }
         }
-    }
 
     //发送注册验证码
-    override fun getSendRegVerifyCodeDataFetcher(): DataFetcher<GraphQLRequestResult> {
-        return DataFetcher<GraphQLRequestResult> { env ->
-            val phoneNumber = env.getArgument<String>("phoneNumber")
-            transactionTemplate.execute { sendVerifyCode(phoneNumber) }
+    override val sendRegVerifyCodeDataFetcher: DataFetcher<GraphQLRequestResult>
+        get() {
+            return DataFetcher<GraphQLRequestResult> { env ->
+                val phoneNumber = env.getArgument<String>("phoneNumber")
+                transactionTemplate.execute { sendVerifyCode(phoneNumber, true) }
+            }
         }
-    }
 
-    private fun sendVerifyCode(phoneNumber: String): GraphQLRequestResult {
-        val smsTpl = "【优利绚彩】帐号绑定验证码为:%s,请勿向任何人提供您收到的短信验证码。"
+    private fun sendVerifyCode(phoneNumber: String, regCode: Boolean): GraphQLRequestResult {
+        val codeType = if (regCode) "帐号绑定" else "重置密码"
+        val smsTpl = "【优利绚彩】${codeType}验证码为:%s,请勿向任何人提供您收到的短信验证码。"
 
         val now = Instant.now()
         var verifyCode = verifyCodeDao.findOne(phoneNumber)
@@ -107,8 +110,11 @@ open class UserServiceImpl : UserService {
         }
         else {
             val user = userDao.findByPhone(phoneNumber)
-            if (user != null) {
+            if (regCode && user != null) {
                 return GraphQLRequestResult(ResultCode.PHONE_NUMBER_ALREADY_REGISTERED)
+            }
+            else if (!regCode && user == null) {
+                return GraphQLRequestResult(ResultCode.USER_NOT_FOUND_FOR_THIS_PHONE_NUMBER)
             }
             else {
                 verifyCode = VerifyCode()
@@ -138,16 +144,69 @@ open class UserServiceImpl : UserService {
 
     }
 
+    override val userRegisterDataFetcher: DataFetcher<GraphQLRequestResult>
+        get() {
+            return DataFetcher { env ->
+                val phoneNumber = env.getArgument<String>("phoneNumber")
+                val userName = env.getArgument<String>("userName")
+                val password = env.getArgument<String>("password")
+                val verifyCode = env.getArgument<String>("verifyCode")
+                val email = env.getArgument<String>("email")
 
-    override fun getUserRegisterDataFetcher(): DataFetcher<GraphQLRequestResult> {
-        return DataFetcher<GraphQLRequestResult> { env ->
-            val phoneNumber = env.getArgument<String>("phoneNumber")
-            val userName = env.getArgument<String>("userName")
-            val password = env.getArgument<String>("password")
-            val verifyCode = env.getArgument<String>("verifyCode")
-            val email = env.getArgument<String>("email")
+                userRegister(userName, password, phoneNumber, verifyCode, email)
+            }
+        }
 
-            userRegister(userName, password, phoneNumber, verifyCode, email)
+    override val requestResetPasswordDataFetcher: DataFetcher<GraphQLRequestResult>
+        get() {
+            return DataFetcher { env ->
+                val phoneNumber = env.getArgument<String>("phoneNumber")
+                sendVerifyCode(phoneNumber, false)
+            }
+        }
+
+    override val resetPasswordDataFetcher: DataFetcher<GraphQLRequestResult>
+        get() {
+            return DataFetcher { env ->
+                val userName = env.getArgument<String>("userName")
+                val phoneNumber = env.getArgument<String>("phoneNumber")
+                val verifyCode = env.getArgument<String>("verifyCode")
+                val newPassword = env.getArgument<String>("newPassword")
+
+                resetPassword(userName, phoneNumber, verifyCode, newPassword)
+            }
+        }
+
+    //重置密码
+    private fun resetPassword(userName: String?, phoneNumber: String?,
+                              verifyCode: String, newPassword: String): GraphQLRequestResult {
+        val now = Instant.now()
+        var user: User? = null
+        if (userName != null) {
+            user = userDao.findByUserName(userName)
+        }
+        else if (phoneNumber != null) {
+            user = userDao.findByPhone(phoneNumber)
+        }
+
+        if (user == null) {
+            return GraphQLRequestResult(ResultCode.USER_NOT_FOUND)
+        }
+        else {
+            val verifyCodeObj = verifyCodeDao.findOne(user.phone)
+            if (verifyCodeObj == null ||
+                    verifyCodeObj.code != verifyCode ||
+                    Duration.between(verifyCodeObj.sendTime.toInstant(), now).seconds > 60 * 10) {  //超过10分钟
+                return GraphQLRequestResult(ResultCode.INVALID_VERIFY_CODE)
+            }
+            else {
+                user.password = passwordEncoder.encode(newPassword)  //XXX 检查密码有效性
+
+                userDao.save(user)
+                verifyCodeDao.delete(verifyCodeObj)
+
+                return GraphQLRequestResult(ResultCode.SUCCESS)
+            }
         }
     }
 

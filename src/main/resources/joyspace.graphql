@@ -23,6 +23,12 @@ type MutationType {
     #用户注册
     userRegister(userName: String!, password: String!, phoneNumber: String!, verifyCode: String!, email: String) : RequestResult!
 
+    #请求重置密码
+    requestResetPassword(phoneNumber: String!) : RequestResult!
+
+    #重置密码
+    resetPassword(userName: String, phoneNumber: String!, verifyCode: String!, newPassword: String!) : RequestResult!
+
     #更新订单状态为已下载
     printOrderDownloaded(printStationId: Int!, printOrderId: Int!) : RequestResult!
 

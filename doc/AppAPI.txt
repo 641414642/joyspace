@@ -1,7 +1,7 @@
 App发送验证码:
 	POST
 		/app/user/sendRegVerifyCode?phoneNumber=xxxxxxxxx
-	返回值: 
+	返回值:
 		{
 			"result": 0,
 			"description": "xxxxxxx"
@@ -12,7 +12,7 @@ App用户登录:
 		/app/user/login?userName=xxxx&password=xxxxxxx
 		或
 		/app/user/login?phoneNumber=xxxx&password=xxxxxxx
-	返回值: 
+	返回值:
 		{
 			"result": 0,
 			"description": null,
@@ -38,16 +38,13 @@ App用户注册:
 		/app/image
 		content-type:  multipart/form-data
 	参数：sessionId   登录返回的sessionId
-		  thumbMaxWidth     生成的缩略图的最大宽度
-		  thumbMaxHeight    生成的缩略图的最大高度  (生成的缩略图会保存原图比例，尺寸不超过这两个参数定义的大小)
 		  image         图片文件内容
 	返回值:   {
 				"imageId": 6,
 				"width": 6000,   //原图尺寸
 				"height": 2315,   //原图尺寸
-				"thumbUrl": "http://localhost:6060/assets/user/1/D8F219B9D0C0470C961074650E79D3DC/e2fee30d51cc481ab8a4e7f3419014b7.thumb.jpg",   //缩略图url
-				"thumbWidth": 200,      //缩略图尺寸
-				"thumbHeight": 77,      //缩略图尺寸
+				"url": "http://localhost:6060/assets/user/1/D8F219B9D0C0470C961074650E79D3DC/e2fee30d51cc481ab8a4e7f3419014b7.jpg",   //图片
+url
 				"errcode": 0,
 				"errmsg": null
 			 }
@@ -59,3 +56,138 @@ App用户注册:
 				"errcode" : 0,
 				"errmsg" : null
 			}
+
+
+请求重置密码:  (发送重置密码验证码到手机)
+    POST
+        /app/user/requestResetPassword
+    参数: phone: 手机号码
+	返回值:
+			{
+				"errcode" : 0,
+				"errmsg" : null
+			}
+
+重置密码:
+    POST
+        /app/user/resetPassword
+    参数: phoneNumber: 手机号码  或  userName: 用户名
+         verifyCode: 上一个请求中发到用户手机上的验证码
+         newpassword: 新密码
+	返回值:
+			{
+				"errcode" : 0,
+				"errmsg" : null
+			}
+
+*使用条款:
+    GET
+        /app/license
+    返回值:
+        content-type: text/html
+        使用条款html文本
+
+*常见问题:
+    GET
+        /app/faq
+    返回值:
+        content-type: text/html
+        常见问题html文本
+
+*检查app更新 (android)
+    GET
+        /app/update
+    参数:
+        currentVersion: 当前app版本
+    返回值:
+        {
+            newVersion: 'xx.xx.xx',  或  null (没有新版本)
+            downloadUrl: 'xxxxxxxxx'   或  null (没有新版本)
+        }
+
+*推荐自助机
+    GET
+        /app/findPrintStationByLocation
+    参数:
+        longitude:  位置精度(double)
+        latitude: 位置纬度(double)
+        radius:   搜索半径(int, 单位米)
+
+    返回值:
+        {
+				"errcode" : 0,
+				"errmsg" : null,
+				"result" : [
+				    { "id" : xx, "longitude" : xxxx.xxx, "latitude": xxxx.xxx },
+                    { "id" : xx, "longitude" : xxxx.xxx, "latitude": xxxx.xxx },
+				    ...
+				    { "id" : xx, "longitude" : xxxx.xxx, "latitude": xxxx.xxx }
+				]
+        }
+
+*自助机详情
+	GET
+		/app/printStation/{id}
+	参数:
+		id 自助机id
+	返回值:
+		{
+			"address": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx", 地址
+			"longitude" : xxxx.xxx,   //经度
+			"latitude": xxxx.xxx,     //纬度
+			"products": [             //产品列表
+				{
+					"id": xx,
+					"name": "xxx",
+					"type": x,   //0 普通   1 证件照    2 模板拼图
+					"width": xxx.xx,   //产品宽度(毫米)
+					"height": xxx.xx,   //产品高度(毫米)
+					"imageCount": x,    //需要用户上传的照片张数
+					"version": xx,      //版本号(整数)
+					"previewUrls": [     //产品预览图片url （可能有多个)
+						"https://xxx.xxxxxxxxxxxxxxxxxxxxxxxxxx",
+						"https://xxx.xxxxxxxxxxxxxxxxxxxxxxxxxx",
+						"https://xxx.xxxxxxxxxxxxxxxxxxxxxxxxxx"
+					],
+					"thumbnailUrl": "https://xxx.xxxxxxxxxxxxxxxxxxxxxxxxxx",   //缩略图url
+					"price": xxx,   //产品价格（整数，单位是分）
+					"remark": "xxxxxxxxxxxxxxxxxxxxxxxxxxx"      //产品说明文本
+				},
+				{ ... },
+				{ ... }
+			]
+		}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

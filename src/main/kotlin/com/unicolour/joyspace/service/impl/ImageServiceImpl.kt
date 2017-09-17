@@ -127,7 +127,7 @@ class ImageServiceImpl : ImageService {
                                 translateY: Int, scale: Double, rotate: Double, baseUrl: String): ImageInfo? {
         return processImage(sessionId, imageId,
                 { userImgFile, srcFile ->
-                    val destFileName = UUID.randomUUID().toString().replace("-", "")
+/*                    val destFileName = UUID.randomUUID().toString().replace("-", "")
                     val destFilePath = "user/${userImgFile.userId}/${sessionId}/${destFileName}.jpg"
 
                     val destFile = File(assetsDir, destFilePath)
@@ -178,6 +178,8 @@ class ImageServiceImpl : ImageService {
 
                         ImageInfo(0, null, newUserImgFile.id, destImgWid, destImgHei, destUrl)
                     }
+                    */
+                    ImageInfo(0, null, 0, 0, 0, "")
                 }
         )
     }

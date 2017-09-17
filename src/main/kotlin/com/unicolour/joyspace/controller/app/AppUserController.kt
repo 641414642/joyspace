@@ -32,6 +32,26 @@ mutation {
         return data["sendRegVerifyCode"]
     }
 
+    @RequestMapping("/app/user/requestResetPassword", method = arrayOf(RequestMethod.POST))
+    @ResponseBody
+    fun requestResetPassword(@RequestParam("phoneNumber") phoneNumber: String) : Any? {
+        val schema = graphQLService.getGraphQLSchema()
+        val graphQL = GraphQL.newGraphQL(schema).build()
+
+        val query =
+"""
+mutation {
+	requestResetPassword(phoneNumber:"$phoneNumber") {
+		result
+		description
+	}
+}
+"""
+        val queryResult = graphQL.execute(query, null, null, emptyMap())
+        val data:Map<String, Any> = queryResult.getData()
+        return data["requestResetPassword"]
+    }
+
     @RequestMapping("/app/user/register", method = arrayOf(RequestMethod.POST))
     @ResponseBody
     fun registerUser(
@@ -62,6 +82,35 @@ mutation {
         val queryResult = graphQL.execute(query, null, null, emptyMap())
         val data:Map<String, Any> = queryResult.getData()
         return data["userRegister"]
+    }
+
+    @RequestMapping("/app/user/resetPassword", method = arrayOf(RequestMethod.POST))
+    @ResponseBody
+    fun resetPassword(
+            @RequestParam("userName", required = false) userName: String?,
+            @RequestParam("phoneNumber", required = false) phoneNumber: String?,
+            @RequestParam("newPassword", required = true) newPassword: String,
+            @RequestParam("verifyCode", required = true) verifyCode: String) : Any? {
+        val schema = graphQLService.getGraphQLSchema()
+        val graphQL = GraphQL.newGraphQL(schema).build()
+
+        val query =
+"""
+mutation {
+	resetPassword(
+            userName: "$userName",
+            phoneNumber: "$phoneNumber",
+            newPassword: "$newPassword",
+            verifyCode: "$verifyCode")
+    {
+		result
+		description
+	}
+}
+"""
+        val queryResult = graphQL.execute(query, null, null, emptyMap())
+        val data:Map<String, Any> = queryResult.getData()
+        return data["resetPassword"]
     }
 
     @RequestMapping("/app/user/login", method = arrayOf(RequestMethod.POST))

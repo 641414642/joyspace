@@ -18,5 +18,7 @@ enum class ResultCode(val value:Int, val desc:String, val descEn: String) {
     RETRY_LATER(4, "请求太频繁(请等待60秒以后再试)", "Retry later"),
     SEND_VERIFY_CODE_FAILED(5, "发送验证码失败", "Send verify code failed"),
     PRINTER_ORDER_NOT_FOUND(6, "没有找到指定的订单", "Print order not found"),
+    USER_NOT_FOUND_FOR_THIS_PHONE_NUMBER(7, "此手机号码没有对应的注册用户", "No user found for this phone number"),
+    USER_NOT_FOUND(8, "没有找到指定的用户", "User not found"),
     SERVER_ERROR(100, "服务器错误", "Server error"),
 }
