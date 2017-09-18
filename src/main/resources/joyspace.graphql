@@ -10,6 +10,9 @@ type QueryType {
 
     #查找指定自助机的待打印订单
     getPrintOrder(printStationId: Int!, idAfter: Int!): PrintOrder
+
+    #根据位置查找指定距离内的自助机列表
+    findPrintStationsByDistance(longitude: Float!, latitude: Float!, radius: Float!): [PrintStation!]
 }
 
 #增删改操作
@@ -164,6 +167,8 @@ enum ProductType {
 
 #自助打印机
 type PrintStation {
+    id: Int
+
     #投放地点
     position: Position!
 

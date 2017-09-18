@@ -107,7 +107,7 @@ url
 
 *推荐自助机
     GET
-        /app/findPrintStationByLocation
+        /app/printStation/findByDistance
     参数:
         longitude:  位置精度(double)
         latitude: 位置纬度(double)

@@ -56,7 +56,8 @@ class GraphQLServiceImpl : GraphQLService {
     fun buildRuntimeWiring(): RuntimeWiring {
         return RuntimeWiring.newRuntimeWiring()
                 .type("QueryType", { typeWiring ->
-                    typeWiring.dataFetcher("printStation", printStationService.getPrintStationDataFetcher())
+                    typeWiring.dataFetcher("printStation", printStationService.printStationDataFetcher)
+                    typeWiring.dataFetcher("findPrintStationsByDistance", printStationService.byDistanceDataFetcher)
                     typeWiring.dataFetcher("getPrintOrder", printOrderService.getPrintOrderDataFetcher())
                 })
                 .type("MutationType", { typeWiring ->

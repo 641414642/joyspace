@@ -1,6 +1,7 @@
 package com.unicolour.joyspace.service.impl
 
 import com.unicolour.joyspace.dao.*
+import com.unicolour.joyspace.model.Position
 import com.unicolour.joyspace.model.PriceListItem
 import com.unicolour.joyspace.model.PrintStation
 import com.unicolour.joyspace.model.PrintStationProduct
@@ -112,11 +113,50 @@ open class PrintStationServiceImpl : PrintStationService {
         )
     }
 
-    override fun getPrintStationDataFetcher(): DataFetcher<PrintStation> {
-        return DataFetcher { environment ->
-            val printStationId = environment.getArgument<Int>("printStationId")
-            printStationDao.findOne(printStationId)
+    override val printStationDataFetcher: DataFetcher<PrintStation>
+        get() {
+            return DataFetcher { environment ->
+                val printStationId = environment.getArgument<Int>("printStationId")
+                printStationDao.findOne(printStationId)
+            }
         }
+
+    override val byDistanceDataFetcher: DataFetcher<List<PrintStation>>
+        get() {
+            return DataFetcher { env ->
+                val longitude = env.getArgument<Double>("longitude")
+                val latitude = env.getArgument<Double>("latitude")
+                val radius = env.getArgument<Double>("radius")
+
+                val idPosMap = HashMap<Int, Position>()
+                printStationDao
+                        .findAll()
+                        .filter {
+                            val pos = idPosMap.computeIfAbsent(it.positionId, { id -> it.position })
+                            distance(longitude, latitude, pos.longitude, pos.latitude) < radius
+                        }
+            }
+        }
+
+    private val AVERAGE_RADIUS_OF_EARTH_M = 6371000
+
+    fun distance(long1: Double, lat1: Double,
+                 long2: Double, lat2: Double): Double {
+
+        val latDistance = Math.toRadians(lat1 - lat2)
+        val lngDistance = Math.toRadians(long1 - long2)
+
+        val sinLatDist = Math.sin(latDistance / 2)
+        val sinLongDist = Math.sin(lngDistance / 2)
+
+        val a = sinLatDist * sinLatDist +
+                Math.cos(Math.toRadians(lat1)) *
+                Math.cos(Math.toRadians(lat2)) *
+                sinLongDist * sinLongDist
+
+        val c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
+
+        return AVERAGE_RADIUS_OF_EARTH_M * c
     }
 }
 
