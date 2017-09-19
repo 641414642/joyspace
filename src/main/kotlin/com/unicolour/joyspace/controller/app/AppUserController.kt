@@ -22,8 +22,8 @@ class AppUserController {
 """
 mutation {
 	sendRegVerifyCode(phoneNumber:"$phoneNumber") {
-		result
-		description
+		state: result
+		msg: description
 	}
 }
 """
@@ -42,8 +42,8 @@ mutation {
 """
 mutation {
 	requestResetPassword(phoneNumber:"$phoneNumber") {
-		result
-		description
+		state: result
+		msg: description
 	}
 }
 """
@@ -74,8 +74,8 @@ mutation {
             verifyCode: "$verifyCode",
             email: "$email")
     {
-		result
-		description
+		state: result
+		msg: description
 	}
 }
 """
@@ -103,8 +103,8 @@ mutation {
             newPassword: "$newPassword",
             verifyCode: "$verifyCode")
     {
-		result
-		description
+		state: result
+		msg: description
 	}
 }
 """
@@ -133,13 +133,15 @@ mutation {
             phoneNumber: "$phoneNumberVal",
             password: "$password")
     {
-        result
-        description
-        sessionId
-        userInfo {
-            phone
-            userName
-            email
+        state: result
+        msg: description
+        result: session {
+            token: sessionId
+            userInfo {
+                nickname: userName
+                phone
+                email
+            }
         }
 	}
 }

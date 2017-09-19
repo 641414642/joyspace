@@ -3,8 +3,8 @@ App发送验证码:
 		/app/user/sendRegVerifyCode?phoneNumber=xxxxxxxxx
 	返回值:
 		{
-			"result": 0,
-			"description": "xxxxxxx"
+			"state": 0,
+			"msg": "xxxxxxx"
 		}
 
 App用户登录:
@@ -14,8 +14,8 @@ App用户登录:
 		/app/user/login?phoneNumber=xxxx&password=xxxxxxx
 	返回值:
 		{
-			"result": 0,
-			"description": null,
+			"state": 0,
+			"msg": null,
 			"sessionId": "xxxxxxxxxxxxxxxxxxxxx",
 			"userInfo": {
 				"phone": "xxxxxxxx",
@@ -29,8 +29,8 @@ App用户注册:
 		/app/user/register?phoneNumber=xxxxxxx&userName=xxxxxxxx&password=xxxxxx&verifyCode=xxxxxxx&email=xxxxxxxxxx
 	返回值:
 		{
-			"result": 0,
-			"description": "xxxxxxx"
+			"state": 0,
+			"msg": "xxxxxxx"
 		}
 
 上传图片：
@@ -43,8 +43,7 @@ App用户注册:
 				"imageId": 6,
 				"width": 6000,   //原图尺寸
 				"height": 2315,   //原图尺寸
-				"url": "http://localhost:6060/assets/user/1/D8F219B9D0C0470C961074650E79D3DC/e2fee30d51cc481ab8a4e7f3419014b7.jpg",   //图片
-url
+				"url": "http://localhost:6060/assets/user/1/D8F219B9D0C0470C961074650E79D3DC/e2fee30d51cc481ab8a4e7f3419014b7.jpg",   //图片url
 				"errcode": 0,
 				"errmsg": null
 			 }
@@ -64,8 +63,8 @@ url
     参数: phone: 手机号码
 	返回值:
 			{
-				"errcode" : 0,
-				"errmsg" : null
+				"state" : 0,
+				"msg" : null
 			}
 
 重置密码:
@@ -80,32 +79,33 @@ url
 				"errmsg" : null
 			}
 
-*使用条款:
+使用条款:
     GET
-        /app/license
+        /assets/app/license.html
     返回值:
         content-type: text/html
         使用条款html文本
 
-*常见问题:
+常见问题:
     GET
-        /app/faq
+        /assets/app/faq.html
     返回值:
         content-type: text/html
         常见问题html文本
 
-*检查app更新 (android)
+检查app版本 (android)
     GET
-        /app/update
-    参数:
-        currentVersion: 当前app版本
+        /assets/app/client.json
     返回值:
         {
-            newVersion: 'xx.xx.xx',  或  null (没有新版本)
-            downloadUrl: 'xxxxxxxxx'   或  null (没有新版本)
+            "version":"0719",
+            "fileName":"JoySpace_client-0719.apk"
         }
+    apk下载地址:
+        /assets/app/<fileName>
 
-*推荐自助机
+
+推荐自助机
     GET
         /app/printStation/findByDistance
     参数:
@@ -115,13 +115,13 @@ url
 
     返回值:
         {
-				"errcode" : 0,
-				"errmsg" : null,
+				"state" : 0,
+				"msg" : null,
 				"result" : [
-				    { "id" : xx, "longitude" : xxxx.xxx, "latitude": xxxx.xxx },
-                    { "id" : xx, "longitude" : xxxx.xxx, "latitude": xxxx.xxx },
+				    { "id" : xx, "address": "xxxx", "longitude" : xxxx.xxx, "latitude": xxxx.xxx },
+                    { "id" : xx, "address": "xxxx", "longitude" : xxxx.xxx, "latitude": xxxx.xxx },
 				    ...
-				    { "id" : xx, "longitude" : xxxx.xxx, "latitude": xxxx.xxx }
+				    { "id" : xx, "address": "xxxx", "longitude" : xxxx.xxx, "latitude": xxxx.xxx }
 				]
         }
 

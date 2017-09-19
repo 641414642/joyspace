@@ -9,7 +9,6 @@ import graphql.schema.DataFetcher
 
 interface UserService {
     fun createOrUpdateUser(user: UserDTO): User
-    fun login(userName: String?, phoneNumber:String?, password:String): AppUserLoginResult
 
     val loginDataFetcher: DataFetcher<AppUserLoginResult>
 

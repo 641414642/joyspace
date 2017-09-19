@@ -79,9 +79,6 @@ class GraphQLServiceImpl : GraphQLService {
                         }
                     })
                 })
-                .type("PrintStation", { typeWiring ->
-                    typeWiring.dataFetchers(printStationService.getDataFetchers())
-                })
                 .type("Product", { typeWiring ->
                     typeWiring.dataFetcher("type", productService.getDataFetcher("type"))
                     typeWiring.dataFetcher("width", productService.getDataFetcher("width"))

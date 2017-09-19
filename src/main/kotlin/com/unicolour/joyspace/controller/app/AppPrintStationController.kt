@@ -24,11 +24,17 @@ class AppPrintStationController {
 """
 query {
 	findPrintStationsByDistance(
-        longitude:$longitude,
-        latitude:$latitude,
-        radius:$radius) {
-            id,
-            position { address, longitude, latitude }
+            longitude:$longitude,
+            latitude:$latitude,
+            radius:$radius) {
+        state: result
+        msg: description
+        result: printStations {
+                id
+                address
+                longitude
+                latitude
+        }
 	}
 }
 """

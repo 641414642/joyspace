@@ -2,7 +2,6 @@ package com.unicolour.joyspace.service.impl
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.unicolour.joyspace.controller.ManagerController
 import com.unicolour.joyspace.dao.UserDao
 import com.unicolour.joyspace.dao.UserLoginSessionDao
 import com.unicolour.joyspace.dao.VerifyCodeDao
@@ -70,7 +69,7 @@ open class UserServiceImpl : UserService {
                 val phoneNumber = env.getArgument<String>("phoneNumber")
                 val userName = env.getArgument<String>("userName")
                 val password = env.getArgument<String>("password")
-                login(userName, phoneNumber, password)
+                transactionTemplate.execute { login(userName, phoneNumber, password) }
             }
         }
 
@@ -251,8 +250,7 @@ open class UserServiceImpl : UserService {
     }
 
     //app用户登录
-    @Transactional
-    override fun login(userName: String?, phoneNumber:String?, password: String): AppUserLoginResult {
+    private fun login(userName: String?, phoneNumber:String?, password: String): AppUserLoginResult {
             val user =
             if (!phoneNumber.isNullOrEmpty()) {
                 userDao.findByPhone(phoneNumber!!)
@@ -277,7 +275,7 @@ open class UserServiceImpl : UserService {
                 session.expireTime.add(Calendar.SECOND, 3600)
                 userLoginSessionDao.save(session)
 
-                return AppUserLoginResult(sessionId = session.id, userInfo = user)
+                return AppUserLoginResult(session = AppUserLoginSession(session.id, userInfo = user))
             }
             else {
                 if (!phoneNumber.isNullOrEmpty()) {

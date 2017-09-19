@@ -1,6 +1,7 @@
 package com.unicolour.joyspace.service.impl
 
 import com.unicolour.joyspace.dao.*
+import com.unicolour.joyspace.dto.*
 import com.unicolour.joyspace.model.Position
 import com.unicolour.joyspace.model.PriceListItem
 import com.unicolour.joyspace.model.PrintStation
@@ -107,34 +108,40 @@ open class PrintStationServiceImpl : PrintStationService {
         }
     }
 
-    override fun getDataFetchers(): Map<String, DataFetcher<Any>> {
-        return mapOf(
-                "products" to DataFetcher<Any> { env -> printStationProductDao.findByPrintStationId(env.getSource<PrintStation>().id).map { it.product } }
-        )
-    }
-
-    override val printStationDataFetcher: DataFetcher<PrintStation>
+    override val printStationDataFetcher: DataFetcher<PrintStationDetailDTO>
         get() {
-            return DataFetcher { environment ->
-                val printStationId = environment.getArgument<Int>("printStationId")
-                printStationDao.findOne(printStationId)
+            return DataFetcher { env ->
+                val printStationId = env.getArgument<Int>("printStationId")
+                val context = env.getContext<HashMap<String, Any>>()
+                val baseUrl = context["baseUrl"] as String
+
+                val printStation = printStationDao.findOne(printStationId)
+                val priceMap = getPriceMap(printStation)
+
+                val products = printStationProductDao.findByPrintStationId(printStationId).map { it.product.productToDTO(baseUrl, priceMap) }
+                printStation.printStationToDetailDTO(products)
             }
         }
 
-    override val byDistanceDataFetcher: DataFetcher<List<PrintStation>>
+    override val byDistanceDataFetcher: DataFetcher<PrintStationFindResult>
         get() {
             return DataFetcher { env ->
                 val longitude = env.getArgument<Double>("longitude")
                 val latitude = env.getArgument<Double>("latitude")
                 val radius = env.getArgument<Double>("radius")
 
-                val idPosMap = HashMap<Int, Position>()
-                printStationDao
+                val idPosDistMap = HashMap<Int, Double>()
+                val printStations = printStationDao
                         .findAll()
                         .filter {
-                            val pos = idPosMap.computeIfAbsent(it.positionId, { id -> it.position })
-                            distance(longitude, latitude, pos.longitude, pos.latitude) < radius
+                            printStation ->
+                                idPosDistMap.computeIfAbsent(printStation.positionId, { posId ->
+                                    val pos = printStation.position
+                                    distance(longitude, latitude, pos.longitude, pos.latitude)
+                                }) < radius
                         }
+
+                PrintStationFindResult(printStations = printStations.map { it.printStationToDTO() })
             }
         }
 

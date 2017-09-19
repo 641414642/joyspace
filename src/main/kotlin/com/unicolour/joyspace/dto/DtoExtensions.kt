@@ -20,6 +20,7 @@ fun User.userToDTO(): UserDTO =
 fun PrintStation.printStationToDTO(): PrintStationDTO {
     val ps = PrintStationDTO()
 
+    ps.id = this.id
     ps.address = this.position.address
     ps.wxQrCode = this.wxQrCode
     ps.latitude = this.position.latitude
