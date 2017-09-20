@@ -14,5 +14,6 @@ class ProductDTO(
         var version: Int = 0,
         var thumbnailUrl: String? = null,
         var previewUrl: String? = null,
-        var thumbnailUrls: List<String> = emptyList(), var previewUrls: List<String> = emptyList()
+        var thumbnailUrls: List<String> = emptyList(),
+        var previewUrls: List<String> = emptyList()
 )

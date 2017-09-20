@@ -125,6 +125,15 @@ type Product {
     #展示图url
     previewUrl: [String!]
 
+    #版本号
+    version: Int!
+
+    #缩略图url
+    thumbnailUrl: String
+
+    #预览图url列表
+    previewUrls: [String!]
+
     #产品用户图片信息
     userImages: [ProductUserImage!]
 }

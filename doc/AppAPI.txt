@@ -125,7 +125,7 @@ App用户注册:
 				]
         }
 
-*自助机详情
+自助机详情
 	GET
 		/app/printStation/{id}
 	参数:
