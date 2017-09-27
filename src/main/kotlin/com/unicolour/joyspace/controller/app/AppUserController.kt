@@ -137,7 +137,7 @@ mutation {
         msg: description
         result: session {
             token: sessionId
-            userInfo {
+            userinfo {
                 nickname: userName
                 phone
                 email
