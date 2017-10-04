@@ -33,9 +33,9 @@ jar {
 
 asciidoctor {
 	outputDir "build/asciidoc"
-	sourceDir 'src/asciidoc'
+	sourceDir 'doc'
 	sources {
-		include 'index.adoc'
+		include 'AppAPI.adoc'
 	}
 }
 
