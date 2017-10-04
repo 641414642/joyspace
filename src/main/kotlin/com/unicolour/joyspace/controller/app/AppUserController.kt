@@ -116,20 +116,20 @@ mutation {
     @RequestMapping("/app/user/login", method = arrayOf(RequestMethod.POST))
     @ResponseBody
     fun userLogin(
-            @RequestParam("userName", required = false) userName: String?,
+            @RequestParam("nickName", required = false) nickName: String?,
             @RequestParam("phoneNumber", required = false) phoneNumber: String?,
             @RequestParam("password") password: String
     ) : Any? {
         val schema = graphQLService.getGraphQLSchema()
         val graphQL = GraphQL.newGraphQL(schema).build()
 
-        val userNameVal = userName ?: ""
+        val nickNameVal = nickName ?: ""
         val phoneNumberVal = phoneNumber ?: ""
         val query =
 """
 mutation {
 	login(
-            userName: "$userNameVal",
+            nickName: "$nickNameVal",
             phoneNumber: "$phoneNumberVal",
             password: "$password")
     {

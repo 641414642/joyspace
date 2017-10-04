@@ -67,9 +67,9 @@ open class UserServiceImpl : UserService {
         get() {
             return DataFetcher<AppUserLoginResult> { env ->
                 val phoneNumber = env.getArgument<String>("phoneNumber")
-                val userName = env.getArgument<String>("userName")
+                val nickName = env.getArgument<String>("nickName")
                 val password = env.getArgument<String>("password")
-                transactionTemplate.execute { login(userName, phoneNumber, password) }
+                transactionTemplate.execute { login(nickName, phoneNumber, password) }
             }
         }
 
@@ -251,13 +251,13 @@ open class UserServiceImpl : UserService {
     }
 
     //app用户登录
-    private fun login(userName: String?, phoneNumber:String?, password: String): AppUserLoginResult {
+    private fun login(nickName: String?, phoneNumber:String?, password: String): AppUserLoginResult {
             val user =
             if (!phoneNumber.isNullOrEmpty()) {
                 userDao.findByPhone(phoneNumber!!)
             }
-            else if (!userName.isNullOrEmpty()) {
-                userDao.findByUserName(userName!!)
+            else if (!nickName.isNullOrEmpty()) {
+                userDao.findByNickName(nickName!!)
             }
             else {
                 null
@@ -291,7 +291,7 @@ open class UserServiceImpl : UserService {
         if (!phoneNumber.isNullOrEmpty()) {
             return AppUserLoginResult(result = 1, description = "手机号或密码错误")
         }
-        else if (!userName.isNullOrEmpty()) {
+        else if (!nickName.isNullOrEmpty()) {
             return AppUserLoginResult(result = 2, description = "用户名或密码错误")
         }
         else {
