@@ -32,12 +32,11 @@ jar {
 }
 
 asciidoctor {
-	outputDir "build/asciidoc/69A8A51418BD43BFB6CF21FC3D697865"
+	outputDir "build/asciidoc"
 	sourceDir 'src/asciidoc'
 	sources {
 		include 'index.adoc'
 	}
-	dependsOn test
 }
 
 

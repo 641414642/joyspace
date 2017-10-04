@@ -7,4 +7,5 @@ interface UserDao : PagingAndSortingRepository<User, Int> {
     fun findByWxOpenId(wxOpenId: String): User?
     fun findByPhone(phoneNumber: String): User?
     fun findByUserName(userName: String): User?
+    fun findByNickName(nickName: String): User?
 }

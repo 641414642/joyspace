@@ -24,7 +24,7 @@ type MutationType {
     sendRegVerifyCode(phoneNumber: String!) : RequestResult!
 
     #用户注册
-    userRegister(userName: String!, password: String!, phoneNumber: String!, verifyCode: String!, email: String) : RequestResult!
+    userRegister(nickName: String!, password: String!, phoneNumber: String!, verifyCode: String!, email: String) : RequestResult!
 
     #请求重置密码
     requestResetPassword(phoneNumber: String!) : RequestResult!
@@ -88,6 +88,12 @@ type LoginUser {
 
     #用户名
     userName: String
+
+    #用户昵称
+    nickName: String
+
+    #用户头像Url
+    avatar: String
 
     #邮件地址
     email: String

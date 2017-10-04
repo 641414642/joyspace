@@ -55,7 +55,7 @@ mutation {
     @RequestMapping("/app/user/register", method = arrayOf(RequestMethod.POST))
     @ResponseBody
     fun registerUser(
-            @RequestParam("userName") userName: String,
+            @RequestParam("nickName") nickName: String,
             @RequestParam("password") password: String,
             @RequestParam("phoneNumber") phoneNumber: String,
             @RequestParam("verifyCode") verifyCode: String,
@@ -68,7 +68,7 @@ mutation {
 """
 mutation {
 	userRegister(
-            userName: "$userName",
+            nickName: "$nickName",
             password: "$password",
             phoneNumber: "$phoneNumber",
             verifyCode: "$verifyCode",
@@ -138,7 +138,8 @@ mutation {
         result: session {
             token: sessionId
             userinfo {
-                nickname: userName
+                nickname: nickName
+                avatar
                 phone
                 email
             }

@@ -21,6 +21,11 @@ class User {
     @Column(length = 200)
     var userName: String? = null
 
+    /** 用户昵称 */
+    @NotNull
+    @Column(length = 200)
+    var nickName: String? = null
+
     /** 微信OpenID */
     @Column(length = 200)
     var wxOpenId: String? = null
@@ -37,6 +42,9 @@ class User {
 
     @Column(length = 50)
     var phone: String? = null
+
+    @Column(length = 1024)
+    var avatar: String? = null
 
     @NotNull
     lateinit var createTime: Calendar

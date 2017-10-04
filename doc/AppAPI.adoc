@@ -54,6 +54,7 @@
                 "token": "xxxxxxxxxxxxxxxxxxxxx",
                 "userinfo": {
                     "nickname": "xxxxxxxx",
+                    "avatar": "http://xxx.xxxxxxxxxx",
                     "phone": "xxxxxxxx",
                     "email": "xxxxxxxxx"
                 }
@@ -69,7 +70,7 @@
 |参数名|描述
 
 |phoneNumber |手机号码
-|userName    |用户名
+|nickName    |用户昵称
 |password    |密码
 |verifyCode  |验证码
 |email       |邮箱地址
