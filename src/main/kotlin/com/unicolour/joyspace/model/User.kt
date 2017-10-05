@@ -22,7 +22,6 @@ class User {
     var userName: String? = null
 
     /** 用户昵称 */
-    @NotNull
     @Column(length = 200)
     var nickName: String? = null
 
