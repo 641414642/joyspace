@@ -35,11 +35,11 @@ mutation {
     @RequestMapping("/app/user/register", method = arrayOf(RequestMethod.POST))
     @ResponseBody
     fun registerUser(
-            @RequestParam("nickName") nickName: String,
+            @RequestParam("nickName", required=false, defaultValue = "") nickName: String,
             @RequestParam("password") password: String,
             @RequestParam("phoneNumber") phoneNumber: String,
             @RequestParam("verifyCode") verifyCode: String,
-            @RequestParam("email") email: String?
+            @RequestParam("email", required=false, defaultValue = "") email: String?
     ) : Any? {
         val schema = graphQLService.getGraphQLSchema()
         val graphQL = GraphQL.newGraphQL(schema).build()
