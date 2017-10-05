@@ -12,16 +12,16 @@ class AppUserController {
     @Autowired
     lateinit var graphQLService: GraphQLService
 
-    @RequestMapping("/app/user/sendRegVerifyCode", method = arrayOf(RequestMethod.POST))
+    @RequestMapping("/app/user/sendVerifyCode", method = arrayOf(RequestMethod.POST))
     @ResponseBody
-    fun sendRegVerifyCode(@RequestParam("phoneNumber") phoneNumber: String) : Any? {
+    fun sendVerifyCode(@RequestParam("phoneNumber") phoneNumber: String, @RequestParam("register") register: Boolean) : Any? {
         val schema = graphQLService.getGraphQLSchema()
         val graphQL = GraphQL.newGraphQL(schema).build()
 
         val query =
 """
 mutation {
-	sendRegVerifyCode(phoneNumber:"$phoneNumber") {
+	sendVerifyCode(phoneNumber:"$phoneNumber", register:"$register") {
 		state: result
 		msg: description
 	}
@@ -29,27 +29,7 @@ mutation {
 """
         val queryResult = graphQL.execute(query, null, null, emptyMap())
         val data:Map<String, Any> = queryResult.getData()
-        return data["sendRegVerifyCode"]
-    }
-
-    @RequestMapping("/app/user/requestResetPassword", method = arrayOf(RequestMethod.POST))
-    @ResponseBody
-    fun requestResetPassword(@RequestParam("phoneNumber") phoneNumber: String) : Any? {
-        val schema = graphQLService.getGraphQLSchema()
-        val graphQL = GraphQL.newGraphQL(schema).build()
-
-        val query =
-"""
-mutation {
-	requestResetPassword(phoneNumber:"$phoneNumber") {
-		state: result
-		msg: description
-	}
-}
-"""
-        val queryResult = graphQL.execute(query, null, null, emptyMap())
-        val data:Map<String, Any> = queryResult.getData()
-        return data["requestResetPassword"]
+        return data["sendVerifyCode"]
     }
 
     @RequestMapping("/app/user/register", method = arrayOf(RequestMethod.POST))

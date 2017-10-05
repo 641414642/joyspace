@@ -1,12 +1,12 @@
 === App发送注册验证码:
-- URL:  /app/user/sendRegVerifyCode
+- URL:  /app/user/sendVerifyCode
 - Method:  POST
 - 参数:
 |===
 |参数名|描述
 
-|phoneNumber
-|接收验证码的手机号码
+|phoneNumber  |接收验证码的手机号码
+|register     |true: 注册用的验证码,  false: 重置密码验证码
 |===
 - 返回值:
 ----
@@ -20,12 +20,10 @@
 |state值 |含义
 
 |0|发送成功
-|1|手机号码已经注册过
+|1|手机号码已经注册过 (register==true时)
 |4|请求太频繁(请等待60秒以后再试)
 |5|发送验证码失败
-|6|没有找到指定的订单
-|7|此手机号码没有对应的注册用户
-|8|没有找到指定的用户
+|7|此手机号码没有对应的注册用户 (register==false时)
 |100|服务器错误
 
 |===
@@ -36,11 +34,9 @@
 - Method: POST
 - 参数:
 
-用户名和手机号码二选一
 |===
 |参数名|描述
 |phoneNumber|手机号码
-|nickName|用户名
 |password|密码
 |===
 
@@ -115,23 +111,6 @@
 {
     "errcode" : 0,
     "errmsg" : null
-}
-----
-
-=== 请求重置密码:  (发送重置密码验证码到手机)
-- URL:  /app/user/requestResetPassword
-- Method: POST
-- 参数:
-|===
-|参数名 |描述
-|phone |手机号码
-|===
-
-- 返回值:
-----
-{
-    "state" : 0,
-    "msg" : null
 }
 ----
 

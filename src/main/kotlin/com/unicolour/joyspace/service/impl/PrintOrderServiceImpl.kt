@@ -164,7 +164,7 @@ open class PrintOrderServiceImpl : PrintOrderService {
                 GraphQLRequestResult(ResultCode.SUCCESS)
             }
             else {
-                GraphQLRequestResult(ResultCode.PRINTER_ORDER_NOT_FOUND)
+                GraphQLRequestResult(ResultCode.PRINT_ORDER_NOT_FOUND)
             }
         }
     }

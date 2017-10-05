@@ -74,11 +74,12 @@ open class UserServiceImpl : UserService {
         }
 
     //发送注册验证码
-    override val sendRegVerifyCodeDataFetcher: DataFetcher<GraphQLRequestResult>
+    override val sendVerifyCodeDataFetcher: DataFetcher<GraphQLRequestResult>
         get() {
             return DataFetcher<GraphQLRequestResult> { env ->
                 val phoneNumber = env.getArgument<String>("phoneNumber")
-                transactionTemplate.execute { sendVerifyCode(phoneNumber, true) }
+                val register = env.getArgument<Boolean>("register")
+                transactionTemplate.execute { sendVerifyCode(phoneNumber, register) }
             }
         }
 
@@ -153,14 +154,6 @@ open class UserServiceImpl : UserService {
                 val email = env.getArgument<String>("email")
 
                 userRegister(nickName, password, phoneNumber, verifyCode, email)
-            }
-        }
-
-    override val requestResetPasswordDataFetcher: DataFetcher<GraphQLRequestResult>
-        get() {
-            return DataFetcher { env ->
-                val phoneNumber = env.getArgument<String>("phoneNumber")
-                sendVerifyCode(phoneNumber, false)
             }
         }
 

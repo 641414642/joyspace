@@ -12,13 +12,11 @@ interface UserService {
 
     val loginDataFetcher: DataFetcher<AppUserLoginResult>
 
-    val sendRegVerifyCodeDataFetcher: DataFetcher<GraphQLRequestResult>
+    /** 发送验证码 */
+    val sendVerifyCodeDataFetcher: DataFetcher<GraphQLRequestResult>
 
     /** 用户注册 */
     val userRegisterDataFetcher: DataFetcher<GraphQLRequestResult>
-
-    /** 请求重置密码 */
-    val requestResetPasswordDataFetcher: DataFetcher<GraphQLRequestResult>
 
     /** 重置密码 */
     val resetPasswordDataFetcher: DataFetcher<GraphQLRequestResult>

@@ -62,9 +62,8 @@ class GraphQLServiceImpl : GraphQLService {
                 })
                 .type("MutationType", { typeWiring ->
                     typeWiring.dataFetcher("login", userService.loginDataFetcher)
-                    typeWiring.dataFetcher("sendRegVerifyCode", userService.sendRegVerifyCodeDataFetcher)
+                    typeWiring.dataFetcher("sendVerifyCode", userService.sendVerifyCodeDataFetcher)
                     typeWiring.dataFetcher("userRegister", userService.userRegisterDataFetcher)
-                    typeWiring.dataFetcher("requestResetPassword", userService.requestResetPasswordDataFetcher)
                     typeWiring.dataFetcher("resetPassword", userService.resetPasswordDataFetcher)
                     typeWiring.dataFetcher("printOrderDownloaded", printOrderService.getUpdateOrderStateDataFetcher(PrintOrderState.DOWNLOADED))
                     typeWiring.dataFetcher("printOrderPrinted", printOrderService.getUpdateOrderStateDataFetcher(PrintOrderState.PRINTED))

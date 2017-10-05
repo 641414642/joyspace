@@ -20,14 +20,11 @@ type MutationType {
     #用户登录
     login(userName: String, phoneNumber: String, password: String!) : LoginRequestResult!
 
-    #发送注册验证码
-    sendRegVerifyCode(phoneNumber: String!) : RequestResult!
+    #发送验证码
+    sendVerifyCode(phoneNumber: String!, register: Boolean) : RequestResult!
 
     #用户注册
     userRegister(nickName: String!, password: String!, phoneNumber: String!, verifyCode: String!, email: String) : RequestResult!
-
-    #请求重置密码
-    requestResetPassword(phoneNumber: String!) : RequestResult!
 
     #重置密码
     resetPassword(userName: String, phoneNumber: String!, verifyCode: String!, newPassword: String!) : RequestResult!
