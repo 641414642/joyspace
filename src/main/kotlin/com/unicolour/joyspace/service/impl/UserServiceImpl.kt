@@ -148,10 +148,10 @@ open class UserServiceImpl : UserService {
         get() {
             return DataFetcher { env ->
                 val phoneNumber = env.getArgument<String>("phoneNumber")
-                val nickName = env.getArgument<String>("nickName")
+                val nickName = env.getArgument<String?>("nickName")
                 val password = env.getArgument<String>("password")
                 val verifyCode = env.getArgument<String>("verifyCode")
-                val email = env.getArgument<String>("email")
+                val email = env.getArgument<String?>("email")
 
                 userRegister(nickName, password, phoneNumber, verifyCode, email)
             }
@@ -203,7 +203,7 @@ open class UserServiceImpl : UserService {
     }
 
     //用户注册
-    private fun userRegister(nickName: String, password: String,
+    private fun userRegister(nickName: String?, password: String,
                              phoneNumber: String, verifyCode: String, email: String?): GraphQLRequestResult {
         val now = Instant.now()
         val verifyCodeObj = verifyCodeDao.findOne(phoneNumber)
@@ -218,9 +218,11 @@ open class UserServiceImpl : UserService {
                 return GraphQLRequestResult(ResultCode.PHONE_NUMBER_ALREADY_REGISTERED)
             }
 
-            user = userDao.findByNickName(nickName)
-            if (user != null) {
-                return GraphQLRequestResult(ResultCode.NICK_NAME_ALREADY_REGISTERED)
+            if (nickName != null && nickName != "") {
+                user = userDao.findByNickName(nickName)
+                if (user != null) {
+                    return GraphQLRequestResult(ResultCode.NICK_NAME_ALREADY_REGISTERED)
+                }
             }
 
             user = User()

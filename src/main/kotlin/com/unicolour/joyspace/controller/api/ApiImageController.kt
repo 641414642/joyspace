@@ -19,7 +19,7 @@ class ApiImageController {
     @Autowired
     lateinit var imageService: ImageService
 
-    @RequestMapping(path = arrayOf("/api/image", "/app/image"), method = arrayOf(RequestMethod.POST))
+    @RequestMapping("/api/image", method = arrayOf(RequestMethod.POST))
     fun uploadImage(request: HttpServletRequest,
                     @RequestParam("sessionId") sessionId: String,
                     @RequestParam("image") imgFile: MultipartFile?) : ResponseEntity<ImageInfo> {
@@ -29,7 +29,7 @@ class ApiImageController {
         return ResponseEntity.ok(imgInfo)
     }
 
-    @RequestMapping(path = arrayOf("/api/image/resize", "/app/image/resize"), method = arrayOf(RequestMethod.POST))
+    @RequestMapping("/api/image/resize", method = arrayOf(RequestMethod.POST))
     fun resizeImage(request: HttpServletRequest,
                     @RequestParam("sessionId") sessionId: String,
                     @RequestParam("width") width: Int,
@@ -41,7 +41,7 @@ class ApiImageController {
         return ResponseEntity.ok(imgInfo)
     }
 
-    @RequestMapping(path = arrayOf("/api/image/rotateAndCrop", "/app/image/rotateAndCrop"), method = arrayOf(RequestMethod.POST))
+    @RequestMapping("/api/image/rotateAndCrop", method = arrayOf(RequestMethod.POST))
     fun rotateAndCropImage(request: HttpServletRequest,
                            @RequestParam("sessionId") sessionId: String,
                            @RequestParam("imageId") imageId: Int,
@@ -73,7 +73,7 @@ class ApiImageController {
         return ResponseEntity.ok(imgInfo)
     }
 
-    @RequestMapping(path = arrayOf("/api/image", "app/image"), method = arrayOf(RequestMethod.DELETE))
+    @RequestMapping("/api/image", method = arrayOf(RequestMethod.DELETE))
     fun deleteImage(@RequestParam("sessionId") sessionId: String,
                     @RequestParam("imageId") imageId: Int) : ResponseEntity<CommonRequestResult> {
         val result = imageService.deleteImage(sessionId, imageId)
