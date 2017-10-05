@@ -21,7 +21,7 @@ class AppUserController {
         val query =
 """
 mutation {
-	sendVerifyCode(phoneNumber:"$phoneNumber", register:"$register") {
+	sendVerifyCode(phoneNumber:"$phoneNumber", register:$register) {
 		state: result
 		msg: description
 	}
