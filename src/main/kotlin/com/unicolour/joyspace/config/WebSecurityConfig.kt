@@ -22,6 +22,7 @@ open class WebSecurityConfig : WebSecurityConfigurerAdapter() {
     override fun configure(http: HttpSecurity) {
         //http.authorizeRequests().anyRequest().permitAll();
         val permitAllPatterns = arrayOf(
+                "/favicon.ico",
                 "/thirdparty/**",
                 "/img/**",
                 "/js/**",
