@@ -116,9 +116,8 @@
 |==========================================================
 |参数名       |描述
 |phoneNumber  |手机号码
-|userName     |用户名
 |verifyCode   |上一个请求中发到用户手机上的验证码
-|newpassword  |新密码
+|newPassword  |新密码
 |==========================================================
 
 - 返回值:
@@ -131,20 +130,20 @@
 ----
 
 === 使用条款:
-- URL:  /assets/app/license.html
+- URL:  /app/license
 - Method: GET
 - 返回值 content-type: text/html
 - 返回值内容: 使用条款html文本
 
 
 === 常见问题:
-- URL:  /assets/app/faq.html
+- URL:  /app/faq
 - Method: GET
 - 返回值 content-type: text/html
 - 返回值内容: 常见问题html文本
 
 === 检查app版本 (android)
-- URL:  /assets/app/client.json
+- URL:  /app/client
 - Method: GET
     返回值:
         {
@@ -221,5 +220,5 @@
 ----
 
 === App主页数据:
-- URL:  /assets/app/homepage.json
+- URL:  /app/homepage
 
