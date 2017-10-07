@@ -1,0 +1,44 @@
+{
+        "msg" : "OK",
+        "state" : 0,
+        "result" : {
+                "promote" : [
+                        {
+                                "name" : "广告1",
+                                "describe" : "广告描述1",
+                                "contentUrl" : "https://test.uni-colour.com/assets/app/images/ad1.jpg"
+                        },
+                        {
+                                "name" : "广告2",
+                                "describe" : "广告描述2",
+                                "contentUrl" : "https://test.uni-colour.com/assets/app/images/ad2.jpg"
+                        }
+                ],
+                "productory" : [
+                        {
+                                "id" : 0,
+                                "name" : "普通照片",
+                                "describe" : "首次冲印免费",
+                                "iconUrl" : "https://test.uni-colour.com/assets/app/images/photo.jpg",
+                                "startColor" : "#ffda48",
+                                "endColor" : "#ffbc2c"
+                        },
+                        {
+                                "id" : 1,
+                                "name" : "证件照",
+                                "describe" : "首次冲印免费",
+                                "iconUrl" : "https://test.uni-colour.com/assets/app/images/id_photo.jpg",
+                                "startColor" : "#fca9c3",
+                                "endColor" : "#fd798e"
+                        },
+                        {
+                                "id" : 2,
+                                "name" : "模板拼图",
+                                "describe" : "免费模板随便用",
+                                "iconUrl" : "https://test.uni-colour.com/assets/app/images/template_photo.jpg",
+                                "startColor" : "#f6c3fc",
+                                "endColor" : "#ccb0fd"
+                        }
+                ]
+        }
+}
