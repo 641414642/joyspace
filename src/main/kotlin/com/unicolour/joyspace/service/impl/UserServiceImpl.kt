@@ -78,14 +78,14 @@ open class UserServiceImpl : UserService {
         get() {
             return DataFetcher<GraphQLRequestResult> { env ->
                 val phoneNumber = env.getArgument<String>("phoneNumber")
-                val register = env.getArgument<Boolean>("register")
-                transactionTemplate.execute { sendVerifyCode(phoneNumber, register) }
+                //val register = env.getArgument<Boolean>("register")
+                transactionTemplate.execute { sendVerifyCode(phoneNumber) }
             }
         }
 
-    private fun sendVerifyCode(phoneNumber: String, regCode: Boolean): GraphQLRequestResult {
-        val codeType = if (regCode) "帐号绑定" else "重置密码"
-        val smsTpl = "【优利绚彩】${codeType}验证码为:%s,请勿向任何人提供您收到的短信验证码。"
+    private fun sendVerifyCode(phoneNumber: String): GraphQLRequestResult {
+        //val codeType = if (regCode) "帐号绑定" else "重置密码"
+        val smsTpl = "【优利绚彩】验证码为:%s,请勿向任何人提供您收到的短信验证码。"
 
         val now = Instant.now()
         var verifyCode = verifyCodeDao.findOne(phoneNumber)
@@ -110,13 +110,13 @@ open class UserServiceImpl : UserService {
         }
         else {
             val user = userDao.findByPhone(phoneNumber)
-            if (regCode && user != null) {
-                return GraphQLRequestResult(ResultCode.PHONE_NUMBER_ALREADY_REGISTERED)
-            }
-            else if (!regCode && user == null) {
-                return GraphQLRequestResult(ResultCode.USER_NOT_FOUND_FOR_THIS_PHONE_NUMBER)
-            }
-            else {
+//            if (regCode && user != null) {
+//                return GraphQLRequestResult(ResultCode.PHONE_NUMBER_ALREADY_REGISTERED)
+//            }
+//            else if (!regCode && user == null) {
+//                return GraphQLRequestResult(ResultCode.USER_NOT_FOUND_FOR_THIS_PHONE_NUMBER)
+//            }
+//            else {
                 verifyCode = VerifyCode()
                 verifyCode.phoneNumber = phoneNumber
                 verifyCode.code = String.format("%06d", secureRandom.nextInt(1000000))
@@ -131,7 +131,7 @@ open class UserServiceImpl : UserService {
                 else {
                     logger.info("Send SMS success, PhoneNumber: $phoneNumber, ResponseCode: ${sendResult.first}, ResponseId: ${sendResult.second}")
                 }
-            }
+//            }
         }
         //XXX
         return GraphQLRequestResult(ResultCode.SUCCESS)

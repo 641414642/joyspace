@@ -21,7 +21,7 @@ type MutationType {
     login(nickName: String, phoneNumber: String, password: String!) : LoginRequestResult!
 
     #发送验证码
-    sendVerifyCode(phoneNumber: String!, register: Boolean) : RequestResult!
+    sendVerifyCode(phoneNumber: String!) : RequestResult!
 
     #用户注册
     userRegister(nickName: String!, password: String!, phoneNumber: String!, verifyCode: String!, email: String) : RequestResult!

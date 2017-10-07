@@ -14,14 +14,14 @@ class AppUserController {
 
     @RequestMapping("/app/user/sendVerifyCode", method = arrayOf(RequestMethod.POST))
     @ResponseBody
-    fun sendVerifyCode(@RequestParam("phoneNumber") phoneNumber: String, @RequestParam("register") register: Boolean) : Any? {
+    fun sendVerifyCode(@RequestParam("phoneNumber") phoneNumber: String) : Any? {
         val schema = graphQLService.getGraphQLSchema()
         val graphQL = GraphQL.newGraphQL(schema).build()
 
         val query =
 """
 mutation {
-	sendVerifyCode(phoneNumber:"$phoneNumber", register:$register) {
+	sendVerifyCode(phoneNumber:"$phoneNumber") {
 		state: result
 		msg: description
 	}
