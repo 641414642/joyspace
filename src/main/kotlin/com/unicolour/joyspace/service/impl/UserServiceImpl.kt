@@ -174,10 +174,10 @@ open class UserServiceImpl : UserService {
                               verifyCode: String, newPassword: String): GraphQLRequestResult {
         val now = Instant.now()
         var user: User? = null
-        if (userName != null) {
+        if (userName != null && userName != "") {
             user = userDao.findByUserName(userName)
         }
-        else if (phoneNumber != null) {
+        else if (phoneNumber != null && phoneNumber != "") {
             user = userDao.findByPhone(phoneNumber)
         }
 

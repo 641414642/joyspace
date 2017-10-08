@@ -67,7 +67,6 @@ mutation {
     @RequestMapping("/app/user/resetPassword", method = arrayOf(RequestMethod.POST))
     @ResponseBody
     fun resetPassword(
-            @RequestParam("userName", required = false) userName: String?,
             @RequestParam("phoneNumber", required = false) phoneNumber: String?,
             @RequestParam("newPassword", required = true) newPassword: String,
             @RequestParam("verifyCode", required = true) verifyCode: String) : Any? {
@@ -78,7 +77,7 @@ mutation {
 """
 mutation {
 	resetPassword(
-            userName: "$userName",
+            userName: "",
             phoneNumber: "$phoneNumber",
             newPassword: "$newPassword",
             verifyCode: "$verifyCode")
