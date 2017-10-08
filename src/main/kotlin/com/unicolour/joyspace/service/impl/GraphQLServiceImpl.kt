@@ -73,8 +73,8 @@ class GraphQLServiceImpl : GraphQLService {
                         val result = environment.getSource<GraphQLRequestResult>()
                         val language = environment.getArgument<String>("language")
                         when (language) {
-                            "zh" -> result.resultCode.desc
-                            else -> result.resultCode.descEn
+                            "en" -> result.resultCode.descEn
+                            else -> result.resultCode.desc
                         }
                     })
                 })
