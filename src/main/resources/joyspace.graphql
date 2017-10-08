@@ -6,13 +6,19 @@ schema {
 #查询
 type QueryType {
     #根据id查找自助打印机
-    printStation(printStationId: Int!): PrintStationDetail
+    printStation(printStationId: Int!): PrintStation
 
     #查找指定自助机的待打印订单
     getPrintOrder(printStationId: Int!, idAfter: Int!): PrintOrder
 
     #根据位置查找指定距离内的自助机列表
     findPrintStationsByDistance(longitude: Float!, latitude: Float!, radius: Float!): PrintStationFindResult!
+
+    #查找指定位置所在城市中的所有自助机列表
+    findPrintStationsByCity(longitude: Float!, latitude: Float!): PrintStationFindResult!
+
+    #查找最近的自助机
+    findNearestPrintStation(longitude: Float!, latitude: Float!): PrintStationFindResult!
 }
 
 #增删改操作
@@ -173,21 +179,8 @@ type PrintStation {
     #地址
     address: String
 
-    #微信二维码
-    wxQrCode: String
-
-    #经度
-    longitude: Float!
-
-    #纬度
-    latitude: Float!
-}
-
-type PrintStationDetail {
-    id: Int!
-
-    #地址
-    address: String
+    #交通情况
+    transportation: String
 
     #微信二维码
     wxQrCode: String

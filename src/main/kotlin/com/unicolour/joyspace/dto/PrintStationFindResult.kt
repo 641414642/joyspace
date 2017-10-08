@@ -1,5 +1,7 @@
 package com.unicolour.joyspace.dto
 
+import com.unicolour.joyspace.model.PrintStation
+
 //查找自助机的结果
 class PrintStationFindResult (
         //结果代码 0: 成功
@@ -9,5 +11,5 @@ class PrintStationFindResult (
         var description: String? = null,
 
         //自助机列表
-        var printStations: List<PrintStationDTO> = emptyList()
+        var printStations: List<PrintStation> = emptyList()
 )

@@ -139,19 +139,21 @@
 === 常见问题:
 - URL:  /app/faq
 - Method: GET
-- 返回值 content-type: text/html
+- 返回值: content-type: text/html
 - 返回值内容: 常见问题html文本
 
 === 检查app版本 (android)
 - URL:  /app/client
 - Method: GET
-    返回值:
+- 返回值:
+
+----
         {
             "version":"0719",
             "fileName":"JoySpace_client-0719.apk"
         }
-    apk下载地址:
-        /assets/app/<fileName>
+----
+- apk下载地址:    /assets/app/<fileName>
 
 
 === 推荐自助机
@@ -159,7 +161,7 @@
 - Method: GET
 - 参数:
 |==========================================================
-|参数名     |描述
+|参数名      |描述
 |longitude  |位置精度(double)
 |latitude   |位置纬度(double)
 |radius     |搜索半径(int, 单位米)
@@ -184,7 +186,7 @@
 - Method: GET
 - 参数:
 |==========================================================
-|参数名  | 描述
+|参数名   | 描述
 |id      | 自助机id
 |==========================================================
 

@@ -38,4 +38,14 @@ class PrintStation {
     lateinit var company: Company
     //endregion
 
+    //region 城市
+    /** 城市ID */
+    @Column(name = "city_id", insertable = false, updatable = false)
+    var cityId: Int = 0
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "city_id")
+    @NotNull
+    lateinit var city: City
+    //endregion
 }

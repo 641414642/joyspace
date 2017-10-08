@@ -38,6 +38,22 @@ open class PrintStationServiceImpl : PrintStationService {
     @Autowired
     lateinit var printStationProductDao: PrintStationProductDao
 
+    @Autowired
+    lateinit var cityDao: CityDao
+
+    override fun getDataFetcher(fieldName: String): DataFetcher<Any> {
+        return DataFetcher<Any> { env ->
+            val printStation = env.getSource<PrintStation>()
+            when (fieldName) {
+                "address" -> printStation.position.address
+                "latitude" -> printStation.position.latitude
+                "longitude" -> printStation.position.longitude
+                "transportation" -> printStation.position.transportation
+                else -> null
+            }
+        }
+    }
+
     override fun getPriceMap(printStation: PrintStation): Map<Int, Int> {
         val priceListItems: List<PriceListItem> = priceListService.getPriceListItems(printStation.position.priceListId)
         val defPriceListItems: List<PriceListItem> = priceListService.getPriceListItems(printStation.company.defaultPriceListId)
@@ -68,6 +84,7 @@ open class PrintStationServiceImpl : PrintStationService {
         printStation.wxQrCode = wxQrCode
         printStation.company = manager.company
         printStation.position = positionDao.findOne(positionId)
+        printStation.city = printStation.position.city
 
         printStationDao.save(printStation)
 
@@ -89,6 +106,7 @@ open class PrintStationServiceImpl : PrintStationService {
         if (printStation != null) {
             printStation.wxQrCode = wxQrCode
             printStation.position = positionDao.findOne(positionId)
+            printStation.city = printStation.position.city
 
             printStationDao.save(printStation)
 
@@ -108,18 +126,50 @@ open class PrintStationServiceImpl : PrintStationService {
         }
     }
 
-    override val printStationDataFetcher: DataFetcher<PrintStationDetailDTO>
+    override val printStationDataFetcher: DataFetcher<PrintStation>
         get() {
             return DataFetcher { env ->
                 val printStationId = env.getArgument<Int>("printStationId")
-                val context = env.getContext<HashMap<String, Any>>()
-                val baseUrl = context["baseUrl"] as String
+                printStationDao.findOne(printStationId)
+            }
+        }
 
-                val printStation = printStationDao.findOne(printStationId)
-                val priceMap = getPriceMap(printStation)
+    override val byCityDataFetcher: DataFetcher<PrintStationFindResult>
+        get() {
+            return DataFetcher { env ->
+                val longitude = env.getArgument<Double>("longitude")
+                val latitude = env.getArgument<Double>("latitude")
 
-                val products = printStationProductDao.findByPrintStationId(printStationId).map { it.product.productToDTO(baseUrl, priceMap) }
-                printStation.printStationToDetailDTO(products)
+                val city = cityDao.findByLocation(longitude, latitude)
+                if (city == null) {
+                    PrintStationFindResult(printStations = emptyList())
+                }
+                else {
+                    PrintStationFindResult(printStations = printStationDao.findByCityId(city.id))
+                }
+            }
+        }
+
+    override val nearestDataFetcher: DataFetcher<PrintStationFindResult>
+        get() {
+            return DataFetcher { env ->
+                val longitude = env.getArgument<Double>("longitude")
+                val latitude = env.getArgument<Double>("latitude")
+
+                val city = cityDao.findByLocation(longitude, latitude)
+                if (city == null) {
+                    PrintStationFindResult(printStations = emptyList())
+                }
+                else {
+                    val printStations = printStationDao.findByCityId(city.id)
+                    val nearest = printStations.minBy { distance(longitude, latitude, it.position.longitude, it.position.latitude) }
+                    if (nearest == null) {
+                        PrintStationFindResult(printStations = emptyList())
+                    }
+                    else {
+                        PrintStationFindResult(printStations = listOf(nearest))
+                    }
+                }
             }
         }
 
@@ -135,13 +185,13 @@ open class PrintStationServiceImpl : PrintStationService {
                         .findAll()
                         .filter {
                             printStation ->
-                                idPosDistMap.computeIfAbsent(printStation.positionId, { posId ->
+                                idPosDistMap.computeIfAbsent(printStation.positionId, { _ ->
                                     val pos = printStation.position
                                     distance(longitude, latitude, pos.longitude, pos.latitude)
                                 }) < radius
                         }
 
-                PrintStationFindResult(printStations = printStations.map { it.printStationToDTO() })
+                PrintStationFindResult(printStations = printStations)
             }
         }
 

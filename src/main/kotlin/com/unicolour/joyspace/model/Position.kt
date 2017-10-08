@@ -30,6 +30,10 @@ class Position {
     @NotNull
     var latitude: Double = 0.0
 
+    /** 交通情况 */
+    @Column(length = 1000)
+    var transportation: String = ""
+
     //region 店面
     /** 店面ID */
     @Column(name = "company_id", insertable = false, updatable = false)
@@ -39,6 +43,17 @@ class Position {
     @JoinColumn(name = "company_id")
     @NotNull
     lateinit var company: Company
+    //endregion
+
+    //region 城市
+    /** 城市ID */
+    @Column(name = "city_id", insertable = false, updatable = false)
+    var cityId: Int = 0
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "city_id")
+    @NotNull
+    lateinit var city: City
     //endregion
 
     //region 价目表列
@@ -53,4 +68,31 @@ class Position {
 
     @OneToMany(mappedBy = "position")
     lateinit var printStations: List<PrintStation>
+
+    @OneToMany(mappedBy = "position")
+    lateinit var imageFiles: List<PositionImageFile>
+}
+
+
+/** 投放地点图片 */
+@Entity
+@Table(name = "position_image_file")
+class PositionImageFile {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    var id: Int = 0
+
+    /** 文件类型 jpg, png ... */
+    @NotNull
+    @Column(length = 10)
+    lateinit var fileType: String
+
+    /** 属于哪个投放地点 */
+    @Column(name = "position_id", insertable = false, updatable = false)
+    var positionId: Int = 0
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "position_id")
+    @NotNull
+    lateinit var position: Position
 }

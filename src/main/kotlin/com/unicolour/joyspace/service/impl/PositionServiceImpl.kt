@@ -1,5 +1,6 @@
 package com.unicolour.joyspace.service.impl
 
+import com.unicolour.joyspace.dao.CityDao
 import com.unicolour.joyspace.dao.ManagerDao
 import com.unicolour.joyspace.dao.PositionDao
 import com.unicolour.joyspace.dao.PriceListDao
@@ -29,6 +30,9 @@ open class PositionServiceImpl : PositionService {
     @Autowired
     lateinit var priceListDao : PriceListDao
 
+    @Autowired
+    lateinit var cityDao : CityDao
+
     @Transactional
     override fun createPosition(name: String, address: String, longitude: Double, latitude: Double, priceListId: Int): Position? {
         val loginManager = managerService.loginManager
@@ -37,6 +41,7 @@ open class PositionServiceImpl : PositionService {
         }
         
         val manager = managerDao.findOne(loginManager.managerId)
+        val city = cityDao.findByLocation(longitude, latitude)
 
         val position = Position()
         position.name = name
@@ -44,6 +49,7 @@ open class PositionServiceImpl : PositionService {
         position.company = manager.company
         position.latitude = latitude
         position.longitude = longitude
+        position.city = city!!
         position.priceList =
                 if (priceListId <= 0)
                     null
@@ -57,12 +63,14 @@ open class PositionServiceImpl : PositionService {
     @Transactional
     override fun updatePosition(id: Int, name: String, address: String, longitude: Double, latitude: Double, priceListId: Int): Boolean {
         val position = positionDao.findOne(id)
+        val city = cityDao.findByLocation(longitude, latitude)
 
         if (position != null) {
             position.name = name
             position.address = address
             position.latitude = latitude
             position.longitude = longitude
+            position.city = city!!
             position.priceList =
                     if (priceListId <= 0)
                         null

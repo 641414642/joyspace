@@ -58,6 +58,8 @@ class GraphQLServiceImpl : GraphQLService {
                 .type("QueryType", { typeWiring ->
                     typeWiring.dataFetcher("printStation", printStationService.printStationDataFetcher)
                     typeWiring.dataFetcher("findPrintStationsByDistance", printStationService.byDistanceDataFetcher)
+                    typeWiring.dataFetcher("findPrintStationsByCity", printStationService.byCityDataFetcher)
+                    typeWiring.dataFetcher("findNearestPrintStation", printStationService.nearestDataFetcher)
                     typeWiring.dataFetcher("getPrintOrder", printOrderService.getPrintOrderDataFetcher())
                 })
                 .type("MutationType", { typeWiring ->
@@ -87,6 +89,13 @@ class GraphQLServiceImpl : GraphQLService {
 //                    typeWiring.dataFetcher("previewUrl", productService.getDataFetcher("previewUrl"))
 //                    typeWiring.dataFetcher("userImages", productService.getDataFetcher("userImages"))
 //                })
+
+                .type("PrintStation", { typeWiring ->
+                    typeWiring.dataFetcher("address", printStationService.getDataFetcher("address"))
+                    typeWiring.dataFetcher("latitude", printStationService.getDataFetcher("latitude"))
+                    typeWiring.dataFetcher("longitude", printStationService.getDataFetcher("longitude"))
+                    typeWiring.dataFetcher("transportation", printStationService.getDataFetcher("transportation"))
+                })
                 .type("PrintOrderItem", { typeWiring ->
                     typeWiring.dataFetcher("imageFiles", printOrderService.getImageFilesDataFetcher())
                 })

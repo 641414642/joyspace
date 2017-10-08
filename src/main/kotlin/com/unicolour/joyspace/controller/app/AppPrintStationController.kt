@@ -13,6 +13,70 @@ class AppPrintStationController {
     @Autowired
     lateinit var graphQLService: GraphQLService
 
+    @RequestMapping("/app/printStation/findByCity", method = arrayOf(RequestMethod.GET))
+    @ResponseBody
+    fun findByCity(
+            request: HttpServletRequest,
+            @RequestParam("longitude") longitude: Double,
+            @RequestParam("latitude") latitude: Double) : Any? {
+        val schema = graphQLService.getGraphQLSchema()
+        val graphQL = GraphQL.newGraphQL(schema).build()
+
+        val query =
+"""
+query {
+	findPrintStationsByCity(
+            longitude:$longitude,
+            latitude:$latitude) {
+        state: result
+        msg: description
+        result: printStations {
+                id
+                address
+                longitude
+                latitude
+        }
+	}
+}
+"""
+        val context = hashMapOf<String, Any>( "baseUrl" to getBaseUrl(request))
+        val queryResult = graphQL.execute(query, null, context, emptyMap())
+        val data:Map<String, Any> = queryResult.getData()
+        return data["findPrintStationsByCity"]
+    }
+
+    @RequestMapping("/app/printStation/nearest", method = arrayOf(RequestMethod.GET))
+    @ResponseBody
+    fun findNearest(
+            request: HttpServletRequest,
+            @RequestParam("longitude") longitude: Double,
+            @RequestParam("latitude") latitude: Double) : Any? {
+        val schema = graphQLService.getGraphQLSchema()
+        val graphQL = GraphQL.newGraphQL(schema).build()
+
+        val query =
+"""
+query {
+	findNearestPrintStation(
+            longitude:$longitude,
+            latitude:$latitude) {
+        state: result
+        msg: description
+        result: printStations {
+                id
+                address
+                longitude
+                latitude
+        }
+	}
+}
+"""
+        val context = hashMapOf<String, Any>( "baseUrl" to getBaseUrl(request))
+        val queryResult = graphQL.execute(query, null, context, emptyMap())
+        val data:Map<String, Any> = queryResult.getData()
+        return data["findNearestPrintStation"]
+    }
+
     @RequestMapping("/app/printStation/findByDistance", method = arrayOf(RequestMethod.GET))
     @ResponseBody
     fun findByDistance(
