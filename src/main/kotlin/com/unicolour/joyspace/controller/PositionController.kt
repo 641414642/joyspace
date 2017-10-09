@@ -1,11 +1,13 @@
 package com.unicolour.joyspace.controller
 
 import com.unicolour.joyspace.dao.PositionDao
+import com.unicolour.joyspace.dao.PositionImageFileDao
 import com.unicolour.joyspace.dao.PriceListDao
 import com.unicolour.joyspace.model.Position
 import com.unicolour.joyspace.service.ManagerService
 import com.unicolour.joyspace.service.PositionService
 import com.unicolour.joyspace.util.Pager
+import com.unicolour.joyspace.util.getBaseUrl
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Controller
@@ -13,7 +15,9 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestMethod
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.ResponseBody
+import org.springframework.web.multipart.MultipartFile
 import org.springframework.web.servlet.ModelAndView
+import javax.servlet.http.HttpServletRequest
 
 @Controller
 class PositionController {
@@ -29,6 +33,9 @@ class PositionController {
 
     @Autowired
     lateinit var managerService: ManagerService
+
+    @Autowired
+    lateinit var positionImageFileDao: PositionImageFileDao
 
     @RequestMapping("/position/list")
     fun positionList(
@@ -105,5 +112,56 @@ class PositionController {
             return positionService.updatePosition(id, name, address, transportation, longitude, latitude, priceListId)
         }
     }
-}
 
+    @RequestMapping(path = arrayOf("/position/manageImageFiles"), method = arrayOf(RequestMethod.GET))
+    @ResponseBody
+    fun manageImageFiles(
+            request: HttpServletRequest,
+            modelAndView: ModelAndView,
+            @RequestParam(name = "positionId", required = true) positionId: Int): ModelAndView {
+
+        val baseUrl = getBaseUrl(request)
+
+        modelAndView.model.put("positionId", positionId)
+
+        val images = positionImageFileDao.findByPositionId(positionId)
+
+        modelAndView.model.put("images", images.map {
+            PreviewImageFileDTO("${baseUrl}/assets/position/images/${it.id}.${it.fileType}", it.id)
+        })
+
+        modelAndView.viewName = "/position/edit :: manageImageFiles"
+
+        return modelAndView
+    }
+
+    @RequestMapping(path = arrayOf("/position/uploadImageFile"), method = arrayOf(RequestMethod.POST))
+    fun uploadPositionImages(
+            request: HttpServletRequest,
+            modelAndView: ModelAndView,
+            @RequestParam(name = "id", required = true) id: Int,
+            @RequestParam("imageFile") imageFile: MultipartFile?
+    ): ModelAndView {
+        val baseUrl = getBaseUrl(request)
+
+        val uploadedImgFile = positionService.uploadPositionImageFile(id, imageFile)
+
+        if (uploadedImgFile != null) {
+            modelAndView.model["imageUploadDivId"] = "imgUpload"
+            modelAndView.viewName = "/position/imageFileUploaded"
+            modelAndView.model["uploadedImg"] = PreviewImageFileDTO("${baseUrl}/assets/position/images/${uploadedImgFile.id}.${uploadedImgFile.fileType}", uploadedImgFile.id)
+        }
+
+        return modelAndView
+    }
+
+    @RequestMapping(path = arrayOf("/position/deleteImageFile"), method = arrayOf(RequestMethod.POST))
+    fun deletePositionImages(
+            modelAndView: ModelAndView,
+            @RequestParam(name = "imgFileId", required = true) imgFileId: Int): ModelAndView {
+        positionService.deletePositionImageFile(imgFileId)
+        modelAndView.model["imgFileId"] = imgFileId
+        modelAndView.viewName = "/position/imageFileDeleted"
+        return modelAndView
+    }
+}

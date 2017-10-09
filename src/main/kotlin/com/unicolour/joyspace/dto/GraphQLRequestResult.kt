@@ -20,5 +20,7 @@ enum class ResultCode(val value:Int, val desc:String, val descEn: String) {
     PRINT_ORDER_NOT_FOUND(6, "没有找到指定的订单", "Print order not found"),
     USER_NOT_FOUND_FOR_THIS_PHONE_NUMBER(7, "此手机号码没有对应的注册用户", "No user found for this phone number"),
     USER_NOT_FOUND(8, "没有找到指定的用户", "User not found"),
+    PRINT_STATION_NOT_FOUND(9, "没有找到自助机", "PrintStation not found"),
+    CITY_NOT_FOUND(10, "没有找到指定位置所属的城市", "City not found for specified location"),
     SERVER_ERROR(100, "服务器错误", "Server error"),
 }

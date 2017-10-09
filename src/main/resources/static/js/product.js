@@ -20,7 +20,7 @@ function createOrEditTemplate(event) {
     return false;
 }
 
-//上传图片文件
+//上传产品图片文件
 function manageProductImageFiles(event) {
     $('#modalTemplate').removeClass().addClass("modal fade");
     showModal(event, function() {
@@ -35,7 +35,7 @@ function manageProductImageFiles(event) {
     return false;
 }
 
-//删除图片
+//删除产品图片
 function deleteProductImage(event) {
     if (confirm("您确定要删除此图片吗?")) {
         var source = event.target || event.srcElement;
@@ -43,6 +43,24 @@ function deleteProductImage(event) {
     }
 }
 
+//上传投放地点图片文件
+function managePositionImageFiles(event) {
+    $('#modalTemplate').removeClass().addClass("modal fade");
+    showModal(event, function() {
+        $('#positionImgFileInput').change(function() {
+          $('#uploadPositionImgFileForm').submit();
+        });
+    });
+    return false;
+}
+
+//删除投放地点图片
+function deletePositionImage(event) {
+    if (confirm("您确定要删除此图片吗?")) {
+        var source = event.target || event.srcElement;
+        $(source).closest('form').submit();
+    }
+}
 //查看价目表
 function viewPriceList(event) {
     return showPostFormModal(event, 'editPriceListForm', 'modal-info', true);

@@ -95,6 +95,7 @@ class GraphQLServiceImpl : GraphQLService {
                     typeWiring.dataFetcher("address", printStationService.getDataFetcher("address"))
                     typeWiring.dataFetcher("latitude", printStationService.getDataFetcher("latitude"))
                     typeWiring.dataFetcher("longitude", printStationService.getDataFetcher("longitude"))
+                    typeWiring.dataFetcher("images", printStationService.getDataFetcher("images"))
                     typeWiring.dataFetcher("transportation", printStationService.getDataFetcher("transportation"))
                     typeWiring.dataFetcher("distance", printStationService.getDataFetcher("distance"))
                 })

@@ -157,7 +157,7 @@
 
 
 === 获取同城的所有自助机
-- URL:  /app/printStation/findByCity
+- URL:  /app/printStation/ofSameCity
 - Method: GET
 - 参数:
 |==========================================================
@@ -179,7 +179,12 @@
                         "longitude": xxxxx,
                         "latitude": xxxx,
                         "transportation": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
-                        "distance": xxx              //距离指定经纬度的距离，单位米
+                        "distance": xxx,              //距离指定经纬度的距离，单位米
+                        "images" : [
+                            "https://xxx.xxxxxxxxxxxxxxxx",
+                            "https://xxx.xxxxxxxxxxxxxxxx",
+                            "https://xxx.xxxxxxxxxxxxxxxx"
+                        ]
                     },
                     {
                         "id": x,
@@ -188,7 +193,12 @@
                         "longitude": xxxxx,
                         "latitude": xxxx,
                         "transportation": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
-                        "distance": xxx              //距离指定经纬度的距离，单位米
+                        "distance": xxx,              //距离指定经纬度的距离，单位米
+                        "images" : [
+                            "https://xxx.xxxxxxxxxxxxxxxx",
+                            "https://xxx.xxxxxxxxxxxxxxxx",
+                            "https://xxx.xxxxxxxxxxxxxxxx"
+                        ]
                     },
                     ...
                     {
@@ -198,7 +208,11 @@
                         "longitude": xxxxx,
                         "latitude": xxxx,
                         "transportation": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
-                        "distance": xxx              //距离指定经纬度的距离，单位米
+                        "distance": xxx,             //距离指定经纬度的距离，单位米
+                        "images" : [
+                            "https://xxx.xxxxxxxxxxxxxxxx",
+                            "https://xxx.xxxxxxxxxxxxxxxx"
+                        ]
                     }
                 ]
         }
@@ -226,7 +240,12 @@
                     "longitude": xxxxx,
                     "latitude": xxxx,
                     "transportation": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
-                    "distance": xxx              //距离指定经纬度的距离，单位米
+                    "distance": xxx,              //距离指定经纬度的距离，单位米
+                    "images" : [
+                        "https://xxx.xxxxxxxxxxxxxxxx",
+                        "https://xxx.xxxxxxxxxxxxxxxx",
+                        "https://xxx.xxxxxxxxxxxxxxxx"
+                    ]
                 }
         }
 ----
