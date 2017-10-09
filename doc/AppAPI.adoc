@@ -178,7 +178,8 @@
                         "address": "xxxxx",
                         "longitude": xxxxx,
                         "latitude": xxxx,
-                        "transportation": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+                        "transportation": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+                        "distance": xxx              //距离指定经纬度的距离，单位米
                     },
                     {
                         "id": x,
@@ -186,7 +187,8 @@
                         "address": "xxxxx",
                         "longitude": xxxxx,
                         "latitude": xxxx,
-                        "transportation": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+                        "transportation": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+                        "distance": xxx              //距离指定经纬度的距离，单位米
                     },
                     ...
                     {
@@ -195,7 +197,8 @@
                         "address": "xxxxx",
                         "longitude": xxxxx,
                         "latitude": xxxx,
-                        "transportation": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+                        "transportation": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+                        "distance": xxx              //距离指定经纬度的距离，单位米
                     }
                 ]
         }
@@ -222,7 +225,8 @@
                     "address": "xxxxx",
                     "longitude": xxxxx,
                     "latitude": xxxx,
-                    "transportation": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+                    "transportation": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+                    "distance": xxx              //距离指定经纬度的距离，单位米
                 }
         }
 ----

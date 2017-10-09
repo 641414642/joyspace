@@ -73,7 +73,11 @@ query {
 	}
 }
 """
-        val context = hashMapOf<String, Any>( "baseUrl" to getBaseUrl(request))
+        val context = hashMapOf<String, Any>(
+                "baseUrl" to getBaseUrl(request),
+                "refLatitude" to latitude,
+                "refLongitude" to longitude)
+
         val queryResult = graphQL.execute(query, null, context, emptyMap())
         val data:Map<String, Any> = queryResult.getData()
         val result = data["findPrintStationsByDistance"] as? Map<*, *>

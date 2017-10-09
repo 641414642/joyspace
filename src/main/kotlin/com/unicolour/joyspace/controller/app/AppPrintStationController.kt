@@ -37,11 +37,16 @@ query {
                 longitude
                 latitude
                 transportation
+                distance
         }
 	}
 }
 """
-        val context = hashMapOf<String, Any>( "baseUrl" to getBaseUrl(request))
+        val context = hashMapOf<String, Any>(
+                "baseUrl" to getBaseUrl(request),
+                "refLatitude" to latitude,
+                "refLongitude" to longitude)
+
         val queryResult = graphQL.execute(query, null, context, emptyMap())
         val data:Map<String, Any> = queryResult.getData()
         return data["findPrintStationsByCity"]
@@ -71,11 +76,16 @@ query {
                 longitude
                 latitude
                 transportation
+                distance
         }
 	}
 }
 """
-        val context = hashMapOf<String, Any>( "baseUrl" to getBaseUrl(request))
+        val context = hashMapOf<String, Any>(
+                "baseUrl" to getBaseUrl(request),
+                "refLatitude" to latitude,
+                "refLongitude" to longitude)
+
         val queryResult = graphQL.execute(query, null, context, emptyMap())
         val data:Map<String, Any> = queryResult.getData()
         return data["findNearestPrintStation"]
@@ -111,7 +121,8 @@ query {
 	}
 }
 """
-        val context = hashMapOf<String, Any>( "baseUrl" to getBaseUrl(request))
+        val context = hashMapOf<String, Any>("baseUrl" to getBaseUrl(request))
+
         val queryResult = graphQL.execute(query, null, context, emptyMap())
         val data:Map<String, Any> = queryResult.getData()
         return data["printStation"]

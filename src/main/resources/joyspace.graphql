@@ -197,6 +197,9 @@ type PrintStation {
     #交通信息
     transportation: String
 
+    #距离指定位置的距离(米)
+    distance: Float
+
     #支持的产品列表
     products: [Product!]
 }

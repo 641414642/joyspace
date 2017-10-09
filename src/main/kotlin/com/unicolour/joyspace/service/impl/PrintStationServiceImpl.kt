@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import java.util.*
 import javax.transaction.Transactional
+import kotlin.collections.HashMap
 
 @Service
 open class PrintStationServiceImpl : PrintStationService {
@@ -50,6 +51,17 @@ open class PrintStationServiceImpl : PrintStationService {
                 "latitude" -> printStation.position.latitude
                 "longitude" -> printStation.position.longitude
                 "transportation" -> printStation.position.transportation
+                "distance" -> {
+                    val context = env.getContext<HashMap<String, Any>>()
+                    val refLatitude = context["refLatitude"] as Double?
+                    val refLongitude = context["refLongitude"] as Double?
+                    if (refLatitude != null && refLongitude != null) {
+                        distance(refLongitude, refLatitude, printStation.position.longitude, printStation.position.latitude)
+                    }
+                    else {
+                        null
+                    }
+                }
                 else -> null
             }
         }
