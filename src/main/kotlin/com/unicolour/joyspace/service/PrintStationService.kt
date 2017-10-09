@@ -2,6 +2,7 @@ package com.unicolour.joyspace.service
 
 import com.unicolour.joyspace.dto.PrintStationDetailDTO
 import com.unicolour.joyspace.dto.PrintStationFindResult
+import com.unicolour.joyspace.dto.PrintStationFindResultSingle
 import com.unicolour.joyspace.model.PrintStation
 import graphql.schema.DataFetcher
 
@@ -11,7 +12,7 @@ interface PrintStationService {
     fun updatePrintStation(id: Int, wxQrCode: String, positionId: Int, selectedProductIds: Set<Int>): Boolean
 
     val printStationDataFetcher: DataFetcher<PrintStation>
-    val nearestDataFetcher: DataFetcher<PrintStationFindResult>
+    val nearestDataFetcher: DataFetcher<PrintStationFindResultSingle>
     val byCityDataFetcher: DataFetcher<PrintStationFindResult>
     val byDistanceDataFetcher: DataFetcher<PrintStationFindResult>
 

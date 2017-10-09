@@ -18,7 +18,7 @@ type QueryType {
     findPrintStationsByCity(longitude: Float!, latitude: Float!): PrintStationFindResult!
 
     #查找最近的自助机
-    findNearestPrintStation(longitude: Float!, latitude: Float!): PrintStationFindResult!
+    findNearestPrintStation(longitude: Float!, latitude: Float!): PrintStationFindResultSingle!
 }
 
 #增删改操作
@@ -176,6 +176,9 @@ enum ProductType {
 type PrintStation {
     id: Int!
 
+    #名称
+    name: String
+
     #地址
     address: String
 
@@ -190,6 +193,9 @@ type PrintStation {
 
     #纬度
     latitude: Float!
+
+    #交通信息
+    transportation: String
 
     #支持的产品列表
     products: [Product!]
@@ -242,4 +248,15 @@ type PrintStationFindResult {
 
     #自助机列表
     printStations: [PrintStation!]
+}
+
+type PrintStationFindResultSingle {
+    #结果代码 0: 成功
+    result: Int!
+
+    #结果的描述
+    description: String
+
+    #自助机列表
+    printStation: PrintStation
 }

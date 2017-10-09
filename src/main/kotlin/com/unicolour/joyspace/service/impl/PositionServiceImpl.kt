@@ -34,7 +34,7 @@ open class PositionServiceImpl : PositionService {
     lateinit var cityDao : CityDao
 
     @Transactional
-    override fun createPosition(name: String, address: String, longitude: Double, latitude: Double, priceListId: Int): Position? {
+    override fun createPosition(name: String, address: String, transportation: String, longitude: Double, latitude: Double, priceListId: Int): Position? {
         val loginManager = managerService.loginManager
         if (loginManager == null) {
             return null
@@ -46,6 +46,7 @@ open class PositionServiceImpl : PositionService {
         val position = Position()
         position.name = name
         position.address = address
+        position.transportation = transportation
         position.company = manager.company
         position.latitude = latitude
         position.longitude = longitude
@@ -61,13 +62,14 @@ open class PositionServiceImpl : PositionService {
     }
 
     @Transactional
-    override fun updatePosition(id: Int, name: String, address: String, longitude: Double, latitude: Double, priceListId: Int): Boolean {
+    override fun updatePosition(id: Int, name: String, address: String, transportation: String, longitude: Double, latitude: Double, priceListId: Int): Boolean {
         val position = positionDao.findOne(id)
         val city = cityDao.findByLocation(longitude, latitude)
 
         if (position != null) {
             position.name = name
             position.address = address
+            position.transportation = transportation
             position.latitude = latitude
             position.longitude = longitude
             position.city = city!!

@@ -156,15 +156,14 @@
 - apk下载地址:    /assets/app/<fileName>
 
 
-=== 推荐自助机
-- URL:  /app/printStation/findByDistance
+=== 获取同城的所有自助机
+- URL:  /app/printStation/findByCity
 - Method: GET
 - 参数:
 |==========================================================
 |参数名      |描述
 |longitude  |位置精度(double)
 |latitude   |位置纬度(double)
-|radius     |搜索半径(int, 单位米)
 |==========================================================
 
 - 返回值:
@@ -172,12 +171,59 @@
         {
 				"state" : 0,
 				"msg" : null,
-				"result" : [
-				    { "id" : xx, "address": "xxxx", "longitude" : xxxx.xxx, "latitude": xxxx.xxx },
-                    { "id" : xx, "address": "xxxx", "longitude" : xxxx.xxx, "latitude": xxxx.xxx },
-				    ...
-				    { "id" : xx, "address": "xxxx", "longitude" : xxxx.xxx, "latitude": xxxx.xxx }
-				]
+                "result": [
+                    {
+                        "id": x,
+                        "name": "xxx",
+                        "address": "xxxxx",
+                        "longitude": xxxxx,
+                        "latitude": xxxx,
+                        "transportation": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+                    },
+                    {
+                        "id": x,
+                        "name": "xxx",
+                        "address": "xxxxx",
+                        "longitude": xxxxx,
+                        "latitude": xxxx,
+                        "transportation": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+                    },
+                    ...
+                    {
+                        "id": x,
+                        "name": "xxx",
+                        "address": "xxxxx",
+                        "longitude": xxxxx,
+                        "latitude": xxxx,
+                        "transportation": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+                    }
+                ]
+        }
+----
+
+=== 获取最近的自助机
+- URL:  /app/printStation/nearest
+- Method: GET
+- 参数:
+|==========================================================
+|参数名      |描述
+|longitude  |位置精度(double)
+|latitude   |位置纬度(double)
+|==========================================================
+
+- 返回值:
+----
+        {
+				"state" : 0,
+				"msg" : null,
+                "result": {
+                    "id": x,
+                    "name": "xxx",
+                    "address": "xxxxx",
+                    "longitude": xxxxx,
+                    "latitude": xxxx,
+                    "transportation": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+                }
         }
 ----
 
@@ -223,4 +269,52 @@
 
 === App主页数据:
 - URL:  /app/homepage
+- 返回值:
 
+----
+{
+        "msg" : "OK",
+        "state" : 0,
+        "result" : {
+                "promote" : [
+                        {
+                                "name" : "广告1",
+                                "describe" : "广告描述1",
+                                "contentUrl" : "https://test.uni-colour.com/assets/app/images/ad1.jpg"
+                        },
+                        {
+                                "name" : "广告2",
+                                "describe" : "广告描述2",
+                                "contentUrl" : "https://test.uni-colour.com/assets/app/images/ad2.jpg"
+                        }
+                ],
+                "productory" : [
+                        {
+                                "id" : 0,
+                                "name" : "普通照片",
+                                "describe" : "首次冲印免费",
+                                "iconUrl" : "https://test.uni-colour.com/assets/app/images/photo.jpg",
+                                "startColor" : "#ffda48",
+                                "endColor" : "#ffbc2c"
+                        },
+                        {
+                                "id" : 1,
+                                "name" : "证件照",
+                                "describe" : "首次冲印免费",
+                                "iconUrl" : "https://test.uni-colour.com/assets/app/images/id_photo.jpg",
+                                "startColor" : "#fca9c3",
+                                "endColor" : "#fd798e"
+                        },
+                        {
+                                "id" : 2,
+                                "name" : "模板拼图",
+                                "describe" : "免费模板随便用",
+                                "iconUrl" : "https://test.uni-colour.com/assets/app/images/template_photo.jpg",
+                                "startColor" : "#f6c3fc",
+                                "endColor" : "#ccb0fd"
+                        }
+                ]
+        }
+}
+
+----

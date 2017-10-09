@@ -32,9 +32,11 @@ query {
         msg: description
         result: printStations {
                 id
+                name
                 address
                 longitude
                 latitude
+                transportation
         }
 	}
 }
@@ -62,11 +64,13 @@ query {
             latitude:$latitude) {
         state: result
         msg: description
-        result: printStations {
+        result: printStation {
                 id
+                name
                 address
                 longitude
                 latitude
+                transportation
         }
 	}
 }
@@ -75,40 +79,6 @@ query {
         val queryResult = graphQL.execute(query, null, context, emptyMap())
         val data:Map<String, Any> = queryResult.getData()
         return data["findNearestPrintStation"]
-    }
-
-    @RequestMapping("/app/printStation/findByDistance", method = arrayOf(RequestMethod.GET))
-    @ResponseBody
-    fun findByDistance(
-            request: HttpServletRequest,
-            @RequestParam("longitude") longitude: Double,
-            @RequestParam("latitude") latitude: Double,
-            @RequestParam("radius") radius:Int) : Any? {
-        val schema = graphQLService.getGraphQLSchema()
-        val graphQL = GraphQL.newGraphQL(schema).build()
-
-        val query =
-"""
-query {
-	findPrintStationsByDistance(
-            longitude:$longitude,
-            latitude:$latitude,
-            radius:$radius) {
-        state: result
-        msg: description
-        result: printStations {
-                id
-                address
-                longitude
-                latitude
-        }
-	}
-}
-"""
-        val context = hashMapOf<String, Any>( "baseUrl" to getBaseUrl(request))
-        val queryResult = graphQL.execute(query, null, context, emptyMap())
-        val data:Map<String, Any> = queryResult.getData()
-        return data["findPrintStationsByDistance"]
     }
 
     @RequestMapping("/app/printStation/{id}", method = arrayOf(RequestMethod.GET))
@@ -125,6 +95,7 @@ query {
 		wxQrCode
 		longitude
 		latitude
+        transportation
 		products {
 			id
 			name

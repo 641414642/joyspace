@@ -92,16 +92,17 @@ class PositionController {
             @RequestParam(name = "id", required = true) id: Int,
             @RequestParam(name = "name", required = true) name: String,
             @RequestParam(name = "address", required = true) address: String,
+            @RequestParam(name = "transportation", required = true) transportation: String,
             @RequestParam(name = "longitude", required = true) longitude: Double,
             @RequestParam(name = "latitude", required = true) latitude: Double,
             @RequestParam(name = "priceListId", required = true) priceListId: Int
     ): Boolean {
 
         if (id <= 0) {
-            positionService.createPosition(name, address, longitude, latitude, priceListId)
+            positionService.createPosition(name, address, transportation, longitude, latitude, priceListId)
             return true
         } else {
-            return positionService.updatePosition(id, name, address, longitude, latitude, priceListId)
+            return positionService.updatePosition(id, name, address, transportation, longitude, latitude, priceListId)
         }
     }
 }

@@ -45,6 +45,7 @@ open class PrintStationServiceImpl : PrintStationService {
         return DataFetcher<Any> { env ->
             val printStation = env.getSource<PrintStation>()
             when (fieldName) {
+                "name" -> "自助机${printStation.id}"
                 "address" -> printStation.position.address
                 "latitude" -> printStation.position.latitude
                 "longitude" -> printStation.position.longitude
@@ -150,7 +151,7 @@ open class PrintStationServiceImpl : PrintStationService {
             }
         }
 
-    override val nearestDataFetcher: DataFetcher<PrintStationFindResult>
+    override val nearestDataFetcher: DataFetcher<PrintStationFindResultSingle>
         get() {
             return DataFetcher { env ->
                 val longitude = env.getArgument<Double>("longitude")
@@ -158,17 +159,12 @@ open class PrintStationServiceImpl : PrintStationService {
 
                 val city = cityDao.findByLocation(longitude, latitude)
                 if (city == null) {
-                    PrintStationFindResult(printStations = emptyList())
+                    PrintStationFindResultSingle(printStation = null)
                 }
                 else {
                     val printStations = printStationDao.findByCityId(city.id)
                     val nearest = printStations.minBy { distance(longitude, latitude, it.position.longitude, it.position.latitude) }
-                    if (nearest == null) {
-                        PrintStationFindResult(printStations = emptyList())
-                    }
-                    else {
-                        PrintStationFindResult(printStations = listOf(nearest))
-                    }
+                    PrintStationFindResultSingle(printStation = nearest)
                 }
             }
         }

@@ -64,6 +64,11 @@
                         <span class="help-block"></span>
                     </div>
                     <div class="form-group">
+                        <label for="transportation" class="control-label">交通信息:</label>
+                        <textarea id="transportation" name="transportation" class="form-control" th:text="${position.transportation}"></textarea>
+                        <span class="help-block"></span>
+                    </div>
+                    <div class="form-group">
                         <label for="priceList" class="control-label">价目表:</label>
                         <select name="priceListId" class="form-control" id="priceList">
                             <option th:selected="${position.priceListId==0}" value="0">&lt;无&gt;</option>
