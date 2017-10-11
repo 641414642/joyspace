@@ -36,6 +36,7 @@ asciidoctor {
 	sourceDir 'doc'
 	sources {
 		include 'AppAPI.adoc'
+		include 'WeChatAPI.adoc'
 	}
 }
 

@@ -39,52 +39,105 @@
     }
 ----
 
-=== 删除上传的图片:
-- URL: /api/image?imageId=xxx&sessionId=xxxx
-- Method: DELETE
+
+=== 根据二维码查找自助打印机
+
+返回的自助打印机信息中包含支持的产品列表
+
+- URL: /api/printStation/findByQrCode
+- Method: GET
+- 参数:
+|==========================================================
+|参数名       |描述
+|qrCode      |小程序扫到的自助机二维码
+|==========================================================
+
+- 返回值:
+
+----
+{
+    "id": 1,
+    "address": "北京市海淀区大柳树路17号富海中心2号富海大厦509",
+    "wxQrCode": "https://test.uni-colour.com/printStation/1",
+    "longitude": 116.33511,
+    "latitude": 39.95392,
+    "products": [
+        {
+            "id": 1,                //产品ID
+            "name": "六寸照片",
+            "type": 0,              //产品类型 0: 普通照片, 1: 证件照, 2: 模板拼图
+            "width": 101.6,         //宽度 (毫米)
+            "height": 152.39999,    //高度 (毫米)
+            "imageRequired": 1,     //需要上传的图片数量
+            "remark": "",
+            "price": 1,             //价格 (分)
+            "version": 1,           //版本号
+            "thumbnailUrls": [                //缩略图url
+                "http://xxxxxxxxxxxxx",
+                "http://xxxxxxxxxxxxx",
+                "http://xxxxxxxxxxxxx"
+            ],
+            "previewUrls": [                   //预览图url
+                "http://xxxxxxxxxxxxx",
+                "http://xxxxxxxxxxxxx",
+                "http://xxxxxxxxxxxxx"
+            ]
+        }
+        ...
+    ]
+}
+----
+
+=== 根据id查找自助打印机
+
+返回的自助打印机信息中包含支持的产品列表
+
+- URL: /api/printStation/{id}
+- Method: GET
+- 参数:
+|==========================================================
+|参数名       |描述
+|id          |自助机id
+|==========================================================
+
+- 返回值:  和根据二维码查找自助打印机接口相同
+
+=== 查找指定自助打印机支持的产品列表
+- URL: /api/product/findByPrintStation
+- Method: GET
+- 参数:
+|==========================================================
+|参数名       |描述
+|printStationId          |自助机id
+|==========================================================
+
 - 返回值:
 ----
-			{
-				"errcode" : 0,
-				"errmsg" : null
-			}
-----
+[
+    {
+        "id": 1,                //产品ID
+        "name": "六寸照片",
+        "type": 0,              //产品类型 0: 普通照片, 1: 证件照, 2: 模板拼图
+        "width": 101.6,         //宽度 (毫米)
+        "height": 152.39999,    //高度 (毫米)
+        "imageRequired": 1,     //需要上传的图片数量
+        "remark": "",
+        "price": 1,             //价格 (分)
+        "version": 1,           //版本号
+        "thumbnailUrls": [                //缩略图url
+            "http://xxxxxxxxxxxxx",
+            "http://xxxxxxxxxxxxx",
+            "http://xxxxxxxxxxxxx"
+        ],
+        "previewUrls": [                   //预览图url
+            "http://xxxxxxxxxxxxx",
+            "http://xxxxxxxxxxxxx",
+            "http://xxxxxxxxxxxxx"
+        ]
+    }
+    ...
+]
 
-==== 下单:
-- URL: /api/order
-- Method: POST
-- RequestBody:
-
-----
-		{
-		  "sessionId" : "xxxxxxxxx",
-		  "printStationId" : x,
-		  "orderItems" : {
-			{ 
-				"productId" : x,
-				"imageFileId" : x,
-				"copies": x
-			},
-			{ "productId" : x, "imageFileId" : x, "copies": x },
-			{ "productId" : x, "imageFileId" : x, "copies": x }
-			...
-		  }
-		}
-----
-
-- 返回:
-
-----
-	{
-		"errcode" : 0,
-		"errmsg": null,
-		"wxPayParams": {
-			"timeStamp" : "1499865120",
-			"nonceStr": "asdfasdfasdfas",
-			"pkg": "prepay_id=wx23423452345dfgl",
-			"paySign" : "6354ldgsgadfas"
-		}
-	}
 ----
 
 
@@ -136,6 +189,18 @@
              "url": "http://xxxxxxxxxxxx.jpg"
          }
 ----
+
+=== 删除上传的图片:
+- URL: /api/image?imageId=xxx&sessionId=xxxx
+- Method: DELETE
+- 返回值:
+----
+			{
+				"errcode" : 0,
+				"errmsg" : null
+			}
+----
+
 
 === 获取产品需要上传的图片的信息:
 - URL: /api/product/images
@@ -189,4 +254,43 @@
             "svgUrl": "https://xxxxxxxxxxxxxxxxxxxxxxxxx.svg",   //这个是给app用的svg格式的模板
             "jpgUrl": "https://xxxxxxxxxxxxxxxxxxxxxxxxx.jpg"    //jpg格式预览图
         }
+----
+
+
+
+==== 下单:
+- URL: /api/order
+- Method: POST
+- RequestBody:
+
+----
+		{
+		  "sessionId" : "xxxxxxxxx",
+		  "printStationId" : x,
+		  "orderItems" : {
+			{
+				"productId" : x,
+				"imageFileId" : x,
+				"copies": x
+			},
+			{ "productId" : x, "imageFileId" : x, "copies": x },
+			{ "productId" : x, "imageFileId" : x, "copies": x }
+			...
+		  }
+		}
+----
+
+- 返回:
+
+----
+	{
+		"errcode" : 0,
+		"errmsg": null,
+		"wxPayParams": {
+			"timeStamp" : "1499865120",
+			"nonceStr": "asdfasdfasdfas",
+			"pkg": "prepay_id=wx23423452345dfgl",
+			"paySign" : "6354ldgsgadfas"
+		}
+	}
 ----
