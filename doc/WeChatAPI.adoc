@@ -1,16 +1,26 @@
-微信用户登录:
-	POST
-	/api/user/login?code=xxxx
-	返回值: {
-			   "errcode": 0,
-				"errmsg": null,
-				"sessionId": "c96aa7ff47c941b881ba068faf7b617c"
-			}
+=== 微信用户登录:
+- URL: /api/user/login
+- Method: POST
+- 参数:
+|==========================================================
+|参数名       |描述
+|code         |小程序调用 wx.login 获得的登录凭证
+|==========================================================
 
-微信用户信息注册:
-	POST
-	/api/user/reg
-	RequestBody:
+- 返回值:
+----
+    {
+        "errcode": 0,
+		"errmsg": null,
+		"sessionId": "c96aa7ff47c941b881ba068faf7b617c"
+	}
+----
+
+=== 微信用户信息注册:
+- URL: /api/user/reg
+- Method: POST
+- RequestBody:
+----
 		{
 			"nickName" : "xxxx",
 			"avatarUrl" : "xxxx",
@@ -19,24 +29,33 @@
 			"city" : "xxxx"
 			"country" : "xxxx"
 		}
-	返回值:  {
-				"errcode" : 0,
-				"errmsg" : null
-			}
+----
 
+- 返回值:
+----
+    {
+        "errcode" : 0,
+        "errmsg" : null
+    }
+----
 
-删除上传的图片:
-	DELETE
-	/api/image?imageId=xxx&sessionId=xxxx
-	返回值:
+=== 删除上传的图片:
+- URL: /api/image?imageId=xxx&sessionId=xxxx
+- Method: DELETE
+- 返回值:
+----
 			{
 				"errcode" : 0,
 				"errmsg" : null
 			}
-下单:
-	POST
-	/api/order
-	RequestBody:
+----
+
+==== 下单:
+- URL: /api/order
+- Method: POST
+- RequestBody:
+
+----
 		{
 		  "sessionId" : "xxxxxxxxx",
 		  "printStationId" : x,
@@ -51,7 +70,11 @@
 			...
 		  }
 		}
-	返回:
+----
+
+- 返回:
+
+----
 	{
 		"errcode" : 0,
 		"errmsg": null,
@@ -62,16 +85,23 @@
 			"paySign" : "6354ldgsgadfas"
 		}
 	}
-		
+----
 
--------------------------------------------------------------------------
-上传图片： (上传原图和缩略图都用这个)
-	POST
-	/api/image
-	content-type:  multipart/form-data
-	参数： sessionId   登录返回的sessionId
-		  image         图片文件内容
-	返回值:   {
+
+=== 上传图片： (上传原图和缩略图都用这个)
+- URL: /api/image
+- Method: POST
+- content-type:  multipart/form-data
+- 参数:
+|==========================================================
+|参数名       |描述
+|sessionId    |登录返回的sessionId
+|image        |图片文件内容
+|==========================================================
+- 返回值:
+
+----
+           {
                "errcode": 0,        //错误代码, 0表示成功
                "errmsg": null,
                "imageId": xxx,
@@ -79,15 +109,24 @@
                "height": xxxx,
                "url": "http://xxxxxxxxxxxxxxxx.jpg"
            }
-缩放图片:
-    POST
-    /api/image/resize
-    参数:
-        sessionId
-        width   //要缩放到的宽度(像素)
-        height   //要缩放到的高度(像素)
-        imageId  //要缩放的图片的id
-    返回值:
+----
+
+=== 缩放图片:
+- URL: /api/image/resize
+- Method: POST
+- 参数:
+
+|==========================================================
+|参数名       |描述
+|sessionId    |登录返回的sessionId
+|width        |要缩放到的宽度(像素)
+|height       |要缩放到的高度(像素)
+|imageId      |要缩放的图片的id
+|==========================================================
+
+- 返回值:
+
+----
          {
              "errcode": 0,
              "errmsg": null,
@@ -96,34 +135,19 @@
              "height": xxx,   //新图片高度(像素)
              "url": "http://xxxxxxxxxxxx.jpg"
          }
+----
 
-旋转裁切图片:
-    POST
-    /api/image/rotateAndCrop
-    参数:
-        sessionId
-        imageId     //要处理的图片的id
-        angleDeg    //旋转角度 0~360
-        cropX       //裁切框x方向起始位置 (0~1)
-        cropY       //裁切框y方向起始位置 (0~1)
-        cropWid     //裁切框x方向宽度 (0~1)
-        cropHei     //裁切框y方向宽度 (0~1)
-    返回值:
-         {
-             "errcode": 0,
-             "errmsg": null,
-             "imageId": xx,   //旋转裁切后的新图片的id
-             "width": xxx,    //新图片宽度(像素)
-             "height": xxx,   //新图片高度(像素)
-             "url": "http://xxxxxxxxxxxx.jpg"
-         }
+=== 获取产品需要上传的图片的信息:
+- URL: /api/product/images
+- Method: GET
+- 参数:
+|==========================================================
+|参数名       |描述
+|productId    |产品id
+|==========================================================
+- 返回值: (json数组)
 
-获取产品需要上传的图片的信息:
-    GET
-    /api/product/images
-    参数:
-        productId    //产品id
-    返回值: (json数组)
+----
     [
         {
             "name": "照片1",
@@ -137,13 +161,14 @@
         },
         ...
     ]
+----
 
-
-生成成品的预览图：
-    POST
-    /api/product/preview
-    content-type:  application/json
-    参数: (POST body， json格式)
+=== 生成成品的预览图：
+- URL: /api/product/preview
+- Method: POST
+- content-type:  application/json
+- 参数: (POST body， json格式)
+----
         {
             "sessionId": "xxxxxxxxxxxxxxxxxxxx",
             "productId": xx,
@@ -154,10 +179,14 @@
                 ...
             ]
         }
-    返回: (json 对象)
+----
+
+- 返回: (json 对象)
+----
         {
             "errcode": 0,
             "errmsg": null,
             "svgUrl": "https://xxxxxxxxxxxxxxxxxxxxxxxxx.svg",   //这个是给app用的svg格式的模板
             "jpgUrl": "https://xxxxxxxxxxxxxxxxxxxxxxxxx.jpg"    //jpg格式预览图
         }
+----
