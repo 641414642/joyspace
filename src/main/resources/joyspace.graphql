@@ -51,6 +51,10 @@ type RequestResult{
     #3: 无效或过期的验证码
     #4: 请求太频繁(请等待60秒以后再试)
     #5: 发送验证码失败
+    #6: 没有找到指定的订单
+    #7: 此手机号码没有对应的注册用户
+    #8: 没有找到指定的用户
+
     #100: 服务器错误
     result: Int!
 
@@ -184,6 +188,9 @@ type PrintStation {
 
     #交通情况
     transportation: String
+
+    #图片
+    images: [String!]!
 
     #微信二维码
     wxQrCode: String

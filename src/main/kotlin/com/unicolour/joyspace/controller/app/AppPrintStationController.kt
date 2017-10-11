@@ -13,9 +13,9 @@ class AppPrintStationController {
     @Autowired
     lateinit var graphQLService: GraphQLService
 
-    @RequestMapping("/app/printStation/findByCity", method = arrayOf(RequestMethod.GET))
+    @RequestMapping("/app/printStation/ofSameCity", method = arrayOf(RequestMethod.GET))
     @ResponseBody
-    fun findByCity(
+    fun ofSameCity(
             request: HttpServletRequest,
             @RequestParam("longitude") longitude: Double,
             @RequestParam("latitude") latitude: Double) : Any? {
@@ -38,6 +38,7 @@ query {
                 latitude
                 transportation
                 distance
+                images
         }
 	}
 }
@@ -77,6 +78,7 @@ query {
                 latitude
                 transportation
                 distance
+                images
         }
 	}
 }

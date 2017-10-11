@@ -2,10 +2,7 @@ package com.unicolour.joyspace.service.impl
 
 import com.unicolour.joyspace.dao.*
 import com.unicolour.joyspace.dto.*
-import com.unicolour.joyspace.model.Position
-import com.unicolour.joyspace.model.PriceListItem
-import com.unicolour.joyspace.model.PrintStation
-import com.unicolour.joyspace.model.PrintStationProduct
+import com.unicolour.joyspace.model.*
 import com.unicolour.joyspace.service.ManagerService
 import com.unicolour.joyspace.service.PriceListService
 import com.unicolour.joyspace.service.PrintStationService
@@ -51,6 +48,12 @@ open class PrintStationServiceImpl : PrintStationService {
                 "latitude" -> printStation.position.latitude
                 "longitude" -> printStation.position.longitude
                 "transportation" -> printStation.position.transportation
+                "images" -> {
+                    val context = env.getContext<HashMap<String, Any>>()
+                    val baseUrl = context["baseUrl"]
+                    printStation.position.imageFiles
+                            .map { "${baseUrl}/assets/position/images/${it.id}.${it.fileType}" }
+                }
                 "distance" -> {
                     val context = env.getContext<HashMap<String, Any>>()
                     val refLatitude = context["refLatitude"] as Double?
@@ -155,7 +158,10 @@ open class PrintStationServiceImpl : PrintStationService {
 
                 val city = cityDao.findByLocation(longitude, latitude)
                 if (city == null) {
-                    PrintStationFindResult(printStations = emptyList())
+                    PrintStationFindResult(
+                            result = ResultCode.CITY_NOT_FOUND.value,
+                            description = ResultCode.CITY_NOT_FOUND.desc,
+                            printStations = emptyList())
                 }
                 else {
                     PrintStationFindResult(printStations = printStationDao.findByCityId(city.id))
@@ -171,12 +177,24 @@ open class PrintStationServiceImpl : PrintStationService {
 
                 val city = cityDao.findByLocation(longitude, latitude)
                 if (city == null) {
-                    PrintStationFindResultSingle(printStation = null)
+                    PrintStationFindResultSingle(
+                            result = ResultCode.CITY_NOT_FOUND.value,
+                            description = ResultCode.CITY_NOT_FOUND.desc,
+                            printStation = null)
                 }
                 else {
                     val printStations = printStationDao.findByCityId(city.id)
                     val nearest = printStations.minBy { distance(longitude, latitude, it.position.longitude, it.position.latitude) }
-                    PrintStationFindResultSingle(printStation = nearest)
+
+                    if (nearest == null) {
+                        PrintStationFindResultSingle(
+                                result = ResultCode.PRINT_STATION_NOT_FOUND.value,
+                                description = ResultCode.PRINT_STATION_NOT_FOUND.desc,
+                                printStation = null)
+                    }
+                    else {
+                        PrintStationFindResultSingle(printStation = nearest)
+                    }
                 }
             }
         }

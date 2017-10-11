@@ -34,9 +34,6 @@ open class ProductServiceImpl : ProductService {
     lateinit var productImgFileDao: ProductImageFileDao
 
     @Autowired
-    lateinit var templateService: TemplateService
-
-    @Autowired
     lateinit var managerService: ManagerService
 
     @Autowired
@@ -124,7 +121,7 @@ open class ProductServiceImpl : ProductService {
 
                 if (retCode != 0) {
                     file.delete()
-                    throw IOException("not value image file")
+                    throw IOException("not valid image file")
                 }
                 else {
                     val patternStr = Pattern.quote(file.absolutePath) + "\\s(\\w+)\\s.*"

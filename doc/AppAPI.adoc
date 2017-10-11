@@ -157,7 +157,7 @@
 
 
 === 获取同城的所有自助机
-- URL:  /app/printStation/findByCity
+- URL:  /app/printStation/ofSameCity
 - Method: GET
 - 参数:
 |==========================================================
@@ -179,7 +179,12 @@
                         "longitude": xxxxx,
                         "latitude": xxxx,
                         "transportation": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
-                        "distance": xxx              //距离指定经纬度的距离，单位米
+                        "distance": xxx,              //距离指定经纬度的距离，单位米
+                        "images" : [
+                            "https://xxx.xxxxxxxxxxxxxxxx",
+                            "https://xxx.xxxxxxxxxxxxxxxx",
+                            "https://xxx.xxxxxxxxxxxxxxxx"
+                        ]
                     },
                     {
                         "id": x,
@@ -188,7 +193,12 @@
                         "longitude": xxxxx,
                         "latitude": xxxx,
                         "transportation": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
-                        "distance": xxx              //距离指定经纬度的距离，单位米
+                        "distance": xxx,              //距离指定经纬度的距离，单位米
+                        "images" : [
+                            "https://xxx.xxxxxxxxxxxxxxxx",
+                            "https://xxx.xxxxxxxxxxxxxxxx",
+                            "https://xxx.xxxxxxxxxxxxxxxx"
+                        ]
                     },
                     ...
                     {
@@ -198,7 +208,11 @@
                         "longitude": xxxxx,
                         "latitude": xxxx,
                         "transportation": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
-                        "distance": xxx              //距离指定经纬度的距离，单位米
+                        "distance": xxx,             //距离指定经纬度的距离，单位米
+                        "images" : [
+                            "https://xxx.xxxxxxxxxxxxxxxx",
+                            "https://xxx.xxxxxxxxxxxxxxxx"
+                        ]
                     }
                 ]
         }
@@ -226,49 +240,14 @@
                     "longitude": xxxxx,
                     "latitude": xxxx,
                     "transportation": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
-                    "distance": xxx              //距离指定经纬度的距离，单位米
+                    "distance": xxx,              //距离指定经纬度的距离，单位米
+                    "images" : [
+                        "https://xxx.xxxxxxxxxxxxxxxx",
+                        "https://xxx.xxxxxxxxxxxxxxxx",
+                        "https://xxx.xxxxxxxxxxxxxxxx"
+                    ]
                 }
         }
-----
-
-=== 自助机详情
-- URL:  /app/printStation/{id}
-- Method: GET
-- 参数:
-|==========================================================
-|参数名   | 描述
-|id      | 自助机id
-|==========================================================
-
-- 返回值:
-
-----
-		{
-			"address": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx", 地址
-			"longitude" : xxxx.xxx,   //经度
-			"latitude": xxxx.xxx,     //纬度
-			"products": [             //产品列表
-				{
-					"id": xx,
-					"name": "xxx",
-					"type": x,   //0 普通   1 证件照    2 模板拼图
-					"width": xxx.xx,   //产品宽度(毫米)
-					"height": xxx.xx,   //产品高度(毫米)
-					"imageCount": x,    //需要用户上传的照片张数
-					"version": xx,      //版本号(整数)
-					"previewUrls": [     //产品预览图片url （可能有多个)
-						"https://xxx.xxxxxxxxxxxxxxxxxxxxxxxxxx",
-						"https://xxx.xxxxxxxxxxxxxxxxxxxxxxxxxx",
-						"https://xxx.xxxxxxxxxxxxxxxxxxxxxxxxxx"
-					],
-					"thumbnailUrl": "https://xxx.xxxxxxxxxxxxxxxxxxxxxxxxxx",   //缩略图url
-					"price": xxx,   //产品价格（整数，单位是分）
-					"remark": "xxxxxxxxxxxxxxxxxxxxxxxxxxx"      //产品说明文本
-				},
-				{ ... },
-				{ ... }
-			]
-		}
 ----
 
 === App主页数据:
