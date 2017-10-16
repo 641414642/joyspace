@@ -1,13 +1,18 @@
 package com.unicolour.joyspace.service.impl
 
 import com.unicolour.joyspace.controller.api.PreviewParam
+
 import com.unicolour.joyspace.dao.*
 import com.unicolour.joyspace.dto.TemplatePreviewResult
 import com.unicolour.joyspace.model.*
 import com.unicolour.joyspace.service.ImageService
 import com.unicolour.joyspace.service.TemplateService
+import graphql.schema.DataFetcher
+import org.apache.batik.anim.dom.SAXSVGDocumentFactory
 import org.apache.batik.apps.rasterizer.DestinationType
 import org.apache.batik.apps.rasterizer.SVGConverter
+import org.apache.batik.gvt.*
+import org.apache.batik.util.XMLResourceDescriptor
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
@@ -16,6 +21,7 @@ import org.springframework.web.multipart.MultipartFile
 import org.w3c.dom.Document
 import org.w3c.dom.Element
 import java.awt.Color
+import java.awt.geom.AffineTransform
 import java.io.File
 import java.io.IOException
 import java.nio.file.Files
@@ -29,8 +35,11 @@ import javax.xml.transform.TransformerFactory
 import javax.xml.transform.dom.DOMSource
 import javax.xml.transform.stream.StreamResult
 
+const val X_LINK_NAMESPACE: String = "http://www.w3.org/1999/xlink"
+
 @Service
 open class TemplateServiceImpl : TemplateService {
+
     @Value("\${com.unicolour.joyspace.assetsDir}")
     lateinit var assetsDir: String
 
@@ -174,32 +183,95 @@ open class TemplateServiceImpl : TemplateService {
         }
     }
 
-    private fun updateTemplateInfo(template: Template, tplSvgFile: File) {
-        val factory = DocumentBuilderFactory.newInstance()
-        factory.isNamespaceAware = true
+    private fun visitImageNodes(node: GraphicsNode, callback: (ImageNode) -> Unit) {
+        if (node is ImageNode) {
+            callback(node)
+        }
+        else if (node is CompositeGraphicsNode) {
+            node.children.forEach { visitImageNodes(it as GraphicsNode, callback) }
+        }
+    }
 
-        val doc = factory.newDocumentBuilder().parse(tplSvgFile)
+    private fun updateTemplateInfo(template: Template, tplSvgFile: File) {
+        val parser = XMLResourceDescriptor.getXMLParserClassName()
+        val df = SAXSVGDocumentFactory(parser)
+        val doc = df.createSVGDocument(tplSvgFile.toURI().toURL().toString())
+        val userAgent = org.apache.batik.bridge.UserAgentAdapter()
+        val loader = org.apache.batik.bridge.DocumentLoader(userAgent)
+        val ctx = org.apache.batik.bridge.BridgeContext(userAgent, loader)
+        ctx.setDynamicState(org.apache.batik.bridge.BridgeContext.DYNAMIC)
+        val builder = org.apache.batik.bridge.GVTBuilder()
+        val rootGraphicsNode = builder.build(ctx, doc)
+
         template.width = toMM(doc.documentElement.getAttribute("width"))
         template.height = toMM(doc.documentElement.getAttribute("height"))
 
-        val userImages = TreeMap<String, TemplateImageInfo>()
+        val userImages = ArrayList<TemplateImageInfo>()
 
-        eachImageElement(doc, {imgEle, title, desc ->
-            if (desc == "UserImage" || desc == "用户图片" && !userImages.containsKey(title)) {
-                val tplImg = TemplateImageInfo()
-                tplImg.template = template
-                tplImg.width = toMM(imgEle.getAttribute("width"))
-                tplImg.height = toMM(imgEle.getAttribute("height"))
-                tplImg.name = title
+        visitImageNodes(rootGraphicsNode, {
+            val element = ctx.getElement(it)
+            val bounds = it.geometryBounds
 
-                userImages.put(title, tplImg)
-            }
+            val tplImg = TemplateImageInfo()
+            tplImg.template = template
+
+            val transform = calcNodeTransform(it)
+            val transformedBounds = it.getTransformedGeometryBounds(transform)
+
+            tplImg.wid = bounds.width
+            tplImg.hei = bounds.height
+            tplImg.x = bounds.x
+            tplImg.y = bounds.y
+
+            tplImg.tw = transformedBounds.width
+            tplImg.th = transformedBounds.height
+            tplImg.tx = transformedBounds.x
+            tplImg.ty = transformedBounds.y
+
+            tplImg.href = element.getAttributeNS(X_LINK_NAMESPACE, "href")
+
+            val matrix = DoubleArray(6)
+            transform.getMatrix(matrix)
+            tplImg.matrix = matrix.joinToString(",")
+
+            var desc = ""
+
+            val children = element.childNodes
+            (0 until children.length)
+                    .map { children.item(it) }
+                    .filterIsInstance<Element>()
+                    .forEach {
+                        if (it.tagName == "title") {
+                            tplImg.name = it.textContent
+                        } else if (it.tagName == "desc") {
+                            desc = it.textContent
+                        }
+                    }
+
+            tplImg.userImage = (desc == "UserImage" || desc == "用户图片")
+            userImages.add(tplImg)
         })
 
-        template.minImageCount = userImages.size
+        template.minImageCount = userImages.filter { it.userImage }.map { it.name }.toSet().size
 
         templateDao.save(template)
-        templateImageInfoDao.save(userImages.values)
+
+        templateImageInfoDao.deleteByTemplateId(template.id)
+        templateImageInfoDao.save(userImages)
+    }
+
+    private fun calcNodeTransform(gn: GraphicsNode): AffineTransform
+    {
+        val ctm = AffineTransform()
+        var node: GraphicsNode? = gn
+        while (node != null && !(node is CanvasGraphicsNode)) {
+            if (node.transform != null) {
+                ctm.preConcatenate(node.transform)
+            }
+            node = node.parent
+        }
+
+        return ctm
     }
 
     private fun eachImageElement(doc: Document, imgEleCallback: (imgEle:Element, title: String, desc: String) -> Unit) {
@@ -254,7 +326,6 @@ open class TemplateServiceImpl : TemplateService {
             val tplHei = toMM(doc.documentElement.getAttribute("height"))
 
             eachImageElement(doc, {imgEle, title, desc ->
-                val xLinkNameSpace = "http://www.w3.org/1999/xlink"
                 if (desc == "UserImage" || desc == "用户图片") {
                     var found = false
                     val prevImg = previewParam.images.firstOrNull { it.name == title }
@@ -263,7 +334,7 @@ open class TemplateServiceImpl : TemplateService {
                         if (userImgFile != null) {
                             val userImgUrl = imageService.getImageUrl(baseUrl, userImgFile)
                             imgEle.setAttributeNS(
-                                    xLinkNameSpace,
+                                    X_LINK_NAMESPACE,
                                     "xlink:href",
                                     userImgUrl)
                             found = true
@@ -271,14 +342,14 @@ open class TemplateServiceImpl : TemplateService {
                     }
 
                     if (!found) {
-                        imgEle.setAttributeNS(xLinkNameSpace, "xlink:href", "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAHWlUWHRDb21tZW50AAAAAABDcmVhdGVkIHdpdGggR0lNUGQuZQcAAAANSURBVAjXY+jo6PgPAAXMApjJRsHmAAAAAElFTkSuQmCC")
+                        imgEle.setAttributeNS(X_LINK_NAMESPACE, "xlink:href", "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAHWlUWHRDb21tZW50AAAAAABDcmVhdGVkIHdpdGggR0lNUGQuZQcAAAANSURBVAjXY+jo6PgPAAXMApjJRsHmAAAAAElFTkSuQmCC")
                     }
                 }
                 else {
-                    val imgSrc = imgEle.getAttributeNS(xLinkNameSpace, "href")
+                    val imgSrc = imgEle.getAttributeNS(X_LINK_NAMESPACE, "href")
                     if (!imgSrc.startsWith("data:")) {
                         imgEle.setAttributeNS(
-                                xLinkNameSpace,
+                                X_LINK_NAMESPACE,
                                 "xlink:href",
                                 "${baseUrl}/assets/template/preview/${template.id}_v${template.currentVersion}/$imgSrc")
                     }
@@ -341,5 +412,22 @@ open class TemplateServiceImpl : TemplateService {
 
         userImageFileDao.save(userSvgImgFile)
         userImageFileDao.save(userJpgImgFile)
+    }
+
+    override fun getDataFetcher(fieldName: String): DataFetcher<Any> {
+        return DataFetcher<Any> { env ->
+            val tplImg = env.getSource<TemplateImageInfo>()
+            when (fieldName) {
+                "url" -> {
+                    val context = env.getContext<HashMap<String, Any>>()
+                    val baseUrl = context["baseUrl"]
+                    val tpl = tplImg.template
+                    val path = tplImg.href?.replace('\\', '/')
+
+                    "${baseUrl}/assets/template/preview/${tpl.id}_v${tpl.currentVersion}/${path}"
+                }
+                else -> null
+            }
+        }
     }
 }

@@ -218,6 +218,98 @@
         }
 ----
 
+=== 获取自助机支持的产品列表
+- URL:  /app/printStation/{printStationId}/products
+- Method: GET
+- 参数:
+|==========================================================
+|参数名           |描述
+|printStationId   |自助机id
+|==========================================================
+
+- 返回值:
+----
+[
+    {
+        "id": 1,
+        "name": "1寸证件照",
+        "type": "ID_PHOTO",     //PHOTO 普通照片,  ID_PHOTO 证件照,   TEMPLATE 模板拼图
+        "width": 100,           //产品尺寸，宽度 (单位毫米)
+        "height": 80,           //产品尺寸，高度 (单位毫米)
+        "imageCount": 1,        //需要用户上传的图片张数
+        "remark": "",           //产品描述
+        "price": 2,             //价格(单位分)
+        "thumbnailImageUrl": "http://localhost:6600/assets/product/images/1.png",    //缩略图url
+        "previewImageUrls": [                                                        //预览图url列表
+            "http://localhost:6600/assets/product/images/2.jpg",
+            "http://localhost:6600/assets/product/images/3.jpg",
+            "http://localhost:6600/assets/product/images/4.jpg",
+            "http://localhost:6600/assets/product/images/5.jpg"
+        ],
+        "templateImages": [                                                          //模板中包含的图片列表
+            {
+                "name": "照片",                                                      //图片名称， 名称相同的图片用户图片只需要用户上传同一张图
+                "x": 233.8582763671875,                                              //图片框位置和尺寸(单位毫米)
+                "y": 150.59054565429688,
+                "width": 77.9527587890625,
+                "height": 113.38583374023438,
+                "isUserImage": true,                                                 //是否是需要用户上传的图片
+                "url": "http://localhost:6600/assets/template/preview/1_v5/images/UserImagePlaceHolder.png"
+            },
+            {
+                "name": "照片",
+                "x": 138.18896484375,
+                "y": 150.59054565429688,
+                "width": 77.9527587890625,
+                "height": 113.38583374023438,
+                "isUserImage": true,
+                "url": "http://localhost:6600/assets/template/preview/1_v5/images/UserImagePlaceHolder.png"
+            },
+            {
+                "name": "照片",
+                "x": 42.51968002319336,
+                "y": 150.59054565429688,
+                "width": 77.9527587890625,
+                "height": 113.38583374023438,
+                "isUserImage": true,
+                "url": "http://localhost:6600/assets/template/preview/1_v5/images/UserImagePlaceHolder.png"
+            },
+            {
+                "name": "照片",
+                "x": 233.8582763671875,
+                "y": 19.48818016052246,
+                "width": 77.9527587890625,
+                "height": 113.38583374023438,
+                "isUserImage": true,
+                "url": "http://localhost:6600/assets/template/preview/1_v5/images/UserImagePlaceHolder.png"
+            },
+            {
+                "name": "照片",
+                "x": 138.18896484375,
+                "y": 19.48818016052246,
+                "width": 77.9527587890625,
+                "height": 113.38583374023438,
+                "isUserImage": true,
+                "url": "http://localhost:6600/assets/template/preview/1_v5/images/UserImagePlaceHolder.png"
+            },
+            {
+                "name": "照片",
+                "x": 42.51968002319336,
+                "y": 19.48818016052246,
+                "width": 77.9527587890625,
+                "height": 113.38583374023438,
+                "isUserImage": true,
+                "url": "http://localhost:6600/assets/template/preview/1_v5/images/UserImagePlaceHolder.png"
+            }
+        ]
+    },
+    ...
+    ...
+    ...
+]
+
+----
+
 === 获取最近的自助机
 - URL:  /app/printStation/nearest
 - Method: GET
@@ -245,7 +337,7 @@
                         "https://xxx.xxxxxxxxxxxxxxxx",
                         "https://xxx.xxxxxxxxxxxxxxxx",
                         "https://xxx.xxxxxxxxxxxxxxxx"
-                    ]
+                    ],
                 }
         }
 ----

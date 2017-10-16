@@ -100,8 +100,8 @@ class TestServiceImpl : TestService {
         templateDao.save(photoTpl)
 
         val photoTplImg = TemplateImageInfo()
-        photoTplImg.width = 200.0
-        photoTplImg.height = 150.0
+        photoTplImg.tw = 200.0
+        photoTplImg.th = 150.0
         photoTplImg.name = "照片"
         photoTplImg.template = photoTpl
         templateImageInfoDao.save(photoTplImg);
@@ -116,8 +116,8 @@ class TestServiceImpl : TestService {
         templateDao.save(idPhotoTpl)
 
         val idPhotoTplImg = TemplateImageInfo()
-        idPhotoTplImg.width = 32.0
-        idPhotoTplImg.height = 22.0
+        idPhotoTplImg.tw = 32.0
+        idPhotoTplImg.th = 22.0
         idPhotoTplImg.name = "证件照片"
         idPhotoTplImg.template = idPhotoTpl
         templateImageInfoDao.save(idPhotoTplImg);
@@ -132,8 +132,8 @@ class TestServiceImpl : TestService {
         templateDao.save(composeTpl)
 
         val composeTplImg = TemplateImageInfo()
-        composeTplImg.width = 100.0
-        composeTplImg.height = 200.0
+        composeTplImg.tw = 100.0
+        composeTplImg.th = 200.0
         composeTplImg.name = "拼图照片"
         composeTplImg.template = composeTpl
         templateImageInfoDao.save(composeTplImg);

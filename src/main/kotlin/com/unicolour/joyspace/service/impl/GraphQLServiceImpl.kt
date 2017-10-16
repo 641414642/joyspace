@@ -22,6 +22,9 @@ class GraphQLServiceImpl : GraphQLService {
     lateinit var productService: ProductService
 
     @Autowired
+    lateinit var templateService: TemplateService
+
+    @Autowired
     lateinit var userService: UserService
 
     @Autowired
@@ -80,16 +83,23 @@ class GraphQLServiceImpl : GraphQLService {
                         }
                     })
                 })
-//                .type("Product", { typeWiring ->
-//                    typeWiring.dataFetcher("type", productService.getDataFetcher("type"))
-//                    typeWiring.dataFetcher("width", productService.getDataFetcher("width"))
-//                    typeWiring.dataFetcher("height", productService.getDataFetcher("height"))
-//                    typeWiring.dataFetcher("imageRequired", productService.getDataFetcher("imageRequired"))
-//                    typeWiring.dataFetcher("thumbnailUrl", productService.getDataFetcher("thumbnailUrl"))
-//                    typeWiring.dataFetcher("previewUrl", productService.getDataFetcher("previewUrl"))
-//                    typeWiring.dataFetcher("userImages", productService.getDataFetcher("userImages"))
-//                })
-
+                .type("Product", { typeWiring ->
+                    typeWiring.dataFetcher("type", productService.getDataFetcher("type"))
+                    typeWiring.dataFetcher("width", productService.getDataFetcher("width"))
+                    typeWiring.dataFetcher("height", productService.getDataFetcher("height"))
+                    typeWiring.dataFetcher("imageRequired", productService.getDataFetcher("imageRequired"))
+                    typeWiring.dataFetcher("thumbnailImageUrl", productService.getDataFetcher("thumbnailImageUrl"))
+                    typeWiring.dataFetcher("previewImageUrls", productService.getDataFetcher("previewImageUrls"))
+                    typeWiring.dataFetcher("templateImages", productService.getDataFetcher("templateImages"))
+                    typeWiring.dataFetcher("price", productService.getDataFetcher("price"))
+                    typeWiring.dataFetcher("remark", productService.getDataFetcher("remark"))
+                    typeWiring.dataFetcher("id", productService.getDataFetcher("id"))
+                    typeWiring.dataFetcher("name", productService.getDataFetcher("name"))
+                    typeWiring.dataFetcher("version", productService.getDataFetcher("version"))
+                })
+                .type("TemplateImage", { typeWiring ->
+                    typeWiring.dataFetcher("url", templateService.getDataFetcher("url"))
+                })
                 .type("PrintStation", { typeWiring ->
                     typeWiring.dataFetcher("name", printStationService.getDataFetcher("name"))
                     typeWiring.dataFetcher("address", printStationService.getDataFetcher("address"))
@@ -98,6 +108,7 @@ class GraphQLServiceImpl : GraphQLService {
                     typeWiring.dataFetcher("images", printStationService.getDataFetcher("images"))
                     typeWiring.dataFetcher("transportation", printStationService.getDataFetcher("transportation"))
                     typeWiring.dataFetcher("distance", printStationService.getDataFetcher("distance"))
+                    typeWiring.dataFetcher("products", printStationService.getDataFetcher("products"))
                 })
                 .type("PrintOrderItem", { typeWiring ->
                     typeWiring.dataFetcher("imageFiles", printOrderService.getImageFilesDataFetcher())

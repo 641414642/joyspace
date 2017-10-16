@@ -57,7 +57,7 @@ class ApiProductController {
         else {
             val tplImgInfoList = templteImageInfoDao.findByTemplateId(product.templateId)
             return ResponseEntity.ok(tplImgInfoList.map {
-                TemplateImageInfoDTO(it.name, it.width, it.height)
+                TemplateImageInfoDTO(it.name, it.tw, it.th)
             })
         }
     }

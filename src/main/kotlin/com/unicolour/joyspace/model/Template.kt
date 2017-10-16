@@ -18,22 +18,22 @@ class Template {
     /** 类型 */
     @Column
     @NotNull
-    var type: Int = ProductType.PHOTO.value;
+    var type: Int = ProductType.PHOTO.value
 
     /** 产品宽度(mm) */
     @Column
     @NotNull
-    var width: Double = 0.0;
+    var width: Double = 0.0
 
     /** 产品高度(mm) */
     @Column
     @NotNull
-    var height: Double = 0.0;
+    var height: Double = 0.0
 
     /** 最小图片数量 */
     @Column
     @NotNull
-    var minImageCount: Int = 0;
+    var minImageCount: Int = 0
 
     /** 当前版本号 */
     @Column
@@ -46,7 +46,7 @@ class Template {
     var uuid: String = ""
 
     @OneToMany(mappedBy = "template")
-    lateinit var userImages: List<TemplateImageInfo>
+    lateinit var images: List<TemplateImageInfo>
 }
 
 /** 产品模板中的图片信息 */
@@ -61,15 +61,57 @@ class TemplateImageInfo {
     @NotNull
     var name: String = ""
 
+    /** 是否是用户需要上传的图片 */
+    @Column
+    var userImage: Boolean = false
+
+    @Column(length = 255)
+    var href: String? = null
+
+    /** 图片框x(mm) */
+    @Column
+    @NotNull
+    var x: Double = 0.0
+
+    /** 图片框y(mm) */
+    @Column
+    @NotNull
+    var y: Double = 0.0
+
     /** 图片宽度(mm) */
     @Column
     @NotNull
-    var width: Double = 0.0;
+    var wid: Double = 0.0
 
     /** 图片高度(mm) */
     @Column
     @NotNull
-    var height: Double = 0.0;
+    var hei: Double = 0.0
+
+    /** 变换后的图片框x(mm) */
+    @Column
+    @NotNull
+    var tx: Double = 0.0
+
+    /** 变换后的图片框y(mm) */
+    @Column
+    @NotNull
+    var ty: Double = 0.0
+
+    /** 变换后的图片宽度(mm) */
+    @Column
+    @NotNull
+    var tw: Double = 0.0
+
+    /** 变换后的图片高度(mm) */
+    @Column
+    @NotNull
+    var th: Double = 0.0
+
+    /** 图形变换矩阵 */
+    @Column(length = 200)
+    @NotNull
+    var matrix: String = ""
 
     /** 属于哪个模板 */
     @Column(name = "template_id", insertable = false, updatable = false)

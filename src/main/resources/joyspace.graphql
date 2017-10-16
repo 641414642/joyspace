@@ -132,35 +132,41 @@ type Product {
     #产品价格（单位是分）
     price: Int
 
-    #小缩略图url
-    thumbnailUrl: [String!]
-
-    #展示图url
-    previewUrl: [String!]
-
     #版本号
     version: Int!
 
     #缩略图url
-    thumbnailUrl: String
+    thumbnailImageUrl: String
 
     #预览图url列表
-    previewUrls: [String!]
+    previewImageUrls: [String!]
 
-    #产品用户图片信息
-    userImages: [ProductUserImage!]
+    #产品图片信息
+    templateImages: [TemplateImage!]
 }
 
 # 产品用户图片信息
-type ProductUserImage {
+type TemplateImage {
     #图片名称
     name: String!
 
-    #需要的图片宽度(mm)
-    width: Float!,
+    #图片框x(mm)
+    tx: Float!
 
-    #需要的图片高度(mm)
-    height: Float!
+    #图片框y(mm)
+    ty: Float!
+
+    #图片框宽度(mm)
+    tw: Float!,
+
+    #图片框高度(mm)
+    th: Float!
+
+    #是否是需要用户上传的图片
+    userImage: Boolean
+
+    #图片url
+    url: String
 }
 
 

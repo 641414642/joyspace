@@ -1,11 +1,14 @@
 package com.unicolour.joyspace.service.impl
 
 import com.unicolour.joyspace.dao.*
+import com.unicolour.joyspace.dto.ProductDTO
+import com.unicolour.joyspace.dto.productToDTO
 import com.unicolour.joyspace.model.*
 import com.unicolour.joyspace.service.ManagerService
+import com.unicolour.joyspace.service.PrintStationService
 import com.unicolour.joyspace.service.ProductService
-import com.unicolour.joyspace.service.TemplateService
 import graphql.schema.DataFetcher
+import org.python.modules.itertools.product
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
@@ -41,6 +44,9 @@ open class ProductServiceImpl : ProductService {
 
     @Autowired
     lateinit var templateDao: TemplateDao
+
+    @Autowired
+    lateinit var printStationService: PrintStationService
 
     override fun getProductsOfPrintStation(printStationId: Int): List<PrintStationProduct> {
         return printStationProductDao.findByPrintStationId(printStationId)
@@ -168,8 +174,23 @@ open class ProductServiceImpl : ProductService {
 
     override fun getDataFetcher(fieldName: String): DataFetcher<Any> {
         return DataFetcher<Any> { env ->
-            val product = env.getSource<Product>()
+            val src = env.getSource<Any>()
+            val product:Product
+            var printStation:PrintStation? = null
+
+            if (src is PrintStationProduct) {
+                product = src.product
+                printStation = src.printStation
+            }
+            else {
+                product = src as Product
+            }
+
             when (fieldName) {
+                "remark" -> product.remark
+                "id" -> product.id
+                "name" -> product.name
+                "version" -> product.version
                 "type" -> {
                     val tpl = product.template
                     val type = ProductType.values().find{ it.value == tpl.type }
@@ -179,22 +200,31 @@ open class ProductServiceImpl : ProductService {
                 "width" -> product.template.width
                 "height" -> product.template.height
                 "imageRequired" -> product.template.minImageCount
-                "thumbnailUrl" -> {
+                "thumbnailImageUrl" -> {
                     val context = env.getContext<HashMap<String, Any>>()
                     val baseUrl = context["baseUrl"]
                     product.imageFiles
                             .filter { it.type == ProductImageFileType.THUMB.value }
-                            .map { "${baseUrl}/assets/product/images/${it.id}.${it.fileType}" }
+                            .map { "$baseUrl/assets/product/images/${it.id}.${it.fileType}" }
+                            .firstOrNull()
                 }
-                "previewUrl" -> {
+                "previewImageUrls" -> {
                     val context = env.getContext<HashMap<String, Any>>()
                     val baseUrl = context["baseUrl"]
                     product.imageFiles
                             .filter { it.type == ProductImageFileType.PREVIEW.value }
-                            .map { "${baseUrl}/assets/product/images/${it.id}.${it.fileType}" }
+                            .map { "$baseUrl/assets/product/images/${it.id}.${it.fileType}" }
                 }
-                "userImages" -> product.template.userImages
-
+                "templateImages" -> product.template.images
+                "price" -> {
+                    if (printStation == null) {
+                        null
+                    }
+                    else {
+                        val priceMap: Map<Int, Int> = printStationService.getPriceMap(printStation)
+                        priceMap.getOrDefault(product.id, product.defaultPrice)
+                    }
+                }
                 else -> null
             }
         }

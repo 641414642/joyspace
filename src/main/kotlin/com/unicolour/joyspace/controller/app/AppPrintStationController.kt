@@ -93,21 +93,15 @@ query {
         return data["findNearestPrintStation"]
     }
 
-    @RequestMapping("/app/printStation/{id}", method = arrayOf(RequestMethod.GET))
-    fun findById(request: HttpServletRequest, @PathVariable("id") id: Int) : Any? {
+    @RequestMapping("/app/printStation/{id}/products", method = arrayOf(RequestMethod.GET))
+    fun printStationProducts(request: HttpServletRequest, @PathVariable("id") id: Int) : Any? {
         val schema = graphQLService.getGraphQLSchema()
         val graphQL = GraphQL.newGraphQL(schema).build()
 
         val query =
 """
 query {
-	printStation(printStationId:${id}) {
-        id
-		address
-		wxQrCode
-		longitude
-		latitude
-        transportation
+	printStation(printStationId:$id) {
 		products {
 			id
 			name
@@ -117,8 +111,17 @@ query {
 			imageCount: imageRequired
 			remark
 			price
-			thumbnailUrl
-			previewUrls
+			thumbnailImageUrl
+			previewImageUrls
+            templateImages {
+                name
+                x:tx
+                y:ty
+                width:tw
+                height:th
+                isUserImage:userImage
+                url
+            }
 		}
 	}
 }
@@ -127,7 +130,7 @@ query {
 
         val queryResult = graphQL.execute(query, null, context, emptyMap())
         val data:Map<String, Any> = queryResult.getData()
-        return data["printStation"]
+        val printStation = data["printStation"] as? Map<*, *>?
+        return printStation?.get("products")
     }
-
 }

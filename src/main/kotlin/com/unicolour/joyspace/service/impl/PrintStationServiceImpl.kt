@@ -6,6 +6,7 @@ import com.unicolour.joyspace.model.*
 import com.unicolour.joyspace.service.ManagerService
 import com.unicolour.joyspace.service.PriceListService
 import com.unicolour.joyspace.service.PrintStationService
+import com.unicolour.joyspace.service.ProductService
 import graphql.schema.DataFetcher
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
@@ -31,6 +32,9 @@ open class PrintStationServiceImpl : PrintStationService {
     lateinit var priceListService: PriceListService
 
     @Autowired
+    lateinit var productService: ProductService
+
+    @Autowired
     lateinit var productDao: ProductDao
 
     @Autowired
@@ -53,6 +57,9 @@ open class PrintStationServiceImpl : PrintStationService {
                     val baseUrl = context["baseUrl"]
                     printStation.position.imageFiles
                             .map { "${baseUrl}/assets/position/images/${it.id}.${it.fileType}" }
+                }
+                "products" -> {
+                    productService.getProductsOfPrintStation(printStation.id)
                 }
                 "distance" -> {
                     val context = env.getContext<HashMap<String, Any>>()
