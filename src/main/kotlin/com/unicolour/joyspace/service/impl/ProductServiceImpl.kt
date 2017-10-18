@@ -196,7 +196,7 @@ open class ProductServiceImpl : ProductService {
                     val type = ProductType.values().find{ it.value == tpl.type }
                     if (type == null) null else type.name
                 }
-
+                "typeInt" -> product.template.type
                 "width" -> product.template.width
                 "height" -> product.template.height
                 "imageRequired" -> product.template.minImageCount

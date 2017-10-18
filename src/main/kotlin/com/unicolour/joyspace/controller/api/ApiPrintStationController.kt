@@ -26,81 +26,59 @@ class ApiPrintStationController {
     lateinit var productService: ProductService
 
     @RequestMapping("/api/printStation/findByQrCode", method = arrayOf(RequestMethod.GET))
-    fun findByQrCode(request: HttpServletRequest, @RequestParam("qrCode") qrCode: String) : ResponseEntity<PrintStationDTO> {
+    fun findByQrCode(request: HttpServletRequest, @RequestParam("qrCode") qrCode: String) : Any? {
         val printStation: PrintStation? = printStationDao.findByWxQrCode(qrCode);
 
-        if (printStation == null) {
-            return ResponseEntity.notFound().build()
-        }
-        else {
-            val baseUrl = getBaseUrl(request)
-            val priceMap: Map<Int, Int> = printStationService.getPriceMap(printStation)
-            val productsOfPrintStation: List<ProductDTO> =
-                    productService.getProductsOfPrintStation(printStation.id).map { it.product.productToDTO(baseUrl, priceMap) }
-
-            val ps: PrintStationDetailDTO = printStation.printStationToDetailDTO(productsOfPrintStation)
-            return ResponseEntity.ok(ps)
-        }
+        return findById(request, printStation?.id ?: 0);
     }
 
     @Autowired
     lateinit var graphQLService: GraphQLService
 
-    @RequestMapping("/api/printStation/findByDistance", method = arrayOf(RequestMethod.GET))
-    @ResponseBody
-    fun findByDistance(
-            request: HttpServletRequest,
-            @RequestParam("longitude") longitude: Double,
-            @RequestParam("latitude") latitude: Double,
-            @RequestParam("radius") radius:Int) : Any? {
+    @RequestMapping("/api/printStation/{id}", method = arrayOf(RequestMethod.GET))
+    fun findById(request: HttpServletRequest, @PathVariable("id") id: Int) : Any? {
         val schema = graphQLService.getGraphQLSchema()
         val graphQL = GraphQL.newGraphQL(schema).build()
 
         val query =
                 """
 query {
-	findPrintStationsByDistance(
-            longitude:$longitude,
-            latitude:$latitude,
-            radius:$radius) {
-        printStations {
-                id
-                address
-                longitude
-                latitude
-                wxQrCode
-        }
+	printStation(printStationId:$id) {
+        id
+        address
+        longitude
+        latitude
+        wxQrCode
+		products {
+			id
+			name
+			type:typeInt
+            version
+			width
+			height
+			imageRequired
+			remark
+			price
+			thumbnailImageUrl
+			previewImageUrls
+            templateImages {
+                name
+                x:tx
+                y:ty
+                width:tw
+                height:th
+                isUserImage:userImage
+                url
+            }
+		}
 	}
 }
 """
-        val context = hashMapOf<String, Any>(
-                "baseUrl" to getBaseUrl(request),
-                "refLatitude" to latitude,
-                "refLongitude" to longitude)
+        val context = hashMapOf<String, Any>("baseUrl" to getBaseUrl(request))
 
         val queryResult = graphQL.execute(query, null, context, emptyMap())
         val data:Map<String, Any> = queryResult.getData()
-        val result = data["findPrintStationsByDistance"] as? Map<*, *>
-        return result?.get("printStations")
-    }
-
-
-    @RequestMapping("/api/printStation/{id}", method = arrayOf(RequestMethod.GET))
-    fun findById(request: HttpServletRequest, @PathVariable("id") id: Int) : ResponseEntity<PrintStationDTO> {
-        val printStation: PrintStation? = printStationDao.findOne(id);
-
-        if (printStation == null) {
-            return ResponseEntity.notFound().build()
-        }
-        else {
-            val baseUrl = getBaseUrl(request)
-            val priceMap: Map<Int, Int> = printStationService.getPriceMap(printStation)
-            val productsOfPrintStation: List<ProductDTO> =
-                    productService.getProductsOfPrintStation(printStation.id).map { it.product.productToDTO(baseUrl, priceMap) }
-
-            val ps: PrintStationDetailDTO = printStation.printStationToDetailDTO(productsOfPrintStation)
-            return ResponseEntity.ok(ps)
-        }
+        return data["printStation"]
     }
 }
 

@@ -116,6 +116,7 @@ type Product {
     id: Int!
     name: String!
     type: ProductType!
+    typeInt: Int!
 
     #宽度（毫米）
     width: Float!

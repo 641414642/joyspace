@@ -64,23 +64,49 @@
     "products": [
         {
             "id": 1,                //产品ID
-            "name": "六寸照片",
-            "type": 0,              //产品类型 0: 普通照片, 1: 证件照, 2: 模板拼图
+            "name": "1寸照片",
+            "type": 1,              //产品类型 0: 普通照片, 1: 证件照, 2: 模板拼图
             "width": 101.6,         //宽度 (毫米)
             "height": 152.39999,    //高度 (毫米)
             "imageRequired": 1,     //需要上传的图片数量
             "remark": "",
             "price": 1,             //价格 (分)
             "version": 1,           //版本号
-            "thumbnailUrls": [                //缩略图url
+            "thumbnailImageUrl": "http://xxxxxxxxxxxxx",               //缩略图url
+            "previewImageUrls": [                   //预览图url列表
                 "http://xxxxxxxxxxxxx",
                 "http://xxxxxxxxxxxxx",
                 "http://xxxxxxxxxxxxx"
             ],
-            "previewUrls": [                   //预览图url
-                "http://xxxxxxxxxxxxx",
-                "http://xxxxxxxxxxxxx",
-                "http://xxxxxxxxxxxxx"
+            "templateImages": [
+                {
+                    "name": "照片",                                                      //图片名称， 名称相同的图片用户图片只需要用户上传同一张图
+                    "x": 11.300000190734863,                                              //图片框位置和尺寸(单位毫米)
+                    "y": 3.1999969482421875,
+                    "width": 25,
+                    "height": 35,
+                    "isUserImage": true,                                                 //是否是需要用户上传的图片
+                    "url": "http://localhost:6060/assets/template/preview/3_v11/images/UserImagePlaceHolder.png"
+                },
+                {
+                    "name": "照片",
+                    "x": 65.29999542236328,
+                    "y": 3.1999969482421875,
+                    "width": 25,
+                    "height": 35,
+                    "isUserImage": true,
+                    "url": "http://localhost:6060/assets/template/preview/3_v11/images/UserImagePlaceHolder.png"
+                },
+                ...
+                {
+                    "name": "照片",
+                    "x": 65.29999542236328,
+                    "y": 114.19999694824219,
+                    "width": 25,
+                    "height": 35,
+                    "isUserImage": true,
+                    "url": "http://localhost:6060/assets/template/preview/3_v11/images/UserImagePlaceHolder.png"
+                }
             ]
         }
         ...
