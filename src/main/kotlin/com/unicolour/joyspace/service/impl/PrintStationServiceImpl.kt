@@ -9,7 +9,9 @@ import com.unicolour.joyspace.service.PrintStationService
 import com.unicolour.joyspace.service.ProductService
 import graphql.schema.DataFetcher
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
+import org.springframework.transaction.support.TransactionTemplate
 import java.util.*
 import javax.transaction.Transactional
 import kotlin.collections.HashMap
@@ -42,6 +44,15 @@ open class PrintStationServiceImpl : PrintStationService {
 
     @Autowired
     lateinit var cityDao: CityDao
+
+    @Autowired
+    lateinit var passwordEncoder: PasswordEncoder
+
+    @Autowired
+    lateinit var transactionTemplate: TransactionTemplate
+
+    @Autowired
+    lateinit var printStationLoginSessionDao: PrintStationLoginSessionDao
 
     override fun getDataFetcher(fieldName: String): DataFetcher<Any> {
         return DataFetcher<Any> { env ->
@@ -77,6 +88,43 @@ open class PrintStationServiceImpl : PrintStationService {
         }
     }
 
+    //登录
+    override val loginDataFetcher: DataFetcher<PrintStationLoginResult>
+        get() {
+            return DataFetcher<PrintStationLoginResult> { env ->
+                val printStationId = env.getArgument<Int>("printStationId")
+                val password = env.getArgument<String>("password")
+                transactionTemplate.execute { login(printStationId, password) }
+            }
+        }
+
+    private fun login(printStationId: Int, password: String): PrintStationLoginResult {
+        val printStation = printStationDao.findOne(printStationId)
+
+        if (printStation != null) {
+            if (passwordEncoder.matches(password, printStation.password)) {
+                var session = printStationLoginSessionDao.findByPrintStationId(printStation.id)
+                if (session == null) {
+                    session = PrintStationLoginSession()
+                    session.id = UUID.randomUUID().toString().replace("-", "")
+                    session.printStationId = printStation.id
+                }
+
+                session.expireTime = Calendar.getInstance()
+                session.expireTime.add(Calendar.SECOND, 3600)
+                printStationLoginSessionDao.save(session)
+
+                return PrintStationLoginResult(sessionId = session.id)
+            }
+            else {
+                return PrintStationLoginResult(result = 2)
+            }
+        }
+        else {
+            return PrintStationLoginResult(result = 1)
+        }
+    }
+
     override fun getPriceMap(printStation: PrintStation): Map<Int, Int> {
         val priceListItems: List<PriceListItem> = priceListService.getPriceListItems(printStation.position.priceListId)
         val defPriceListItems: List<PriceListItem> = priceListService.getPriceListItems(printStation.company.defaultPriceListId)
@@ -93,9 +141,8 @@ open class PrintStationServiceImpl : PrintStationService {
         return priceMap;
     }
 
-
     @Transactional
-    override fun createPrintStation(wxQrCode: String, positionId: Int, selectedProductIds: Set<Int>): PrintStation? {
+    override fun createPrintStation(password: String, wxQrCode: String, positionId: Int, selectedProductIds: Set<Int>): PrintStation? {
         val loginManager = managerService.loginManager
         if (loginManager == null) {
             return null
@@ -108,6 +155,7 @@ open class PrintStationServiceImpl : PrintStationService {
         printStation.company = manager.company
         printStation.position = positionDao.findOne(positionId)
         printStation.city = printStation.position.city
+        printStation.password = passwordEncoder.encode(password)
 
         printStationDao.save(printStation)
 
@@ -123,13 +171,16 @@ open class PrintStationServiceImpl : PrintStationService {
     }
 
     @Transactional
-    override fun updatePrintStation(id: Int, wxQrCode: String, positionId: Int, selectedProductIds: Set<Int>): Boolean {
+    override fun updatePrintStation(id: Int, password: String, wxQrCode: String, positionId: Int, selectedProductIds: Set<Int>): Boolean {
         val printStation = printStationDao.findOne(id)
 
         if (printStation != null) {
             printStation.wxQrCode = wxQrCode
             printStation.position = positionDao.findOne(positionId)
             printStation.city = printStation.position.city
+            if (!password.isNullOrEmpty()) {
+                printStation.password = passwordEncoder.encode(password)
+            }
 
             printStationDao.save(printStation)
 

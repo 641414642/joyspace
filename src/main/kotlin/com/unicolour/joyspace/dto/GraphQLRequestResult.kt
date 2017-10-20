@@ -22,5 +22,7 @@ enum class ResultCode(val value:Int, val desc:String, val descEn: String) {
     USER_NOT_FOUND(8, "没有找到指定的用户", "User not found"),
     PRINT_STATION_NOT_FOUND(9, "没有找到自助机", "PrintStation not found"),
     CITY_NOT_FOUND(10, "没有找到指定位置所属的城市", "City not found for specified location"),
+    INVALID_PRINT_STATION_LOGIN_SESSION(11, "自助机没有登录或登录超时", "PrintStation not login or session timeout"),
+    NOT_IN_THIS_PRINT_STATION(12, "不是此自助机的订单", "Print order not in this print station"),
     SERVER_ERROR(100, "服务器错误", "Server error"),
 }

@@ -40,6 +40,9 @@ open class PrintOrderServiceImpl : PrintOrderService {
     lateinit var printStationDao: PrintStationDao
 
     @Autowired
+    lateinit var printStationLoginSessionDao: PrintStationLoginSessionDao
+
+    @Autowired
     lateinit var printStationService: PrintStationService
 
     @Autowired
@@ -136,35 +139,53 @@ open class PrintOrderServiceImpl : PrintOrderService {
         return orderNo
     }
 
-    override fun getImageFilesDataFetcher(): DataFetcher<Array<UserImageFile>> {
-        return DataFetcher { env ->
-            val printOrderItem = env.getSource<PrintOrderItem>()
-            printOrderItem.userImageFiles.toTypedArray()
+    override val imageFilesDataFetcher: DataFetcher<Array<UserImageFile>>
+        get() {
+            return DataFetcher { env ->
+                val printOrderItem = env.getSource<PrintOrderItem>()
+                printOrderItem.userImageFiles.toTypedArray()
+            }
         }
-    }
 
-    override fun getPrintOrderDataFetcher(): DataFetcher<PrintOrder?> {
-        return DataFetcher { env ->
-            val printStationId = env.getArgument<Int>("printStationId")
-            val idAfter = env.getArgument<Int>("idAfter")
+    override val printOrderDataFetcher: DataFetcher<PrintOrder?>
+        get() {
+            return DataFetcher { env ->
+                val sessionId = env.getArgument<String>("sessionId")
+                val idAfter = env.getArgument<Int>("idAfter")
 
-            printOrderDao.findFirstByPrintStationIdAndStateAndIdAfter(printStationId, PrintOrderState.PAYED.value, idAfter)
+                val session = printStationLoginSessionDao.findOne(sessionId)
+                if (session == null) {
+                    null
+                }
+                else {
+                    printOrderDao.findFirstByPrintStationIdAndStateAndIdAfter(session.printStationId, PrintOrderState.PAYED.value, idAfter)
+                }
+            }
         }
-    }
 
     override fun getUpdateOrderStateDataFetcher(state: PrintOrderState): DataFetcher<GraphQLRequestResult> {
         return DataFetcher { env ->
-            val printStationId = env.getArgument<Int>("printStationId")
+            val sessionId = env.getArgument<String>("sessionId")
             val printOrderId = env.getArgument<Int>("printOrderId")
 
-            val order = printOrderDao.findOne(printOrderId)
-            if (order != null) {
-                order.state = state.value
-                printOrderDao.save(order)
-                GraphQLRequestResult(ResultCode.SUCCESS)
+            val loginSession = printStationLoginSessionDao.findOne(sessionId)
+            if (loginSession == null || System.currentTimeMillis() > loginSession.expireTime.timeInMillis) {
+                GraphQLRequestResult(ResultCode.INVALID_PRINT_STATION_LOGIN_SESSION)
             }
             else {
-                GraphQLRequestResult(ResultCode.PRINT_ORDER_NOT_FOUND)
+                val order = printOrderDao.findOne(printOrderId)
+                if (order != null) {
+                    if (order.printStationId != loginSession.printStationId) {
+                        GraphQLRequestResult(ResultCode.NOT_IN_THIS_PRINT_STATION)
+                    }
+                    else {
+                        order.state = state.value
+                        printOrderDao.save(order)
+                        GraphQLRequestResult(ResultCode.SUCCESS)
+                    }
+                } else {
+                    GraphQLRequestResult(ResultCode.PRINT_ORDER_NOT_FOUND)
+                }
             }
         }
     }

@@ -27,6 +27,9 @@ class PrintStation {
     @JoinColumn(name = "position_id")
     lateinit var position: Position
 
+    @Column(length = 128)
+    lateinit var password: String
+
     //region 店面
     /** 店面ID */
     @Column(name = "company_id", insertable = false, updatable = false)

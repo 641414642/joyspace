@@ -63,13 +63,14 @@ class GraphQLServiceImpl : GraphQLService {
                     typeWiring.dataFetcher("findPrintStationsByDistance", printStationService.byDistanceDataFetcher)
                     typeWiring.dataFetcher("findPrintStationsByCity", printStationService.byCityDataFetcher)
                     typeWiring.dataFetcher("findNearestPrintStation", printStationService.nearestDataFetcher)
-                    typeWiring.dataFetcher("getPrintOrder", printOrderService.getPrintOrderDataFetcher())
+                    typeWiring.dataFetcher("getPrintOrder", printOrderService.printOrderDataFetcher)
                 })
                 .type("MutationType", { typeWiring ->
                     typeWiring.dataFetcher("login", userService.loginDataFetcher)
                     typeWiring.dataFetcher("sendVerifyCode", userService.sendVerifyCodeDataFetcher)
                     typeWiring.dataFetcher("userRegister", userService.userRegisterDataFetcher)
                     typeWiring.dataFetcher("resetPassword", userService.resetPasswordDataFetcher)
+                    typeWiring.dataFetcher("printStationLogin", printStationService.loginDataFetcher)
                     typeWiring.dataFetcher("printOrderDownloaded", printOrderService.getUpdateOrderStateDataFetcher(PrintOrderState.DOWNLOADED))
                     typeWiring.dataFetcher("printOrderPrinted", printOrderService.getUpdateOrderStateDataFetcher(PrintOrderState.PRINTED))
                 })
@@ -112,7 +113,7 @@ class GraphQLServiceImpl : GraphQLService {
                     typeWiring.dataFetcher("products", printStationService.getDataFetcher("products"))
                 })
                 .type("PrintOrderItem", { typeWiring ->
-                    typeWiring.dataFetcher("imageFiles", printOrderService.getImageFilesDataFetcher())
+                    typeWiring.dataFetcher("imageFiles", printOrderService.imageFilesDataFetcher)
                 })
                 .type("UserImageFile", { typeWiring ->
                     typeWiring.dataFetcher("url", imageService.getImageFileUrlDataFetcher())

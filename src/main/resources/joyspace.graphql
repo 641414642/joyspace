@@ -8,9 +8,6 @@ type QueryType {
     #根据id查找自助打印机
     printStation(printStationId: Int!): PrintStation
 
-    #查找指定自助机的待打印订单
-    getPrintOrder(printStationId: Int!, idAfter: Int!): PrintOrder
-
     #根据位置查找指定距离内的自助机列表
     findPrintStationsByDistance(longitude: Float!, latitude: Float!, radius: Float!): PrintStationFindResult!
 
@@ -19,6 +16,10 @@ type QueryType {
 
     #查找最近的自助机
     findNearestPrintStation(longitude: Float!, latitude: Float!): PrintStationFindResultSingle!
+
+    ###############################自助机调用的接口######################################3
+    #查找指定自助机的待打印订单
+    getPrintOrder(sessionId: String!, idAfter: Int!): PrintOrder
 }
 
 #增删改操作
@@ -35,11 +36,15 @@ type MutationType {
     #重置密码
     resetPassword(userName: String, phoneNumber: String!, verifyCode: String!, newPassword: String!) : RequestResult!
 
+    ###############################自助机调用的接口######################################3
+    #自助机登录
+    printStationLogin(printStationId: Int! password: String!) : PrintStationLoginRequestResult!
+
     #更新订单状态为已下载
-    printOrderDownloaded(printStationId: Int!, printOrderId: Int!) : RequestResult!
+    printOrderDownloaded(sessionId: String!, printOrderId: Int!) : RequestResult!
 
     #更新订单状态为已打印
-    printOrderPrinted(printStationId: Int!, printOrderId: Int!) : RequestResult!
+    printOrderPrinted(sessionId: String!, printOrderId: Int!) : RequestResult!
 }
 
 #请求的结果的通用类型
@@ -60,6 +65,18 @@ type RequestResult{
 
     #结果的描述 (语言: zh, en ...)
     description(language: String) : String!
+}
+
+#登录请求结果
+type PrintStationLoginRequestResult {
+    #结果代码
+    #0: 成功
+    #1: 没有找到id对应的自助机
+    #2: 密码错误
+    result: Int!
+
+    #登录sessionId
+    sessionId: String
 }
 
 #登录请求结果

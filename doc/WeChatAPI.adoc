@@ -176,10 +176,6 @@
 |参数名       |描述
 |sessionId    |登录返回的sessionId
 |image        |图片文件内容
-|brightness   |亮度调整参数 (0~2)
-|saturate     |饱和度调整参数 (0~2)
-|grayscale    |是否转成黑白  (true 或 false)
-|sepia        |是否转成怀旧效果  (true 或 false)， grayscale 和 sepia 最多只能有1个为true
 |==========================================================
 - 返回值:
 

@@ -99,6 +99,7 @@ class PrintStationController {
     fun editPrintStation(
             request: HttpServletRequest,
             @RequestParam(name = "id", required = true) id: Int,
+            @RequestParam(name = "password", required = true) password: String,
             @RequestParam(name = "wxQrCode", required = true) wxQrCode: String,
             @RequestParam(name = "positionId", required = true) positionId: Int,
             @RequestParam(name = "productIds", required = true) productIds: String
@@ -111,10 +112,10 @@ class PrintStationController {
                 .toSet()
 
         if (id <= 0) {
-            printStationService.createPrintStation(wxQrCode, positionId, selectedProductIds)
+            printStationService.createPrintStation(password, wxQrCode, positionId, selectedProductIds)
             return true
         } else {
-            return printStationService.updatePrintStation(id, wxQrCode, positionId, selectedProductIds)
+            return printStationService.updatePrintStation(id, password, wxQrCode, positionId, selectedProductIds)
         }
     }
 
