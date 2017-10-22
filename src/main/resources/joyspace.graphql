@@ -20,6 +20,12 @@ type QueryType {
     ###############################自助机调用的接口######################################3
     #查找指定自助机的待打印订单
     getPrintOrder(sessionId: String!, idAfter: Int!): PrintOrder
+
+    #查询模板列表
+    templates(sessionId: String!): [Template!]!
+
+    #查询模板文件的url
+    getTemplateFileUrl(sessionId: String!, templateId: Int!, templateVersion: Int!): String
 }
 
 #增删改操作
@@ -45,6 +51,12 @@ type MutationType {
 
     #更新订单状态为已打印
     printOrderPrinted(sessionId: String!, printOrderId: Int!) : RequestResult!
+}
+
+#模板信息
+type Template {
+    id: Int!
+    currentVersion: Int!
 }
 
 #请求的结果的通用类型

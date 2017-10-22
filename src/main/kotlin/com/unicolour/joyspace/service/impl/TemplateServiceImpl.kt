@@ -1,17 +1,20 @@
 package com.unicolour.joyspace.service.impl
 
 import com.unicolour.joyspace.controller.api.PreviewParam
-
 import com.unicolour.joyspace.dao.*
 import com.unicolour.joyspace.dto.TemplatePreviewResult
 import com.unicolour.joyspace.model.*
 import com.unicolour.joyspace.service.ImageService
+import com.unicolour.joyspace.service.PrintStationService
 import com.unicolour.joyspace.service.TemplateService
 import graphql.schema.DataFetcher
 import org.apache.batik.anim.dom.SAXSVGDocumentFactory
 import org.apache.batik.apps.rasterizer.DestinationType
 import org.apache.batik.apps.rasterizer.SVGConverter
-import org.apache.batik.gvt.*
+import org.apache.batik.gvt.CanvasGraphicsNode
+import org.apache.batik.gvt.CompositeGraphicsNode
+import org.apache.batik.gvt.GraphicsNode
+import org.apache.batik.gvt.ImageNode
 import org.apache.batik.util.XMLResourceDescriptor
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
@@ -63,6 +66,9 @@ open class TemplateServiceImpl : TemplateService {
 
     @Autowired
     lateinit var productDao: ProductDao
+
+    @Autowired
+    lateinit var printStationService: PrintStationService
 
     private fun toMM(value:String) : Double {
         if (value.endsWith("mm")) {
@@ -414,7 +420,46 @@ open class TemplateServiceImpl : TemplateService {
         userImageFileDao.save(userJpgImgFile)
     }
 
-    override fun getDataFetcher(fieldName: String): DataFetcher<Any> {
+    override val templateFileUrlDataFetcher: DataFetcher<String?>
+        get() {
+            return DataFetcher { env ->
+                val sessionId = env.getArgument<String>("sessionId")
+                val templateId = env.getArgument<Int>("templateId")
+                val templateVersion = env.getArgument<Int>("templateVersion")
+
+                val loginSession = printStationService.getPrintStationLoginSession(sessionId)
+                if (loginSession == null) {
+                    null
+                }
+                else {
+                    val template = templateDao.findOne(templateId)
+                    if (template == null) {
+                        null
+                    }
+                    else {
+                        val context = env.getContext<HashMap<String, Any>>()
+                        val baseUrl = context["baseUrl"]
+
+                        "${baseUrl}/assets/template/production/${template.id}_v${templateVersion}_${template.uuid}.zip"
+                    }
+                }
+            }
+        }
+    override val templatesDataFetcher: DataFetcher<List<Template>>
+        get() {
+            return DataFetcher { env ->
+                val sessionId = env.getArgument<String>("sessionId")
+                val loginSession = printStationService.getPrintStationLoginSession(sessionId)
+                if (loginSession == null) {
+                    emptyList<Template>()
+                }
+                else {
+                    templateDao.findAll().toList()
+                }
+            }
+        }
+
+    override fun getTemplateImageDataFetcher(fieldName: String): DataFetcher<Any> {
         return DataFetcher<Any> { env ->
             val tplImg = env.getSource<TemplateImageInfo>()
             when (fieldName) {

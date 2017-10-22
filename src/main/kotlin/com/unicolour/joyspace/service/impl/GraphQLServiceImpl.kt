@@ -64,6 +64,8 @@ class GraphQLServiceImpl : GraphQLService {
                     typeWiring.dataFetcher("findPrintStationsByCity", printStationService.byCityDataFetcher)
                     typeWiring.dataFetcher("findNearestPrintStation", printStationService.nearestDataFetcher)
                     typeWiring.dataFetcher("getPrintOrder", printOrderService.printOrderDataFetcher)
+                    typeWiring.dataFetcher("getTemplateFileUrl", templateService.templateFileUrlDataFetcher)
+                    typeWiring.dataFetcher("templates", templateService.templatesDataFetcher)
                 })
                 .type("MutationType", { typeWiring ->
                     typeWiring.dataFetcher("login", userService.loginDataFetcher)
@@ -100,7 +102,7 @@ class GraphQLServiceImpl : GraphQLService {
                     typeWiring.dataFetcher("version", productService.getDataFetcher("version"))
                 })
                 .type("TemplateImage", { typeWiring ->
-                    typeWiring.dataFetcher("url", templateService.getDataFetcher("url"))
+                    typeWiring.dataFetcher("url", templateService.getTemplateImageDataFetcher("url"))
                 })
                 .type("PrintStation", { typeWiring ->
                     typeWiring.dataFetcher("name", printStationService.getDataFetcher("name"))

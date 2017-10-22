@@ -2,7 +2,9 @@ package com.unicolour.joyspace.service
 
 import com.unicolour.joyspace.dto.*
 import com.unicolour.joyspace.model.PrintStation
+import com.unicolour.joyspace.model.PrintStationLoginSession
 import graphql.schema.DataFetcher
+import javax.transaction.Transactional
 
 interface PrintStationService {
     fun getPriceMap(printStation: PrintStation): Map<Int, Int>
@@ -16,4 +18,5 @@ interface PrintStationService {
     val byDistanceDataFetcher: DataFetcher<PrintStationFindResult>
 
     fun getDataFetcher(fieldName:String): DataFetcher<Any>
+    fun getPrintStationLoginSession(sessionId: String): PrintStationLoginSession?
 }

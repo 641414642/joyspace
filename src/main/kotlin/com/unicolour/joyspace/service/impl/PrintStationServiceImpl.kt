@@ -54,6 +54,27 @@ open class PrintStationServiceImpl : PrintStationService {
     @Autowired
     lateinit var printStationLoginSessionDao: PrintStationLoginSessionDao
 
+    @Transactional
+    override fun getPrintStationLoginSession(sessionId: String): PrintStationLoginSession? {
+        val session = printStationLoginSessionDao.findOne(sessionId)
+        if (session != null) {
+            if (System.currentTimeMillis() > session.expireTime.timeInMillis) {
+                printStationLoginSessionDao.delete(session)
+                return null
+            }
+            else {
+                session.expireTime = Calendar.getInstance()
+                session.expireTime.add(Calendar.SECOND, 3600)
+                printStationLoginSessionDao.save(session)
+
+                return session
+            }
+        }
+        else {
+            return null
+        }
+    }
+
     override fun getDataFetcher(fieldName: String): DataFetcher<Any> {
         return DataFetcher<Any> { env ->
             val printStation = env.getSource<PrintStation>()
@@ -104,12 +125,13 @@ open class PrintStationServiceImpl : PrintStationService {
         if (printStation != null) {
             if (passwordEncoder.matches(password, printStation.password)) {
                 var session = printStationLoginSessionDao.findByPrintStationId(printStation.id)
-                if (session == null) {
-                    session = PrintStationLoginSession()
-                    session.id = UUID.randomUUID().toString().replace("-", "")
-                    session.printStationId = printStation.id
+                if (session != null) {
+                    printStationLoginSessionDao.delete(session)
                 }
 
+                session = PrintStationLoginSession()
+                session.id = UUID.randomUUID().toString().replace("-", "")
+                session.printStationId = printStation.id
                 session.expireTime = Calendar.getInstance()
                 session.expireTime.add(Calendar.SECOND, 3600)
                 printStationLoginSessionDao.save(session)
