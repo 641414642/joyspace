@@ -41,38 +41,6 @@ class ApiImageController {
         return ResponseEntity.ok(imgInfo)
     }
 
-    @RequestMapping("/api/image/rotateAndCrop", method = arrayOf(RequestMethod.POST))
-    fun rotateAndCropImage(request: HttpServletRequest,
-                           @RequestParam("sessionId") sessionId: String,
-                           @RequestParam("imageId") imageId: Int,
-                           @RequestParam("angleDeg") angleDeg: Double,
-                           @RequestParam("cropX") cropX: Double,
-                           @RequestParam("cropY") cropY: Double,
-                           @RequestParam("cropWid") cropWid: Double,
-                           @RequestParam("cropHei") cropHei: Double
-    ): ResponseEntity<ImageInfo> {
-        val baseUrl = getBaseUrl(request)
-        val imgInfo = imageService.rotateAndCropImage(sessionId, imageId, angleDeg, cropX, cropY, cropWid, cropHei, baseUrl)
-
-        return ResponseEntity.ok(imgInfo)
-    }
-    @RequestMapping(path = arrayOf("/api/image/transform"), method = arrayOf(RequestMethod.POST))
-    fun transformImage(request: HttpServletRequest,
-                           @RequestParam("sessionId") sessionId: String,
-                           @RequestParam("imageId") imageId: Int,
-                           @RequestParam("imageRatio") imageRatio: Double,
-                           @RequestParam("initialRotate") initialRotate: Int,
-                           @RequestParam("translateX") translateX: Int,
-                           @RequestParam("translateY") translateY: Int,
-                           @RequestParam("scale") scale: Double,
-                           @RequestParam("rotate") rotate: Double
-    ): ResponseEntity<ImageInfo> {
-        val baseUrl = getBaseUrl(request)
-        val imgInfo = imageService.transformImage(sessionId, imageId, imageRatio, initialRotate, translateX, translateY, scale, rotate, baseUrl)
-
-        return ResponseEntity.ok(imgInfo)
-    }
-
     @RequestMapping("/api/image", method = arrayOf(RequestMethod.DELETE))
     fun deleteImage(@RequestParam("sessionId") sessionId: String,
                     @RequestParam("imageId") imageId: Int) : ResponseEntity<CommonRequestResult> {

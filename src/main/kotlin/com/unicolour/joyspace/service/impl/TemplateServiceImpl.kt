@@ -526,7 +526,7 @@ open class TemplateServiceImpl : TemplateService {
 
         //create filter element
         var filterId: String? = null
-        if (imageParam.brightness != 1.0 || imageParam.saturate != 1.0 || imageParam.grayscale || imageParam.sepia) {
+        if (imageParam.brightness != 1.0 || imageParam.saturate != 1.0 || imageParam.effect != "none") {
             filterId = "filter_" + UUID.randomUUID().toString().replace("-", "")
             val filterElement = createElement(doc, defsElement, "filter", "id", filterId)
 
@@ -541,10 +541,10 @@ open class TemplateServiceImpl : TemplateService {
                 createElement(doc, filterElement, "feColorMatrix", "saturate", imageParam.saturate.toString())
             }
 
-            if (imageParam.sepia) {
+            if (imageParam.effect == "sepia") {
                 val matrixValues = "0.393 0.769 0.189 0 0 0.349 0.686 0.168 0 0 0.272 0.534 0.131 0 0 0 0 0 1 0"
                 createElement(doc, filterElement, "feColorMatrix", "type", "matrix", "values", matrixValues)
-            } else if (imageParam.grayscale) {
+            } else if (imageParam.effect == "grayscale") {
                 val matrixValues = "0.2126 0.7152 0.0722 0 0 0.2126 0.7152 0.0722 0 0 0.2126 0.7152 0.0722 0 0 0 0 0 1 0"
                 createElement(doc, filterElement, "feColorMatrix", "type", "matrix", "values", matrixValues)
             }
@@ -590,8 +590,8 @@ open class TemplateServiceImpl : TemplateService {
         transform.translate(w / 2.0, h / 2.0)   //坐标原点移到图片框中心位置
 
         //用户平移
-        if (imageParam.translateX != 0.0 || imageParam.translateY != 0.0) {
-            transform.translate(imageParam.translateX, imageParam.translateY)
+        if (imageParam.horTranslate != 0.0 || imageParam.verTranslate != 0.0) {
+            transform.translate(imageParam.horTranslate, imageParam.verTranslate)
         }
 
         //用户缩放

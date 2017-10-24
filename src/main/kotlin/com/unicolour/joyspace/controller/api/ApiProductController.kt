@@ -87,12 +87,11 @@ class ImageParam(
         var initialRotate: Int = 0,
         var scale: Double = 1.0,
         var rotate: Double = 0.0,
-        var translateX: Double = 0.0,
-        var translateY: Double = 0.0,
+        var horTranslate: Double = 0.0,
+        var verTranslate: Double = 0.0,
         var brightness: Double = 1.0,
         var saturate: Double = 1.0,
-        var grayscale: Boolean = false,
-        var sepia: Boolean = false
+        var effect: String = "none"
 )
 
 class PreviewParam(
