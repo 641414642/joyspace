@@ -1,5 +1,6 @@
 package com.unicolour.joyspace.service.impl
 
+import com.unicolour.joyspace.controller.api.ImageParam
 import com.unicolour.joyspace.controller.api.PreviewParam
 import com.unicolour.joyspace.dao.*
 import com.unicolour.joyspace.dto.TemplatePreviewResult
@@ -283,7 +284,7 @@ open class TemplateServiceImpl : TemplateService {
     private fun eachImageElement(doc: Document, imgEleCallback: (imgEle:Element, title: String, desc: String) -> Unit) {
         val imgElements = doc.getElementsByTagName("image")
 
-        for (i in 0..imgElements.length - 1) {
+        for (i in 0 until imgElements.length) {
             val imgEle = imgElements.item(i) as? Element
 
             var title = ""
@@ -291,7 +292,7 @@ open class TemplateServiceImpl : TemplateService {
 
             if (imgEle != null) {
                 val children = imgEle.childNodes
-                for (j in 0..children.length - 1) {
+                for (j in 0 until children.length) {
                     val child = children.item(j)
                     if (child is Element) {
                         if (child.tagName == "title") {
@@ -328,8 +329,20 @@ open class TemplateServiceImpl : TemplateService {
             factory.isNamespaceAware = true
 
             val doc = factory.newDocumentBuilder().parse(templateFile)
-            val tplWid = toMM(doc.documentElement.getAttribute("width"))
-            val tplHei = toMM(doc.documentElement.getAttribute("height"))
+            val svgElement = doc.documentElement
+            val tplWid = toMM(svgElement.getAttribute("width"))
+            val tplHei = toMM(svgElement.getAttribute("height"))
+
+            var defsElement = getChildElementByName(svgElement, "defs")
+            if (defsElement == null) {
+                defsElement = doc.createElement("defs")
+                val firstChild = svgElement.firstChild
+                if (firstChild != null) {
+                    svgElement.insertBefore(defsElement, firstChild)
+                } else {
+                    svgElement.appendChild(defsElement)
+                }
+            }
 
             eachImageElement(doc, {imgEle, title, desc ->
                 if (desc == "UserImage" || desc == "用户图片") {
@@ -339,10 +352,7 @@ open class TemplateServiceImpl : TemplateService {
                         val userImgFile = userImgFiles.firstOrNull { it.id == prevImg.imageId }
                         if (userImgFile != null) {
                             val userImgUrl = imageService.getImageUrl(baseUrl, userImgFile)
-                            imgEle.setAttributeNS(
-                                    X_LINK_NAMESPACE,
-                                    "xlink:href",
-                                    userImgUrl)
+                            replaceImageElementWithPattern(defsElement!!, imgEle, userImgUrl, prevImg)
                             found = true
                         }
                     }
@@ -474,5 +484,150 @@ open class TemplateServiceImpl : TemplateService {
                 else -> null
             }
         }
+    }
+
+    private fun getChildElementByName(element: Element, childElementTagName: String): Element? {
+        val children = element.childNodes
+        for (i in 0 until children.length) {
+            val childNode = children.item(i)
+            if (childNode is Element && childNode.tagName == childElementTagName) {
+                return childNode
+            }
+        }
+
+        return null
+    }
+
+    private fun getDoubleAttribute(element: Element, attrName: String, defaultValue: Double): Double {
+        val attrValue = element.getAttribute(attrName)
+        return if (attrValue.isNullOrEmpty()) {
+            defaultValue
+        } else {
+            return attrValue.toDoubleOrNull() ?: defaultValue
+        }
+    }
+
+    private fun createElement(doc: Document, parentElement: Element?, tagName: String, vararg attrNameAndValues: String): Element {
+        val element = doc.createElement(tagName)
+        var i = 0
+        while (i < attrNameAndValues.size) {
+            element.setAttribute(attrNameAndValues[i], attrNameAndValues[i + 1])
+            i += 2
+        }
+        parentElement?.appendChild(element)
+        return element
+    }
+
+    private fun replaceImageElementWithPattern(
+            defsElement: Element, imageElement: Element,
+            imagePath: String, imageParam: ImageParam) {
+
+        val doc = defsElement.ownerDocument
+
+        //create filter element
+        var filterId: String? = null
+        if (imageParam.brightness != 1.0 || imageParam.saturate != 1.0 || imageParam.grayscale || imageParam.sepia) {
+            filterId = "filter_" + UUID.randomUUID().toString().replace("-", "")
+            val filterElement = createElement(doc, defsElement, "filter", "id", filterId)
+
+            if (imageParam.brightness != 1.0) {
+                val feComponentTransferElement = createElement(doc, filterElement, "feComponentTransfer")
+                createElement(doc, feComponentTransferElement, "feFuncR", "type", "linear", "slope", imageParam.brightness.toString())
+                createElement(doc, feComponentTransferElement, "feFuncG", "type", "linear", "slope", imageParam.brightness.toString())
+                createElement(doc, feComponentTransferElement, "feFuncB", "type", "linear", "slope", imageParam.brightness.toString())
+            }
+
+            if (imageParam.saturate != 1.0) {
+                createElement(doc, filterElement, "feColorMatrix", "saturate", imageParam.saturate.toString())
+            }
+
+            if (imageParam.sepia) {
+                val matrixValues = "0.393 0.769 0.189 0 0 0.349 0.686 0.168 0 0 0.272 0.534 0.131 0 0 0 0 0 1 0"
+                createElement(doc, filterElement, "feColorMatrix", "type", "matrix", "values", matrixValues)
+            } else if (imageParam.grayscale) {
+                val matrixValues = "0.2126 0.7152 0.0722 0 0 0.2126 0.7152 0.0722 0 0 0.2126 0.7152 0.0722 0 0 0 0 0 1 0"
+                createElement(doc, filterElement, "feColorMatrix", "type", "matrix", "values", matrixValues)
+            }
+        }
+
+        val x = getDoubleAttribute(imageElement, "x", 0.0)
+        val y = getDoubleAttribute(imageElement, "y", 0.0)
+        val w = getDoubleAttribute(imageElement, "width", 0.0)
+        val h = getDoubleAttribute(imageElement, "height", 0.0)
+
+        //create pattern element
+        val patternId = "pattern_" + UUID.randomUUID().toString().replace("-", "")
+        val patternElement = createElement(doc, defsElement, "pattern",
+                "patternUnits", "userSpaceOnUse",
+                "patternContentUnits", "userSpaceOnUse",
+                "x", x.toString(),
+                "y", y.toString(),
+                "width", w.toString(),
+                "height", h.toString(),
+                "id", patternId)
+
+        //create pattern white background element
+        createElement(doc, patternElement, "rect",
+                "x", "0",
+                "y", "0",
+                "width", w.toString(),
+                "height", h.toString(),
+                "style", "fill:#ffffff;fill-opacity:1")
+
+        //create pattern image element
+        val patternImgElement = createElement(doc, patternElement, "image",
+                "x", (-w / 2.0).toString(),
+                "y", (-h / 2.0).toString(),
+                "width", w.toString(),
+                "height", h.toString(),
+                "preserveAspectRatio", "xMidYMid slice")
+        patternImgElement.setAttributeNS(X_LINK_NAMESPACE, "xlink:href", imagePath)
+        if (filterId != null) {
+            patternImgElement.setAttribute("filter", "url(#$filterId)")
+        }
+
+        val transform = AffineTransform()
+        transform.translate(w / 2.0, h / 2.0)   //坐标原点移到图片框中心位置
+
+        //用户平移
+        if (imageParam.translateX != 0.0 || imageParam.translateY != 0.0) {
+            transform.translate(imageParam.translateX, imageParam.translateY)
+        }
+
+        //用户缩放
+        var s = imageParam.scale
+        //初始旋转如果是90或270度，需要先缩放图片以便充满图片框
+        if (imageParam.initialRotate == 90 || imageParam.initialRotate == 270) {
+            val sx = w / h
+            val sy = h / w
+            s *= Math.max(sx, sy)
+        }
+
+        if (s != 1.0) {
+            transform.scale(s, s)
+        }
+
+        //用户旋转
+        if (imageParam.initialRotate + imageParam.rotate != 0.0) {
+            transform.rotate(Math.toRadians(imageParam.initialRotate + imageParam.rotate))
+        }
+
+        val matrix = DoubleArray(6)
+        transform.getMatrix(matrix)
+        patternImgElement.setAttribute("transform", matrix.joinToString(",", "matrix(", ")"))
+
+        //create rect element to replace original image element
+        val rectElement = createElement(doc, null, "rect",
+                "x", x.toString(),
+                "y", y.toString(),
+                "width", w.toString(),
+                "height", h.toString(),
+                "style", "fill:url(#$patternId);stroke:none;")
+        val originImgEleTransform = imageElement.getAttribute("transform")
+        if (originImgEleTransform != null && originImgEleTransform != "") {
+            rectElement.setAttribute("transform", originImgEleTransform)
+        }
+
+        imageElement.parentNode.replaceChild(rectElement, imageElement)
     }
 }
