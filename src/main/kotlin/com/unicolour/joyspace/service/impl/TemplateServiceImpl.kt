@@ -384,7 +384,7 @@ open class TemplateServiceImpl : TemplateService {
             val jpgUrl = "${baseUrl}/assets/${destJpgFilePath}"
             val destImgFile = File(assetsDir, destJpgFilePath)
 
-            val scale = minOf(500.0 / tplWid, 500.0 / tplHei)
+            val scale = minOf(1000.0 / tplWid, 1000.0 / tplHei)
             val destJpgWid = (tplWid * scale).toInt()
             val destJpgHei = (tplHei * scale).toInt()
 
