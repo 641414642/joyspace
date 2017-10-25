@@ -38,6 +38,7 @@ import javax.xml.parsers.DocumentBuilderFactory
 import javax.xml.transform.TransformerFactory
 import javax.xml.transform.dom.DOMSource
 import javax.xml.transform.stream.StreamResult
+import kotlin.collections.HashMap
 
 const val X_LINK_NAMESPACE: String = "http://www.w3.org/1999/xlink"
 
@@ -344,6 +345,8 @@ open class TemplateServiceImpl : TemplateService {
                 }
             }
 
+            val imgEleUrlMap = HashMap<Element, String>()
+
             eachImageElement(doc, {imgEle, title, desc ->
                 if (desc == "UserImage" || desc == "用户图片") {
                     var found = false
@@ -352,8 +355,12 @@ open class TemplateServiceImpl : TemplateService {
                         val userImgFile = userImgFiles.firstOrNull { it.id == prevImg.imageId }
                         if (userImgFile != null) {
                             val userImgUrl = imageService.getImageUrl(baseUrl, userImgFile)
-                            replaceImageElementWithPattern(defsElement!!, imgEle, userImgUrl, prevImg)
+                            val userImgFileUrl =  imageService.getImageFileUrl(userImgFile)
+
+                            val newImgEle = replaceImageElementWithPattern(defsElement!!, imgEle, userImgFileUrl, prevImg)
                             found = true
+
+                            imgEleUrlMap[newImgEle] = userImgUrl
                         }
                     }
 
@@ -364,21 +371,22 @@ open class TemplateServiceImpl : TemplateService {
                 else {
                     val imgSrc = imgEle.getAttributeNS(X_LINK_NAMESPACE, "href")
                     if (!imgSrc.startsWith("data:")) {
-                        imgEle.setAttributeNS(
-                                X_LINK_NAMESPACE,
-                                "xlink:href",
-                                "${baseUrl}/assets/template/preview/${template.id}_v${template.currentVersion}/$imgSrc")
+                        val imgUrl = "${baseUrl}/assets/template/preview/${template.id}_v${template.currentVersion}/$imgSrc"
+                        val imgFileUrl = File(assetsDir, "/template/preview/${template.id}_v${template.currentVersion}/$imgSrc").toURI().toURL().toExternalForm()
+
+                        imgEle.setAttributeNS(X_LINK_NAMESPACE, "xlink:href", imgFileUrl)
+                        imgEleUrlMap[imgEle] = imgFileUrl
                     }
                 }
             })
 
+            //生成预览图用的svg文件, 图片url为 file:///xxx.xxx.....
             val destFileName = UUID.randomUUID().toString().replace("-", "")
-            val destSvgFilePath = "user/${session.userId}/${previewParam.sessionId}/${destFileName}.svg"
-            val svgUrl = "${baseUrl}/assets/${destSvgFilePath}"
-            val destSvgFile = File(assetsDir, destSvgFilePath)
+            val svgFilePath = "user/${session.userId}/${previewParam.sessionId}/${destFileName}.svg"
+            val svgFile = File(assetsDir, svgFilePath)
 
             val transformer = TransformerFactory.newInstance().newTransformer()
-            transformer.transform(DOMSource(doc), StreamResult(destSvgFile))
+            transformer.transform(DOMSource(doc), StreamResult(svgFile))
 
             val destJpgFilePath = "user/${session.userId}/${previewParam.sessionId}/${destFileName}.jpg"
             val jpgUrl = "${baseUrl}/assets/${destJpgFilePath}"
@@ -389,7 +397,7 @@ open class TemplateServiceImpl : TemplateService {
             val destJpgHei = (tplHei * scale).toInt()
 
             val svgConverter = SVGConverter()
-            svgConverter.setSources(arrayOf(destSvgFile.absolutePath))
+            svgConverter.setSources(arrayOf(svgFile.absolutePath))
             svgConverter.destinationType = DestinationType.JPEG
             svgConverter.quality = 0.9f
             svgConverter.dst = destImgFile
@@ -399,6 +407,13 @@ open class TemplateServiceImpl : TemplateService {
             svgConverter.execute()
 
             transactionTemplate.execute { saveImgFileRecord(destFileName, destJpgWid, destJpgHei, session) }
+
+            //客户端预览用的svg文件, 图片url为 https://xxx.xxx.....
+            for ((imgEle, imgUrl) in imgEleUrlMap) {
+                imgEle.setAttributeNS(X_LINK_NAMESPACE, "xlink:href", imgUrl)
+            }
+            val svgUrl = "${baseUrl}/assets/${svgFilePath}"
+            transformer.transform(DOMSource(doc), StreamResult(svgFile))
 
             return TemplatePreviewResult(0, null, svgUrl, jpgUrl)
         }
@@ -518,9 +533,10 @@ open class TemplateServiceImpl : TemplateService {
         return element
     }
 
+    //返回pattern里面的新创建的image element
     private fun replaceImageElementWithPattern(
             defsElement: Element, imageElement: Element,
-            imagePath: String, imageParam: ImageParam) {
+            imagePath: String, imageParam: ImageParam): Element {
 
         val doc = defsElement.ownerDocument
 
@@ -629,5 +645,7 @@ open class TemplateServiceImpl : TemplateService {
         }
 
         imageElement.parentNode.replaceChild(rectElement, imageElement)
+
+        return patternImgElement
     }
 }

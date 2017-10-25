@@ -12,6 +12,7 @@ interface ImageService {
 
     fun deleteImage(sessionId: String, imageId: Int): CommonRequestResult
     fun getImageUrl(baseUrl:String, userImgFile: UserImageFile) : String
+    fun getImageFileUrl(userImgFile: UserImageFile): String
 
     fun getImageFileUrlDataFetcher(): DataFetcher<String>
 }

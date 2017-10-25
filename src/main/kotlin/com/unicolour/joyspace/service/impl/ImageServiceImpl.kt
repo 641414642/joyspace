@@ -222,5 +222,10 @@ class ImageServiceImpl : ImageService {
     override fun getImageUrl(baseUrl: String, userImgFile: UserImageFile): String {
         return "${baseUrl}/assets/user/${userImgFile.userId}/${userImgFile.sessionId}/${userImgFile.fileName}.${userImgFile.type}"
     }
+
+    override fun getImageFileUrl(userImgFile: UserImageFile): String {
+        val file = File(assetsDir, "/user/${userImgFile.userId}/${userImgFile.sessionId}/${userImgFile.fileName}.${userImgFile.type}")
+        return file.toURI().toURL().toExternalForm()
+    }
 }
 
