@@ -357,7 +357,7 @@ open class TemplateServiceImpl : TemplateService {
                             val userImgUrl = imageService.getImageUrl(baseUrl, userImgFile)
                             val userImgFileUrl =  imageService.getImageFileUrl(userImgFile)
 
-                            val newImgEle = replaceImageElementWithPattern(defsElement!!, imgEle, userImgFileUrl, prevImg)
+                            val newImgEle = replaceImageElementWithPattern(defsElement!!, imgEle, userImgFileUrl, userImgFile.width, userImgFile.height, prevImg)
                             found = true
 
                             imgEleUrlMap[newImgEle] = userImgUrl
@@ -536,7 +536,8 @@ open class TemplateServiceImpl : TemplateService {
     //返回pattern里面的新创建的image element
     private fun replaceImageElementWithPattern(
             defsElement: Element, imageElement: Element,
-            imagePath: String, imageParam: ImageParam): Element {
+            imagePath: String, imageWidth: Int, imageHeight: Int,
+            imageParam: ImageParam): Element {
 
         val doc = defsElement.ownerDocument
 
@@ -592,11 +593,11 @@ open class TemplateServiceImpl : TemplateService {
 
         //create pattern image element
         val patternImgElement = createElement(doc, patternElement, "image",
-                "x", (-w / 2.0).toString(),
-                "y", (-h / 2.0).toString(),
-                "width", w.toString(),
-                "height", h.toString(),
-                "preserveAspectRatio", "xMidYMid slice")
+                "x", (-imageWidth / 2.0).toString(),
+                "y", (-imageHeight / 2.0).toString(),
+                "width", imageWidth.toString(),
+                "height", imageHeight.toString(),
+                "preserveAspectRatio", "none")
         patternImgElement.setAttributeNS(X_LINK_NAMESPACE, "xlink:href", imagePath)
         if (filterId != null) {
             patternImgElement.setAttribute("filter", "url(#$filterId)")
@@ -612,12 +613,10 @@ open class TemplateServiceImpl : TemplateService {
 
         //用户缩放
         var s = imageParam.scale
-        //初始旋转如果是90或270度，需要先缩放图片以便充满图片框
-        if (imageParam.initialRotate == 90 || imageParam.initialRotate == 270) {
-            val sx = w / h
-            val sy = h / w
-            s *= Math.max(sx, sy)
-        }
+        //先缩放图片到充满pattern
+        val iw = if (imageParam.initialRotate == 90 || imageParam.initialRotate == 270) imageHeight else imageWidth
+        val ih = if (imageParam.initialRotate == 90 || imageParam.initialRotate == 270) imageWidth else imageHeight
+        s *= Math.max(w / iw, h / ih)
 
         if (s != 1.0) {
             transform.scale(s, s)
