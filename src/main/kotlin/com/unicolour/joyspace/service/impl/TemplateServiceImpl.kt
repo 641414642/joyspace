@@ -555,7 +555,9 @@ open class TemplateServiceImpl : TemplateService {
             }
 
             if (imageParam.saturate != 1.0) {
-                createElement(doc, filterElement, "feColorMatrix", "saturate", imageParam.saturate.toString())
+                createElement(doc, filterElement, "feColorMatrix",
+                        "type", "saturate",
+                        "values", imageParam.saturate.toString())
             }
 
             if (imageParam.effect == "sepia") {
