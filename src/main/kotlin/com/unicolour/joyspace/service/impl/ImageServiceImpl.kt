@@ -99,86 +99,60 @@ class ImageServiceImpl : ImageService {
         }
     }
 
-    private fun processImage(sessionId: String, imageId: Int, process : (userImgFile: UserImageFile, srcFile: File) -> ImageInfo) : ImageInfo {
-        val session = userLoginSessionDao.findOne(sessionId);
+    override fun createThumbnail(sessionId: String, userImgFile: UserImageFile, width: Int, height: Int) : UserImageFile? {
+        val destFileName = UUID.randomUUID().toString().replace("-", "")
+        val destFilePath = "user/${userImgFile.userId}/${sessionId}/${destFileName}.jpg"
 
-        if (session == null) {
-            return ImageInfo(1, "用户未登录")
-        } else {
-            val userImg = userImageFileDao.findOne(imageId)
-            if (userImg == null) {
-                return ImageInfo(2, "没有找到指定ID对应的图片")
-            } else if (userImg.userId != session.userId) {
-                return ImageInfo(3, "不是此用户的图片")
-            } else {
-                val srcFilePath = "user/${userImg.userId}/${userImg.sessionId}/${userImg.fileName}.${userImg.type}"
-                val srcFile = File(assetsDir, srcFilePath)
+        val destFile = File(assetsDir, destFilePath)
 
-                if (!srcFile.exists()) {
-                    return ImageInfo(4, "图片文件已删除")
-                } else {
-                    return process(userImg, srcFile)
-                }
-            }
+        val srcFilePath = "user/${userImgFile.userId}/${userImgFile.sessionId}/${userImgFile.fileName}.${userImgFile.type}"
+        val srcFile = File(assetsDir, srcFilePath)
+
+        val pb = ProcessBuilder(
+                "magick",
+                "convert",
+                srcFile.absolutePath,
+                "-thumbnail",
+                "${width}x${height}",
+                "-identify",
+                destFile.absolutePath)
+
+        val process = pb.start()
+
+        var retStr: String = "";
+        BufferedReader(InputStreamReader(process.inputStream)).use { reader ->
+            retStr = reader.readText()
         }
-    }
 
-    override fun resizeImage(sessionId: String, imageId: Int, width: Int, height: Int, baseUrl: String): ImageInfo {
-        return processImage(sessionId, imageId,
-                { userImgFile, srcFile ->
-                    val destFileName = UUID.randomUUID().toString().replace("-", "")
-                    val destFilePath = "user/${userImgFile.userId}/${sessionId}/${destFileName}.jpg"
+        val retCode = process.waitFor()
 
-                    val destFile = File(assetsDir, destFilePath)
-                    srcFile.parentFile.mkdirs()
+        if (retCode != 0) {
+            return null
+        } else {
+            val patternStr = Pattern.quote(srcFile.absolutePath) + "\\s\\w+\\s\\d+x\\d+=>(\\d+)x(\\d+).*"
+            val pattern = Pattern.compile(patternStr)
+            val matcher = pattern.matcher(retStr)
 
-                    val pb = ProcessBuilder(
-                            "magick",
-                            "convert",
-                            srcFile.absolutePath,
-                            "-thumbnail",
-                            "${width}x${height}!",
-                            "-identify",
-                            destFile.absolutePath)
+            matcher.find()
 
-                    val process = pb.start()
+            val destImgWid = matcher.group(1).toInt()
+            val destImgHei = matcher.group(2).toInt()
 
-                    var retStr: String = "";
-                    BufferedReader(InputStreamReader(process.inputStream)).use { reader ->
-                        retStr = reader.readText()
-                    }
+            val newUserImgFile = UserImageFile()
+            newUserImgFile.type = "jpg"
+            newUserImgFile.fileName = destFileName
+            newUserImgFile.width = destImgWid
+            newUserImgFile.height = destImgHei
+            newUserImgFile.sessionId = sessionId
+            newUserImgFile.uploadTime = Calendar.getInstance()
+            newUserImgFile.userId = userImgFile.userId
+            userImageFileDao.save(newUserImgFile)
 
-                    val retCode = process.waitFor()
+            userImgFile.thumbnail = newUserImgFile
+            userImageFileDao.save(userImgFile)
 
-                    if (retCode != 0) {
-                        ImageInfo(5, retStr)
-                    } else {
-                        val patternStr = Pattern.quote(srcFile.absolutePath) + "\\s\\w+\\s\\d+x\\d+=>(\\d+)x(\\d+).*"
-                        val pattern = Pattern.compile(patternStr)
-                        val matcher = pattern.matcher(retStr)
-
-                        matcher.find()
-
-                        val destImgWid = matcher.group(1).toInt()
-                        val destImgHei = matcher.group(2).toInt()
-
-                        val destUrl = "${baseUrl}/assets/${destFilePath}"
-
-                        val newUserImgFile = UserImageFile()
-                        newUserImgFile.type = "jpg"
-                        newUserImgFile.fileName = destFileName
-                        newUserImgFile.width = destImgWid
-                        newUserImgFile.height = destImgHei
-                        newUserImgFile.sessionId = sessionId
-                        newUserImgFile.uploadTime = Calendar.getInstance()
-                        newUserImgFile.userId = userImgFile.userId
-
-                        userImageFileDao.save(newUserImgFile)
-
-                        ImageInfo(0, null, newUserImgFile.id, destImgWid, destImgHei, destUrl)
-                    }
-                }
-        )
+            return newUserImgFile
+        }
     }
 
     override fun deleteImage(sessionId: String, imageId: Int): CommonRequestResult {

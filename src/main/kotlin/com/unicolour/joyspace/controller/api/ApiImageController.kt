@@ -29,18 +29,6 @@ class ApiImageController {
         return ResponseEntity.ok(imgInfo)
     }
 
-    @RequestMapping("/api/image/resize", method = arrayOf(RequestMethod.POST))
-    fun resizeImage(request: HttpServletRequest,
-                    @RequestParam("sessionId") sessionId: String,
-                    @RequestParam("width") width: Int,
-                    @RequestParam("height") height: Int,
-                    @RequestParam("imageId") imageId: Int) : ResponseEntity<ImageInfo> {
-        val baseUrl = getBaseUrl(request)
-        val imgInfo = imageService.resizeImage(sessionId, imageId, width, height, baseUrl)
-
-        return ResponseEntity.ok(imgInfo)
-    }
-
     @RequestMapping("/api/image", method = arrayOf(RequestMethod.DELETE))
     fun deleteImage(@RequestParam("sessionId") sessionId: String,
                     @RequestParam("imageId") imageId: Int) : ResponseEntity<CommonRequestResult> {

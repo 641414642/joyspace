@@ -45,4 +45,11 @@ class UserImageFile {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "order_item_id")
     var orderItem: PrintOrderItem? = null
+
+    //region 缩略图
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "thumbnail_id")
+    var thumbnail: UserImageFile? = null
+    //endregion
+
 }

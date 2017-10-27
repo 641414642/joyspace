@@ -352,9 +352,19 @@ open class TemplateServiceImpl : TemplateService {
                     var found = false
                     val prevImg = previewParam.images.firstOrNull { it.name == title }
                     if (prevImg != null) {
-                        val userImgFile = userImgFiles.firstOrNull { it.id == prevImg.imageId }
+                        var userImgFile = userImgFiles.firstOrNull { it.id == prevImg.imageId }
                         if (userImgFile != null) {
-                            val userImgUrl = imageService.getImageUrl(baseUrl, userImgFile)
+                            if (userImgFile.thumbnail != null) {
+                                userImgFile = userImgFile.thumbnail
+                            }
+                            else if (userImgFile.width > 1000 || userImgFile.height > 1000) {
+                                val newImgFile = imageService.createThumbnail(previewParam.sessionId, userImgFile, 1000, 1000)
+                                if (newImgFile != null) {
+                                    userImgFile = newImgFile
+                                }
+                            }
+
+                            val userImgUrl = imageService.getImageUrl(baseUrl, userImgFile!!)
                             val userImgFileUrl =  imageService.getImageFileUrl(userImgFile)
 
                             val newImgEle = replaceImageElementWithPattern(defsElement!!, imgEle, userImgFileUrl, userImgFile.width, userImgFile.height, prevImg)

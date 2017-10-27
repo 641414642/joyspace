@@ -190,32 +190,6 @@
            }
 ----
 
-=== 缩放图片:
-- URL: /api/image/resize
-- Method: POST
-- 参数:
-
-|==========================================================
-|参数名       |描述
-|sessionId    |登录返回的sessionId
-|width        |要缩放到的宽度(像素)
-|height       |要缩放到的高度(像素)
-|imageId      |要缩放的图片的id
-|==========================================================
-
-- 返回值:
-
-----
-         {
-             "errcode": 0,
-             "errmsg": null,
-             "imageId": xx,   //缩放后的新图片的id
-             "width": xxx,    //新图片宽度(像素)
-             "height": xxx,   //新图片高度(像素)
-             "url": "http://xxxxxxxxxxxx.jpg"
-         }
-----
-
 === 删除上传的图片:
 - URL: /api/image?imageId=xxx&sessionId=xxxx
 - Method: DELETE
