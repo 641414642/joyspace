@@ -644,6 +644,10 @@ open class TemplateServiceImpl : TemplateService {
         if (originImgEleTransform != null && originImgEleTransform != "") {
             rectElement.setAttribute("transform", originImgEleTransform)
         }
+        val originImgEleClipPath = imageElement.getAttribute("clip-path")
+        if (originImgEleClipPath != null && originImgEleClipPath != "") {
+            rectElement.setAttribute("clip-path", originImgEleClipPath)
+        }
 
         imageElement.parentNode.replaceChild(rectElement, imageElement)
 
