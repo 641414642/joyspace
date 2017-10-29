@@ -113,6 +113,7 @@ query {
 			price
 			thumbnailImageUrl
 			previewImageUrls
+            templateUrl
             templateImages {
                 name
                 x:tx

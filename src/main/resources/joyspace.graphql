@@ -173,6 +173,9 @@ type Product {
 
     #产品图片信息
     templateImages: [TemplateImage!]
+
+    #产品模板url
+    templateUrl: String!
 }
 
 # 产品用户图片信息

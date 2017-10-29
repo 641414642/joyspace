@@ -246,6 +246,7 @@
             "http://localhost:6600/assets/product/images/4.jpg",
             "http://localhost:6600/assets/product/images/5.jpg"
         ],
+        "templateUrl": "http://xxx.xxxxx/xxxx/xxx.svg"     //预览用的模板文件的url (svg文件)
         "templateImages": [                                                          //模板中包含的图片列表
             {
                 "name": "照片",                                                      //图片名称， 名称相同的图片用户图片只需要用户上传同一张图

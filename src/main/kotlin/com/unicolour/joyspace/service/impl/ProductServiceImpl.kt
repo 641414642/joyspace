@@ -225,6 +225,13 @@ open class ProductServiceImpl : ProductService {
                         priceMap.getOrDefault(product.id, product.defaultPrice)
                     }
                 }
+                "templateUrl" -> {
+                    val context = env.getContext<HashMap<String, Any>>()
+                    val baseUrl = context["baseUrl"]
+                    val tpl = product.template
+
+                    "$baseUrl/assets/template/preview/${tpl.id}_v${tpl.currentVersion}/template.svg"
+                }
                 else -> null
             }
         }

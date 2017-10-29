@@ -100,6 +100,7 @@ class GraphQLServiceImpl : GraphQLService {
                     typeWiring.dataFetcher("id", productService.getDataFetcher("id"))
                     typeWiring.dataFetcher("name", productService.getDataFetcher("name"))
                     typeWiring.dataFetcher("version", productService.getDataFetcher("version"))
+                    typeWiring.dataFetcher("templateUrl", productService.getDataFetcher("templateUrl"))
                 })
                 .type("TemplateImage", { typeWiring ->
                     typeWiring.dataFetcher("url", templateService.getTemplateImageDataFetcher("url"))
