@@ -1,6 +1,6 @@
 package com.unicolour.joyspace.service
 
-import com.unicolour.joyspace.controller.api.PreviewParam
+import com.unicolour.joyspace.dto.PreviewParam
 import com.unicolour.joyspace.dto.TemplatePreviewResult
 import com.unicolour.joyspace.model.ProductType
 import com.unicolour.joyspace.model.Template

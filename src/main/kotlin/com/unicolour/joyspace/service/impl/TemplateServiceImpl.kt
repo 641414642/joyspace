@@ -1,8 +1,8 @@
 package com.unicolour.joyspace.service.impl
 
-import com.unicolour.joyspace.controller.api.ImageParam
-import com.unicolour.joyspace.controller.api.PreviewParam
 import com.unicolour.joyspace.dao.*
+import com.unicolour.joyspace.dto.ImageParam
+import com.unicolour.joyspace.dto.PreviewParam
 import com.unicolour.joyspace.dto.TemplatePreviewResult
 import com.unicolour.joyspace.model.*
 import com.unicolour.joyspace.service.ImageService

@@ -1,7 +1,6 @@
 package com.unicolour.joyspace.controller.api
 
-import com.unicolour.joyspace.dto.CreateOrderRequestResult
-import com.unicolour.joyspace.dto.OrderInput
+import com.unicolour.joyspace.dto.*
 import com.unicolour.joyspace.exception.ProcessException
 import com.unicolour.joyspace.service.PrintOrderService
 import com.unicolour.joyspace.util.getBaseUrl
@@ -9,10 +8,8 @@ import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RequestMethod
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
+import org.springframework.web.multipart.MultipartFile
 import java.io.InputStreamReader
 import java.nio.charset.StandardCharsets
 import javax.servlet.http.HttpServletRequest
@@ -26,12 +23,14 @@ class ApiPrintOrderController {
     lateinit var printOrderService: PrintOrderService
 
     @RequestMapping("/api/order", method = arrayOf(RequestMethod.POST))
-    fun uploadImage(request: HttpServletRequest, @RequestBody orderInput: OrderInput) : ResponseEntity<CreateOrderRequestResult> {
+    fun createOrder(request: HttpServletRequest, @RequestBody orderInput: OrderInput) :
+            ResponseEntity<CreateOrderRequestResult> {
         try {
             val baseUrl = getBaseUrl(request)
             val order = printOrderService.createOrder(orderInput)
             val params = printOrderService.startPayment(order.id, baseUrl)
-            return ResponseEntity.ok(CreateOrderRequestResult(params))
+            val orderItems = order.printOrderItems.map { OrderItemRet(it.id, it.productId) }
+            return ResponseEntity.ok(CreateOrderRequestResult(params, orderItems))
         } catch(e: ProcessException) {
             e.printStackTrace()
             return ResponseEntity.ok(CreateOrderRequestResult(e.errcode, e.message))
@@ -40,6 +39,38 @@ class ApiPrintOrderController {
             return ResponseEntity.ok(CreateOrderRequestResult(1, ex.message))
         }
     }
+
+    //上传订单图片文件
+    @RequestMapping("/api/order/image", method = arrayOf(RequestMethod.POST))
+    fun uploadOrderItemImage(request: HttpServletRequest,
+                    @RequestParam("sessionId") sessionId: String,
+                    @RequestParam("orderItemId") orderItemId: Int,
+                    @RequestParam("name") name: String,
+                    @RequestParam("initialRotate") initialRotate: Int,
+                    @RequestParam("scale") scale: Double,
+                    @RequestParam("rotate") rotate: Double,
+                    @RequestParam("horTranslate") horTranslate: Double,
+                    @RequestParam("verTranslate") verTranslate: Double,
+                    @RequestParam("brightness") brightness: Double,
+                    @RequestParam("saturate") saturate: Double,
+                    @RequestParam("effect") effect: String,
+                    @RequestParam("image") imgFile: MultipartFile?) : ResponseEntity<UploadOrderImageResult> {
+        val imageProcessParam = ImageProcessParams(
+                initialRotate,
+                scale,
+                rotate,
+                horTranslate,
+                verTranslate,
+                brightness,
+                saturate,
+                effect
+        )
+
+        val allUploaded = printOrderService.uploadOrderItemImage(sessionId, orderItemId, name, imageProcessParam, imgFile)
+        return ResponseEntity.ok(UploadOrderImageResult(allUploaded))
+    }
+
+
 
     @RequestMapping("/wxpay/notify",
             method = arrayOf(RequestMethod.POST),

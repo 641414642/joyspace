@@ -39,8 +39,25 @@ class PrintOrder {
     @Column
     lateinit var updateTime: Calendar
 
+    //是否已支付
     @Column
-    var state: Byte = PrintOrderState.CREATED.value
+    @NotNull
+    var payed: Boolean = false
+
+    //用户图片是否已上传
+    @Column
+    @NotNull
+    var imageFileUploaded: Boolean = false
+
+    //是否已下载到自助机
+    @Column
+    @NotNull
+    var downloadedToPrintStation: Boolean = false
+
+    //是否已打印
+    @Column
+    @NotNull
+    var printedOnPrintStation: Boolean = false
 
     @OneToMany(mappedBy = "printOrder")
     lateinit var printOrderItems: List<PrintOrderItem>
@@ -63,10 +80,6 @@ class PrintOrderItem {
     var printOrder: PrintOrder? = null
     //endregion
 
-    //图片文件
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "orderItem")
-    lateinit var userImageFiles: List<UserImageFile>
-
     //region 产品
     @Column(name = "product_id", insertable = false, updatable = false)
     var productId: Int = 0
@@ -81,12 +94,14 @@ class PrintOrderItem {
     @Column
     @NotNull
     var copies: Int = 0
-}
 
-/** 订单状态 */
-enum class PrintOrderState(val value: Byte) {
-    CREATED(0),  //刚创建时的状态
-    PAYED(1),    //用户已支付
-    DOWNLOADED(2), //已下载到自助机
-    PRINTED(3),   //已打印
+    //需要上传的图片个数
+    @Column
+    @NotNull
+    var imageRequired: Int = 0
+
+    //已上传的图片个数
+    @Column
+    @NotNull
+    var imageUploaded: Int = 0
 }

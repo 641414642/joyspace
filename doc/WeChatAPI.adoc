@@ -281,15 +281,20 @@
 ----
 		{
 		  "sessionId" : "xxxxxxxxx",
-		  "printStationId" : x,
+		  "printStationId" : xx,        //自助机id
 		  "orderItems" : {
 			{
-				"productId" : x,
-				"imageFileId" : x,
-				"copies": x
+				"productId" : xx,       //产品id
+				"copies": xx            //打印份数 (>=1)
 			},
-			{ "productId" : x, "imageFileId" : x, "copies": x },
-			{ "productId" : x, "imageFileId" : x, "copies": x }
+			{
+			    "productId" : xx,
+			    "copies": xx
+			},
+			{
+			    "productId" : xx,
+			    "copies": xx
+			}
 			...
 		  }
 		}
@@ -306,6 +311,48 @@
 			"nonceStr": "asdfasdfasdfas",
 			"pkg": "prepay_id=wx23423452345dfgl",
 			"paySign" : "6354ldgsgadfas"
+		},
+		"orderItems" {                 //和请求中的 orderItems 对应
+		    {
+		        "id": xx,              //订单项id
+		        "productId" : xx       //产品id
+		    },
+		    {
+		        "id": xx,
+		        "productId" : xx
+		    },
+		    ...
 		}
 	}
+----
+
+==== 上传订单图片文件:
+- URL: /api/order/image
+- Method: POST
+- content-type:  multipart/form-data
+- 参数:
+|==========================================================
+|参数名         |描述
+|sessionId     |登录返回的sessionId
+|orderItemId   |创建订单接口返回的订单项id
+|name          |图片名称
+|image         |图片文件内容
+|initialRotate |图片初始旋转角度，必须是 0, 90, 180, 270 中的某一个
+|scale         |图片缩放比例
+|rotate        |图片旋转角度
+|horTranslate  |图片水平移动距离，单位mm
+|verTranslate  |图片垂直移动距离，单位mm
+|brightness    |亮度调整 (0~2), 数值为1时保持不变
+|saturate      |饱和度调整 (0~2), 数值为1时保持不变
+|effect        |图片效果, none: 没有,  grayscale: 黑白图片效果,  sepia: 怀旧效果
+|==========================================================
+
+- 返回值:
+
+----
+           {
+               "errcode": 0,        //错误代码, 0表示成功
+               "errmsg": null,
+               "allImagesUploaded": true    //true表示整个订单所有的用户图片都已经上传完成, false 表示还有未上传的用户图片文件
+           }
 ----

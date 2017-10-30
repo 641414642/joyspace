@@ -1,15 +1,15 @@
 package com.unicolour.joyspace.service.impl
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.unicolour.joyspace.dao.*
 import com.unicolour.joyspace.dto.*
 import com.unicolour.joyspace.exception.ProcessException
-import com.unicolour.joyspace.model.PrintOrder
-import com.unicolour.joyspace.model.PrintOrderItem
-import com.unicolour.joyspace.model.PrintOrderState
-import com.unicolour.joyspace.model.UserImageFile
+import com.unicolour.joyspace.model.*
+import com.unicolour.joyspace.service.ImageService
 import com.unicolour.joyspace.service.PrintOrderService
 import com.unicolour.joyspace.service.PrintStationService
 import graphql.schema.DataFetcher
+import graphql.schema.DataFetchingEnvironment
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.core.io.Resource
@@ -18,6 +18,7 @@ import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
 import org.springframework.stereotype.Service
 import org.springframework.web.client.RestTemplate
+import org.springframework.web.multipart.MultipartFile
 import java.math.BigInteger
 import java.nio.charset.StandardCharsets
 import java.security.MessageDigest
@@ -46,6 +47,9 @@ open class PrintOrderServiceImpl : PrintOrderService {
     lateinit var printStationService: PrintStationService
 
     @Autowired
+    lateinit var imageService: ImageService
+
+    @Autowired
     lateinit var userLoginSessionDao: UserLoginSessionDao
 
     @Autowired
@@ -61,6 +65,9 @@ open class PrintOrderServiceImpl : PrintOrderService {
     lateinit var userImageFileDao: UserImageFileDao
 
     @Autowired
+    lateinit var printOrderImageDao: PrintOrderImageDao
+
+    @Autowired
     lateinit var productDao: ProductDao
 
     @Autowired
@@ -68,6 +75,9 @@ open class PrintOrderServiceImpl : PrintOrderService {
 
     @Autowired
     lateinit var restTemplate: RestTemplate
+
+    @Autowired
+    lateinit var objectMapper: ObjectMapper
 
     @Value("\${com.unicolour.wxAppId}")
     lateinit var wxAppId: String
@@ -101,31 +111,68 @@ open class PrintOrderServiceImpl : PrintOrderService {
             throw ProcessException(2, "没有找到指定的自助机")
         }
 
-        val order = PrintOrder()
-        order.orderNo = createOrderNo()
-        order.companyId = printStation.companyId
-        order.createTime = Calendar.getInstance()
-        order.updateTime = order.createTime
-        order.printStationId = orderInput.printStationId
-        order.userId = session.userId
-        order.state = PrintOrderState.CREATED.value
+        val newOrder = PrintOrder()
+        newOrder.orderNo = createOrderNo()
+        newOrder.companyId = printStation.companyId
+        newOrder.createTime = Calendar.getInstance()
+        newOrder.updateTime = newOrder.createTime
+        newOrder.printStationId = orderInput.printStationId
+        newOrder.userId = session.userId
+        newOrder.payed = false
+        newOrder.imageFileUploaded = false
+        newOrder.downloadedToPrintStation = false
+        newOrder.printedOnPrintStation = false
 
-        printOrderDao.save(order)
+        newOrder.imageFileUploaded = true
+
+        printOrderDao.save(newOrder)
 
         for (orderItem in orderInput.orderItems) {
+            val product = productDao.findOne(orderItem.productId)
+            val tpl = product.template
+
             val newOrderItem = PrintOrderItem()
             newOrderItem.copies = orderItem.copies
-            newOrderItem.printOrder = order
-            newOrderItem.product = productDao.findOne(orderItem.productId)
+            newOrderItem.printOrder = newOrder
+            newOrderItem.product = product
+            newOrderItem.imageRequired = tpl.minImageCount
+            newOrderItem.imageUploaded = 0
 
             printOrderItemDao.save(newOrderItem)
 
-            val userImgFile = userImageFileDao.findOne(orderItem.imageFileId)
-            userImgFile.orderItem = newOrderItem
-            userImageFileDao.save(userImgFile)
+            for (tplImg in tpl.images.filter { it.userImage }) {
+                var userImgId = 0
+                var processParams: String? = null
+                val orderItemImages = orderItem.images
+                if (orderItemImages != null) {
+                    val orderItemImg = orderItemImages.find { it.name == tplImg.name }
+                    if (orderItemImg != null) {
+                        userImgId = orderItemImg.imageId
+
+                        val userImgFile = userImageFileDao.findOne(userImgId)
+                        if (userImgFile != null) {
+                            if (userImgFile.userId != session.userId) {
+                                throw ProcessException(3, "图片不属于指定用户")
+                            }
+                        }
+
+                        processParams = objectMapper.writeValueAsString(ImageProcessParams(orderItemImg))
+                    }
+                }
+
+                val orderImg = PrintOrderImage()
+                orderImg.orderId = newOrder.id
+                orderImg.orderItemId = newOrderItem.id
+                orderImg.name = tplImg.name
+                orderImg.userImageFileId = userImgId
+                orderImg.processParams = processParams
+
+                printOrderImageDao.save(orderImg)
+            }
         }
 
-        return order
+        checkOrderImageUploaded(newOrder.id)
+        return newOrder
     }
 
     private fun createOrderNo(): String {
@@ -143,9 +190,48 @@ open class PrintOrderServiceImpl : PrintOrderService {
         get() {
             return DataFetcher { env ->
                 val printOrderItem = env.getSource<PrintOrderItem>()
-                printOrderItem.userImageFiles.toTypedArray()
+                //printOrderItem.userImageFiles.toTypedArray()
+                //XXX
+                emptyArray<UserImageFile>()
             }
         }
+
+    @Transactional
+    override fun uploadOrderItemImage(sessionId: String, orderItemId: Int, name:String, imageProcessParam: ImageProcessParams, imgFile: MultipartFile?): Boolean {
+        val imgInfo = imageService.uploadImage(sessionId, imgFile, "")
+        if (imgInfo.errcode == 0) {
+            val orderImg = printOrderImageDao.findByOrderItemIdAndName(orderItemId, name)
+            if (orderImg == null) {
+                throw ProcessException(2, "没有此名称的图片")
+            }
+            else {
+                orderImg.userImageFileId = imgInfo.imageId
+                orderImg.processParams = objectMapper.writeValueAsString(imageProcessParam)
+
+                printOrderImageDao.save(orderImg)
+                return checkOrderImageUploaded(orderImg.orderId)
+            }
+        }
+        else {
+            throw ProcessException(1, "上传图片失败")
+            //XXX
+        }
+    }
+
+    //检查是否所有订单图片都已上传，如果都上传了返回true并修改订单状态
+    @Synchronized
+    private fun checkOrderImageUploaded(orderId: Int) : Boolean {
+        val missingImageCount = printOrderImageDao.countByOrderIdAndUserImageFileId(orderId, 0)  //userImageFileId == 0 表示此订单图片还没有上传
+        if (missingImageCount == 0L) {
+            val order= printOrderDao.findOne(orderId)
+            order.imageFileUploaded = true
+            printOrderDao.save(order)
+            return true
+        }
+        else {
+            return false
+        }
+    }
 
     override val printOrderDataFetcher: DataFetcher<PrintOrder?>
         get() {
@@ -158,34 +244,54 @@ open class PrintOrderServiceImpl : PrintOrderService {
                     null
                 }
                 else {
-                    printOrderDao.findFirstByPrintStationIdAndStateAndIdAfter(session.printStationId, PrintOrderState.PAYED.value, idAfter)
+                    printOrderDao.findFirstByPrintStationIdAndPayedAndImageFileUploadedAndIdAfter(
+                            printStationId = session.printStationId,
+                            payed = true,
+                            imageFileUploaded = true,
+                            idAfter = idAfter)
                 }
             }
         }
 
-    override fun getUpdateOrderStateDataFetcher(state: PrintOrderState): DataFetcher<GraphQLRequestResult> {
-        return DataFetcher { env ->
-            val sessionId = env.getArgument<String>("sessionId")
-            val printOrderId = env.getArgument<Int>("printOrderId")
-
-            val loginSession = printStationLoginSessionDao.findOne(sessionId)
-            if (loginSession == null || System.currentTimeMillis() > loginSession.expireTime.timeInMillis) {
-                GraphQLRequestResult(ResultCode.INVALID_PRINT_STATION_LOGIN_SESSION)
+    override val printerOrderDownloadedDataFetcher: DataFetcher<GraphQLRequestResult>
+        get() {
+            return DataFetcher { env ->
+                updatePrintOrderState(env, "downloaded")
             }
-            else {
-                val order = printOrderDao.findOne(printOrderId)
-                if (order != null) {
-                    if (order.printStationId != loginSession.printStationId) {
-                        GraphQLRequestResult(ResultCode.NOT_IN_THIS_PRINT_STATION)
-                    }
-                    else {
-                        order.state = state.value
-                        printOrderDao.save(order)
-                        GraphQLRequestResult(ResultCode.SUCCESS)
-                    }
+        }
+
+    override val printerOrderPrintedDataFetcher: DataFetcher<GraphQLRequestResult>
+        get() {
+            return DataFetcher { env ->
+                updatePrintOrderState(env, "printed")
+            }
+        }
+
+    private fun updatePrintOrderState(env: DataFetchingEnvironment, state: String): GraphQLRequestResult {
+        val sessionId = env.getArgument<String>("sessionId")
+        val printOrderId = env.getArgument<Int>("printOrderId")
+
+        val loginSession = printStationLoginSessionDao.findOne(sessionId)
+        return if (loginSession == null || System.currentTimeMillis() > loginSession.expireTime.timeInMillis) {
+            GraphQLRequestResult(ResultCode.INVALID_PRINT_STATION_LOGIN_SESSION)
+        } else {
+            val order = printOrderDao.findOne(printOrderId)
+            if (order != null) {
+                if (order.printStationId != loginSession.printStationId) {
+                    GraphQLRequestResult(ResultCode.NOT_IN_THIS_PRINT_STATION)
                 } else {
-                    GraphQLRequestResult(ResultCode.PRINT_ORDER_NOT_FOUND)
+                    if (state == "downloaded") {
+                        order.downloadedToPrintStation = true
+                    }
+                    else if (state == "printed") {
+                        order.printedOnPrintStation = true
+                    }
+
+                    printOrderDao.save(order)
+                    GraphQLRequestResult(ResultCode.SUCCESS)
                 }
+            } else {
+                GraphQLRequestResult(ResultCode.PRINT_ORDER_NOT_FOUND)
             }
         }
     }
@@ -295,7 +401,7 @@ open class PrintOrderServiceImpl : PrintOrderService {
             else {
                 //XXX 检查金额
 
-                printOrder.state = PrintOrderState.PAYED.value
+                printOrder.payed = true
                 printOrderDao.save(printOrder)
 
                 return null

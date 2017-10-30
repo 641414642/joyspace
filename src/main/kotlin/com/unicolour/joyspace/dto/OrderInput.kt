@@ -8,6 +8,6 @@ class OrderInput(
 
 class OrderItemInput(
         var copies: Int = 1,
-        var imageFileId: Int = 0,
-        var productId: Int = 0
+        var productId: Int = 0,
+        var images: List<ImageParam>? = null
 )
