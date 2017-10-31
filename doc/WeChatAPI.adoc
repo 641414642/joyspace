@@ -271,10 +271,46 @@
         }
 ----
 
+==== 查询自助机耗材是否足够打印指定的订单:
+==== (目前这个接口返回的数据是假的, 如果有 copies > 10 的订单项，返回值中的canPrint就为false)
+- URL: /api/order/check
+- Method: POST
+- RequestBody:
 
+----
+		{
+		  "sessionId" : "xxxxxxxxx",
+		  "printStationId" : xx,        //自助机id
+		  "orderItems" : {
+			{
+				"productId" : xx,       //产品id
+				"copies": xx            //打印份数 (>=1)
+			},
+			{
+			    "productId" : xx,
+			    "copies": xx
+			},
+			{
+			    "productId" : xx,
+			    "copies": xx
+			}
+			...
+		  }
+		}
+----
+
+- 返回:
+
+----
+	{
+		"errcode" : 0,
+		"errmsg": null,
+		"canPrint": true    //true表示printStationId对应的自助机可以打印此订单, false表示耗材不足，需要提示用户换自助机
+	}
+----
 
 ==== 下单:
-- URL: /api/order
+- URL: /api/order/create
 - Method: POST
 - RequestBody:
 

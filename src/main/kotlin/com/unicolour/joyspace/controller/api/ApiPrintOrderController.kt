@@ -22,7 +22,15 @@ class ApiPrintOrderController {
     @Autowired
     lateinit var printOrderService: PrintOrderService
 
-    @RequestMapping("/api/order", method = arrayOf(RequestMethod.POST))
+    @RequestMapping("/api/order/check", method = arrayOf(RequestMethod.POST))
+    fun checkOrder(request: HttpServletRequest, @RequestBody orderInput: OrderInput) :
+            ResponseEntity<CheckOrderRequestResult> {
+        //XXX
+        val canPrint = orderInput.orderItems.filter { it.copies > 10 }.isEmpty()
+        return ResponseEntity.ok(CheckOrderRequestResult(canPrint))
+    }
+
+    @RequestMapping("/api/order/create", method = arrayOf(RequestMethod.POST))
     fun createOrder(request: HttpServletRequest, @RequestBody orderInput: OrderInput) :
             ResponseEntity<CreateOrderRequestResult> {
         try {

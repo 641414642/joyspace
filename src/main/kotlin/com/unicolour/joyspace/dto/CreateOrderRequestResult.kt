@@ -1,5 +1,11 @@
 package com.unicolour.joyspace.dto
 
+class CheckOrderRequestResult(
+        var canPrint: Boolean,
+        errcode: Int = 0,
+        errmsg: String? = null
+) : CommonRequestResult(errcode, errmsg)
+
 class CreateOrderRequestResult(
         var wxPayParams: WxPayParams?,
         var orderItems: List<OrderItemRet>?,
