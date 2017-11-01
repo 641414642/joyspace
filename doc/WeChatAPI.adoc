@@ -281,7 +281,7 @@
 		{
 		  "sessionId" : "xxxxxxxxx",
 		  "printStationId" : xx,        //自助机id
-		  "orderItems" : {
+		  "orderItems" : [
 			{
 				"productId" : xx,       //产品id
 				"copies": xx            //打印份数 (>=1)
@@ -295,7 +295,7 @@
 			    "copies": xx
 			}
 			...
-		  },
+		  ],
 		  "coupon": "xxx"              //优惠券代码 (有两个测试用的代码, J5 满10分钱减5分钱, 8Z 总价8折, 其他代码会返回此优惠券不可用的错误 )
 		}
 ----
@@ -321,7 +321,7 @@
 		{
 		  "sessionId" : "xxxxxxxxx",
 		  "printStationId" : xx,        //自助机id
-		  "orderItems" : {
+		  "orderItems" : [
 			{
 				"productId" : xx,       //产品id
 				"copies": xx            //打印份数 (>=1)
@@ -335,7 +335,7 @@
 			    "copies": xx
 			}
 			...
-		  },
+		  ],
 		  "coupon": "xxx"              //优惠券代码 (有两个测试用的代码, J5 满10分钱减5分钱, 8Z 总价8折, 其他代码会返回此优惠券不可用的错误 )
 		}
 ----

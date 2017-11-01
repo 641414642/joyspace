@@ -109,13 +109,6 @@ class PrintOrderItem {
     @NotNull
     var copies: Int = 0
 
-    //需要上传的图片个数
-    @Column
-    @NotNull
-    var imageRequired: Int = 0
-
-    //已上传的图片个数
-    @Column
-    @NotNull
-    var imageUploaded: Int = 0
+    @OneToMany(mappedBy = "orderItemId", fetch = FetchType.LAZY)
+    lateinit var orderImages: List<PrintOrderImage>
 }

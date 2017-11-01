@@ -268,13 +268,31 @@ type UserImageFile {
     url: String!
 }
 
+#订单图片
+type PrintOrderImage {
+    #订单id
+    orderId: Int!
+
+    #订单项id
+    orderItemId: Int!
+
+    #图片在模板中的名称
+    name: String!
+
+    #用户图片
+    userImageFile: UserImageFile
+
+    #图片处理参数
+    processParams: String
+}
+
 #订单项目
 type PrintOrderItem {
     #打印份数
     copies: Int!
 
     #图片文件
-    imageFiles: [UserImageFile!]
+    orderImages: [PrintOrderImage!]
 
     #产品
     product: Product!
@@ -284,7 +302,6 @@ type PrintOrderItem {
 type PrintOrder {
     id: Int!
     printOrderItems: [PrintOrderItem!]
-    state: Int!
 }
 
 #自助机查找结果

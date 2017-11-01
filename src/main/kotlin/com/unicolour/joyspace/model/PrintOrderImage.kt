@@ -23,11 +23,16 @@ class PrintOrderImage {
     @NotNull
     var name: String = ""
 
-    @Column
-    @NotNull
-    var userImageFileId: Int = 0
-
     //图片处理参数
     @Column(length = 1000)
     var processParams: String? = null
+
+    //region 用户图片
+    @Column(name = "user_image_file_id", insertable = false, updatable = false)
+    var userImageFileId: Int? = null
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_image_file_id")
+    var userImageFile: UserImageFile? = null
+    //endregion
 }

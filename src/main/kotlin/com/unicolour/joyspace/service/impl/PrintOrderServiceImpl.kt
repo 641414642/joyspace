@@ -33,6 +33,7 @@ import java.net.URL
 import javax.annotation.PostConstruct
 import javax.xml.bind.JAXBContext
 import javax.xml.bind.Unmarshaller
+import kotlin.collections.ArrayList
 
 
 @Service
@@ -128,7 +129,8 @@ open class PrintOrderServiceImpl : PrintOrderService {
         newOrder.downloadedToPrintStation = false
         newOrder.printedOnPrintStation = false
 
-        newOrder.imageFileUploaded = true
+        val orderItems = ArrayList<PrintOrderItem>()
+        newOrder.printOrderItems = orderItems
 
         printOrderDao.save(newOrder)
 
@@ -140,12 +142,15 @@ open class PrintOrderServiceImpl : PrintOrderService {
             newOrderItem.copies = orderItem.copies
             newOrderItem.printOrder = newOrder
             newOrderItem.product = product
-            newOrderItem.imageRequired = tpl.minImageCount
-            newOrderItem.imageUploaded = 0
+
+            val orderImages = ArrayList<PrintOrderImage>()
+            newOrderItem.orderImages = orderImages
 
             printOrderItemDao.save(newOrderItem)
 
-            for (tplImg in tpl.images.filter { it.userImage }) {
+            orderItems.add(newOrderItem)
+
+            for (tplImg in tpl.images.filter { it.userImage }.distinctBy { it.name }) {
                 var userImgId = 0
                 var processParams: String? = null
                 val orderItemImages = orderItem.images
@@ -169,14 +174,15 @@ open class PrintOrderServiceImpl : PrintOrderService {
                 orderImg.orderId = newOrder.id
                 orderImg.orderItemId = newOrderItem.id
                 orderImg.name = tplImg.name
-                orderImg.userImageFileId = userImgId
+                orderImg.userImageFile = if (userImgId == 0) null else userImageFileDao.findOne(userImgId)
                 orderImg.processParams = processParams
 
                 printOrderImageDao.save(orderImg)
+
+                orderImages.add(orderImg)
             }
         }
 
-        checkOrderImageUploaded(newOrder.id)
         return newOrder
     }
 
@@ -210,7 +216,7 @@ open class PrintOrderServiceImpl : PrintOrderService {
                 throw ProcessException(2, "没有此名称的图片")
             }
             else {
-                orderImg.userImageFileId = imgInfo.imageId
+                orderImg.userImageFile = userImageFileDao.findOne(imgInfo.imageId)
                 orderImg.processParams = objectMapper.writeValueAsString(imageProcessParam)
 
                 printOrderImageDao.save(orderImg)
