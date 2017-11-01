@@ -25,9 +25,20 @@ class ApiPrintOrderController {
     @RequestMapping("/api/order/check", method = arrayOf(RequestMethod.POST))
     fun checkOrder(request: HttpServletRequest, @RequestBody orderInput: OrderInput) :
             ResponseEntity<CheckOrderRequestResult> {
-        //XXX
-        val canPrint = orderInput.orderItems.filter { it.copies > 10 }.isEmpty()
-        return ResponseEntity.ok(CheckOrderRequestResult(canPrint))
+        try {
+            //XXX
+            val canPrint = orderInput.orderItems.filter { it.copies > 10 }.isEmpty()
+            val ret = printOrderService.calculateOrderFee(orderInput)
+            val totalFee = ret.first
+            val discount = ret.second
+            return ResponseEntity.ok(CheckOrderRequestResult(canPrint, totalFee, discount))
+        } catch(e: ProcessException) {
+            e.printStackTrace()
+            return ResponseEntity.ok(CheckOrderRequestResult(false, 0, 0, e.errcode, e.message))
+        }  catch (ex: Exception) {
+            ex.printStackTrace()
+            return ResponseEntity.ok(CheckOrderRequestResult(false, 0, 0,1, ex.message))
+        }
     }
 
     @RequestMapping("/api/order/create", method = arrayOf(RequestMethod.POST))

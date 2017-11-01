@@ -111,6 +111,8 @@ open class PrintOrderServiceImpl : PrintOrderService {
             throw ProcessException(2, "没有找到指定的自助机")
         }
 
+        val ret = calculateOrderFee(orderInput)
+
         val newOrder = PrintOrder()
         newOrder.orderNo = createOrderNo()
         newOrder.companyId = printStation.companyId
@@ -118,6 +120,9 @@ open class PrintOrderServiceImpl : PrintOrderService {
         newOrder.updateTime = newOrder.createTime
         newOrder.printStationId = orderInput.printStationId
         newOrder.userId = session.userId
+        newOrder.totalFee = ret.first
+        newOrder.discount = ret.second
+        newOrder.coupon = orderInput.coupon
         newOrder.payed = false
         newOrder.imageFileUploaded = false
         newOrder.downloadedToPrintStation = false
@@ -296,10 +301,42 @@ open class PrintOrderServiceImpl : PrintOrderService {
         }
     }
 
+    override fun calculateOrderFee(orderInput: OrderInput) : Pair<Int, Int> {
+        val printStation = printStationDao.findOne(orderInput.printStationId)
+        val priceMap = printStationService.getPriceMap(printStation)
+
+        val productIdObjMap: MutableMap<Int, Product> = HashMap()
+        var totalFee = 0
+        var discount = 0
+
+        for (printOrderItem in orderInput.orderItems) {
+            val orderItemFee:Int = priceMap.getOrElse(printOrderItem.productId, {
+                val product = productIdObjMap.computeIfAbsent(printOrderItem.productId, { productId -> productDao.findOne(productId) })
+                product.defaultPrice
+            })
+            totalFee += orderItemFee * printOrderItem.copies
+        }
+
+        //XXX
+        if (!orderInput.coupon.isNullOrEmpty()) {
+            if (orderInput.coupon == "J5") {
+                if (totalFee > 10) {
+                    discount = 5
+                }
+            }
+            else if (orderInput.coupon == "8Z") {
+                discount = (totalFee * 0.8).toInt()
+            }
+            else {
+                throw ProcessException(1, "指定的优惠券不可用")
+            }
+        }
+
+        return Pair(totalFee, discount)
+    }
+
     override fun startPayment(orderId: Int, baseUrl:String): WxPayParams {
         val order = printOrderDao.findOne(orderId)
-        val printStation = printStationDao.findOne(order.printStationId)
-        val priceMap = printStationService.getPriceMap(printStation)
 
         val user = userDao.findOne(order.userId)
         val openId: String = user?.wxOpenId ?: ""
@@ -311,13 +348,6 @@ open class PrintOrderServiceImpl : PrintOrderService {
         val notifyUrl = "$baseUrl/wxpay/notify"
         val ipAddress: String = java.net.InetAddress.getByName(URL(baseUrl).host).hostAddress
 
-        val orderItems = printOrderItemDao.findByPrintOrderId(order.id)
-        var totalFee = 0
-        for (printOrderItem in orderItems) {
-            val orderItemFee:Int = priceMap.getOrElse(printOrderItem.product.id, { printOrderItem.product.defaultPrice })
-            totalFee += orderItemFee * printOrderItem.copies
-        }
-
         val requestBody = getPaymentRequestParams(TreeMap(hashMapOf<String, String>(
                 "appid" to wxAppId,
                 "body" to "优利绚彩-照片打印",
@@ -327,7 +357,7 @@ open class PrintOrderServiceImpl : PrintOrderService {
                 "openid" to openId,
                 "out_trade_no" to order.orderNo,
                 "spbill_create_ip" to ipAddress,
-                "total_fee" to totalFee.toString(),
+                "total_fee" to (order.totalFee - order.discount).toString(),
                 "trade_type" to "JSAPI"
         )))
 

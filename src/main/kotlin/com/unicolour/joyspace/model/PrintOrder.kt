@@ -39,6 +39,20 @@ class PrintOrder {
     @Column
     lateinit var updateTime: Calendar
 
+    //总价（单位分）
+    @Column
+    @NotNull
+    var totalFee: Int = 0
+
+    //折扣（单位分）
+    @Column
+    @NotNull
+    var discount: Int = 0
+
+    //使用的优惠券
+    @Column(length = 32)
+    var coupon: String? = null
+
     //是否已支付
     @Column
     @NotNull

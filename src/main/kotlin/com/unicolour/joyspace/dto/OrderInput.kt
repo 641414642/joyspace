@@ -3,7 +3,8 @@ package com.unicolour.joyspace.dto
 class OrderInput(
         var sessionId: String = "",
         var printStationId: Int = 0,
-        var orderItems: Array<OrderItemInput> = emptyArray()
+        var orderItems: Array<OrderItemInput> = emptyArray(),
+        var coupon: String? = ""
 )
 
 class OrderItemInput(

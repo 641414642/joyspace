@@ -1,14 +1,16 @@
 package com.unicolour.joyspace.dto
 
 class CheckOrderRequestResult(
-        var canPrint: Boolean,
+        val canPrint: Boolean,
+        val totalFee: Int,
+        val discount: Int,
         errcode: Int = 0,
         errmsg: String? = null
 ) : CommonRequestResult(errcode, errmsg)
 
 class CreateOrderRequestResult(
-        var wxPayParams: WxPayParams?,
-        var orderItems: List<OrderItemRet>?,
+        val wxPayParams: WxPayParams?,
+        val orderItems: List<OrderItemRet>?,
         errcode: Int = 0,
         errmsg: String? = null)
     : CommonRequestResult(errcode, errmsg)

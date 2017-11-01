@@ -1,6 +1,6 @@
 package com.unicolour.joyspace.dto
 
 open class CommonRequestResult(
-        var errcode: Int = 0,
-        var errmsg: String? = null
+        val errcode: Int = 0,
+        val errmsg: String? = null
 )

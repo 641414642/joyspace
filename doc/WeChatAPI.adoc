@@ -295,7 +295,8 @@
 			    "copies": xx
 			}
 			...
-		  }
+		  },
+		  "coupon": "xxx"              //优惠券代码 (有两个测试用的代码, J5 满10分钱减5分钱, 8Z 总价8折, 其他代码会返回此优惠券不可用的错误 )
 		}
 ----
 
@@ -305,7 +306,9 @@
 	{
 		"errcode" : 0,
 		"errmsg": null,
-		"canPrint": true    //true表示printStationId对应的自助机可以打印此订单, false表示耗材不足，需要提示用户换自助机
+		"canPrint": true,    //true表示printStationId对应的自助机可以打印此订单, false表示耗材不足，需要提示用户换自助机
+		"totalFee": xxx,     //总价, 单位为分
+		"discount": xxx      //折扣, 单位为分,  总价-折扣 为用户应支付的价格
 	}
 ----
 
@@ -332,7 +335,8 @@
 			    "copies": xx
 			}
 			...
-		  }
+		  },
+		  "coupon": "xxx"              //优惠券代码 (有两个测试用的代码, J5 满10分钱减5分钱, 8Z 总价8折, 其他代码会返回此优惠券不可用的错误 )
 		}
 ----
 
