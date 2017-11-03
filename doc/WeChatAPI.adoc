@@ -355,6 +355,8 @@
 			"pkg": "prepay_id=wx23423452345dfgl",
 			"paySign" : "6354ldgsgadfas"
 		},
+        "totalFee": xxx,     //总价, 单位为分
+        "discount": xxx,      //折扣, 单位为分,  总价-折扣 为用户应支付的价格
 		"orderItems" {                 //和请求中的 orderItems 对应
 		    {
 		        "id": xx,              //订单项id

@@ -11,11 +11,13 @@ class CheckOrderRequestResult(
 class CreateOrderRequestResult(
         val wxPayParams: WxPayParams?,
         val orderItems: List<OrderItemRet>?,
+        val totalFee: Int,
+        val discount: Int,
         errcode: Int = 0,
         errmsg: String? = null)
     : CommonRequestResult(errcode, errmsg)
 {
-    constructor(errcode: Int, errmsg: String?) : this(null, null, errcode, errmsg)
+    constructor(errcode: Int, errmsg: String?) : this(null, null, 0, 0, errcode, errmsg)
 }
 
 class OrderItemRet(
