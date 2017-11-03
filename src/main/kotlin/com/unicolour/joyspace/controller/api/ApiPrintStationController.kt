@@ -19,12 +19,6 @@ class ApiPrintStationController {
     @Autowired
     lateinit var printStationDao: PrintStationDao
 
-    @Autowired
-    lateinit var printStationService: PrintStationService
-
-    @Autowired
-    lateinit var productService: ProductService
-
     @RequestMapping("/api/printStation/findByQrCode", method = arrayOf(RequestMethod.GET))
     fun findByQrCode(request: HttpServletRequest, @RequestParam("qrCode") qrCode: String) : Any? {
         val printStation: PrintStation? = printStationDao.findByWxQrCode(qrCode);
@@ -54,8 +48,11 @@ query {
 			name
 			type:typeInt
             version
+            templateWidth
+            templateHeight
 			width
 			height
+            displaySize
 			imageRequired
 			remark
 			price

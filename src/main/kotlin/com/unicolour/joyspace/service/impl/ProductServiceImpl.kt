@@ -197,8 +197,38 @@ open class ProductServiceImpl : ProductService {
                     if (type == null) null else type.name
                 }
                 "typeInt" -> product.template.type
-                "width" -> product.template.width
-                "height" -> product.template.height
+                "templateWidth" -> product.template.width
+                "templateHeight" -> product.template.height
+                "width" -> {
+                    val tpl = product.template
+                    if (tpl.type == ProductType.ID_PHOTO.value) {
+                        tpl.images[0].tw
+                    }
+                    else {
+                        tpl.width
+                    }
+                }
+                "height" -> {
+                    val tpl = product.template
+                    if (tpl.type == ProductType.ID_PHOTO.value) {
+                        tpl.images[0].th
+                    }
+                    else {
+                        tpl.height
+                    }
+                }
+                "displaySize" -> {
+                    val tpl = product.template
+                    var w = tpl.width
+                    var h = tpl.height
+
+                    if (tpl.type == ProductType.ID_PHOTO.value) {
+                        w = tpl.images[0].tw
+                        h = tpl.images[0].th
+                    }
+
+                    String.format("%1$.0f x %2$.0f mm", w, h)
+                }
                 "imageRequired" -> product.template.minImageCount
                 "thumbnailImageUrl" -> {
                     val context = env.getContext<HashMap<String, Any>>()

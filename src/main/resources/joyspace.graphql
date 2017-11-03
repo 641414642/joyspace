@@ -147,11 +147,20 @@ type Product {
     type: ProductType!
     typeInt: Int!
 
-    #宽度（毫米）
+    #模板宽度（毫米）
+    templateWidth: Float!
+
+    #模板高度（毫米）
+    templateHeight: Float!
+
+    #证件照返回头像宽度,其他类型的产品返回模板宽度（毫米）
     width: Float!
 
-    #高度（毫米）
+    #证件照返回头像高度,其他类型的产品返回模板高度（毫米）
     height: Float!
+
+    #证件照返回头像高度和宽度, 其他类型的产品返回模板宽度和高度
+    displaySize: String!
 
     #最少需要照片张数
     imageRequired: Int!
