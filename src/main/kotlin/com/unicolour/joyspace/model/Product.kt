@@ -42,11 +42,6 @@ class Product {
     @OneToMany(mappedBy = "product")
     lateinit var imageFiles: List<ProductImageFile>
 
-    /** 产品版本号 */
-    @Column
-    @NotNull
-    var version: Int = 1
-
     //region 店面
     /** 店面ID */
     @Column(name = "company_id", insertable = false, updatable = false)
@@ -94,6 +89,7 @@ class ProductImageFile {
     @NotNull
     lateinit var product: Product
 }
+
 
 /** 产品图片类别 */
 enum class ProductImageFileType(var value: Int) {

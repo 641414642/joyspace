@@ -28,6 +28,8 @@ import java.awt.Color
 import java.awt.geom.AffineTransform
 import java.io.File
 import java.io.IOException
+import java.math.BigDecimal
+import java.math.RoundingMode
 import java.nio.file.Files
 import java.nio.file.StandardCopyOption
 import java.util.*
@@ -180,10 +182,6 @@ open class TemplateServiceImpl : TemplateService {
 
                 saveTemplateFiles(tpl, templateFile)
 
-                val products = productDao.findByTemplateId(tpl.id)
-                products.forEach { it.version++ }
-                productDao.save(products)
-
                 return true
             } else {
                 return false
@@ -200,6 +198,12 @@ open class TemplateServiceImpl : TemplateService {
         }
     }
 
+    private fun round(value: Double, places: Int) : Double {
+        var bd = BigDecimal(value)
+        bd = bd.setScale(places, RoundingMode.HALF_UP)
+        return bd.toDouble()
+    }
+
     private fun updateTemplateInfo(template: Template, tplSvgFile: File) {
         val parser = XMLResourceDescriptor.getXMLParserClassName()
         val df = SAXSVGDocumentFactory(parser)
@@ -214,11 +218,10 @@ open class TemplateServiceImpl : TemplateService {
         template.width = toMM(doc.documentElement.getAttribute("width"))
         template.height = toMM(doc.documentElement.getAttribute("height"))
 
-        val userImages = ArrayList<TemplateImageInfo>()
+        val tplImages = ArrayList<TemplateImageInfo>()
 
         visitImageNodes(rootGraphicsNode, {
             val element = ctx.getElement(it)
-            val bounds = it.geometryBounds
 
             val tplImg = TemplateImageInfo()
             tplImg.template = template
@@ -226,21 +229,12 @@ open class TemplateServiceImpl : TemplateService {
             val transform = calcNodeTransform(it)
             val transformedBounds = it.getTransformedGeometryBounds(transform)
 
-            tplImg.wid = bounds.width
-            tplImg.hei = bounds.height
-            tplImg.x = bounds.x
-            tplImg.y = bounds.y
-
-            tplImg.tw = transformedBounds.width
-            tplImg.th = transformedBounds.height
-            tplImg.tx = transformedBounds.x
-            tplImg.ty = transformedBounds.y
+            tplImg.width = round(transformedBounds.width, 1)
+            tplImg.height = round(transformedBounds.height, 1)
+            tplImg.x = round(transformedBounds.x, 1)
+            tplImg.y = round(transformedBounds.y, 1)
 
             tplImg.href = element.getAttributeNS(X_LINK_NAMESPACE, "href")
-
-            val matrix = DoubleArray(6)
-            transform.getMatrix(matrix)
-            tplImg.matrix = matrix.joinToString(",")
 
             var desc = ""
 
@@ -257,15 +251,15 @@ open class TemplateServiceImpl : TemplateService {
                     }
 
             tplImg.userImage = (desc == "UserImage" || desc == "用户图片")
-            userImages.add(tplImg)
+            tplImages.add(tplImg)
         })
 
-        template.minImageCount = userImages.filter { it.userImage }.map { it.name }.toSet().size
+        template.minImageCount = tplImages.filter { it.userImage }.map { it.name }.toSet().size
 
         templateDao.save(template)
 
-        templateImageInfoDao.deleteByTemplateId(template.id)
-        templateImageInfoDao.save(userImages)
+        templateImageInfoDao.deleteByTemplateIdAndTemplateVersion(template.id, template.currentVersion)
+        templateImageInfoDao.save(tplImages)
     }
 
     private fun calcNodeTransform(gn: GraphicsNode): AffineTransform
@@ -310,13 +304,17 @@ open class TemplateServiceImpl : TemplateService {
         }
     }
 
-    override fun createPreview(previewParam: PreviewParam, template: Template, baseUrl: String): TemplatePreviewResult {
+    override fun createPreview(previewParam: PreviewParam, baseUrl: String): TemplatePreviewResult {
         val session = userLoginSessionDao.findOne(previewParam.sessionId)
 
         if (session == null) {
             return TemplatePreviewResult(1, "用户未登录")
         }
         else {
+            val tplVerSplit = previewParam.productVersion.split(',')
+            val tplId = tplVerSplit[0].toInt()
+            val tplVer = tplVerSplit[1].toInt()
+
             val userImgFiles = previewParam.images.map { userImageFileDao.findOne(it.imageId) }
             if (userImgFiles.any { it == null }) {
                 return TemplatePreviewResult(2, "没有找到指定ID对应的图片")
@@ -325,7 +323,8 @@ open class TemplateServiceImpl : TemplateService {
                 return TemplatePreviewResult(3, "不是此用户的图片")
             }
 
-            val templateFile = File(assetsDir, "template/preview/${template.id}_v${template.currentVersion}/template.svg")
+
+            val templateFile = File(assetsDir, "template/preview/${tplId}_v${tplVer}/template.svg")
             val factory = DocumentBuilderFactory.newInstance()
             factory.isNamespaceAware = true
 
@@ -381,8 +380,8 @@ open class TemplateServiceImpl : TemplateService {
                 else {
                     val imgSrc = imgEle.getAttributeNS(X_LINK_NAMESPACE, "href")
                     if (!imgSrc.startsWith("data:")) {
-                        val imgUrl = "${baseUrl}/assets/template/preview/${template.id}_v${template.currentVersion}/$imgSrc"
-                        val imgFileUrl = File(assetsDir, "/template/preview/${template.id}_v${template.currentVersion}/$imgSrc").toURI().toURL().toExternalForm()
+                        val imgUrl = "${baseUrl}/assets/template/preview/${tplId}_v${tplVer}/$imgSrc"
+                        val imgFileUrl = File(assetsDir, "/template/preview/${tplId}_v${tplVer}/$imgSrc").toURI().toURL().toExternalForm()
 
                         imgEle.setAttributeNS(X_LINK_NAMESPACE, "xlink:href", imgFileUrl)
                         imgEleUrlMap[imgEle] = imgFileUrl
@@ -501,10 +500,9 @@ open class TemplateServiceImpl : TemplateService {
                 "url" -> {
                     val context = env.getContext<HashMap<String, Any>>()
                     val baseUrl = context["baseUrl"]
-                    val tpl = tplImg.template
                     val path = tplImg.href?.replace('\\', '/')
 
-                    "${baseUrl}/assets/template/preview/${tpl.id}_v${tpl.currentVersion}/${path}"
+                    "${baseUrl}/assets/template/preview/${tplImg.templateId}_v${tplImg.templateVersion}/${path}"
                 }
                 else -> null
             }

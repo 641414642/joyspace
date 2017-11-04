@@ -62,5 +62,4 @@ dependencies {
 	//runtime('mysql:mysql-connector-java')
 	testCompile('org.springframework.boot:spring-boot-starter-test')
 	testCompile('com.microsoft.sqlserver:mssql-jdbc:6.1.0.jre8')
-	testCompile("org.springframework.restdocs:spring-restdocs-mockmvc")
 }

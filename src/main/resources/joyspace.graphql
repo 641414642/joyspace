@@ -162,6 +162,9 @@ type Product {
     #证件照返回头像高度和宽度, 其他类型的产品返回模板宽度和高度
     displaySize: String!
 
+    #证件照头像轮廓图片url(其他类型产品此项为null)
+    idPhotoMaskImageUrl: String
+
     #最少需要照片张数
     imageRequired: Int!
 
@@ -172,7 +175,7 @@ type Product {
     price: Int
 
     #版本号
-    version: Int!
+    version: String!
 
     #缩略图url
     thumbnailImageUrl: String
@@ -193,16 +196,16 @@ type TemplateImage {
     name: String!
 
     #图片框x(mm)
-    tx: Float!
+    x: Float!
 
     #图片框y(mm)
-    ty: Float!
+    y: Float!
 
     #图片框宽度(mm)
-    tw: Float!,
+    width: Float!,
 
     #图片框高度(mm)
-    th: Float!
+    height: Float!
 
     #是否是需要用户上传的图片
     userImage: Boolean
@@ -303,8 +306,11 @@ type PrintOrderItem {
     #图片文件
     orderImages: [PrintOrderImage!]
 
-    #产品
-    product: Product!
+    #产品id
+    productId: Int!
+
+    #产品版本号
+    productVersion: String!
 }
 
 #订单

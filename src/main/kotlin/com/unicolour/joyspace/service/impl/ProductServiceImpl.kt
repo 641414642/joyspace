@@ -1,14 +1,11 @@
 package com.unicolour.joyspace.service.impl
 
 import com.unicolour.joyspace.dao.*
-import com.unicolour.joyspace.dto.ProductDTO
-import com.unicolour.joyspace.dto.productToDTO
 import com.unicolour.joyspace.model.*
 import com.unicolour.joyspace.service.ManagerService
 import com.unicolour.joyspace.service.PrintStationService
 import com.unicolour.joyspace.service.ProductService
 import graphql.schema.DataFetcher
-import org.python.modules.itertools.product
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
@@ -59,10 +56,6 @@ open class ProductServiceImpl : ProductService {
             val tpl = templateDao.findOne(templateId)
 
             if (tpl != null) {
-                if (templateId != product.templateId) {
-                    product.version++
-                }
-
                 product.name = name
                 product.template = tpl
                 product.defaultPrice = (defPrice * 100).toInt()
@@ -92,7 +85,6 @@ open class ProductServiceImpl : ProductService {
             product.defaultPrice = (defPrice * 100).toInt()
             product.enabled = true
             product.remark = remark
-            product.version = 1
             product.company = manager.company
 
             productDao.save(product)
@@ -190,7 +182,10 @@ open class ProductServiceImpl : ProductService {
                 "remark" -> product.remark
                 "id" -> product.id
                 "name" -> product.name
-                "version" -> product.version
+                "version" -> {
+                    val tpl = product.template
+                    "${tpl.id}.${tpl.currentVersion}"
+                }
                 "type" -> {
                     val tpl = product.template
                     val type = ProductType.values().find{ it.value == tpl.type }
@@ -202,7 +197,7 @@ open class ProductServiceImpl : ProductService {
                 "width" -> {
                     val tpl = product.template
                     if (tpl.type == ProductType.ID_PHOTO.value) {
-                        tpl.images[0].tw
+                        tpl.images[0].width
                     }
                     else {
                         tpl.width
@@ -211,7 +206,7 @@ open class ProductServiceImpl : ProductService {
                 "height" -> {
                     val tpl = product.template
                     if (tpl.type == ProductType.ID_PHOTO.value) {
-                        tpl.images[0].th
+                        tpl.images[0].height
                     }
                     else {
                         tpl.height
@@ -223,11 +218,22 @@ open class ProductServiceImpl : ProductService {
                     var h = tpl.height
 
                     if (tpl.type == ProductType.ID_PHOTO.value) {
-                        w = tpl.images[0].tw
-                        h = tpl.images[0].th
+                        w = tpl.images[0].width
+                        h = tpl.images[0].height
                     }
 
                     String.format("%1$.0f x %2$.0f mm", w, h)
+                }
+                "idPhotoMaskImageUrl" -> {
+                    val tpl = product.template
+                    if (tpl.type == ProductType.ID_PHOTO.value) {
+                        val context = env.getContext<HashMap<String, Any>>()
+                        val baseUrl = context["baseUrl"]
+                        "${baseUrl}/assets/template/preview/${tpl.id}_v${tpl.currentVersion}/mask.png"
+                    }
+                    else {
+                        null
+                    }
                 }
                 "imageRequired" -> product.template.minImageCount
                 "thumbnailImageUrl" -> {

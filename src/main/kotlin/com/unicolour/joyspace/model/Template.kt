@@ -1,12 +1,14 @@
 package com.unicolour.joyspace.model
 
+import java.io.Serializable
 import javax.persistence.*
 import javax.validation.constraints.NotNull
+
 
 /** 产品模板 */
 @Entity
 @Table(name = "template")
-class Template {
+class Template : Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     var id: Int = 0
@@ -46,6 +48,7 @@ class Template {
     var uuid: String = ""
 
     @OneToMany(mappedBy = "template")
+    @OrderBy("id ASC")
     lateinit var images: List<TemplateImageInfo>
 }
 
@@ -57,9 +60,20 @@ class TemplateImageInfo {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     var id: Int = 0
 
-    @Column(length = 50)
-    @NotNull
-    var name: String = ""
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumns(
+            JoinColumn(name = "templateVersion", referencedColumnName = "currentVersion"),
+            JoinColumn(name = "templateId", referencedColumnName = "id")
+    )
+    lateinit var template: Template
+
+    /** 模板id */
+    @Column(insertable = false, updatable = false)
+    var templateId: Int = 0
+
+    /** 模板版本号 */
+    @Column(insertable = false, updatable = false)
+    var templateVersion: Int = 0
 
     /** 是否是用户需要上传的图片 */
     @Column
@@ -67,6 +81,10 @@ class TemplateImageInfo {
 
     @Column(length = 255)
     var href: String? = null
+
+    @Column(length = 50)
+    @NotNull
+    var name: String = ""
 
     /** 图片框x(mm) */
     @Column
@@ -78,47 +96,13 @@ class TemplateImageInfo {
     @NotNull
     var y: Double = 0.0
 
-    /** 图片宽度(mm) */
+    /** 图片框宽度(mm) */
     @Column
     @NotNull
-    var wid: Double = 0.0
+    var width: Double = 0.0
 
-    /** 图片高度(mm) */
+    /** 图片框高度(mm) */
     @Column
     @NotNull
-    var hei: Double = 0.0
-
-    /** 变换后的图片框x(mm) */
-    @Column
-    @NotNull
-    var tx: Double = 0.0
-
-    /** 变换后的图片框y(mm) */
-    @Column
-    @NotNull
-    var ty: Double = 0.0
-
-    /** 变换后的图片宽度(mm) */
-    @Column
-    @NotNull
-    var tw: Double = 0.0
-
-    /** 变换后的图片高度(mm) */
-    @Column
-    @NotNull
-    var th: Double = 0.0
-
-    /** 图形变换矩阵 */
-    @Column(length = 200)
-    @NotNull
-    var matrix: String = ""
-
-    /** 属于哪个模板 */
-    @Column(name = "template_id", insertable = false, updatable = false)
-    var templateId: Int = 0
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "template_id")
-    @NotNull
-    lateinit var template: Template
+    var height: Double = 0.0
 }

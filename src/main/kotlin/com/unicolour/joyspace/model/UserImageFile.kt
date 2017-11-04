@@ -42,9 +42,8 @@ class UserImageFile {
     @NotNull
     var height: Int = 0
 
-    //region 缩略图
+    //缩略图
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "thumbnail_id")
     var thumbnail: UserImageFile? = null
-    //endregion
 }

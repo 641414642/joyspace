@@ -93,6 +93,7 @@ class GraphQLServiceImpl : GraphQLService {
                     typeWiring.dataFetcher("width", productService.getDataFetcher("width"))
                     typeWiring.dataFetcher("height", productService.getDataFetcher("height"))
                     typeWiring.dataFetcher("displaySize", productService.getDataFetcher("displaySize"))
+                    typeWiring.dataFetcher("idPhotoMaskImageUrl", productService.getDataFetcher("idPhotoMaskImageUrl"))
                     typeWiring.dataFetcher("imageRequired", productService.getDataFetcher("imageRequired"))
                     typeWiring.dataFetcher("thumbnailImageUrl", productService.getDataFetcher("thumbnailImageUrl"))
                     typeWiring.dataFetcher("previewImageUrls", productService.getDataFetcher("previewImageUrls"))

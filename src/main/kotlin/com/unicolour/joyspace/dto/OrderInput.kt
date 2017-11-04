@@ -9,6 +9,7 @@ class OrderInput(
 
 class OrderItemInput(
         var copies: Int = 1,
-        var productId: Int = 0,
+        var productId: Int = 0,           //产品id
+        var productVersion: String = "",  //产品版本号
         var images: List<ImageParam>? = null
 )

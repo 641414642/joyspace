@@ -30,5 +30,6 @@ class ImageParam(
 class PreviewParam(
         var sessionId: String = "",
         var productId: Int = 0,
+        var productVersion: String = "",
         var images: List<ImageParam> = emptyList()
 )

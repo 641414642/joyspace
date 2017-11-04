@@ -71,10 +71,11 @@
             "width": xx,  //证件照返回头像宽度,其他类型的产品返回模板宽度（毫米）
             "height": xx,  //证件照返回头像高度,其他类型的产品返回模板高度（毫米）
             "displaySize" : "25 x 35 mm",   //显示用的尺寸 (证件照这个尺寸是头像图片框的尺寸， 其他类型的产品是模板的尺寸)
+            "idPhotoMaskImageUrl": "https://xxx.xxxxxxx.xxx/xxxxx.png",       //证件照头像轮廓图片url(其他类型产品此项为null)
             "imageRequired": 1,     //需要上传的图片数量
             "remark": "",
             "price": 1,             //价格 (分)
-            "version": 1,           //版本号
+            "version": "3.11",           //版本号
             "thumbnailImageUrl": "http://xxxxxxxxxxxxx",               //缩略图url
             "previewImageUrls": [                   //预览图url列表
                 "http://xxxxxxxxxxxxx",
@@ -131,46 +132,8 @@
 
 - 返回值:  和根据二维码查找自助打印机接口相同
 
-=== 查找指定自助打印机支持的产品列表
-- URL: /api/product/findByPrintStation
-- Method: GET
-- 参数:
-|==========================================================
-|参数名       |描述
-|printStationId          |自助机id
-|==========================================================
 
-- 返回值:
-----
-[
-    {
-        "id": 1,                //产品ID
-        "name": "六寸照片",
-        "type": 0,              //产品类型 0: 普通照片, 1: 证件照, 2: 模板拼图
-        "width": 101.6,         //宽度 (毫米)
-        "height": 152.39999,    //高度 (毫米)
-        "imageRequired": 1,     //需要上传的图片数量
-        "remark": "",
-        "price": 1,             //价格 (分)
-        "version": 1,           //版本号
-        "thumbnailUrls": [                //缩略图url
-            "http://xxxxxxxxxxxxx",
-            "http://xxxxxxxxxxxxx",
-            "http://xxxxxxxxxxxxx"
-        ],
-        "previewUrls": [                   //预览图url
-            "http://xxxxxxxxxxxxx",
-            "http://xxxxxxxxxxxxx",
-            "http://xxxxxxxxxxxxx"
-        ]
-    }
-    ...
-]
-
-----
-
-
-=== 上传图片： (上传原图和缩略图都用这个)
+=== 上传图片：
 - URL: /api/image
 - Method: POST
 - content-type:  multipart/form-data
@@ -205,32 +168,6 @@
 ----
 
 
-=== 获取产品需要上传的图片的信息:
-- URL: /api/product/images
-- Method: GET
-- 参数:
-|==========================================================
-|参数名       |描述
-|productId    |产品id
-|==========================================================
-- 返回值: (json数组)
-
-----
-    [
-        {
-            "name": "照片1",
-            "width": 100,    //单位mm
-            "height": 200    //单位mm
-        },
-        {
-            "name": "照片2",
-            "width": 80,
-            "height": 60
-        },
-        ...
-    ]
-----
-
 === 生成成品的预览图：
 - URL: /api/product/preview
 - Method: POST
@@ -239,7 +176,8 @@
 ----
         {
             "sessionId": "xxxxxxxxxxxxxxxxxxxx",
-            "productId": xx,
+            "productId": xx,              //产品id
+            "productVersion" : "xx.xx",   //产品版本号
             "images" : [
                 {
                     "imageId": xxx,  //上传图片接口返回的图片id
@@ -287,14 +225,17 @@
 		  "orderItems" : [
 			{
 				"productId" : xx,       //产品id
+				"productVersion" : "xx.xx",  //产品版本号
 				"copies": xx            //打印份数 (>=1)
 			},
 			{
 			    "productId" : xx,
+			    "productVersion" : "xx.xx",
 			    "copies": xx
 			},
 			{
 			    "productId" : xx,
+			    "productVersion" : "xx.xx",
 			    "copies": xx
 			}
 			...
@@ -315,7 +256,7 @@
 	}
 ----
 
-==== 下单:
+==== 创建订单:
 - URL: /api/order/create
 - Method: POST
 - RequestBody:
@@ -327,14 +268,17 @@
 		  "orderItems" : [
 			{
 				"productId" : xx,       //产品id
+				"productVersion" : "xx.xx",  //产品版本号
 				"copies": xx            //打印份数 (>=1)
 			},
 			{
 			    "productId" : xx,
+			    "productVersion" : "xx.xx",
 			    "copies": xx
 			},
 			{
 			    "productId" : xx,
+			    "productVersion" : "xx.xx",
 			    "copies": xx
 			}
 			...

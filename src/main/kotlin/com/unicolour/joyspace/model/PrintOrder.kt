@@ -94,15 +94,13 @@ class PrintOrderItem {
     var printOrder: PrintOrder? = null
     //endregion
 
-    //region 产品
-    @Column(name = "product_id", insertable = false, updatable = false)
+    @Column
+    @NotNull
     var productId: Int = 0
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "product_id")
+    @Column(length = 10)
     @NotNull
-    lateinit var product: Product
-    //endregion
+    var productVersion: String = ""
 
     //打印份数
     @Column

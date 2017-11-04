@@ -53,6 +53,7 @@ query {
 			width
 			height
             displaySize
+            idPhotoMaskImageUrl
 			imageRequired
 			remark
 			price
@@ -60,10 +61,10 @@ query {
 			previewImageUrls
             templateImages {
                 name
-                x:tx
-                y:ty
-                width:tw
-                height:th
+                x
+                y
+                width
+                height
                 isUserImage:userImage
                 url
             }

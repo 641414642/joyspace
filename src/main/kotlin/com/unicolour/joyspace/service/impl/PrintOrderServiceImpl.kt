@@ -72,6 +72,9 @@ open class PrintOrderServiceImpl : PrintOrderService {
     lateinit var productDao: ProductDao
 
     @Autowired
+    lateinit var templateImageInfoDao: TemplateImageInfoDao
+
+    @Autowired
     lateinit var secureRandom: SecureRandom
 
     @Autowired
@@ -135,13 +138,14 @@ open class PrintOrderServiceImpl : PrintOrderService {
         printOrderDao.save(newOrder)
 
         for (orderItem in orderInput.orderItems) {
-            val product = productDao.findOne(orderItem.productId)
-            val tpl = product.template
+            //val product = productDao.findOne(orderItem.productId)
+            //val tpl = product.template
 
             val newOrderItem = PrintOrderItem()
             newOrderItem.copies = orderItem.copies
             newOrderItem.printOrder = newOrder
-            newOrderItem.product = product
+            newOrderItem.productId = orderItem.productId
+            newOrderItem.productVersion = orderItem.productVersion
 
             val orderImages = ArrayList<PrintOrderImage>()
             newOrderItem.orderImages = orderImages
@@ -150,7 +154,12 @@ open class PrintOrderServiceImpl : PrintOrderService {
 
             orderItems.add(newOrderItem)
 
-            for (tplImg in tpl.images.filter { it.userImage }.distinctBy { it.name }) {
+            val tplVerSplit = orderItem.productVersion.split(',')
+            val tplId = tplVerSplit[0].toInt()
+            val tplVer = tplVerSplit[1].toInt()
+
+            val tplImages = templateImageInfoDao.findByTemplateIdAndTemplateVersion(tplId, tplVer)
+            for (tplImg in tplImages.filter { it.userImage }.distinctBy { it.name }) {
                 var userImgId = 0
                 var processParams: String? = null
                 val orderItemImages = orderItem.images
