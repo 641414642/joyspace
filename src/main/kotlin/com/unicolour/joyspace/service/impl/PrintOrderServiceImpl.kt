@@ -151,7 +151,7 @@ open class PrintOrderServiceImpl : PrintOrderService {
 
             orderItems.add(newOrderItem)
 
-            val tplVerSplit = orderItemInput.productVersion.split(',')
+            val tplVerSplit = orderItemInput.productVersion.split('.')
             val tplId = tplVerSplit[0].toInt()
             val tplVer = tplVerSplit[1].toInt()
 

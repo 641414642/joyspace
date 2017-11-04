@@ -310,7 +310,7 @@ open class TemplateServiceImpl : TemplateService {
             return TemplatePreviewResult(1, "用户未登录")
         }
         else {
-            val tplVerSplit = previewParam.productVersion.split(',')
+            val tplVerSplit = previewParam.productVersion.split('.')
             val tplId = tplVerSplit[0].toInt()
             val tplVer = tplVerSplit[1].toInt()
 
