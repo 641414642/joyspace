@@ -47,7 +47,7 @@
 					<tr th:each="template : ${templates}">
 						<td th:text="${template.id}"></td>
 						<td th:text="${template.name}"></td>
-						<td th:text="${template.width + ' x ' + template.height}"></td>
+						<td th:text="${#numbers.formatDecimal(template.width, 1, 'DEFAULT', 2, 'DEFAULT') + ' x ' + #numbers.formatDecimal(template.height, 1, 'NONE', 2, 'POINT')}"></td>
 						<td th:text="${template.minImageCount}"></td>
 						<td>
 							<a href="#" th:attr="data-url=@{/template/edit(id=${template.id},mode='edit')}" onclick="return createOrEditTemplate(event, true)" style="padding-right:5px">编辑</a>

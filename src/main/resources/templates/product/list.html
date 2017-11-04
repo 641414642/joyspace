@@ -50,9 +50,9 @@
 						<td th:text="${product.id}"></td>
 						<td th:text="${product.name}"></td>
 						<td th:text="${product.template.name}"></td>
-						<td th:text="${product.template.width + ' x ' + product.template.height}"></td>
+						<td th:text="${#numbers.formatDecimal(product.template.width, 1, 'DEFAULT', 2, 'DEFAULT') + ' x ' + #numbers.formatDecimal(product.template.height, 1, 'DEFAULT', 2, 'DEFAULT')}"></td>
 						<td th:text="${product.template.minImageCount}"></td>
-						<td th:text="${#numbers.formatDecimal(product.defaultPrice / 100.0, 0, 'DEFAULT', 2, 'DEFAULT')}"></td>
+						<td th:text="${#numbers.formatDecimal(product.defaultPrice / 100.0, 1, 'DEFAULT', 2, 'DEFAULT')}"></td>
 						<td>
 							<a href="#" th:attr="data-url=@{/product/edit(id=${product.id},mode='edit')}" onclick="return createOrEditProduct(event, true)" style="padding-right:5px">编辑</a>
 							<a href="#" th:attr="data-url=@{/product/manageImageFiles(productId=${product.id})}" onclick="return manageProductImageFiles(event, true)">图片管理</a>
