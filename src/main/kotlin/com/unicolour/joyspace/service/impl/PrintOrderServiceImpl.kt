@@ -137,15 +137,12 @@ open class PrintOrderServiceImpl : PrintOrderService {
 
         printOrderDao.save(newOrder)
 
-        for (orderItem in orderInput.orderItems) {
-            //val product = productDao.findOne(orderItem.productId)
-            //val tpl = product.template
-
+        for (orderItemInput in orderInput.orderItems) {
             val newOrderItem = PrintOrderItem()
-            newOrderItem.copies = orderItem.copies
+            newOrderItem.copies = orderItemInput.copies
             newOrderItem.printOrder = newOrder
-            newOrderItem.productId = orderItem.productId
-            newOrderItem.productVersion = orderItem.productVersion
+            newOrderItem.productId = orderItemInput.productId
+            newOrderItem.productVersion = orderItemInput.productVersion
 
             val orderImages = ArrayList<PrintOrderImage>()
             newOrderItem.orderImages = orderImages
@@ -154,7 +151,7 @@ open class PrintOrderServiceImpl : PrintOrderService {
 
             orderItems.add(newOrderItem)
 
-            val tplVerSplit = orderItem.productVersion.split(',')
+            val tplVerSplit = orderItemInput.productVersion.split(',')
             val tplId = tplVerSplit[0].toInt()
             val tplVer = tplVerSplit[1].toInt()
 
@@ -162,7 +159,7 @@ open class PrintOrderServiceImpl : PrintOrderService {
             for (tplImg in tplImages.filter { it.userImage }.distinctBy { it.name }) {
                 var userImgId = 0
                 var processParams: String? = null
-                val orderItemImages = orderItem.images
+                val orderItemImages = orderItemInput.images
                 if (orderItemImages != null) {
                     val orderItemImg = orderItemImages.find { it.name == tplImg.name }
                     if (orderItemImg != null) {

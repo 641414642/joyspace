@@ -258,7 +258,6 @@ open class TemplateServiceImpl : TemplateService {
 
         templateDao.save(template)
 
-        templateImageInfoDao.deleteByTemplateIdAndTemplateVersion(template.id, template.currentVersion)
         templateImageInfoDao.save(tplImages)
     }
 
