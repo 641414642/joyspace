@@ -40,7 +40,7 @@
 					<tr>
 						<th>ID</th>
 						<th>名称</th>
-						<th>模板名称</th>
+						<th>模板名称和版本</th>
 						<th>尺寸(毫米)</th>
 						<th>最小图片数量</th>
 						<th>缺省价格(元)</th>
@@ -49,7 +49,7 @@
 					<tr th:each="product : ${products}">
 						<td th:text="${product.id}"></td>
 						<td th:text="${product.name}"></td>
-						<td th:text="${product.template.name}"></td>
+						<td th:text="${product.template.name + ' (v' + product.template.currentVersion} + ')'"></td>
 						<td th:text="${#numbers.formatDecimal(product.template.width, 1, 'DEFAULT', 2, 'DEFAULT') + ' x ' + #numbers.formatDecimal(product.template.height, 1, 'DEFAULT', 2, 'DEFAULT')}"></td>
 						<td th:text="${product.template.minImageCount}"></td>
 						<td th:text="${#numbers.formatDecimal(product.defaultPrice / 100.0, 1, 'DEFAULT', 2, 'DEFAULT')}"></td>

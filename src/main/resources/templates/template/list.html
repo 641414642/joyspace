@@ -40,6 +40,7 @@
 					<tr>
 						<th>ID</th>
 						<th>名称</th>
+						<th>版本号</th>
 						<th>尺寸(毫米)</th>
 						<th>最小图片数量</th>
 						<th>操作</th>
@@ -47,6 +48,7 @@
 					<tr th:each="template : ${templates}">
 						<td th:text="${template.id}"></td>
 						<td th:text="${template.name}"></td>
+						<td th:text="${template.currentVersion}"></td>
 						<td th:text="${#numbers.formatDecimal(template.width, 1, 'DEFAULT', 2, 'DEFAULT') + ' x ' + #numbers.formatDecimal(template.height, 1, 'NONE', 2, 'POINT')}"></td>
 						<td th:text="${template.minImageCount}"></td>
 						<td>
