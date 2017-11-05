@@ -179,6 +179,7 @@ open class TemplateServiceImpl : TemplateService {
         else {
             if (tpl != null) {
                 tpl.currentVersion++
+                templateDao.save(tpl)
 
                 saveTemplateFiles(tpl, templateFile)
 
