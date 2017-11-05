@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
+import org.springframework.data.domain.Sort
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Controller
@@ -39,7 +40,7 @@ class PaymentController {
             @RequestParam(name = "name", required = false, defaultValue = "") name: String?,
             @RequestParam(name = "pageno", required = false, defaultValue = "1") pageno: Int): ModelAndView {
 
-        val pageable = PageRequest(pageno - 1, 20)
+        val pageable = PageRequest(pageno - 1, 20, Sort.Direction.ASC, "id")
         val wxPayCfgs = if (name == null || name == "")
             weiXinPayConfigDao.findAll(pageable)
         else
@@ -114,7 +115,7 @@ class PaymentController {
             @RequestParam(name = "name", required = false, defaultValue = "") name: String?,
             @RequestParam(name = "pageno", required = false, defaultValue = "1") pageno: Int): ModelAndView {
 
-        val pageable = PageRequest(pageno - 1, 20)
+        val pageable = PageRequest(pageno - 1, 20, Sort.Direction.ASC, "id")
         val aliPayCfgs = if (name == null || name == "")
             aliPayConfigDao.findAll(pageable)
         else

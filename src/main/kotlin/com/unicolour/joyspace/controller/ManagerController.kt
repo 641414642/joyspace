@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
+import org.springframework.data.domain.Sort
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Controller
@@ -43,7 +44,7 @@ class ManagerController {
             return modelAndView
         }
 
-        val pageable = PageRequest(pageno - 1, 20)
+        val pageable = PageRequest(pageno - 1, 20, Sort.Direction.ASC, "id")
         val users = if (name == null || name == "")
             managerDao.findByCompanyId(loginManager.companyId, pageable)
         else

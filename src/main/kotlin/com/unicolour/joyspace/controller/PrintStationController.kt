@@ -10,6 +10,7 @@ import com.unicolour.joyspace.service.PrintStationService
 import com.unicolour.joyspace.util.Pager
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.PageRequest
+import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.servlet.ModelAndView
@@ -49,7 +50,7 @@ class PrintStationController {
             return modelAndView
         }
 
-        val pageable = PageRequest(pageno - 1, 20)
+        val pageable = PageRequest(pageno - 1, 20, Sort.Direction.ASC, "id")
         val printStations = printStationDao.findByCompanyId(loginManager.companyId, pageable)
 
         val pager = Pager(printStations.totalPages, 7, pageno - 1)

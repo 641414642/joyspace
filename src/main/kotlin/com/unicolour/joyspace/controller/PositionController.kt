@@ -10,6 +10,7 @@ import com.unicolour.joyspace.util.Pager
 import com.unicolour.joyspace.util.getBaseUrl
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.PageRequest
+import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestMethod
@@ -50,7 +51,7 @@ class PositionController {
             return modelAndView
         }
 
-        val pageable = PageRequest(pageno - 1, 20)
+        val pageable = PageRequest(pageno - 1, 20, Sort.Direction.ASC, "id")
         val positions = if (name == null || name == "")
             positionDao.findByCompanyId(loginManager.companyId, pageable)
         else
