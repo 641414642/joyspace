@@ -238,7 +238,7 @@ open class PrintOrderServiceImpl : PrintOrderService {
     //检查是否所有订单图片都已上传，如果都上传了返回true并修改订单状态
     @Synchronized
     private fun checkOrderImageUploaded(orderId: Int) : Boolean {
-        val missingImageCount = printOrderImageDao.countByOrderIdAndUserImageFileId(orderId, 0)  //userImageFileId == 0 表示此订单图片还没有上传
+        val missingImageCount = printOrderImageDao.countByOrderIdAndUserImageFileIdIsNull(orderId)  //userImageFileId is null 表示此订单图片还没有上传
         if (missingImageCount == 0L) {
             val order= printOrderDao.findOne(orderId)
             order.imageFileUploaded = true
