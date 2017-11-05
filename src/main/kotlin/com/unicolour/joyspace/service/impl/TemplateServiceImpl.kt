@@ -225,7 +225,8 @@ open class TemplateServiceImpl : TemplateService {
             val element = ctx.getElement(it)
 
             val tplImg = TemplateImageInfo()
-            tplImg.template = template
+            tplImg.templateId = template.id
+            tplImg.templateVersion = template.currentVersion
 
             val transform = calcNodeTransform(it)
             val transformedBounds = it.getTransformedGeometryBounds(transform)

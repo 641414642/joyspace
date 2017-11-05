@@ -43,6 +43,9 @@ open class ProductServiceImpl : ProductService {
     lateinit var templateDao: TemplateDao
 
     @Autowired
+    lateinit var tplImgInfoDao: TemplateImageInfoDao
+
+    @Autowired
     lateinit var printStationService: PrintStationService
 
     override fun getProductsOfPrintStation(printStationId: Int): List<PrintStationProduct> {
@@ -164,6 +167,15 @@ open class ProductServiceImpl : ProductService {
         }
     }
 
+    private fun getTemplateImagesOfCurrentVersion(tpl: Template, context: HashMap<String, Any>): List<TemplateImageInfo> {
+        val key = "_tplImgs_${tpl.id}.${tpl.currentVersion}"
+        return context.computeIfAbsent(key, {
+            println(key)
+            tplImgInfoDao.findByTemplateIdAndTemplateVersion(tpl.id, tpl.currentVersion)
+        }) as List<TemplateImageInfo>
+
+    }
+
     override fun getDataFetcher(fieldName: String): DataFetcher<Any> {
         return DataFetcher<Any> { env ->
             val src = env.getSource<Any>()
@@ -197,7 +209,9 @@ open class ProductServiceImpl : ProductService {
                 "width" -> {
                     val tpl = product.template
                     if (tpl.type == ProductType.ID_PHOTO.value) {
-                        tpl.images[0].width
+                        val context = env.getContext<HashMap<String, Any>>()
+                        val images = getTemplateImagesOfCurrentVersion(tpl, context)
+                        images[0].width
                     }
                     else {
                         tpl.width
@@ -206,7 +220,9 @@ open class ProductServiceImpl : ProductService {
                 "height" -> {
                     val tpl = product.template
                     if (tpl.type == ProductType.ID_PHOTO.value) {
-                        tpl.images[0].height
+                        val context = env.getContext<HashMap<String, Any>>()
+                        val images = getTemplateImagesOfCurrentVersion(tpl, context)
+                        images[0].height
                     }
                     else {
                         tpl.height
@@ -218,8 +234,11 @@ open class ProductServiceImpl : ProductService {
                     var h = tpl.height
 
                     if (tpl.type == ProductType.ID_PHOTO.value) {
-                        w = tpl.images[0].width
-                        h = tpl.images[0].height
+                        val context = env.getContext<HashMap<String, Any>>()
+                        val images = getTemplateImagesOfCurrentVersion(tpl, context)
+
+                        w = images[0].width
+                        h = images[0].height
                     }
 
                     String.format("%1$.0f x %2$.0f mm", w, h)
@@ -251,7 +270,11 @@ open class ProductServiceImpl : ProductService {
                             .filter { it.type == ProductImageFileType.PREVIEW.value }
                             .map { "$baseUrl/assets/product/images/${it.id}.${it.fileType}" }
                 }
-                "templateImages" -> product.template.images
+                "templateImages" -> {
+                    val context = env.getContext<HashMap<String, Any>>()
+                    getTemplateImagesOfCurrentVersion(product.template, context)
+
+                }
                 "price" -> {
                     if (printStation == null) {
                         null
