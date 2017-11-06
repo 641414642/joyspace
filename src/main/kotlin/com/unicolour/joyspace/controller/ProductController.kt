@@ -53,7 +53,7 @@ class ProductController {
             return modelAndView
         }
 
-        val pageable = PageRequest(pageno - 1, 20, Sort.Direction.ASC, "id")
+        val pageable = PageRequest(pageno - 1, 20, Sort.Direction.ASC, "sequence")
         val products = if (name == null || name == "")
             productDao.findByCompanyId(loginManager.companyId, pageable)
         else
@@ -93,6 +93,15 @@ class ProductController {
         modelAndView.viewName = "/product/edit :: content"
 
         return modelAndView
+    }
+
+    @RequestMapping(path = arrayOf("/product/move"), method = arrayOf(RequestMethod.POST))
+    @ResponseBody
+    fun moveProduct(
+            modelAndView: ModelAndView,
+            @RequestParam(name = "id", required = true) id: Int,
+            @RequestParam(name = "up", required = true) up: Boolean): Boolean {
+        return productService.moveProduct(id, up)
     }
 
     @RequestMapping(path = arrayOf("/product/edit"), method = arrayOf(RequestMethod.POST))

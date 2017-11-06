@@ -71,7 +71,9 @@
                         <div>
                             <div style="display:inline-block; margin-right:20px" class="checkbox" th:each="product : ${products}">
                                 <label>
-                                    <input type="checkbox" th:checked="${product.selected}" th:name="${'product_' + product.productId}" th:text="${product.productName}"/>
+                                    <input type="checkbox" th:checked="${product.selected}"
+                                           th:name="${'product_' + product.productId}"
+                                           th:text="${product.productName + ' (' + product.templateName + ')'}"/>
                                 </label>
                             </div>
                         </div>

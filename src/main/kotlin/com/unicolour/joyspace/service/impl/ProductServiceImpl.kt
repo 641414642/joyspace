@@ -49,7 +49,8 @@ open class ProductServiceImpl : ProductService {
     lateinit var printStationService: PrintStationService
 
     override fun getProductsOfPrintStation(printStationId: Int): List<PrintStationProduct> {
-        return printStationProductDao.findByPrintStationId(printStationId)
+        val products = printStationProductDao.findByPrintStationId(printStationId)
+        return products.sortedBy { it.product.sequence }
     }
 
     @Transactional
@@ -74,6 +75,37 @@ open class ProductServiceImpl : ProductService {
     }
 
     @Transactional
+    override fun moveProduct(id: Int, up: Boolean): Boolean {
+        val product = productDao.findOne(id)
+        if (product != null) {
+            var otherProduct: Product? = null
+            if (up) {
+                otherProduct = productDao.findFirstByCompanyIdAndSequenceLessThanOrderBySequenceDesc(product.companyId, product.sequence)
+            }
+            else {
+                otherProduct = productDao.findFirstByCompanyIdAndSequenceGreaterThanOrderBySequence(product.companyId, product.sequence)
+            }
+
+            if (otherProduct == null) {
+                return false
+            }
+            else {
+                val t = product.sequence
+                product.sequence = otherProduct.sequence
+                otherProduct.sequence = t
+
+                productDao.save(product)
+                productDao.save(otherProduct)
+
+                return true
+            }
+        }
+        else {
+            return false
+        }
+    }
+
+    @Transactional
     override fun createProduct(name: String, remark: String, defPrice: Double, templateId: Int): Product? {
         val loginManager = managerService.loginManager
         val tpl = templateDao.findOne(templateId)
@@ -89,6 +121,7 @@ open class ProductServiceImpl : ProductService {
             product.enabled = true
             product.remark = remark
             product.company = manager.company
+            product.sequence = productDao.getMaxProductSequence(manager.companyId) + 1
 
             productDao.save(product)
 

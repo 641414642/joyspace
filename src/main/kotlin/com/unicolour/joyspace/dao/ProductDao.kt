@@ -12,5 +12,11 @@ interface ProductDao : PagingAndSortingRepository<Product, Int> {
     fun findByCompanyIdAndName(@Param("companyId") companyId: Int, @Param("name") name: String, pageable: Pageable): Page<Product>
 
     fun findByCompanyId(companyId: Int, pageable: Pageable): Page<Product>
-    fun findByTemplateId(id: Int): List<Product>
+
+    @Query("SELECT coalesce(max(p.sequence), 0) FROM Product p WHERE p.companyId=:companyId")
+    fun getMaxProductSequence(@Param("companyId") companyId: Int): Int
+
+    fun findFirstByCompanyIdAndSequenceGreaterThanOrderBySequence(companyId: Int, sequence: Int) : Product?
+
+    fun findFirstByCompanyIdAndSequenceLessThanOrderBySequenceDesc(companyId: Int, sequence: Int) : Product?
 }

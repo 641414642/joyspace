@@ -56,6 +56,8 @@
 						<td>
 							<a href="#" th:attr="data-url=@{/product/edit(id=${product.id},mode='edit')}" onclick="return createOrEditProduct(event, true)" style="padding-right:5px">编辑</a>
 							<a href="#" th:attr="data-url=@{/product/manageImageFiles(productId=${product.id})}" onclick="return manageProductImageFiles(event, true)">图片管理</a>
+							<a href="#" th:attr="data-url=@{/product/move(id=${product.id},up='true')}" onclick="return moveProduct(event)">上移</a>
+							<a href="#" th:attr="data-url=@{/product/move(id=${product.id},up='false')}" onclick="return moveProduct(event)">下移</a>
 						</td>
 					</tr>
 				</table>

@@ -16,4 +16,5 @@ interface ProductService {
 
     fun uploadProductImageFile(id: Int, type: ProductImageFileType, imageFile: MultipartFile?): ProductImageFile?
     fun deleteProductImageFile(imgFileId: Int): Boolean
+    fun moveProduct(id: Int, up: Boolean): Boolean
 }

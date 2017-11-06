@@ -83,7 +83,7 @@ class PrintStationController {
             printStation = PrintStation()
         }
 
-        val allProducts = productDao.findAll().map { ProductItem(it.id, it.name, supportedProductIdSet.contains(it.id)) }
+        val allProducts = productDao.findAll().map { ProductItem(it.id, it.name, it.template.name, supportedProductIdSet.contains(it.id)) }
 
         modelAndView.model.put("create", id <= 0)
         modelAndView.model.put("printStation", printStation)
@@ -138,8 +138,9 @@ class PrintStationController {
     }
 }
 
-data class ProductItem(
+class ProductItem(
         val productId: Int,
         val productName: String,
+        val templateName: String,
         val selected: Boolean
 )

@@ -52,6 +52,10 @@ class Product {
     @NotNull
     lateinit var company: Company
     //endregion
+
+    @Column
+    @NotNull
+    var sequence: Int = 0
 }
 
 /** 产品类别 */
