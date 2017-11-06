@@ -1,34 +1,42 @@
 package com.unicolour.joyspace.util
 
+import java.awt.Color
+import java.awt.image.BufferedImage
 import java.io.File
 import java.nio.file.Files
 import java.nio.file.Paths
+import java.nio.file.StandardCopyOption
 import java.nio.file.StandardOpenOption
 import java.util.StringTokenizer
+import javax.imageio.ImageIO
 
 object CreateIDPhotoTemplate {
     @JvmStatic
     fun main(args: Array<String>) {
         val input = arrayOf(
-                "USA-Passport 50 50 2 1x2 6x4",
-                "JPN-Passport 45 45 4 2x2 4x6",
-                "Z0604-02-004 35 53 4 2x2 4x6",
-                "Z0604-02-003 35 49 4 2x2 4x6",
-                "Z0604-02-002 35 45 4 2x2 4x6",
-                "Z0604-02-001 33 48 4 2x2 4x6",
-                "Z0604-01-003 26 32 8 2x4 6x4",
-                "Z0604-01-002 25 35 8 2x4 6x4",
-                "Z0604-01-001 22 32 8 2x4 6x4")
+                "USA-Passport 50 50 1x2 6x4",
+                "JPN-Passport 45 45 2x2 4x6",
+                "Z0604-02-004 35 53 2x2 4x6",
+                "Z0604-02-003 35 49 2x2 4x6",
+                "Z0604-02-002 35 45 2x2 4x6",
+                "Z0604-02-001 33 48 2x2 4x6",
+                "Z0604-01-003 26 32 2x4 6x4",
+                "Z0604-01-002 25 35 2x4 6x4",
+                "Z0604-01-001 22 32 2x4 6x4",
+                "Driving-License 21 26 2x4 6x4",
+                "Car 60 91 1x2 6x4")
 
-        val gap = 2  //2mm 间隙
+        val gap = 3  //3mm 间隙
 
         for (line in input) {
             val st = StringTokenizer(line, " ")
             val name = st.nextToken()
 
-            val w = st.nextToken().toDouble()  //照片宽度
-            val h = st.nextToken().toDouble()  //照片高度
-            val n = st.nextToken().toInt()  //照片个数
+            val wStr = st.nextToken()
+            val hStr = st.nextToken()
+
+            val w = wStr.toDouble()  //照片宽度
+            val h = hStr.toDouble()  //照片高度
 
             val rowCol = st.nextToken()
             val size = st.nextToken()
@@ -86,8 +94,20 @@ object CreateIDPhotoTemplate {
 
             tpl += "</svg>"
 
-            File("R:/tpl/${name}").mkdirs()
+            val tplDir = File("R:/tpl/${name}")
+            val tplImagesDir = File(tplDir, "images")
+            tplImagesDir.mkdirs()
+
             Files.write(Paths.get("R:/tpl/${name}/template.svg"), tpl.toByteArray(), StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING)
+
+            val placeHolderImg = BufferedImage(10, 10, BufferedImage.TYPE_INT_ARGB)
+            val g = placeHolderImg.createGraphics()
+            g.color = Color.GRAY
+            g.fillRect(0, 0, 10, 10)
+            g.dispose()
+            ImageIO.write(placeHolderImg, "png", File(tplImagesDir, "UserImagePlaceHolder.png"))
+
+            Files.copy(Paths.get("idPhotoMasks/${wStr}x${hStr}.png"), File(tplDir, "mask.png").toPath(), StandardCopyOption.REPLACE_EXISTING)
         }
     }
 }
