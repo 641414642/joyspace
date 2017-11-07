@@ -107,7 +107,15 @@ object CreateIDPhotoTemplate {
             g.dispose()
             ImageIO.write(placeHolderImg, "png", File(tplImagesDir, "UserImagePlaceHolder.png"))
 
+            //val maskImg = ImageIO.read(File("idPhotoMasks/${wStr}x${hStr}.png"))
+            //ImageIO.write(maskImg, "png", File(tplDir, "mask.png"))
             Files.copy(Paths.get("idPhotoMasks/${wStr}x${hStr}.png"), File(tplDir, "mask.png").toPath(), StandardCopyOption.REPLACE_EXISTING)
+
+            val pb = ProcessBuilder("jar", "cfM", "${name}.zip", "*")
+            pb.directory(tplDir)
+            pb.start().waitFor()
+
+            Files.move(File(tplDir, "${name}.zip").toPath(), Paths.get("R:/tpl/${name}.zip"), StandardCopyOption.REPLACE_EXISTING)
         }
     }
 }
