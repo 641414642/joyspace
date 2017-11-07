@@ -139,7 +139,7 @@ open class TemplateServiceImpl : TemplateService {
                     if (isTplSvgFile) {
                         updateTemplateInfo(tpl, targetFile)
                     }
-                    else if (isImgFile(fileName)) {   //缩小图片
+                    else if (tpl.type == ProductType.TEMPLATE.value && isImgFile(fileName)) {   //模板拼图, 缩小图片
                         val pb = ProcessBuilder("magick", "mogrify", "-resize", "500x500>", targetFile.absolutePath)    //如果宽度或高度大于1000， 才缩小图片
                         val process = pb.start()
                         val retCode = process.waitFor()
