@@ -168,7 +168,7 @@ open class TemplateServiceImpl : TemplateService {
     override fun updateTemplate(id: Int, name: String, type: ProductType, templateFile: MultipartFile?): Boolean {
         val tpl = templateDao.findOne(id)
 
-        if (templateFile == null) {
+        if (templateFile == null || templateFile.isEmpty) {
             tpl.name = name
             tpl.type = type.value
 
