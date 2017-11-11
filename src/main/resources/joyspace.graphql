@@ -300,6 +300,8 @@ type PrintOrderImage {
 
 #订单项目
 type PrintOrderItem {
+    id: Int!
+
     #打印份数
     copies: Int!
 
@@ -309,7 +311,7 @@ type PrintOrderItem {
     #产品id
     productId: Int!
 
-    #产品id
+    #产品类型
     productType: Int!
 
     #产品版本号
