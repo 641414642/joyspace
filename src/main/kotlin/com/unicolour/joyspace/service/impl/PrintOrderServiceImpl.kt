@@ -138,10 +138,14 @@ open class PrintOrderServiceImpl : PrintOrderService {
         printOrderDao.save(newOrder)
 
         for (orderItemInput in orderInput.orderItems) {
+            //XXX 检查自助机是否支持此产品
+            val product = productDao.findOne(orderItemInput.productId)
+
             val newOrderItem = PrintOrderItem()
             newOrderItem.copies = orderItemInput.copies
             newOrderItem.printOrder = newOrder
             newOrderItem.productId = orderItemInput.productId
+            newOrderItem.productType = product.template.type
             newOrderItem.productVersion = orderItemInput.productVersion
 
             val orderImages = ArrayList<PrintOrderImage>()

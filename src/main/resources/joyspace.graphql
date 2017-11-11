@@ -309,6 +309,9 @@ type PrintOrderItem {
     #产品id
     productId: Int!
 
+    #产品id
+    productType: Int!
+
     #产品版本号
     productVersion: String!
 }

@@ -98,6 +98,10 @@ class PrintOrderItem {
     @NotNull
     var productId: Int = 0
 
+    @Column
+    @NotNull
+    var productType: Int = 0
+
     @Column(length = 10)
     @NotNull
     var productVersion: String = ""
