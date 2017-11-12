@@ -1,34 +1,82 @@
 package com.unicolour.joyspace.util
 
+import javafx.application.Application
+import javafx.application.Platform
+import javafx.event.EventHandler
+import javafx.geometry.Insets
+import javafx.scene.Scene
+import javafx.scene.control.Button
+import javafx.scene.control.Label
+import javafx.scene.control.TextArea
+import javafx.scene.control.TextField
+import javafx.scene.layout.Priority
+import javafx.scene.layout.VBox
+import javafx.stage.Stage
 import java.awt.Color
 import java.awt.image.BufferedImage
 import java.io.File
-import java.nio.file.Files
-import java.nio.file.Paths
-import java.nio.file.StandardCopyOption
-import java.nio.file.StandardOpenOption
-import java.util.StringTokenizer
+import java.io.IOException
+import java.nio.file.*
+import java.util.*
+import java.util.prefs.Preferences
+import java.util.zip.ZipEntry
+import java.util.zip.ZipOutputStream
 import javax.imageio.ImageIO
 
-object CreateIDPhotoTemplate {
-    @JvmStatic
-    fun main(args: Array<String>) {
-        val input = arrayOf(
-                "USA-Passport 50 50 1x2 6x4",
-                "JPN-Passport 45 45 2x2 4x6",
-                "Z0604-02-004 35 53 2x2 4x6",
-                "Z0604-02-003 35 49 2x2 4x6",
-                "Z0604-02-002 35 45 2x2 4x6",
-                "Z0604-02-001 33 48 2x2 4x6",
-                "Z0604-01-003 26 32 2x4 6x4",
-                "Z0604-01-002 25 35 2x4 6x4",
-                "Z0604-01-001 22 32 2x4 6x4",
-                "Driving-License 21 26 2x4 6x4",
-                "Car 60 91 1x2 6x4")
+fun main(args: Array<String>) {
+    Application.launch(CreateIDPhotoTemplate::class.java)
+}
 
-        val gap = 3  //3mm 间隙
+class CreateIDPhotoTemplate : Application() {
+    val pref = Preferences.userNodeForPackage(CreateIDPhotoTemplate::class.java)
 
+    override fun start(primaryStage: Stage) {
+        primaryStage.title = "证件照模板工具"
+        val argTextArea = TextArea(
+                pref.get("args",
+"""USA-Passport 50 50 1x2 6x4 5 5
+JPN-Passport 45 45 2x2 4x6 5 5
+Z0604-02-004 35 53 2x2 4x6 5 5
+Z0604-02-003 35 49 2x2 4x6 5 5
+Z0604-02-002 35 45 2x2 4x6 5 5
+Z0604-02-001 33 48 2x2 4x6 5 5
+Z0604-01-003 26 32 2x4 6x4 5 5
+Z0604-01-002 25 35 2x4 6x4 5 5
+Z0604-01-001 22 32 2x4 6x4 5 5
+Driving-License 21 26 2x4 6x4 5 5
+Car 60 91 1x2 6x4 5 5"""))
+        val dirTextField = TextField(pref.get("outputdir", "R:\\templates\\"))
+        val startButton = Button("生成")
+        val box = VBox(10.0,
+                Label("输出目录:"), dirTextField,
+                Label("模板参数:(名称 小图宽度 小图高度 行数x列数 大图宽度x大图高度 小图水平间隙 小图垂直间隙)"), argTextArea,
+                startButton)
+
+        box.padding = Insets(10.0)
+        VBox.setVgrow(argTextArea, Priority.ALWAYS)
+
+        startButton.onAction = EventHandler{
+            pref.put("args", argTextArea.text)
+            pref.put("outputdir", dirTextField.text)
+
+            box.children.forEach({ it.isDisable = true})
+            Thread({
+                startCreate(Paths.get(dirTextField.text), argTextArea.text.lines())
+                Thread.sleep(1000)
+                Platform.runLater({ box.children.forEach({ it.isDisable = false}) })
+            }).start()
+        }
+
+        primaryStage.scene = Scene(box)
+        primaryStage.show()
+    }
+
+    private fun startCreate(outputDir: Path, input: List<String>) {
         for (line in input) {
+            if (line.isBlank()) {
+                continue
+            }
+
             val st = StringTokenizer(line, " ")
             val name = st.nextToken()
 
@@ -40,6 +88,7 @@ object CreateIDPhotoTemplate {
 
             val rowCol = st.nextToken()
             val size = st.nextToken()
+
             val t1 = rowCol.indexOf('x')
             val t2 = size.indexOf('x')
 
@@ -49,8 +98,11 @@ object CreateIDPhotoTemplate {
             val tplW = size.substring(0, t2).toDouble() * 25.4   //相纸宽度
             val tplH = size.substring(t2 + 1).toDouble() * 25.4  //相纸高度
 
-            val offsetX = (tplW - col * w - (col - 1) * gap) / 2.0
-            val offsetY = (tplH - row * h - (row - 1) * gap) / 2.0
+            val hGap = st.nextToken().toDouble()
+            val vGap = st.nextToken().toDouble()
+
+            val offsetX = (tplW - col * w - (col - 1) * hGap) / 2.0
+            val offsetY = (tplH - row * h - (row - 1) * vGap) / 2.0
 
             var tpl =
 """<?xml version="1.0" encoding="UTF-8" standalone="no"?>
@@ -70,8 +122,8 @@ object CreateIDPhotoTemplate {
             while (r < row) {
                 var c = 0
                 while (c < col) {
-                    val x = offsetX + (w + gap) * c
-                    val y = offsetY + (h + gap) * r
+                    val x = offsetX + (w + hGap) * c
+                    val y = offsetY + (h + vGap) * r
 
                     tpl +=
 """
@@ -94,11 +146,13 @@ object CreateIDPhotoTemplate {
 
             tpl += "</svg>"
 
-            val tplDir = File("R:/tpl/${name}")
+            val tplDir = File(outputDir.toFile(), name)
+            val tplFile = File(tplDir, "template.svg")
+            val tplPreviewFile = File(tplDir, "template.html")
             val tplImagesDir = File(tplDir, "images")
             tplImagesDir.mkdirs()
 
-            Files.write(Paths.get("R:/tpl/${name}/template.svg"), tpl.toByteArray(), StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING)
+            Files.write(tplFile.toPath(), tpl.toByteArray(), StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING)
 
             val placeHolderImg = BufferedImage(10, 10, BufferedImage.TYPE_INT_ARGB)
             val g = placeHolderImg.createGraphics()
@@ -111,11 +165,41 @@ object CreateIDPhotoTemplate {
             //ImageIO.write(maskImg, "png", File(tplDir, "mask.png"))
             Files.copy(Paths.get("idPhotoMasks/${wStr}x${hStr}.png"), File(tplDir, "mask.png").toPath(), StandardCopyOption.REPLACE_EXISTING)
 
-            val pb = ProcessBuilder("jar", "cfM", "${name}.zip", "*")
-            pb.directory(tplDir)
-            pb.start().waitFor()
+            pack(tplDir.toPath(), outputDir.resolve("${name}.zip"))
 
-            Files.move(File(tplDir, "${name}.zip").toPath(), Paths.get("R:/tpl/${name}.zip"), StandardCopyOption.REPLACE_EXISTING)
+            val previewHtml = """
+                    <html>
+                        <style>
+                            svg {
+                                border: 1px solid black;
+                            }
+                        </style>
+                        <body>
+                            $tpl
+                        </body>
+                    </html>
+                """
+            Files.write(tplPreviewFile.toPath(), previewHtml.toByteArray(), StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING)
+        }
+    }
+
+    @Throws(IOException::class)
+    fun pack(sourceDir: Path, zipFile: Path) {
+        Files.deleteIfExists(zipFile)
+        val p = Files.createFile(zipFile)
+        ZipOutputStream(Files.newOutputStream(p)).use { zs ->
+            Files.walk(sourceDir)
+                    .filter { path -> !Files.isDirectory(path) }
+                    .forEach { path ->
+                        val zipEntry = ZipEntry(sourceDir.relativize(path).toString().replace('\\', '/'))
+                        try {
+                            zs.putNextEntry(zipEntry)
+                            Files.copy(path, zs)
+                            zs.closeEntry()
+                        } catch (e: IOException) {
+                            System.err.println(e)
+                        }
+                    }
         }
     }
 }
