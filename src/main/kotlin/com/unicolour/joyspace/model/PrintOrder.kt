@@ -50,8 +50,8 @@ class PrintOrder {
     var discount: Int = 0
 
     //使用的优惠券
-    @Column(length = 32)
-    var coupon: String? = null
+    @Column
+    var couponId: Int? = null
 
     //是否已支付
     @Column

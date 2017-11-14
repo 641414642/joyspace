@@ -165,6 +165,7 @@
 						<li th:class="${viewContent=='priceList_list' ? 'active' : ''}"><a href="#" th:href="@{/priceList/list}"><i class="fa fa-circle-o"></i>价目表</a></li>
 						<li th:class="${viewContent=='position_list' ? 'active' : ''}"><a href="#" th:href="@{/position/list}"><i class="fa fa-circle-o"></i>投放地点</a></li>
 						<li th:class="${viewContent=='printStation_list' ? 'active' : ''}"><a href="#" th:href="@{/printStation/list}"><i class="fa fa-circle-o"></i>自助打印机</a></li>
+						<li th:class="${viewContent=='coupon_list' ? 'active' : ''}"><a href="#" th:href="@{/coupon/list}"><i class="fa fa-circle-o"></i>优惠券</a></li>
 					</ul>
 				</li>
 				<li class="treeview">
@@ -211,6 +212,7 @@
 		<div th:case="'product_list'" th:include="product/list :: content"></div>
 		<div th:case="'position_list'" th:include="position/list :: content"></div>
 		<div th:case="'printStation_list'" th:include="printStation/list :: content"></div>
+		<div th:case="'coupon_list'" th:include="coupon/list :: content"></div>
 		<div th:case="*"></div>
 		<!-- /.content -->
 	</div>

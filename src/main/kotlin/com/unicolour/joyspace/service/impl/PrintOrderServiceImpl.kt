@@ -126,7 +126,7 @@ open class PrintOrderServiceImpl : PrintOrderService {
         newOrder.userId = session.userId
         newOrder.totalFee = ret.first
         newOrder.discount = ret.second
-        newOrder.coupon = orderInput.coupon
+        //XXX newOrder.coupon = orderInput.coupon
         newOrder.payed = false
         newOrder.imageFileUploaded = false
         newOrder.downloadedToPrintStation = false
@@ -377,8 +377,8 @@ open class PrintOrderServiceImpl : PrintOrderService {
                 "trade_type" to "JSAPI"
         )))
 
-        val headers = HttpHeaders();
-        headers.set(HttpHeaders.CONTENT_TYPE, "text/xml;charset=UTF-8");
+        val headers = HttpHeaders()
+        headers.set(HttpHeaders.CONTENT_TYPE, "text/xml;charset=UTF-8")
 
         val request = HttpEntity<String>(requestBody, headers)
         val response = restTemplate.exchange(
@@ -460,7 +460,7 @@ open class PrintOrderServiceImpl : PrintOrderService {
         val sj = StringJoiner("&")
 
         for ((key, value) in varMap) {
-            if (!value.isNullOrBlank()) {
+            if (!value.isBlank()) {
                 sj.add("$key=$value")
             }
 
