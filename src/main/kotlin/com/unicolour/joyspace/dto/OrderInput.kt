@@ -4,7 +4,7 @@ class OrderInput(
         var sessionId: String = "",
         var printStationId: Int = 0,
         var orderItems: Array<OrderItemInput> = emptyArray(),
-        var coupon: String? = ""
+        var couponId: Int = 0
 )
 
 class OrderItemInput(

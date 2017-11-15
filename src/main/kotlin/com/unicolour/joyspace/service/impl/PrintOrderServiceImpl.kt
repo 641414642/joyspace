@@ -75,6 +75,12 @@ open class PrintOrderServiceImpl : PrintOrderService {
     lateinit var templateImageInfoDao: TemplateImageInfoDao
 
     @Autowired
+    lateinit var couponDao: CouponDao
+
+    @Autowired
+    lateinit var userCouponDao: UserCouponDao
+
+    @Autowired
     lateinit var secureRandom: SecureRandom
 
     @Autowired
@@ -318,6 +324,11 @@ open class PrintOrderServiceImpl : PrintOrderService {
     }
 
     override fun calculateOrderFee(orderInput: OrderInput) : Pair<Int, Int> {
+        val session = userLoginSessionDao.findOne(orderInput.sessionId)
+        //XXX
+        //if (session == null) {
+        //}
+
         val printStation = printStationDao.findOne(orderInput.printStationId)
         val priceMap = printStationService.getPriceMap(printStation)
 
@@ -334,17 +345,26 @@ open class PrintOrderServiceImpl : PrintOrderService {
         }
 
         //XXX
-        if (!orderInput.coupon.isNullOrEmpty()) {
-            if (orderInput.coupon == "J5") {
-                if (totalFee > 10) {
-                    discount = 5
+        if (orderInput.couponId > 0) {
+            val curTime = System.currentTimeMillis()
+
+            val userCoupon = userCouponDao.findByUserIdAndCouponId(session.userId, orderInput.couponId)
+            if (userCoupon == null) {
+                throw ProcessException(1, "没有领取此优惠券")
+            }
+            else {   //XXX 检查使用次数,产品等
+                val coupon = couponDao.findOne(orderInput.couponId)
+                if (coupon == null) {
+                    throw ProcessException(1, "指定的优惠券不可用")
+                } else if (coupon.begin != null && curTime < coupon.begin!!.time) {
+                    throw ProcessException(1, "优惠券还未到使用时间")
+                } else if (coupon.expire != null && curTime > coupon.expire!!.time) {
+                    throw ProcessException(1, "优惠券已过期")
+                } else if (totalFee < coupon.minExpense) {
+                    throw ProcessException(1, "没有达到最低消费金额")
+                } else {
+                    discount = coupon.discount
                 }
-            }
-            else if (orderInput.coupon == "8Z") {
-                discount = (totalFee * 0.8).toInt()
-            }
-            else {
-                throw ProcessException(1, "指定的优惠券不可用")
             }
         }
 

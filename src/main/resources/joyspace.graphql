@@ -17,6 +17,9 @@ type QueryType {
     #查找最近的自助机
     findNearestPrintStation(longitude: Float!, latitude: Float!): PrintStationFindResultSingle!
 
+    #查询用户优惠券列表
+    userCouponList(sessionId: String!): UserCouponListResult!
+
     ###############################自助机调用的接口######################################3
     #查找指定自助机的待打印订单
     getPrintOrder(sessionId: String!, idAfter: Int!): PrintOrder
@@ -343,6 +346,40 @@ type PrintStationFindResultSingle {
     #结果的描述
     description: String
 
-    #自助机列表
+    #自助机
     printStation: PrintStation
+}
+
+#优惠券
+type Coupon {
+    id: Int
+
+    #名称
+    name: String!
+
+    #编码
+    code: String
+
+    #生效日期时间 (yyyy-MM-dd HH:mm:ss)
+    begin: String
+
+    #失效日期时间 (yyyy-MM-dd HH:mm:ss)
+    expire: String
+
+    #使用优惠券所需要的最小金额（分）
+    minExpense: Int!
+
+    #折扣金额（分）
+    discount: Int!
+}
+
+type UserCouponListResult {
+    #结果代码 0: 成功
+    result: Int!
+
+    #结果的描述
+    description: String
+
+    #优惠券列表
+    coupons: [Coupon!]
 }

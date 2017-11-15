@@ -35,6 +35,9 @@ class GraphQLServiceImpl : GraphQLService {
     @Autowired
     lateinit var appContext: ApplicationContext
 
+    @Autowired
+    lateinit var couponService: CouponService
+
     private var graphQLSchema: GraphQLSchema? = null
 
     @Synchronized
@@ -62,6 +65,7 @@ class GraphQLServiceImpl : GraphQLService {
                     typeWiring.dataFetcher("findPrintStationsByDistance", printStationService.byDistanceDataFetcher)
                     typeWiring.dataFetcher("findPrintStationsByCity", printStationService.byCityDataFetcher)
                     typeWiring.dataFetcher("findNearestPrintStation", printStationService.nearestDataFetcher)
+                    typeWiring.dataFetcher("userCouponList", couponService.userCouponListDataFetcher)
                     typeWiring.dataFetcher("getPrintOrder", printOrderService.printOrderDataFetcher)
                     typeWiring.dataFetcher("getTemplateFileUrl", templateService.templateFileUrlDataFetcher)
                     typeWiring.dataFetcher("templates", templateService.templatesDataFetcher)
