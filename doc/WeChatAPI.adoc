@@ -375,3 +375,31 @@
                ]
            }
 ----
+
+==== 用户领取优惠券
+- URL: /api/user/claimCoupon
+- Method: POST
+- 参数:
+|==========================================================
+|参数名         |描述
+|sessionId      |登录返回的sessionId
+|couponCode     |优惠券代码
+|==========================================================
+
+- 返回值:
+
+----
+           {
+                "errcode": 0,        //错误代码, 0表示成功
+                "errmsg": null,
+                "coupon": {
+                    "id": 1,                 //优惠券id
+                    "name": "xxxxxxxxxx",    //名称
+                    "code": "xxxxxxx"        //编码
+                    "begin": "yyyy-MM-dd HH:mm:ss",  //生效日期时间
+                    "expire": "yyyy-MM-dd HH:mm:ss", //失效日期时间
+                    "minExpense": 1000,             //使用优惠券所需要的最小金额（分）
+                    "discount": 200                 //折扣金额（分）
+                }
+           }
+----

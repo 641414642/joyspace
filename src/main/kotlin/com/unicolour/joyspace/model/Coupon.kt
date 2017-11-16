@@ -35,6 +35,11 @@ class Coupon {
     @NotNull
     var usageCount: Int = 0
 
+    //已经领取的次数
+    @Column
+    @NotNull
+    var claimCount: Int = 0
+
     //每用户最大使用次数(0表示无限制)
     @Column
     @NotNull
@@ -114,4 +119,12 @@ class UserCoupon {
     @Column
     @NotNull
     var couponId: Int = 0
+
+    @Column
+    var claimTime: Date? = null   //领取时间
+
+    //已经使用的次数
+    @Column
+    @NotNull
+    var usageCount: Int = 0
 }

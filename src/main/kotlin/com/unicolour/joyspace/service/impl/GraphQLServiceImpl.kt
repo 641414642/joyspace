@@ -75,6 +75,7 @@ class GraphQLServiceImpl : GraphQLService {
                     typeWiring.dataFetcher("sendVerifyCode", userService.sendVerifyCodeDataFetcher)
                     typeWiring.dataFetcher("userRegister", userService.userRegisterDataFetcher)
                     typeWiring.dataFetcher("resetPassword", userService.resetPasswordDataFetcher)
+                    typeWiring.dataFetcher("claimCoupon", couponService.claimCouponDataFetcher)
                     typeWiring.dataFetcher("printStationLogin", printStationService.loginDataFetcher)
                     typeWiring.dataFetcher("printOrderDownloaded", printOrderService.printerOrderDownloadedDataFetcher)
                     typeWiring.dataFetcher("printOrderPrinted", printOrderService.printerOrderPrintedDataFetcher)

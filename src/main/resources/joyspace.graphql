@@ -45,6 +45,9 @@ type MutationType {
     #重置密码
     resetPassword(userName: String, phoneNumber: String!, verifyCode: String!, newPassword: String!) : RequestResult!
 
+    #获取优惠券
+    claimCoupon(sessionId: String!, couponCode: String!): ClaimCouponResult!
+
     ###############################自助机调用的接口######################################3
     #自助机登录
     printStationLogin(printStationId: Int! password: String!) : PrintStationLoginRequestResult!
@@ -382,4 +385,15 @@ type UserCouponListResult {
 
     #优惠券列表
     coupons: [Coupon!]
+}
+
+type ClaimCouponResult {
+    #结果代码 0: 成功
+    result: Int!
+
+    #结果的描述
+    description: String
+
+    #优惠券
+    coupon: Coupon
 }

@@ -42,4 +42,34 @@ query {
         val data:Map<String, Any> = queryResult.getData()
         return data["userCouponList"]
     }
+
+    @RequestMapping("/api/user/claimCoupon", method = arrayOf(RequestMethod.POST))
+    fun getUserCoupons(@RequestParam("sessionId") sessionId: String, @RequestParam("couponCode") couponCode: String) : Any? {
+        val schema = graphQLService.getGraphQLSchema()
+        val graphQL = GraphQL.newGraphQL(schema).build()
+
+        val query =
+                """
+claimCoupon {
+	claimCoupon(sessionId:"$sessionId", couponCode:"$couponCode") {
+        errcode:result
+        errmsg:description
+        coupon {
+            id
+            name
+            code
+            begin
+            expire
+            minExpense
+            discount
+		}
+	}
+}
+"""
+        val context = HashMap<String, Any>()
+
+        val queryResult = graphQL.execute(query, null, context, emptyMap())
+        val data:Map<String, Any> = queryResult.getData()
+        return data["claimCoupon"]
+    }
 }
