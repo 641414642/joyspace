@@ -129,6 +129,13 @@ class GraphQLServiceImpl : GraphQLService {
                 .type("UserImageFile", { typeWiring ->
                     typeWiring.dataFetcher("url", imageService.getImageFileUrlDataFetcher())
                 })
+                .type("Coupon", { typeWiring ->
+                    typeWiring.dataFetcher("printStationIdList", couponService.getDataFetcher("printStationIdList"))
+                    typeWiring.dataFetcher("positionIdList", couponService.getDataFetcher("positionIdList"))
+                    typeWiring.dataFetcher("companyIdList", couponService.getDataFetcher("companyIdList"))
+                    typeWiring.dataFetcher("productIdList", couponService.getDataFetcher("productIdList"))
+                    typeWiring.dataFetcher("productTypeList", couponService.getDataFetcher("productTypeList"))
+                })
                 .build()
     }
 }

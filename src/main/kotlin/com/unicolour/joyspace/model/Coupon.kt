@@ -62,6 +62,10 @@ class Coupon {
     @Column
     @NotNull
     var discount: Int = 0         //折扣金额（分）
+
+    @OneToMany(mappedBy = "couponId", fetch = FetchType.LAZY)
+    lateinit var constrains: List<CouponConstrains>
+
 }
 
 /** 优惠券使用限制条件 */

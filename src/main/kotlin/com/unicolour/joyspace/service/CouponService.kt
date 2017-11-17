@@ -56,4 +56,6 @@ interface CouponService {
 
     fun validateCoupon(context: CouponValidateContext,
                        vararg validateFuns: (CouponValidateContext) -> CouponValidateResult): CouponValidateResult
+
+    fun getDataFetcher(fieldName:String): DataFetcher<Any>
 }

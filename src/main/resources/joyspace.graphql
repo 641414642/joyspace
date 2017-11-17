@@ -380,6 +380,21 @@ type Coupon {
 
     #折扣金额（分）
     discount: Int!
+
+    #可以使用的自助机id列表, 为null表示无限制
+    printStationIdList: [Int!]
+
+    #可以使用的投放地点id列表, 为null表示无限制
+    positionIdList: [Int!]
+
+    #可以使用的投放商id列表, 为null表示无限制
+    companyIdList: [Int!]
+
+    #可以使用的产品id列表, 为null表示无限制
+    productIdList: [Int!]
+
+    #可以使用的产品类型, 为null表示无限制
+    productTypeList: [Int!]
 }
 
 type UserCouponListResult {

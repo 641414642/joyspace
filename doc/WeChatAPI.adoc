@@ -371,7 +371,12 @@
                         "begin": "yyyy-MM-dd HH:mm:ss",  //生效日期时间
                         "expire": "yyyy-MM-dd HH:mm:ss", //失效日期时间
                         "minExpense": 1000,             //使用优惠券所需要的最小金额（分）
-                        "discount": 200                 //折扣金额（分）
+                        "discount": 200,                 //折扣金额（分）
+                        "printStationIdList": [xx,xx,xx,xx],        //可以使用的自助机id列表, 为null表示无限制
+                        "positionIdList": [xx,xx,xx,xx],            //可以使用的投放地点id列表, 为null表示无限制
+                        "companyIdList": [xx,xx,xx,xx],            //可以使用的投放商id列表, 为null表示无限制
+                        "productIdList": [xx,xx,xx,xx],            //可以使用的产品id列表, 为null表示无限制
+                        "productTypeList": [xx,xx,xx]            //可以使用的产品类型, 为null表示无限制 (产品类型 0: 普通照片, 1: 证件照, 2: 模板拼图)
                     },
                     ...
                ]
@@ -401,7 +406,12 @@
                     "begin": "yyyy-MM-dd HH:mm:ss",  //生效日期时间
                     "expire": "yyyy-MM-dd HH:mm:ss", //失效日期时间
                     "minExpense": 1000,             //使用优惠券所需要的最小金额（分）
-                    "discount": 200                 //折扣金额（分）
+                    "discount": 200,                 //折扣金额（分）
+                    "printStationIdList": [xx,xx,xx,xx],        //可以使用的自助机id列表, 为null表示无限制
+                    "positionIdList": [xx,xx,xx,xx],            //可以使用的投放地点id列表, 为null表示无限制
+                    "companyIdList": [xx,xx,xx,xx],            //可以使用的投放商id列表, 为null表示无限制
+                    "productIdList": [xx,xx,xx,xx],            //可以使用的产品id列表, 为null表示无限制
+                    "productTypeList": [xx,xx,xx]            //可以使用的产品类型, 为null表示无限制 (产品类型 0: 普通照片, 1: 证件照, 2: 模板拼图)
                 }
            }
 ----

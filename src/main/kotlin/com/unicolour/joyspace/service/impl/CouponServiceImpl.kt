@@ -6,6 +6,8 @@ import com.unicolour.joyspace.dao.UserCouponDao
 import com.unicolour.joyspace.dao.UserLoginSessionDao
 import com.unicolour.joyspace.dto.ClaimCouponResult
 import com.unicolour.joyspace.dto.UserCouponListResult
+import com.unicolour.joyspace.model.Coupon
+import com.unicolour.joyspace.model.CouponConstrainsType
 import com.unicolour.joyspace.model.UserCoupon
 import com.unicolour.joyspace.service.CouponService
 import com.unicolour.joyspace.service.CouponValidateContext
@@ -104,6 +106,35 @@ class CouponServiceImpl : CouponService {
                 }
             }
         }
+
+    override fun getDataFetcher(fieldName: String): DataFetcher<Any> {
+        return DataFetcher<Any> { env ->
+            val coupon = env.getSource<Coupon>()
+            when (fieldName) {
+                "printStationIdList" -> {
+                    val constrains = coupon.constrains.filter { it.constrainsType == CouponConstrainsType.PRINT_STATION.value }
+                    if (constrains.isEmpty()) { null } else { constrains }
+                }
+                "positionIdList" -> {
+                    val constrains = coupon.constrains.filter { it.constrainsType == CouponConstrainsType.POSITION.value }
+                    if (constrains.isEmpty()) { null } else { constrains }
+                }
+                "companyIdList" -> {
+                    val constrains = coupon.constrains.filter { it.constrainsType == CouponConstrainsType.COMPANY.value }
+                    if (constrains.isEmpty()) { null } else { constrains }
+                }
+                "productIdList" -> {
+                    val constrains = coupon.constrains.filter { it.constrainsType == CouponConstrainsType.PRODUCT.value }
+                    if (constrains.isEmpty()) { null } else { constrains }
+                }
+                "productTypeList" -> {
+                    val constrains = coupon.constrains.filter { it.constrainsType == CouponConstrainsType.PRODUCT_TYPE.value }
+                    if (constrains.isEmpty()) { null } else { constrains }
+                }
+                else -> null
+            }
+        }
+    }
 
     override fun validateCoupon(context: CouponValidateContext,
                        vararg validateFuns: (CouponValidateContext) -> CouponValidateResult)

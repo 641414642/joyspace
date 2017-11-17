@@ -32,6 +32,11 @@ query {
             expire
             minExpense
             discount
+            printStationIdList
+            positionIdList
+            companyIdList
+            productIdList
+            productTypeList
 		}
 	}
 }
@@ -62,6 +67,11 @@ mutation {
             expire
             minExpense
             discount
+            printStationIdList
+            positionIdList
+            companyIdList
+            productIdList
+            productTypeList
 		}
 	}
 }
