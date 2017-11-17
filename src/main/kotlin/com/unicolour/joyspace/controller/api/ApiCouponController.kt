@@ -50,7 +50,7 @@ query {
 
         val query =
                 """
-claimCoupon {
+mutation {
 	claimCoupon(sessionId:"$sessionId", couponCode:"$couponCode") {
         errcode:result
         errmsg:description
