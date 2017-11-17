@@ -39,6 +39,8 @@ query {
         longitude
         latitude
         wxQrCode
+        positionId
+        companyId
 		products {
 			id
 			name

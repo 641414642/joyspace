@@ -178,6 +178,8 @@
                         "address": "xxxxx",
                         "longitude": xxxxx,
                         "latitude": xxxx,
+                        "positionId": xx,               //投放地点id
+                        "companyId": xx,                //投放商id
                         "transportation": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
                         "distance": xxx,              //距离指定经纬度的距离，单位米
                         "images" : [
@@ -192,6 +194,8 @@
                         "address": "xxxxx",
                         "longitude": xxxxx,
                         "latitude": xxxx,
+                        "positionId": xx,               //投放地点id
+                        "companyId": xx,                //投放商id
                         "transportation": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
                         "distance": xxx,              //距离指定经纬度的距离，单位米
                         "images" : [
@@ -207,6 +211,8 @@
                         "address": "xxxxx",
                         "longitude": xxxxx,
                         "latitude": xxxx,
+                        "positionId": xx,               //投放地点id
+                        "companyId": xx,                //投放商id
                         "transportation": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
                         "distance": xxx,             //距离指定经纬度的距离，单位米
                         "images" : [
@@ -332,6 +338,8 @@
                     "address": "xxxxx",
                     "longitude": xxxxx,
                     "latitude": xxxx,
+                    "positionId": xx,               //投放地点id
+                    "companyId": xx,                //投放商id
                     "transportation": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
                     "distance": xxx,              //距离指定经纬度的距离，单位米
                     "images" : [

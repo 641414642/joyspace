@@ -59,8 +59,10 @@
     "id": 1,
     "address": "北京市海淀区大柳树路17号富海中心2号富海大厦509",
     "wxQrCode": "https://test.uni-colour.com/printStation/1",
-    "longitude": 116.33511,
-    "latitude": 39.95392,
+    "longitude": 116.33511,         //自助机位置经度
+    "latitude": 39.95392,           //自助机位置维度
+    "positionId": xx,               //投放地点id
+    "companyId": xx,                //投放商id
     "products": [
         {
             "id": 1,                //产品ID

@@ -33,6 +33,8 @@ query {
         result: printStations {
                 id
                 name
+                positionId
+                companyId
                 address
                 longitude
                 latitude
@@ -73,6 +75,8 @@ query {
         result: printStation {
                 id
                 name
+                positionId
+                companyId
                 address
                 longitude
                 latitude

@@ -266,6 +266,12 @@ type PrintStation {
 
     #支持的产品列表
     products: [Product!]
+
+    #投放地点id
+    positionId: Int!
+
+    #投放商id
+    companyId: Int!
 }
 
 #用户上传图片
