@@ -8,6 +8,7 @@ import com.unicolour.joyspace.dto.ClaimCouponResult
 import com.unicolour.joyspace.dto.UserCouponListResult
 import com.unicolour.joyspace.model.Coupon
 import com.unicolour.joyspace.model.CouponConstrainsType
+import com.unicolour.joyspace.model.CouponGetMethod
 import com.unicolour.joyspace.model.UserCoupon
 import com.unicolour.joyspace.service.CouponService
 import com.unicolour.joyspace.service.CouponValidateContext
@@ -18,9 +19,10 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 import org.springframework.transaction.support.TransactionTemplate
 import java.util.*
+import javax.transaction.Transactional
 
 @Component
-class CouponServiceImpl : CouponService {
+open class CouponServiceImpl : CouponService {
     @Autowired
     lateinit var userLoginSessionDao: UserLoginSessionDao
 
@@ -184,6 +186,47 @@ class CouponServiceImpl : CouponService {
         }
         else {
             return VALID
+        }
+    }
+
+    @Transactional
+    override fun createCoupon(name: String, code: String, couponGetMethod: CouponGetMethod, maxUses: Int,
+                              maxUsesPerUser: Int, minExpense: Int, discount: Int, begin: Date, expire: Date) {
+        val coupon = Coupon()
+        coupon.name = name
+        coupon.code = code
+        coupon.getMethod = couponGetMethod.value
+        coupon.maxUses = maxUses
+        coupon.maxUsesPerUser = maxUsesPerUser
+        coupon.minExpense = minExpense
+        coupon.discount = discount
+        coupon.begin = begin
+        coupon.expire = expire
+
+        couponDao.save(coupon)
+    }
+
+    @Transactional
+    override fun updateCoupon(id: Int, name: String, code: String, couponGetMethod: CouponGetMethod, maxUses: Int,
+                              maxUsesPerUser: Int, minExpense: Int, discount: Int, begin: Date, expire: Date): Boolean {
+        val coupon = couponDao.findOne(id)
+        if (coupon == null) {
+            return false
+        }
+        else {
+            coupon.name = name
+            coupon.code = code
+            coupon.getMethod = couponGetMethod.value
+            coupon.maxUses = maxUses
+            coupon.maxUsesPerUser = maxUsesPerUser
+            coupon.minExpense = minExpense
+            coupon.discount = discount
+            coupon.begin = begin
+            coupon.expire = expire
+
+            couponDao.save(coupon)
+
+            return true
         }
     }
 }

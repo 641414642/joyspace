@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<meta charset="utf-8" />
+</head>
+<body>
+<div th:fragment="content">
+	<!-- Content Header (Page header) -->
+	<section class="content-header">
+		<h1>优惠券列表</h1>
+		<ol class="breadcrumb">
+			<li class="active">产品管理</li>
+			<li class="active">优惠券列表</li>
+		</ol>
+	</section>
+
+	<!-- Main content -->
+	<section class="content">
+		<div class="box">
+			<div class="box-header with-border">
+				<form th:action="@{/coupon/list}" method="get" target="_self">
+					<input type="hidden" id="pageNoField" name="pageno" />
+					<div class="form-inline">
+						<label class="form-label">名称</label>
+						<input class="form-control" type="text" name="name" th:value="${inputCouponName}" />
+						&nbsp;&nbsp;
+						<button type="submit" class="btn btn-default btn-sm">查询</button>
+						<a href="#" th:href="@{/coupon/list}" class="btn btn-default btn-sm">重置</a>
+
+						<div class="pull-right">
+							<a href="#" th:attr="data-url=@{/coupon/edit(id=0)}" class="btn btn-primary btn-sm" onclick="return createOrEditCoupon(event, true)">新建</a>
+						</div>
+					</div>
+				</form>
+			</div>
+
+			<div class="box-body">
+				<table class="table table-bordered table-striped">
+					<tr>
+						<th>ID</th>
+						<th>名称</th>
+						<th>代码</th>
+						<th>类型</th>
+						<th>有效期</th>
+						<th>领取 / 使用 / 最大使用次数</th>
+						<th>优惠</th>
+						<th>操作</th>
+					</tr>
+					<tr th:each="coupon : ${coupons}">
+						<td th:text="${coupon.id}"></td>
+						<td th:text="${coupon.name}"></td>
+						<td th:text="${coupon.code}"></td>
+						<th:block th:switch="${coupon.getMethod}">
+							<td th:case="1">自动获取</td>
+							<td th:case="2">输入代码获取</td>
+							<td th:case="3">扫码获取</td>
+						</th:block>
+						<td>
+							<span th:if="${coupon.begin != null}" th:text="${#calendars.format(coupon.begin, 'yyyy-MM-dd')}"></span>
+							<span> ~ </span>
+							<span th:if="${coupon.expire != null}" th:text="${#calendars.format(coupon.expire, 'yyyy-MM-dd')}"></span>
+						</td>
+						<td>
+							<span th:text="${coupon.claimCount}"></span>
+							<span> / </span>
+							<span th:text="${coupon.usageCount}"></span>
+							<span> / </span>
+							<span th:text="${coupon.maxUses}"></span>
+						</td>
+						<td>
+							<span th:text="${#numbers.formatDecimal(coupon.minExpense / 100.0, 1, 'DEFAULT', 2, 'DEFAULT')}"></span>
+							<span> - </span>
+							<span th:text="${#numbers.formatDecimal(coupon.discount / 100.0, 1, 'DEFAULT', 2, 'DEFAULT')}"></span>
+						</td>
+						<td>
+							<a href="#" th:attr="data-url=@{/coupon/edit(id=${coupon.id},mode='edit')}" onclick="return createOrEditCoupon(event, true)" style="padding-right:5px">编辑</a>
+						</td>
+					</tr>
+				</table>
+			</div>
+
+			<div class="box-footer clearfix" th:include="pager :: content(${pager}, 'pageNoField')">
+			</div>
+		</div>
+	</section>
+
+	<script src="../../static/js/product.js" th:src="@{/js/product.js}"></script>
+</div>
+</body>
+</html>

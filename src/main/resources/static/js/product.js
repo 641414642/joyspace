@@ -71,6 +71,45 @@ function createOrEditPriceList(event) {
     return showPostFormModal(event, 'editPriceListForm', null, true);
 }
 
+//添加编辑优惠券
+function createOrEditCoupon(event) {
+    $('#modalTemplate').removeClass().addClass("modal fade");
+
+    showModal(event, function() {
+        var frm = $('#editCouponForm');
+        frm
+            .find('.date_picker')
+            .datepicker({
+                format: 'yyyy-mm-dd',
+                startView: 0,
+                todayHighlight: true,
+                weekStart: 1,
+                language: 'zh-CN',
+                autoclose: true,
+                todayBtn: true
+            });
+        frm.submit(function (ev) {
+            //if (typeof validateFunc !== "function" || validateFunc()) {
+                $.ajax({
+                    type: frm.attr('method'),
+                    url: frm.attr('action'),
+                    data: frm.serialize(),
+                    success: function (data) {
+                        $('#modalTemplate').modal('hide');
+                        window.location.reload();
+                    }
+                });
+            //}
+
+            ev.preventDefault();
+        });
+    });
+
+    return false;
+
+//    return showPostFormModal(event, 'editCouponForm', null, true);
+}
+
 //显示二维码
 function showPrintStationQrCode(event) {
     var source = event.target || event.srcElement;

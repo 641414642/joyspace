@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta charset="utf-8" />
+    <!-- Bootstrap 3.3.6 -->
+    <link rel="stylesheet" href="../../static/thirdparty/bootstrap/css/bootstrap.min.css" th:href="@{/thirdparty/bootstrap/css/bootstrap.min.css}" />
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="../../static/thirdparty/fontawesome/css/font-awesome.min.css" th:href="@{/thirdparty/fontawesome/css/font-awesome.min.css}" />
+    <!-- Ionicons -->
+    <link rel="stylesheet" href="../../static/thirdparty/ionicons/css/ionicons.min.css" th:href="@{/thirdparty/ionicons/css/ionicons.min.css}" />
+    <!-- Theme style -->
+    <link rel="stylesheet" href="../../static/thirdparty/adminlte/css/AdminLTE.min.css" th:href="@{/thirdparty/adminlte/css/AdminLTE.min.css}" />
+    <!-- AdminLTE Skins. Choose a skin from the css/skins
+         folder instead of downloading all of them to reduce the load. -->
+    <link rel="stylesheet" href="../../static/thirdparty/adminlte/css/skins/_all-skins.min.css" th:href="@{/thirdparty/adminlte/css/skins/_all-skins.min.css}" />
+
+    <link rel="stylesheet" href="../static/css/bootstrap-datepicker3.css" th:href="@{/css/bootstrap-datepicker3.min.css}" />
+
+    <!-- jQuery 2.2.3 -->
+    <script src="../../static/thirdparty/plugins/jQuery/jquery-2.2.3.min.js" th:src="@{/thirdparty/plugins/jQuery/jquery-2.2.3.min.js}"></script>
+    <!-- Bootstrap 3.3.6 -->
+    <script src="../../static/thirdparty/bootstrap/js/bootstrap.min.js" th:src="@{/thirdparty/bootstrap/js/bootstrap.min.js}"></script>
+    <!-- SlimScroll -->
+    <script src="../../static/thirdparty/plugins/slimScroll/jquery.slimscroll.min.js" th:src="@{/thirdparty/plugins/slimScroll/jquery.slimscroll.min.js}"></script>
+    <!-- FastClick -->
+    <script src="../../static/thirdparty/plugins/fastclick/fastclick.js" th:src="@{/thirdparty/plugins/fastclick/fastclick.js}"></script>
+    <!-- AdminLTE App -->
+    <script src="../../static/thirdparty/adminlte/js/app.min.js" th:src="@{/thirdparty/adminlte/js/app.min.js}"></script>
+    <!-- datepicker -->
+    <script src="../../static/js/bootstrap-datepicker.min.js" th:src="@{/js/bootstrap-datepicker.min.js}"></script>
+
+    <script type="text/javascript">
+		$(document).ready(function() {
+			$('#editDialog').modal('show');
+		});
+	</script>
+</head>
+<body>
+<div class="modal fade" role="dialog" id="editDialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content" th:fragment="content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+                <h4 class="modal-title" th:text="${create ? '新建' : '修改'}"></h4>
+            </div>
+            <form id="editCouponForm" target="_blank" th:action="@{/coupon/edit}" method="post" enctype="multipart/form-data">
+                <input type="hidden" name="id" th:value="${coupon.id}" />
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="name" class="control-label">名称:</label>
+                        <input type="text" name="name" class="form-control" id="name" th:value="${coupon.name}" />
+                        <span class="help-block"></span>
+                    </div>
+                    <div class="form-group">
+                        <label for="code" class="control-label">代码:</label>
+                        <input type="text" name="code" class="form-control" id="code" th:value="${coupon.code}" />
+                        <span class="help-block"></span>
+                    </div>
+                    <div class="form-group">
+                        <label for="getMethod" class="control-label">获取方式:</label>
+                        <select name="getMethod" class="form-control" id="getMethod">
+                            <option th:each="m : ${getMethods}"
+                                    th:value="${m.value}"
+                                    th:text="${m.dispName}"
+                                    th:selected="${m.value == coupon.getMethod}">
+                            </option>
+                        </select>
+                        <span class="help-block"></span>
+                    </div>
+                    <div class="form-group">
+                        <label for="maxUses" class="control-label">最大使用次数(0表示无限制):</label>
+                        <input type="text" name="maxUses" class="form-control" id="maxUses" th:value="${coupon.maxUses}" />
+                        <span class="help-block"></span>
+                    </div>
+                    <div class="form-group">
+                        <label for="maxUsesPerUser" class="control-label">每用户最大使用次数(0表示无限制):</label>
+                        <input type="text" name="maxUsesPerUser" class="form-control" id="maxUsesPerUser" th:value="${coupon.maxUsesPerUser}" />
+                        <span class="help-block"></span>
+                    </div>
+                    <div class="form-group">
+                        <label for="begin" class="control-label">有效期:</label>
+                        <div class="input-group input-daterange">
+                            <input type="text" name="begin" id="begin" class="form-control date_picker"
+                                   th:value="${#calendars.format(coupon.begin, 'yyyy-MM-dd')}" />
+                            <div class="input-group-addon">到</div>
+                            <input type="text" name="expire" class="form-control date_picker"
+                                   th:value="${#calendars.format(coupon.expire, 'yyyy-MM-dd')}" />
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="minExpense" class="control-label">最低消费(元):</label>
+                        <input type="text" name="minExpense" class="form-control" id="minExpense" th:value="${coupon.minExpense/100.0}" />
+                        <span class="help-block"></span>
+                    </div>
+                    <div class="form-group">
+                        <label for="discount" class="control-label">折扣金额(元):</label>
+                        <input type="text" name="discount" class="form-control" id="discount" th:value="${coupon.discount/100.0}" />
+                        <span class="help-block"></span>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary">确定</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+</body>
+</html>

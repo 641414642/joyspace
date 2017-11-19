@@ -4,8 +4,10 @@ import com.unicolour.joyspace.dto.ClaimCouponResult
 import com.unicolour.joyspace.dto.UserCouponListResult
 import com.unicolour.joyspace.model.Coupon
 import com.unicolour.joyspace.model.CouponConstrains
+import com.unicolour.joyspace.model.CouponGetMethod
 import com.unicolour.joyspace.model.UserCoupon
 import graphql.schema.DataFetcher
+import java.util.*
 
 enum class CouponValidateResult(val desc:String) {
     VALID("有效"),
@@ -58,4 +60,11 @@ interface CouponService {
                        vararg validateFuns: (CouponValidateContext) -> CouponValidateResult): CouponValidateResult
 
     fun getDataFetcher(fieldName:String): DataFetcher<Any>
+
+    fun createCoupon(name: String, code: String, couponGetMethod: CouponGetMethod,
+                     maxUses: Int, maxUsesPerUser: Int, minExpense: Int, discount: Int,
+                     begin: Date, expire: Date)
+    fun updateCoupon(id: Int, name: String, code: String, couponGetMethod: CouponGetMethod,
+                     maxUses: Int, maxUsesPerUser: Int, minExpense: Int, discount: Int,
+                     begin: Date, expire: Date): Boolean
 }
