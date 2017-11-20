@@ -63,7 +63,7 @@ class Coupon {
     @NotNull
     var discount: Int = 0         //折扣金额（分）
 
-    @OneToMany(mappedBy = "couponId", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "couponId")
     lateinit var constrains: List<CouponConstrains>
 
 }

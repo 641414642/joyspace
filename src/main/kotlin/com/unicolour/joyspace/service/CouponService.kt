@@ -2,10 +2,7 @@ package com.unicolour.joyspace.service
 
 import com.unicolour.joyspace.dto.ClaimCouponResult
 import com.unicolour.joyspace.dto.UserCouponListResult
-import com.unicolour.joyspace.model.Coupon
-import com.unicolour.joyspace.model.CouponConstrains
-import com.unicolour.joyspace.model.CouponGetMethod
-import com.unicolour.joyspace.model.UserCoupon
+import com.unicolour.joyspace.model.*
 import graphql.schema.DataFetcher
 import java.util.*
 
@@ -63,8 +60,17 @@ interface CouponService {
 
     fun createCoupon(name: String, code: String, couponGetMethod: CouponGetMethod,
                      maxUses: Int, maxUsesPerUser: Int, minExpense: Int, discount: Int,
-                     begin: Date, expire: Date)
+                     begin: Date, expire: Date,
+                     selectedProductTypes: Set<ProductType>,
+                     selectedProductIds: Set<Int>,
+                     selectedPositionIds: Set<Int>,
+                     selectedPrintStationIds: Set<Int>)
+
     fun updateCoupon(id: Int, name: String, code: String, couponGetMethod: CouponGetMethod,
                      maxUses: Int, maxUsesPerUser: Int, minExpense: Int, discount: Int,
-                     begin: Date, expire: Date): Boolean
+                     begin: Date, expire: Date,
+                     selectedProductTypes: Set<ProductType>,
+                     selectedProductIds: Set<Int>,
+                     selectedPositionIds: Set<Int>,
+                     selectedPrintStationIds: Set<Int>): Boolean
 }

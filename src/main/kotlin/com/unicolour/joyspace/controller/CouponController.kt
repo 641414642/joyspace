@@ -1,8 +1,16 @@
 package com.unicolour.joyspace.controller
 
 import com.unicolour.joyspace.dao.CouponDao
+import com.unicolour.joyspace.dao.PositionDao
+import com.unicolour.joyspace.dao.PrintStationDao
+import com.unicolour.joyspace.dao.ProductDao
+import com.unicolour.joyspace.dto.PositionItem
+import com.unicolour.joyspace.dto.PrintStationItem
+import com.unicolour.joyspace.dto.ProductItem
+import com.unicolour.joyspace.dto.ProductTypeItem
 import com.unicolour.joyspace.model.*
 import com.unicolour.joyspace.service.CouponService
+import com.unicolour.joyspace.service.ManagerService
 import com.unicolour.joyspace.util.Pager
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.PageRequest
@@ -18,6 +26,7 @@ import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
 import java.util.*
+import javax.servlet.http.HttpServletRequest
 
 @Controller
 class CouponController {
@@ -27,6 +36,18 @@ class CouponController {
 
     @Autowired
     lateinit var couponDao: CouponDao
+
+    @Autowired
+    lateinit var productDao: ProductDao
+
+    @Autowired
+    lateinit var positionDao: PositionDao
+
+    @Autowired
+    lateinit var printStationDao: PrintStationDao
+
+    @Autowired
+    lateinit var managerService: ManagerService
 
     @RequestMapping("/coupon/list")
     fun couponList(
@@ -58,6 +79,43 @@ class CouponController {
     fun editCoupon(
             modelAndView: ModelAndView,
             @RequestParam(name = "id", required = true) id: Int): ModelAndView {
+
+        val loginManager = managerService.loginManager
+
+        var supportedProductTypes: Set<Int> = emptySet<Int>()
+        var supportedProductIdSet: Set<Int> = emptySet<Int>()
+        var supportedPositionIdSet: Set<Int> = emptySet<Int>()
+        var supportedPrintStationIdSet: Set<Int> = emptySet<Int>()
+
+        if (id > 0) {
+            val coupon = couponDao.findOne(id)
+            supportedProductTypes = coupon.constrains
+                    .filter { it.constrainsType == CouponConstrainsType.PRODUCT_TYPE.value }
+                    .map { it.value }
+                    .toHashSet()
+            supportedProductIdSet = coupon.constrains
+                    .filter { it.constrainsType == CouponConstrainsType.PRODUCT.value }
+                    .map { it.value }
+                    .toHashSet()
+            supportedPositionIdSet = coupon.constrains
+                    .filter { it.constrainsType == CouponConstrainsType.POSITION.value }
+                    .map { it.value }
+                    .toHashSet()
+            supportedPrintStationIdSet = coupon.constrains
+                    .filter { it.constrainsType == CouponConstrainsType.PRINT_STATION.value }
+                    .map { it.value }
+                    .toHashSet()
+        }
+
+        val allProductTypes = ProductType.values()
+                .map { ProductTypeItem(it.value, it.dispName, supportedProductTypes.contains(it.value)) }
+        val allProducts = productDao.findByCompanyId(loginManager!!.companyId)
+                .map { ProductItem(it.id, it.name, it.template.name, supportedProductIdSet.contains(it.id)) }
+        val allPositions = positionDao.findByCompanyId(loginManager.companyId)
+                .map { PositionItem(it.id, it.name, it.address, supportedPositionIdSet.contains(it.id)) }
+        val allPrintStations = printStationDao.findByCompanyId(loginManager.companyId)
+                .map { PrintStationItem(it.id, "自助机${it.id}", it.position.name, supportedPrintStationIdSet.contains(it.id)) }
+
         var coupon: Coupon? = null
         if (id > 0) {
             coupon = couponDao.findOne(id)
@@ -75,6 +133,13 @@ class CouponController {
 
         modelAndView.model["coupons"] = couponDao.findAll()
         modelAndView.model["getMethods"] = CouponGetMethod.values()
+        modelAndView.model["productTypes"] = allProductTypes
+        modelAndView.model["products"] = allProducts
+        modelAndView.model["positions"] = allPositions
+        modelAndView.model["printStations"] = allPrintStations
+        modelAndView.model.put("productIds", allProducts.map { it.productId }.joinToString(separator = ","))
+        modelAndView.model.put("positionIds", allPositions.map { it.positionId }.joinToString(separator = ","))
+        modelAndView.model.put("printStationIds", allPrintStations.map { it.printStationId }.joinToString(separator = ","))
 
         modelAndView.model.put("create", id <= 0)
         modelAndView.model.put("coupon", coupon)
@@ -86,29 +151,54 @@ class CouponController {
     @RequestMapping(path = arrayOf("/coupon/edit"), method = arrayOf(RequestMethod.POST))
     @ResponseBody
     fun editCoupon(
+            request: HttpServletRequest,
             @RequestParam(name = "id", required = true) id: Int,
             @RequestParam(name = "name", required = true) name: String,
             @RequestParam(name = "code", required = true) code: String,
             @RequestParam(name = "getMethod", required = true) getMethod: Int,
             @RequestParam(name = "maxUses", required = true) maxUses: Int,
             @RequestParam(name = "maxUsesPerUser", required = true) maxUsesPerUser: Int,
-            @RequestParam(name = "minExpense", required = true) minExpense: Int,
-            @RequestParam(name = "discount", required = true) discount: Int,
+            @RequestParam(name = "minExpense", required = true) minExpense: Double,
+            @RequestParam(name = "discount", required = true) discount: Double,
             @RequestParam(name = "begin", required = true) begin: String,
-            @RequestParam(name = "expire", required = true) expire: String
+            @RequestParam(name = "expire", required = true) expire: String,
+            @RequestParam(name = "productIds", required = true) productIds: String,
+            @RequestParam(name = "positionIds", required = true) positionIds: String,
+            @RequestParam(name = "printStationIds", required = true) printStationIds: String
     ): Boolean {
+
+        val selectedProductTypes = ProductType.values()
+                .filter { !request.getParameter("productType_${it.value}").isNullOrBlank() }
+                .toSet()
+        val selectedProductIds = productIds
+                .split(',')
+                .filter { !request.getParameter("product_${it}").isNullOrBlank() }
+                .map { it.toInt() }
+                .toSet()
+        val selectedPositionIds = positionIds
+                .split(',')
+                .filter { !request.getParameter("position_${it}").isNullOrBlank() }
+                .map { it.toInt() }
+                .toSet()
+        val selectedPrintStationIds = printStationIds
+                .split(',')
+                .filter { !request.getParameter("printStation_${it}").isNullOrBlank() }
+                .map { it.toInt() }
+                .toSet()
 
         val df = SimpleDateFormat("yyyy-MM-dd")
         val couponGetMethod = CouponGetMethod.values().find{ it.value == getMethod }
         if (id <= 0) {
             couponService.createCoupon(name, code, couponGetMethod!!, maxUses, maxUsesPerUser,
-                    minExpense * 100, discount * 100,
-                    df.parse(begin), df.parse(expire))
+                    (minExpense * 100).toInt(), (discount * 100).toInt(),
+                    df.parse(begin), df.parse(expire),
+                    selectedProductTypes, selectedProductIds, selectedPositionIds, selectedPrintStationIds)
             return true
         } else {
             return couponService.updateCoupon(id, name, code, couponGetMethod!!, maxUses, maxUsesPerUser,
-                    minExpense * 100, discount * 100,
-                    df.parse(begin), df.parse(expire))
+                    (minExpense * 100).toInt(), (discount * 100).toInt(),
+                    df.parse(begin), df.parse(expire),
+                    selectedProductTypes, selectedProductIds, selectedPositionIds, selectedPrintStationIds)
         }
     }
 }

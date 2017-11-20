@@ -12,4 +12,5 @@ interface PositionDao : PagingAndSortingRepository<Position, Int> {
     fun findByCompanyIdAndName(@Param("companyId") companyId: Int, @Param("name") name: String, pageable: Pageable): Page<Position>
 
     fun findByCompanyId(companyId: Int, pageable: Pageable): Page<Position>
+    fun findByCompanyId(companyId: Int): List<Position>
 }

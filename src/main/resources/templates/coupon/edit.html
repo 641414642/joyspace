@@ -46,6 +46,9 @@
             </div>
             <form id="editCouponForm" target="_blank" th:action="@{/coupon/edit}" method="post" enctype="multipart/form-data">
                 <input type="hidden" name="id" th:value="${coupon.id}" />
+                <input type="hidden" name="productIds" th:value="${productIds}" />
+                <input type="hidden" name="positionIds" th:value="${positionIds}" />
+                <input type="hidden" name="printStationIds" th:value="${printStationIds}" />
                 <div class="modal-body">
                     <div class="form-group">
                         <label for="name" class="control-label">名称:</label>
@@ -97,6 +100,55 @@
                         <label for="discount" class="control-label">折扣金额(元):</label>
                         <input type="text" name="discount" class="form-control" id="discount" th:value="${coupon.discount/100.0}" />
                         <span class="help-block"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="control-label">投放地点:</label>
+                        <div>
+                            <div style="display:inline-block; margin-right:20px" class="checkbox" th:each="position : ${positions}">
+                                <label>
+                                    <input type="checkbox" th:checked="${position.selected}"
+                                           th:name="${'position_' + position.positionId}"
+                                           th:text="${position.positionName + ' (' + position.address + ')'}"/>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label">自助机:</label>
+                        <div>
+                            <div style="display:inline-block; margin-right:20px" class="checkbox" th:each="printStation : ${printStations}">
+                                <label>
+                                    <input type="checkbox" th:checked="${printStation.selected}"
+                                           th:name="${'printStation_' + printStation.printStationId}"
+                                           th:text="${printStation.printStationName + ' (' + printStation.address + ')'}"/>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label">产品类型:</label>
+                        <div>
+                            <div style="display:inline-block; margin-right:20px" class="checkbox" th:each="productType : ${productTypes}">
+                                <label>
+                                    <input type="checkbox" th:checked="${productType.selected}"
+                                           th:name="${'productType_' + productType.productTypeId}"
+                                           th:text="${productType.productTypeName}"/>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label">产品:</label>
+                        <div>
+                            <div style="display:inline-block; margin-right:20px" class="checkbox" th:each="product : ${products}">
+                                <label>
+                                    <input type="checkbox" th:checked="${product.selected}"
+                                           th:name="${'product_' + product.productId}"
+                                           th:text="${product.productName + ' (' + product.templateName + ')'}"/>
+                                </label>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div class="modal-footer">

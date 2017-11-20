@@ -111,6 +111,6 @@ class PrintOrderItem {
     @NotNull
     var copies: Int = 0
 
-    @OneToMany(mappedBy = "orderItemId", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "orderItemId")
     lateinit var orderImages: List<PrintOrderImage>
 }

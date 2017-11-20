@@ -4,6 +4,7 @@ import com.unicolour.joyspace.dao.PositionDao
 import com.unicolour.joyspace.dao.PrintStationDao
 import com.unicolour.joyspace.dao.PrintStationProductDao
 import com.unicolour.joyspace.dao.ProductDao
+import com.unicolour.joyspace.dto.ProductItem
 import com.unicolour.joyspace.model.PrintStation
 import com.unicolour.joyspace.service.ManagerService
 import com.unicolour.joyspace.service.PrintStationService
@@ -70,6 +71,7 @@ class PrintStationController {
             modelAndView: ModelAndView,
             @RequestParam(name = "id", required = true) id: Int
     ): ModelAndView {
+        val loginManager = managerService.loginManager
 
         var supportedProductIdSet: Set<Int> = emptySet<Int>()
 
@@ -83,7 +85,8 @@ class PrintStationController {
             printStation = PrintStation()
         }
 
-        val allProducts = productDao.findAll().map { ProductItem(it.id, it.name, it.template.name, supportedProductIdSet.contains(it.id)) }
+        val allProducts = productDao.findByCompanyId(loginManager!!.companyId)
+                .map { ProductItem(it.id, it.name, it.template.name, supportedProductIdSet.contains(it.id)) }
 
         modelAndView.model.put("create", id <= 0)
         modelAndView.model.put("printStation", printStation)
@@ -137,10 +140,3 @@ class PrintStationController {
         return modelAndView
     }
 }
-
-class ProductItem(
-        val productId: Int,
-        val productName: String,
-        val templateName: String,
-        val selected: Boolean
-)
