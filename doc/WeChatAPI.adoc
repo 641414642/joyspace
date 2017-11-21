@@ -368,8 +368,8 @@
                         "id": 1,                 //优惠券id
                         "name": "xxxxxxxxxx",    //名称
                         "code": "xxxxxxx"        //编码
-                        "begin": "yyyy-MM-dd HH:mm:ss",  //生效日期时间
-                        "expire": "yyyy-MM-dd HH:mm:ss", //失效日期时间
+                        "begin": "yyyy-MM-dd HH",  //生效日期时间，精确到小时
+                        "expire": "yyyy-MM-dd HH", //失效日期时间，精确到小时
                         "minExpense": 1000,             //使用优惠券所需要的最小金额（分）
                         "discount": 200,                 //折扣金额（分）
                         "printStationIdList": [xx,xx,xx,xx],        //可以使用的自助机id列表, 为null表示无限制
@@ -403,8 +403,8 @@
                     "id": 1,                 //优惠券id
                     "name": "xxxxxxxxxx",    //名称
                     "code": "xxxxxxx"        //编码
-                    "begin": "yyyy-MM-dd HH:mm:ss",  //生效日期时间
-                    "expire": "yyyy-MM-dd HH:mm:ss", //失效日期时间
+                    "begin": "yyyy-MM-dd HH",  //生效日期时间，精确到小时
+                    "expire": "yyyy-MM-dd HH", //失效日期时间，精确到小时
                     "minExpense": 1000,             //使用优惠券所需要的最小金额（分）
                     "discount": 200,                 //折扣金额（分）
                     "printStationIdList": [xx,xx,xx,xx],        //可以使用的自助机id列表, 为null表示无限制

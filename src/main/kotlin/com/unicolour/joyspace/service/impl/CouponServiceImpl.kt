@@ -130,6 +130,18 @@ open class CouponServiceImpl : CouponService {
                     val constrains = coupon.constrains.filter { it.constrainsType == CouponConstrainsType.PRODUCT_TYPE.value }
                     if (constrains.isEmpty()) { null } else { constrains.map { it.value } }
                 }
+                "begin" -> {
+                    if (coupon.begin == null)
+                        null
+                    else
+                        String.format("%1\$tY-%1\$tm-%1\$td %1\$tH", coupon.begin)
+                }
+                "expire" -> {
+                    if (coupon.expire == null)
+                        null
+                    else
+                        String.format("%1\$tY-%1\$tm-%1\$td %1\$tH", coupon.expire)
+                }
                 else -> null
             }
         }

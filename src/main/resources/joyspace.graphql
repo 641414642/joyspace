@@ -369,10 +369,10 @@ type Coupon {
     #编码
     code: String
 
-    #生效日期时间 (yyyy-MM-dd HH:mm:ss)
+    #生效日期时间 (yyyy-MM-dd HH)
     begin: String
 
-    #失效日期时间 (yyyy-MM-dd HH:mm:ss)
+    #失效日期时间 (yyyy-MM-dd HH)
     expire: String
 
     #使用优惠券所需要的最小金额（分）

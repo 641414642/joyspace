@@ -135,6 +135,8 @@ class GraphQLServiceImpl : GraphQLService {
                     typeWiring.dataFetcher("companyIdList", couponService.getDataFetcher("companyIdList"))
                     typeWiring.dataFetcher("productIdList", couponService.getDataFetcher("productIdList"))
                     typeWiring.dataFetcher("productTypeList", couponService.getDataFetcher("productTypeList"))
+                    typeWiring.dataFetcher("begin", couponService.getDataFetcher("begin"))
+                    typeWiring.dataFetcher("expire", couponService.getDataFetcher("expire"))
                 })
                 .build()
     }
