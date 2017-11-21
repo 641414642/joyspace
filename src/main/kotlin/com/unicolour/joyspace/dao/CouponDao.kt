@@ -8,7 +8,7 @@ import org.springframework.data.repository.PagingAndSortingRepository
 import org.springframework.data.repository.query.Param
 
 interface CouponDao : PagingAndSortingRepository<Coupon, Int> {
-    fun findByIdIn(idList: List<Int>): List<Coupon>
+    fun findByIdInOrderByDiscountDesc(idList: List<Int>): List<Coupon>
     fun findByCode(code: String): Coupon
 
     @Query("SELECT t FROM Coupon t WHERE LOWER(t.name) LIKE LOWER(CONCAT('%', :name, '%'))")

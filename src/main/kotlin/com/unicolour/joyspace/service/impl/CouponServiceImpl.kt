@@ -49,7 +49,7 @@ open class CouponServiceImpl : CouponService {
                 else {
                     val userCoupons = userCouponDao.findByUserId(session.userId)
                     UserCouponListResult(0, null,
-                            couponDao.findByIdIn(userCoupons.map { it.couponId }))
+                            couponDao.findByIdInOrderByDiscountDesc(userCoupons.map { it.couponId }))
                 }
             }
         }
