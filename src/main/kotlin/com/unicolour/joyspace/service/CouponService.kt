@@ -78,7 +78,7 @@ interface CouponService {
 
     fun createCoupon(name: String, code: String, couponClaimMethod: CouponClaimMethod,
                      maxUses: Int, maxUsesPerUser: Int, minExpense: Int, discount: Int,
-                     begin: Date, expire: Date,
+                     begin: Date, expire: Date, userRegDays: Int,
                      selectedProductTypes: Set<ProductType>,
                      selectedProductIds: Set<Int>,
                      selectedPositionIds: Set<Int>,
@@ -86,7 +86,7 @@ interface CouponService {
 
     fun updateCoupon(id: Int, name: String, code: String, couponClaimMethod: CouponClaimMethod,
                      maxUses: Int, maxUsesPerUser: Int, minExpense: Int, discount: Int,
-                     begin: Date, expire: Date,
+                     begin: Date, expire: Date, userRegDays: Int,
                      selectedProductTypes: Set<ProductType>,
                      selectedProductIds: Set<Int>,
                      selectedPositionIds: Set<Int>,

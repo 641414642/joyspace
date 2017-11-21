@@ -103,6 +103,12 @@
                     </div>
 
                     <div class="form-group">
+                        <label for="userRegDays" class="control-label">用户注册天数(0表示无限制):</label>
+                        <input type="text" name="userRegDays" class="form-control" id="userRegDays" th:value="${userRegDays}" />
+                        <span class="help-block"></span>
+                    </div>
+
+                    <div class="form-group">
                         <label class="control-label">投放地点:</label>
                         <div>
                             <div style="display:inline-block; margin-right:20px" class="checkbox" th:each="position : ${positions}">

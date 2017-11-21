@@ -268,7 +268,7 @@ open class CouponServiceImpl : CouponService {
 
     @Transactional
     override fun createCoupon(name: String, code: String, couponClaimMethod: CouponClaimMethod, maxUses: Int,
-                              maxUsesPerUser: Int, minExpense: Int, discount: Int, begin: Date, expire: Date,
+                              maxUsesPerUser: Int, minExpense: Int, discount: Int, begin: Date, expire: Date, userRegDays: Int,
                               selectedProductTypes: Set<ProductType>,
                               selectedProductIds: Set<Int>,
                               selectedPositionIds: Set<Int>,
@@ -286,43 +286,52 @@ open class CouponServiceImpl : CouponService {
 
         couponDao.save(coupon)
 
+        if (userRegDays > 0) {
+            val cc = CouponConstrains()
+            cc.constrainsType = CouponConstrainsType.USER_REG_DAYS.value
+            cc.couponId = coupon.id
+            cc.value = userRegDays
+
+            couponConstrainsDao.save(cc)
+        }
+
         couponConstrainsDao.save(
                 selectedProductTypes.map {
-                    val couponProduct = CouponConstrains()
-                    couponProduct.constrainsType = CouponConstrainsType.PRODUCT_TYPE.value
-                    couponProduct.couponId = coupon.id
-                    couponProduct.value = it.value
-                    couponProduct
+                    val cc = CouponConstrains()
+                    cc.constrainsType = CouponConstrainsType.PRODUCT_TYPE.value
+                    cc.couponId = coupon.id
+                    cc.value = it.value
+                    cc
                 })
         couponConstrainsDao.save(
                 selectedProductIds.map {
-                    val couponProduct = CouponConstrains()
-                    couponProduct.constrainsType = CouponConstrainsType.PRODUCT.value
-                    couponProduct.couponId = coupon.id
-                    couponProduct.value = it
-                    couponProduct
+                    val cc = CouponConstrains()
+                    cc.constrainsType = CouponConstrainsType.PRODUCT.value
+                    cc.couponId = coupon.id
+                    cc.value = it
+                    cc
                 })
         couponConstrainsDao.save(
                 selectedPositionIds.map {
-                    val couponProduct = CouponConstrains()
-                    couponProduct.constrainsType = CouponConstrainsType.POSITION.value
-                    couponProduct.couponId = coupon.id
-                    couponProduct.value = it
-                    couponProduct
+                    val cc = CouponConstrains()
+                    cc.constrainsType = CouponConstrainsType.POSITION.value
+                    cc.couponId = coupon.id
+                    cc.value = it
+                    cc
                 })
         couponConstrainsDao.save(
                 selectedPrintStationIds.map {
-                    val couponProduct = CouponConstrains()
-                    couponProduct.constrainsType = CouponConstrainsType.PRINT_STATION.value
-                    couponProduct.couponId = coupon.id
-                    couponProduct.value = it
-                    couponProduct
+                    val cc = CouponConstrains()
+                    cc.constrainsType = CouponConstrainsType.PRINT_STATION.value
+                    cc.couponId = coupon.id
+                    cc.value = it
+                    cc
                 })
     }
 
     @Transactional
     override fun updateCoupon(id: Int, name: String, code: String, couponClaimMethod: CouponClaimMethod, maxUses: Int,
-                              maxUsesPerUser: Int, minExpense: Int, discount: Int, begin: Date, expire: Date,
+                              maxUsesPerUser: Int, minExpense: Int, discount: Int, begin: Date, expire: Date, userRegDays: Int,
                               selectedProductTypes: Set<ProductType>,
                               selectedProductIds: Set<Int>,
                               selectedPositionIds: Set<Int>,
@@ -345,37 +354,47 @@ open class CouponServiceImpl : CouponService {
             couponDao.save(coupon)
 
             couponConstrainsDao.deleteByCouponId(coupon.id)
+
+            if (userRegDays > 0) {
+                val cc = CouponConstrains()
+                cc.constrainsType = CouponConstrainsType.USER_REG_DAYS.value
+                cc.couponId = coupon.id
+                cc.value = userRegDays
+
+                couponConstrainsDao.save(cc)
+            }
+
             couponConstrainsDao.save(
                     selectedProductTypes.map {
-                        val couponProduct = CouponConstrains()
-                        couponProduct.constrainsType = CouponConstrainsType.PRODUCT_TYPE.value
-                        couponProduct.couponId = coupon.id
-                        couponProduct.value = it.value
-                        couponProduct
+                        val cc = CouponConstrains()
+                        cc.constrainsType = CouponConstrainsType.PRODUCT_TYPE.value
+                        cc.couponId = coupon.id
+                        cc.value = it.value
+                        cc
                     })
             couponConstrainsDao.save(
                     selectedProductIds.map {
-                        val couponProduct = CouponConstrains()
-                        couponProduct.constrainsType = CouponConstrainsType.PRODUCT.value
-                        couponProduct.couponId = coupon.id
-                        couponProduct.value = it
-                        couponProduct
+                        val cc = CouponConstrains()
+                        cc.constrainsType = CouponConstrainsType.PRODUCT.value
+                        cc.couponId = coupon.id
+                        cc.value = it
+                        cc
                     })
             couponConstrainsDao.save(
                     selectedPositionIds.map {
-                        val couponProduct = CouponConstrains()
-                        couponProduct.constrainsType = CouponConstrainsType.POSITION.value
-                        couponProduct.couponId = coupon.id
-                        couponProduct.value = it
-                        couponProduct
+                        val cc = CouponConstrains()
+                        cc.constrainsType = CouponConstrainsType.POSITION.value
+                        cc.couponId = coupon.id
+                        cc.value = it
+                        cc
                     })
             couponConstrainsDao.save(
                     selectedPrintStationIds.map {
-                        val couponProduct = CouponConstrains()
-                        couponProduct.constrainsType = CouponConstrainsType.PRINT_STATION.value
-                        couponProduct.couponId = coupon.id
-                        couponProduct.value = it
-                        couponProduct
+                        val cc = CouponConstrains()
+                        cc.constrainsType = CouponConstrainsType.PRINT_STATION.value
+                        cc.couponId = coupon.id
+                        cc.value = it
+                        cc
                     })
 
             return true

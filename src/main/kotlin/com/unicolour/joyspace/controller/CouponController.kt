@@ -140,6 +140,14 @@ class CouponController {
         modelAndView.model.put("positionIds", allPositions.map { it.positionId }.joinToString(separator = ","))
         modelAndView.model.put("printStationIds", allPrintStations.map { it.printStationId }.joinToString(separator = ","))
 
+        if (id > 0) {
+            modelAndView.model.put("userRegDays", coupon.constrains
+                    .find { it.constrainsType == CouponConstrainsType.USER_REG_DAYS.value }?.value ?: 0)
+        }
+        else {
+            modelAndView.model.put("userRegDays", 0)
+        }
+
         modelAndView.model.put("create", id <= 0)
         modelAndView.model.put("coupon", coupon)
         modelAndView.viewName = "/coupon/edit :: content"
@@ -161,6 +169,7 @@ class CouponController {
             @RequestParam(name = "discount", required = true) discount: Double,
             @RequestParam(name = "begin", required = true) begin: String,
             @RequestParam(name = "expire", required = true) expire: String,
+            @RequestParam(name = "userRegDays", required = true) userRegDays: Int,
             @RequestParam(name = "productIds", required = true) productIds: String,
             @RequestParam(name = "positionIds", required = true) positionIds: String,
             @RequestParam(name = "printStationIds", required = true) printStationIds: String
@@ -190,13 +199,13 @@ class CouponController {
         if (id <= 0) {
             couponService.createCoupon(name, code, couponClaimMethod!!, maxUses, maxUsesPerUser,
                     (minExpense * 100).toInt(), (discount * 100).toInt(),
-                    df.parse(begin), df.parse(expire),
+                    df.parse(begin), df.parse(expire), userRegDays,
                     selectedProductTypes, selectedProductIds, selectedPositionIds, selectedPrintStationIds)
             return true
         } else {
             return couponService.updateCoupon(id, name, code, couponClaimMethod!!, maxUses, maxUsesPerUser,
                     (minExpense * 100).toInt(), (discount * 100).toInt(),
-                    df.parse(begin), df.parse(expire),
+                    df.parse(begin), df.parse(expire), userRegDays,
                     selectedProductTypes, selectedProductIds, selectedPositionIds, selectedPrintStationIds)
         }
     }
