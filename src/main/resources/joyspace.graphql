@@ -17,9 +17,6 @@ type QueryType {
     #查找最近的自助机
     findNearestPrintStation(longitude: Float!, latitude: Float!): PrintStationFindResultSingle!
 
-    #查询用户优惠券列表
-    userCouponList(sessionId: String!): UserCouponListResult!
-
     ###############################自助机调用的接口######################################3
     #查找指定自助机的待打印订单
     getPrintOrder(sessionId: String!, idAfter: Int!): PrintOrder
@@ -44,6 +41,9 @@ type MutationType {
 
     #重置密码
     resetPassword(userName: String, phoneNumber: String!, verifyCode: String!, newPassword: String!) : RequestResult!
+
+    #获取用户优惠券列表
+    userCouponList(sessionId: String!, printStationId: Int): UserCouponListResult!
 
     #获取优惠券
     claimCoupon(sessionId: String!, couponCode: String!): ClaimCouponResult!

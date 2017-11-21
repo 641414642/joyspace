@@ -1,9 +1,6 @@
 package com.unicolour.joyspace.service.impl
 
-import com.unicolour.joyspace.dao.CouponConstrainsDao
-import com.unicolour.joyspace.dao.CouponDao
-import com.unicolour.joyspace.dao.UserCouponDao
-import com.unicolour.joyspace.dao.UserLoginSessionDao
+import com.unicolour.joyspace.dao.*
 import com.unicolour.joyspace.dto.ClaimCouponResult
 import com.unicolour.joyspace.dto.UserCouponListResult
 import com.unicolour.joyspace.model.*
@@ -33,6 +30,9 @@ open class CouponServiceImpl : CouponService {
     lateinit var userCouponDao: UserCouponDao
 
     @Autowired
+    lateinit var userDao: UserDao
+
+    @Autowired
     lateinit var transactionTemplate: TransactionTemplate
 
     private var couponLock = Object()
@@ -41,15 +41,53 @@ open class CouponServiceImpl : CouponService {
         get() {
             return DataFetcher { env ->
                 val sessionId = env.getArgument<String>("sessionId")
+                val printStationId = env.getArgument<Int>("printStationId")
                 val session = userLoginSessionDao.findOne(sessionId)
 
                 if (session == null) {  //XXX 登录过期检查
                     UserCouponListResult(1, "用户未登录")
                 }
                 else {
-                    val userCoupons = userCouponDao.findByUserId(session.userId)
-                    UserCouponListResult(0, null,
-                            couponDao.findByIdInOrderByDiscountDesc(userCoupons.map { it.couponId }))
+                    val user = userDao.findOne(session.userId)
+
+                    synchronized(couponLock, {
+                        transactionTemplate.execute {
+                            val userCoupons = userCouponDao.findByUserId(session.userId)
+                            val userCouponIds = userCoupons.map { it.couponId }
+
+                            if (printStationId > 0) {
+                                val couponsNotClaimed = couponDao.findByIdNotIn(userCouponIds) //用户没有领取过的
+
+                                for (c in couponsNotClaimed) {
+                                    val context = CouponValidateContext(
+                                            coupon = c,
+                                            user = user,
+                                            claimMethod = CouponClaimMethod.SCAN_PRINT_STATION_CODE)
+
+                                    val checkResult = validateCoupon(context,
+                                            this::validateCouponByClaimMethod,
+                                            this::validateCouponByTime,
+                                            this::validateCouponByMaxUses,
+                                            this::validateCouponByUserRegTime)
+
+                                    if (checkResult == CouponValidateResult.VALID) {
+                                        val userCoupon = UserCoupon()
+                                        userCoupon.couponId = c.id
+                                        userCoupon.userId = session.userId
+                                        userCoupon.usageCount = 0
+                                        userCoupon.claimTime = Date()
+                                        userCouponDao.save(userCoupon)
+
+                                        c.claimCount++
+                                        couponDao.save(c)
+                                    }
+                                }
+
+                            }
+                            UserCouponListResult(0, null,
+                                    couponDao.findByIdInOrderByDiscountDesc(userCouponIds))
+                        }
+                    })
                 }
             }
         }
@@ -65,10 +103,11 @@ open class CouponServiceImpl : CouponService {
                     ClaimCouponResult(1, "用户未登录")
                 }
                 else {
+                    val user = userDao.findOne(session.userId)
+
                     synchronized(couponLock, {
                         transactionTemplate.execute {
                             val coupon = couponDao.findByCode(code)
-                            val constrains = couponConstrainsDao.findByCouponId(coupon.id)
 
                             val oldUserCoupon = userCouponDao.findByUserIdAndCouponId(session.userId, coupon.id)
                             if (oldUserCoupon != null) {
@@ -77,12 +116,13 @@ open class CouponServiceImpl : CouponService {
                             else {
                                 val context = CouponValidateContext(
                                         coupon = coupon,
-                                        constrains = constrains)
+                                        user = user)
 
                                 //XXX 用户maxUse check
                                 val checkResult = validateCoupon(context,
                                         this::validateCouponByTime,
-                                        this::validateCouponByMaxUses)
+                                        this::validateCouponByMaxUses,
+                                        this::validateCouponByUserRegTime)
 
                                 if (checkResult == VALID) {
                                     val userCoupon = UserCoupon()
@@ -187,19 +227,47 @@ open class CouponServiceImpl : CouponService {
     override fun validateCouponByTime(context: CouponValidateContext): CouponValidateResult {
         val coupon = context.coupon
         val now = System.currentTimeMillis()
-        if (coupon.begin != null && now < coupon.begin!!.time) {
-            return NOT_BEGIN
+        return if (coupon.begin != null && now < coupon.begin!!.time) {
+            NOT_BEGIN
         }
         else if (coupon.expire != null && now > coupon.expire!!.time) {
-            return EXPIRED
+            EXPIRED
         }
         else {
-            return VALID
+            VALID
+        }
+    }
+
+    override fun validateCouponByClaimMethod(context: CouponValidateContext): CouponValidateResult {
+        val coupon = context.coupon
+        return if (coupon.claimMethod == context.claimMethod.value) {
+            VALID
+        }
+        else {
+            COUPON_NOT_EXIST
+        }
+    }
+
+    override fun validateCouponByUserRegTime(context: CouponValidateContext): CouponValidateResult {
+        val coupon = context.coupon
+        val user = context.user
+
+        val userRegConstrains = coupon.constrains.find { it.constrainsType == CouponConstrainsType.USER_REG_DAYS.value }
+        return if (user == null || userRegConstrains == null) {
+            VALID
+        }
+        else {
+            val regDays = (System.currentTimeMillis() - user.createTime.timeInMillis) / (1000 * 60 * 60 * 24)
+            if (regDays >= userRegConstrains.value) {
+                VALID
+            } else {
+                USER_REG_NOT_LONG_ENOUGH
+            }
         }
     }
 
     @Transactional
-    override fun createCoupon(name: String, code: String, couponGetMethod: CouponGetMethod, maxUses: Int,
+    override fun createCoupon(name: String, code: String, couponClaimMethod: CouponClaimMethod, maxUses: Int,
                               maxUsesPerUser: Int, minExpense: Int, discount: Int, begin: Date, expire: Date,
                               selectedProductTypes: Set<ProductType>,
                               selectedProductIds: Set<Int>,
@@ -208,7 +276,7 @@ open class CouponServiceImpl : CouponService {
         val coupon = Coupon()
         coupon.name = name
         coupon.code = code
-        coupon.getMethod = couponGetMethod.value
+        coupon.claimMethod = couponClaimMethod.value
         coupon.maxUses = maxUses
         coupon.maxUsesPerUser = maxUsesPerUser
         coupon.minExpense = minExpense
@@ -253,7 +321,7 @@ open class CouponServiceImpl : CouponService {
     }
 
     @Transactional
-    override fun updateCoupon(id: Int, name: String, code: String, couponGetMethod: CouponGetMethod, maxUses: Int,
+    override fun updateCoupon(id: Int, name: String, code: String, couponClaimMethod: CouponClaimMethod, maxUses: Int,
                               maxUsesPerUser: Int, minExpense: Int, discount: Int, begin: Date, expire: Date,
                               selectedProductTypes: Set<ProductType>,
                               selectedProductIds: Set<Int>,
@@ -266,7 +334,7 @@ open class CouponServiceImpl : CouponService {
         else {
             coupon.name = name
             coupon.code = code
-            coupon.getMethod = couponGetMethod.value
+            coupon.claimMethod = couponClaimMethod.value
             coupon.maxUses = maxUses
             coupon.maxUsesPerUser = maxUsesPerUser
             coupon.minExpense = minExpense

@@ -9,23 +9,27 @@ import java.util.*
 enum class CouponValidateResult(val desc:String) {
     VALID("有效"),
 
+    COUPON_NOT_EXIST("没有此优惠券"),
     USER_NOT_CLAIM_THIS_COUPON("用户未领取此优惠券"),
 
     NOT_BEGIN("还未进入有效期"),
     EXPIRED("已经超出有效期"),
 
     EXCEED_MAX_USAGE("超过了最大使用次数"),
-    EXCEED_MAX_USAGE_PER_USER("超过了每用户最大使用次数")
+    EXCEED_MAX_USAGE_PER_USER("超过了每用户最大使用次数"),
+
+    USER_REG_NOT_LONG_ENOUGH("用户注册时间不够")
 }
 
 class CouponValidateContext(
         val coupon: Coupon,
-        val constrains: List<CouponConstrains>,
         val userCoupon: UserCoupon? = null,
         val userId: Int = 0,
+        val user: User? = null,
         val printStationId: Int = 0,
         val positionId: Int = 0,
-        val companyId: Int = 0
+        val companyId: Int = 0,
+        val claimMethod: CouponClaimMethod = CouponClaimMethod.SCAN_PRINT_STATION_CODE
 )
 
 interface CouponService {
@@ -53,12 +57,26 @@ interface CouponService {
      */
     fun validateCouponByMaxUsesPerUser(context: CouponValidateContext): CouponValidateResult
 
+    /**
+     * 检查优惠券领取方式
+     * @param context
+     * @return
+     */
+    fun validateCouponByClaimMethod(context: CouponValidateContext): CouponValidateResult
+
+    /**
+     * 检查用户注册时间
+     * @param context
+     * @return
+     */
+    fun validateCouponByUserRegTime(context: CouponValidateContext): CouponValidateResult
+
     fun validateCoupon(context: CouponValidateContext,
                        vararg validateFuns: (CouponValidateContext) -> CouponValidateResult): CouponValidateResult
 
     fun getDataFetcher(fieldName:String): DataFetcher<Any>
 
-    fun createCoupon(name: String, code: String, couponGetMethod: CouponGetMethod,
+    fun createCoupon(name: String, code: String, couponClaimMethod: CouponClaimMethod,
                      maxUses: Int, maxUsesPerUser: Int, minExpense: Int, discount: Int,
                      begin: Date, expire: Date,
                      selectedProductTypes: Set<ProductType>,
@@ -66,7 +84,7 @@ interface CouponService {
                      selectedPositionIds: Set<Int>,
                      selectedPrintStationIds: Set<Int>)
 
-    fun updateCoupon(id: Int, name: String, code: String, couponGetMethod: CouponGetMethod,
+    fun updateCoupon(id: Int, name: String, code: String, couponClaimMethod: CouponClaimMethod,
                      maxUses: Int, maxUsesPerUser: Int, minExpense: Int, discount: Int,
                      begin: Date, expire: Date,
                      selectedProductTypes: Set<ProductType>,

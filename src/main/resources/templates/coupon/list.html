@@ -51,7 +51,7 @@
 						<td th:text="${coupon.id}"></td>
 						<td th:text="${coupon.name}"></td>
 						<td th:text="${coupon.code}"></td>
-						<th:block th:switch="${coupon.getMethod}">
+						<th:block th:switch="${coupon.claimMethod}">
 							<td th:case="1">自动获取</td>
 							<td th:case="2">输入代码获取</td>
 							<td th:case="3">扫码获取</td>

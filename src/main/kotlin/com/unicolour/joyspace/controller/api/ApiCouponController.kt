@@ -13,15 +13,25 @@ class ApiCouponController {
     @Autowired
     lateinit var graphQLService: GraphQLService
 
-    @RequestMapping("/api/user/coupons", method = arrayOf(RequestMethod.GET))
-    fun getUserCoupons(@RequestParam("sessionId") sessionId: String) : Any? {
+    @RequestMapping("/api/user/coupons", method = arrayOf(RequestMethod.GET, RequestMethod.POST))
+    fun getUserCoupons(
+            @RequestParam("sessionId") sessionId: String,
+            @RequestParam("printStationId", required = false) printStationId: Int?) : Any? {
+        val printStationIdVal =
+            if (printStationId == null) {
+                0
+            }
+            else {
+                printStationId
+            }
+
         val schema = graphQLService.getGraphQLSchema()
         val graphQL = GraphQL.newGraphQL(schema).build()
 
         val query =
                 """
-query {
-	userCouponList(sessionId:"$sessionId") {
+mutation {
+	userCouponList(sessionId:"$sessionId", printStationId: $printStationIdVal) {
         errcode:result
         errmsg:description
         coupons {

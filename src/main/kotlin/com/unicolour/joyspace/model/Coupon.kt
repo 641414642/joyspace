@@ -23,7 +23,7 @@ class Coupon {
 
     @Column
     @NotNull
-    var getMethod: Int = 0
+    var claimMethod: Int = 0
 
     //最大使用次数(0表示无限制)
     @Column
@@ -102,7 +102,7 @@ enum class CouponConstrainsType(val value:Int, val dispName:String) {
 }
 
 //优惠券获取方式
-enum class CouponGetMethod(val value:Int, val dispName:String) {
+enum class CouponClaimMethod(val value:Int, val dispName:String) {
     SCAN_PRINT_STATION_CODE(1, "扫描自助机二维码自动获取"),
     INPUT_CODE(2, "输入代码手动获取"),
     SCAN_CODE(3, "扫优惠券二维码或条形码获取")

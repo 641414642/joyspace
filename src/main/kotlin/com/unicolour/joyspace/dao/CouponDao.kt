@@ -14,6 +14,5 @@ interface CouponDao : PagingAndSortingRepository<Coupon, Int> {
     @Query("SELECT t FROM Coupon t WHERE LOWER(t.name) LIKE LOWER(CONCAT('%', :name, '%'))")
     fun findByName(@Param("name") name: String, pageable: Pageable): Page<Coupon>
 
-
-
+    fun findByIdNotIn(couponIds: List<Int>): Iterable<Coupon>
 }

@@ -22,7 +22,6 @@ import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.ResponseBody
 import org.springframework.web.servlet.ModelAndView
 import java.text.SimpleDateFormat
-import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
 import java.util.*
@@ -124,7 +123,7 @@ class CouponController {
         if (coupon == null) {
             val now = LocalDate.now()
             coupon = Coupon()
-            coupon.getMethod = CouponGetMethod.INPUT_CODE.value
+            coupon.claimMethod = CouponClaimMethod.INPUT_CODE.value
             coupon.begin = Date.from(now.atStartOfDay(ZoneId.systemDefault()).toInstant())
             coupon.expire = Date.from(now.plusDays(7).atStartOfDay(ZoneId.systemDefault()).toInstant())
             coupon.minExpense = 100
@@ -132,7 +131,7 @@ class CouponController {
         }
 
         modelAndView.model["coupons"] = couponDao.findAll()
-        modelAndView.model["getMethods"] = CouponGetMethod.values()
+        modelAndView.model["claimMethods"] = CouponClaimMethod.values()
         modelAndView.model["productTypes"] = allProductTypes
         modelAndView.model["products"] = allProducts
         modelAndView.model["positions"] = allPositions
@@ -155,7 +154,7 @@ class CouponController {
             @RequestParam(name = "id", required = true) id: Int,
             @RequestParam(name = "name", required = true) name: String,
             @RequestParam(name = "code", required = true) code: String,
-            @RequestParam(name = "getMethod", required = true) getMethod: Int,
+            @RequestParam(name = "claimMethod", required = true) claimMethod: Int,
             @RequestParam(name = "maxUses", required = true) maxUses: Int,
             @RequestParam(name = "maxUsesPerUser", required = true) maxUsesPerUser: Int,
             @RequestParam(name = "minExpense", required = true) minExpense: Double,
@@ -187,15 +186,15 @@ class CouponController {
                 .toSet()
 
         val df = SimpleDateFormat("yyyy-MM-dd")
-        val couponGetMethod = CouponGetMethod.values().find{ it.value == getMethod }
+        val couponClaimMethod = CouponClaimMethod.values().find{ it.value == claimMethod }
         if (id <= 0) {
-            couponService.createCoupon(name, code, couponGetMethod!!, maxUses, maxUsesPerUser,
+            couponService.createCoupon(name, code, couponClaimMethod!!, maxUses, maxUsesPerUser,
                     (minExpense * 100).toInt(), (discount * 100).toInt(),
                     df.parse(begin), df.parse(expire),
                     selectedProductTypes, selectedProductIds, selectedPositionIds, selectedPrintStationIds)
             return true
         } else {
-            return couponService.updateCoupon(id, name, code, couponGetMethod!!, maxUses, maxUsesPerUser,
+            return couponService.updateCoupon(id, name, code, couponClaimMethod!!, maxUses, maxUsesPerUser,
                     (minExpense * 100).toInt(), (discount * 100).toInt(),
                     df.parse(begin), df.parse(expire),
                     selectedProductTypes, selectedProductIds, selectedPositionIds, selectedPrintStationIds)
