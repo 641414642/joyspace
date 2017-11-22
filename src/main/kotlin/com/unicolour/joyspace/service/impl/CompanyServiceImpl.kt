@@ -23,9 +23,9 @@ class CompanyServiceImpl : CompanyService {
                                phone: String,
                                email: String,
                                password: String): Company {
-        val company = Company();
+        val company = Company()
 
-        company.name = name;
+        company.name = name
         company.createTime = Calendar.getInstance()
         company.defaultPriceList = defPriceList
 

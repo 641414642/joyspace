@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component
 import org.springframework.transaction.support.TransactionTemplate
 import java.util.*
 import javax.transaction.Transactional
+import kotlin.collections.ArrayList
 
 @Component
 open class CouponServiceImpl : CouponService {
@@ -54,6 +55,7 @@ open class CouponServiceImpl : CouponService {
                         transactionTemplate.execute {
                             val userCoupons = userCouponDao.findByUserId(session.userId)
                             val userCouponIds = userCoupons.map { it.couponId }
+                            val retUserCouponIds = ArrayList<Int>(userCouponIds)
 
                             if (printStationId > 0) {
                                 val couponsNotClaimed = couponDao.findByIdNotIn(userCouponIds) //用户没有领取过的
@@ -80,12 +82,14 @@ open class CouponServiceImpl : CouponService {
 
                                         c.claimCount++
                                         couponDao.save(c)
+
+                                        retUserCouponIds.add(userCoupon.id)
                                     }
                                 }
-
                             }
+
                             UserCouponListResult(0, null,
-                                    couponDao.findByIdInOrderByDiscountDesc(userCouponIds))
+                                    couponDao.findByIdInOrderByDiscountDesc(retUserCouponIds))
                         }
                     })
                 }

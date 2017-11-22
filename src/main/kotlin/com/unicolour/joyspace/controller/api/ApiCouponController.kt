@@ -13,7 +13,7 @@ class ApiCouponController {
     @Autowired
     lateinit var graphQLService: GraphQLService
 
-    @RequestMapping("/api/user/coupons", method = arrayOf(RequestMethod.GET, RequestMethod.POST))
+    @RequestMapping("/api/user/coupons", method = arrayOf(RequestMethod.POST))
     fun getUserCoupons(
             @RequestParam("sessionId") sessionId: String,
             @RequestParam("printStationId", required = false) printStationId: Int?) : Any? {
