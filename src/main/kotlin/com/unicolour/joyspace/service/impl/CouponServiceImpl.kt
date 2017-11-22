@@ -34,6 +34,9 @@ open class CouponServiceImpl : CouponService {
     lateinit var userDao: UserDao
 
     @Autowired
+    lateinit var printStationDao: PrintStationDao
+
+    @Autowired
     lateinit var transactionTemplate: TransactionTemplate
 
     private var couponLock = Object()
@@ -56,35 +59,42 @@ open class CouponServiceImpl : CouponService {
                             val userCoupons = userCouponDao.findByUserId(session.userId)
                             val couponIds = userCoupons.map { it.couponId }
                             val retCouponIds = ArrayList<Int>(couponIds)
-
-                            if (printStationId > 0) {
-                                val couponsNotClaimed = couponDao.findByIdNotIn(couponIds) //用户没有领取过的
-
-                                for (c in couponsNotClaimed) {
-                                    val context = CouponValidateContext(
-                                            coupon = c,
-                                            user = user,
-                                            claimMethod = CouponClaimMethod.SCAN_PRINT_STATION_CODE)
-
-                                    val checkResult = validateCoupon(context,
-                                            this::validateCouponByClaimMethod,
-                                            this::validateCouponByTime,
-                                            this::validateCouponByMaxUses,
-                                            this::validateCouponByUserRegTime)
-
-                                    if (checkResult == CouponValidateResult.VALID) {
-                                        val userCoupon = UserCoupon()
-                                        userCoupon.couponId = c.id
-                                        userCoupon.userId = session.userId
-                                        userCoupon.usageCount = 0
-                                        userCoupon.claimTime = Date()
-                                        userCouponDao.save(userCoupon)
-
-                                        c.claimCount++
-                                        couponDao.save(c)
-
-                                        retCouponIds.add(c.id)
+                            val position =
+                                    if (printStationId > 0) {
+                                        printStationDao.findOne(printStationId)
+                                    } else {
+                                        null
                                     }
+
+                            val couponsNotClaimed = couponDao.findByIdNotIn(couponIds) //用户没有领取过的
+
+                            for (c in couponsNotClaimed) {
+                                val context = CouponValidateContext(
+                                        coupon = c,
+                                        user = user,
+                                        printStationId = printStationId,
+                                        positionId = position?.id ?: 0,
+                                        claimMethod = CouponClaimMethod.SCAN_PRINT_STATION_CODE)
+
+                                val checkResult = validateCoupon(context,
+                                        this::validateCouponByClaimMethod,
+                                        this::validateCouponByTime,
+                                        this::validateCouponByMaxUses,
+                                        this::validateCouponByPrintStation,
+                                        this::validateCouponByUserRegTime)
+
+                                if (checkResult == CouponValidateResult.VALID) {
+                                    val userCoupon = UserCoupon()
+                                    userCoupon.couponId = c.id
+                                    userCoupon.userId = session.userId
+                                    userCoupon.usageCount = 0
+                                    userCoupon.claimTime = Date()
+                                    userCouponDao.save(userCoupon)
+
+                                    c.claimCount++
+                                    couponDao.save(c)
+
+                                    retCouponIds.add(c.id)
                                 }
                             }
 
@@ -267,6 +277,29 @@ open class CouponServiceImpl : CouponService {
             } else {
                 USER_REG_NOT_LONG_ENOUGH
             }
+        }
+    }
+
+    override fun validateCouponByPrintStation(context: CouponValidateContext): CouponValidateResult {
+        val coupon = context.coupon
+        val printStationId = context.printStationId
+        val positionId = context.positionId
+
+        val printStationIdConstrains = coupon.constrains
+                .filter { it.constrainsType == CouponConstrainsType.PRINT_STATION.value }
+                .map { it.value }
+
+        val positionIdConstrains = coupon.constrains
+                .filter { it.constrainsType == CouponConstrainsType.POSITION.value }
+                .map { it.value }
+
+        return if (printStationIdConstrains.isEmpty() ||
+                printStationIdConstrains.contains(printStationId) ||
+                positionIdConstrains.contains(positionId)) {
+            VALID
+        }
+        else {
+            NOT_USABLE_IN_THIS_PRINT_STATION
         }
     }
 

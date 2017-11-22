@@ -18,7 +18,9 @@ enum class CouponValidateResult(val desc:String) {
     EXCEED_MAX_USAGE("超过了最大使用次数"),
     EXCEED_MAX_USAGE_PER_USER("超过了每用户最大使用次数"),
 
-    USER_REG_NOT_LONG_ENOUGH("用户注册时间不够")
+    USER_REG_NOT_LONG_ENOUGH("用户注册时间不够"),
+
+    NOT_USABLE_IN_THIS_PRINT_STATION("不能在此自助机使用")
 }
 
 class CouponValidateContext(
@@ -70,6 +72,13 @@ interface CouponService {
      * @return
      */
     fun validateCouponByUserRegTime(context: CouponValidateContext): CouponValidateResult
+
+    /**
+     * 检查自助机
+     * @param context
+     * @return
+     */
+    fun validateCouponByPrintStation(context: CouponValidateContext): CouponValidateResult
 
     fun validateCoupon(context: CouponValidateContext,
                        vararg validateFuns: (CouponValidateContext) -> CouponValidateResult): CouponValidateResult
