@@ -22,8 +22,10 @@
 - RequestBody:
 ----
 		{
+		    "sessionId" : "xxxxxxxxxx",
 			"nickName" : "xxxx",
 			"avatarUrl" : "xxxx",
+			"language" : "zh_CN",
 			"gender" : x,
 			"province" : "xxxx",
 			"city" : "xxxx"

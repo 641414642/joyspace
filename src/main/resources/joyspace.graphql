@@ -39,6 +39,9 @@ type MutationType {
     #用户注册
     userRegister(nickName: String!, password: String!, phoneNumber: String!, verifyCode: String!, email: String) : RequestResult!
 
+    #用户信息记录
+    recordUserInfo(sessionId:String, nickName: String, avatarUrl: String, gender: Int, language: String, province: String, city: String, country: String) : RequestResult!
+
     #重置密码
     resetPassword(userName: String, phoneNumber: String!, verifyCode: String!, newPassword: String!) : RequestResult!
 

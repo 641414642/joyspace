@@ -45,6 +45,18 @@ class User {
     @Column(length = 1024)
     var avatar: String? = null
 
+    @Column(length = 10)
+    var language: String? = null
+
+    @Column(length = 50)
+    var city: String? = null
+
+    @Column(length = 50)
+    var country: String? = null
+
+    @Column(length = 50)
+    var province: String? = null
+
     @NotNull
     lateinit var createTime: Calendar
 

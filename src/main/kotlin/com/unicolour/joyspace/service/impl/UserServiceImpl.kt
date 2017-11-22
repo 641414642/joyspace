@@ -157,6 +157,52 @@ open class UserServiceImpl : UserService {
             }
         }
 
+    override val recordUserInfoDataFetcher: DataFetcher<GraphQLRequestResult>
+        get() {
+            return DataFetcher { env ->
+                val sessionId = env.getArgument<String>("sessionId")
+                val nickName = env.getArgument<String?>("nickName")
+                val avatarUrl = env.getArgument<String?>("avatarUrl")
+                val language = env.getArgument<String?>("language")
+                val gender = env.getArgument<Int?>("gender")
+                val province = env.getArgument<String?>("province")
+                val city = env.getArgument<String?>("city")
+                val country = env.getArgument<String?>("country")
+
+                recordUserInfo(sessionId, nickName, avatarUrl, gender, language, province, city, country)
+            }
+        }
+
+    @Transactional
+    fun recordUserInfo(sessionId: String,
+        nickName: String?, avatarUrl: String?, gender: Int?, language: String?,
+        province: String?, city: String?, country: String?): GraphQLRequestResult
+    {
+        val session = userLoginSessionDao.findOne(sessionId)
+        if (session == null) {
+            return GraphQLRequestResult(ResultCode.INVALID_USER_LOGIN_SESSION)
+        }
+        else {
+            val user = userDao.findOne(session.userId)
+            if (user == null) {
+                return GraphQLRequestResult(ResultCode.INVALID_USER_LOGIN_SESSION)
+            }
+            else {
+                user.avatar = avatarUrl
+                user.nickName = nickName
+                user.sex = gender?.toByte() ?: 0
+                user.language = language
+                user.city = city
+                user.country = country
+                user.province = province
+
+                userDao.save(user)
+
+                return GraphQLRequestResult(ResultCode.SUCCESS)
+            }
+        }
+    }
+
     override val resetPasswordDataFetcher: DataFetcher<GraphQLRequestResult>
         get() {
             return DataFetcher { env ->

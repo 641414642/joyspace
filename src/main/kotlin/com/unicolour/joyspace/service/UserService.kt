@@ -18,8 +18,12 @@ interface UserService {
     /** 用户注册 */
     val userRegisterDataFetcher: DataFetcher<GraphQLRequestResult>
 
+    /** 记录用户信息 */
+    val recordUserInfoDataFetcher: DataFetcher<GraphQLRequestResult>
+
     /** 重置密码 */
     val resetPasswordDataFetcher: DataFetcher<GraphQLRequestResult>
+
 
     //微信用户登录，返回 sessionId
     fun wxLogin(code: String): WxLoginResult
