@@ -54,11 +54,11 @@ open class CouponServiceImpl : CouponService {
                     synchronized(couponLock, {
                         transactionTemplate.execute {
                             val userCoupons = userCouponDao.findByUserId(session.userId)
-                            val userCouponIds = userCoupons.map { it.couponId }
-                            val retUserCouponIds = ArrayList<Int>(userCouponIds)
+                            val couponIds = userCoupons.map { it.couponId }
+                            val retCouponIds = ArrayList<Int>(couponIds)
 
                             if (printStationId > 0) {
-                                val couponsNotClaimed = couponDao.findByIdNotIn(userCouponIds) //用户没有领取过的
+                                val couponsNotClaimed = couponDao.findByIdNotIn(couponIds) //用户没有领取过的
 
                                 for (c in couponsNotClaimed) {
                                     val context = CouponValidateContext(
@@ -83,13 +83,13 @@ open class CouponServiceImpl : CouponService {
                                         c.claimCount++
                                         couponDao.save(c)
 
-                                        retUserCouponIds.add(userCoupon.id)
+                                        retCouponIds.add(c.id)
                                     }
                                 }
                             }
 
                             UserCouponListResult(0, null,
-                                    couponDao.findByIdInOrderByDiscountDesc(retUserCouponIds))
+                                    couponDao.findByIdInOrderByDiscountDesc(retCouponIds))
                         }
                     })
                 }
