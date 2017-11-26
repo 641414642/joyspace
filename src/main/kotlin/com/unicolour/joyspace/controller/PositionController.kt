@@ -122,8 +122,9 @@ class PositionController {
             @RequestParam(name = "positionId", required = true) positionId: Int): ModelAndView {
 
         val baseUrl = getBaseUrl(request)
+        val position = positionDao.findOne(positionId)
 
-        modelAndView.model.put("positionId", positionId)
+        modelAndView.model.put("position", position)
 
         val images = positionImageFileDao.findByPositionId(positionId)
 

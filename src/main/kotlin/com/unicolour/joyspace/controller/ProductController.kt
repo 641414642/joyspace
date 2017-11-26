@@ -130,8 +130,9 @@ class ProductController {
             @RequestParam(name = "productId", required = true) productId: Int): ModelAndView {
 
         val baseUrl = getBaseUrl(request)
+        val product = productDao.findOne(productId)
 
-        modelAndView.model.put("productId", productId)
+        modelAndView.model.put("product", product)
 
         val thumbImages = productImageFileDao.findByProductIdAndType(productId = productId, type = ProductImageFileType.THUMB.value)
         val prevImages = productImageFileDao.findByProductIdAndType(productId = productId, type = ProductImageFileType.PREVIEW.value)

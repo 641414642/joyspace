@@ -96,7 +96,7 @@
         <div class="modal-content" th:fragment="manageImageFiles">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
-                <h4 class="modal-title" th:text="图片管理"></h4>
+                <h4 class="modal-title" th:text="${'投放地点图片 - ' + position.name }"></h4>
                 <iframe name="target_iframe" src="about:blank" th:src="@{/empty}" style="display:none"></iframe>
             </div>
             <div class="modal-body">
@@ -113,7 +113,7 @@
                     </div>
                     <div class="product_img_block" id="imgUpload">
                         <form id="uploadPositionImgFileForm" target="target_iframe" method="post" th:action="@{/position/uploadImageFile}" enctype="multipart/form-data">
-                            <input type="hidden" name="id" th:value="${positionId}" />
+                            <input type="hidden" name="id" th:value="${position.id}" />
                             <div class="img_display upload">
                                 <input id="positionImgFileInput" style="margin:0; padding:0; cursor:pointer; opacity:0; width:100%; height:100%;" type="file" accept="image/jpeg,image/png" name="imageFile" />
                             </div>
