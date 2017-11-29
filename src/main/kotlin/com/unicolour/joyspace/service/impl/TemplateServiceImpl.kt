@@ -305,6 +305,46 @@ open class TemplateServiceImpl : TemplateService {
         }
     }
 
+
+    //旋转普通照片的图片框，如果图片的方向和图片框的方向不同
+    fun rotateTemplateIfNeeded(tplDoc: Document, image: UserImageFile?) {
+        if (image != null) {
+            val svgElement = tplDoc.documentElement
+            val tplWidInMM = toMM(svgElement.getAttribute("width"))
+            val tplHeiInMM = toMM(svgElement.getAttribute("height"))
+
+            val tplRatio = tplWidInMM / tplHeiInMM
+            val imgRatio = image.width.toDouble() / image.height.toDouble()
+
+            if (tplRatio > 1 && imgRatio < 1 || tplRatio < 1 && imgRatio > 1) {
+                val tplWid = svgElement.getAttribute("width")
+                val tplHei = svgElement.getAttribute("height")
+
+                svgElement.setAttribute("width", tplHei);
+                svgElement.setAttribute("height", tplWid)
+
+                val viewBox = svgElement.getAttribute("viewBox")
+                if (viewBox != null) {
+                    val st = StringTokenizer(viewBox, " ,")
+                    val vbx = st.nextToken()
+                    val vby = st.nextToken()
+                    val vbw = st.nextToken()
+                    val vbh = st.nextToken()
+
+                    svgElement.setAttribute("viewBox", "$vbx $vby $vbh $vbw")
+                }
+
+                eachImageElement(tplDoc, { imgEle, _, _ ->
+                    val imgWid = imgEle.getAttribute("width")
+                    val imgHei = imgEle.getAttribute("height")
+
+                    imgEle.setAttribute("width", imgHei);
+                    imgEle.setAttribute("height", imgWid)
+                })
+            }
+        }
+    }
+
     override fun createPreview(previewParam: PreviewParam, baseUrl: String): TemplatePreviewResult {
         val session = userLoginSessionDao.findOne(previewParam.sessionId)
 
@@ -312,6 +352,7 @@ open class TemplateServiceImpl : TemplateService {
             return TemplatePreviewResult(1, "用户未登录")
         }
         else {
+            val product = productDao.findOne(previewParam.productId)
             val tplVerSplit = previewParam.productVersion.split('.')
             val tplId = tplVerSplit[0].toInt()
             val tplVer = tplVerSplit[1].toInt()
@@ -330,6 +371,10 @@ open class TemplateServiceImpl : TemplateService {
             factory.isNamespaceAware = true
 
             val doc = factory.newDocumentBuilder().parse(templateFile)
+            if (product.template.type == ProductType.PHOTO.value) {
+                rotateTemplateIfNeeded(doc, userImgFiles.firstOrNull())
+            }
+
             val svgElement = doc.documentElement
             val tplWid = toMM(svgElement.getAttribute("width"))
             val tplHei = toMM(svgElement.getAttribute("height"))
