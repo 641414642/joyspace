@@ -59,21 +59,27 @@ open class CouponServiceImpl : CouponService {
                             val userCoupons = userCouponDao.findByUserId(session.userId)
                             val couponIds = userCoupons.map { it.couponId }
                             val retCouponIds = ArrayList<Int>(couponIds)
-                            val position =
+                            val printStation =
                                     if (printStationId > 0) {
                                         printStationDao.findOne(printStationId)
                                     } else {
                                         null
                                     }
 
-                            val couponsNotClaimed = couponDao.findByIdNotIn(couponIds) //用户没有领取过的
+                            //用户没有领取过的优惠券
+                            val couponsNotClaimed =
+                                    if (couponIds.isEmpty()) {
+                                        couponDao.findAll()
+                                    } else {
+                                        couponDao.findByIdNotIn(couponIds)
+                                    }
 
                             for (c in couponsNotClaimed) {
                                 val context = CouponValidateContext(
                                         coupon = c,
                                         user = user,
                                         printStationId = printStationId,
-                                        positionId = position?.id ?: 0,
+                                        positionId = printStation?.position?.id ?: 0,
                                         claimMethod = CouponClaimMethod.SCAN_PRINT_STATION_CODE)
 
                                 val checkResult = validateCoupon(context,
@@ -216,7 +222,7 @@ open class CouponServiceImpl : CouponService {
 
     override fun validateCouponByMaxUses(context: CouponValidateContext): CouponValidateResult {
         val coupon = context.coupon
-        return if (coupon.usageCount < coupon.maxUses) {
+        return if (coupon.maxUses == 0 || coupon.usageCount < coupon.maxUses) {
             VALID
         }
         else {
