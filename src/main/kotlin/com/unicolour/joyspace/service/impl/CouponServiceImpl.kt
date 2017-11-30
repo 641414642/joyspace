@@ -104,6 +104,29 @@ open class CouponServiceImpl : CouponService {
                                 }
                             }
 
+                            //删除不存在、过期、超过最大使用次数的优惠券
+                            for (userCoupon in userCoupons) {
+                                val coupon = couponDao.findOne(userCoupon.couponId)
+                                val context = CouponValidateContext(
+                                        coupon = coupon,
+                                        userCoupon = userCoupon)
+
+                                val checkResult =
+                                        if (coupon == null) {
+                                            COUPON_NOT_EXIST
+                                        } else {
+                                            validateCoupon(context,
+                                                    this::validateCouponByTime,
+                                                    this::validateCouponByMaxUses,
+                                                    this::validateCouponByMaxUses)
+                                        }
+
+                                if (checkResult != VALID) {
+                                    userCouponDao.delete(userCoupon)
+                                    retCouponIds.remove(userCoupon.couponId)
+                                }
+                            }
+
                             UserCouponListResult(0, null,
                                     couponDao.findByIdInOrderByDiscountDesc(retCouponIds))
                         }
