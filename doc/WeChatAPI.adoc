@@ -65,6 +65,7 @@
     "latitude": 39.95392,           //自助机位置维度
     "positionId": xx,               //投放地点id
     "companyId": xx,                //投放商id
+    "status": x,                    //状态 (0: 正常, 1: 离线, 2: 故障, 3: 打印耗材用完)
     "products": [
         {
             "id": 1,                //产品ID

@@ -41,6 +41,7 @@ query {
         wxQrCode
         positionId
         companyId
+        status
 		products {
 			id
 			name

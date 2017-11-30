@@ -51,4 +51,15 @@ class PrintStation {
     @NotNull
     lateinit var city: City
     //endregion
+
+    @Column(name = "status")
+    var status: Int = PrintStationStatus.WORKING.value
 }
+
+enum class PrintStationStatus(val value:Int, val message:String) {
+    WORKING(0, "正常"),
+    OFFLINE(1, "离线"),
+    MALFUNCTION(2, "故障"),
+    OUT_OF_PRINTING_SUPPLIES(3, "打印耗材用完")
+}
+

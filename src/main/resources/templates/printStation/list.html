@@ -42,6 +42,7 @@
 						<th>微信二维码</th>
 						<th>投放商</th>
 						<th>投放地点</th>
+						<th>状态</th>
 						<th>操作</th>
 					</tr>
 					<tr th:each="printStation : ${printStations}">
@@ -49,6 +50,12 @@
 						<td th:text="${printStation.wxQrCode}"></td>
 						<td th:text="${printStation.company?.name}"></td>
 						<td th:text="${printStation.position.name}"></td>
+						<th:block th:switch="${printStation.status}">
+							<td th:case="0">正常</td>
+							<td th:case="1">离线</td>
+							<td th:case="2">故障</td>
+							<td th:case="3">耗材用完</td>
+						</th:block>
 						<td>
 							<a href="#" th:attr="data-qrcode=${printStation.wxQrCode}" onclick="return showPrintStationQrCode(event, true)" style="padding-right:5px">二维码</a>
 							<a href="#" th:attr="data-url=@{/printStation/edit(id=${printStation.id},mode='edit')}" onclick="return createOrEditPrintStation(event, true)">编辑</a>

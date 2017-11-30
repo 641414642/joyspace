@@ -275,6 +275,9 @@ type PrintStation {
 
     #投放商id
     companyId: Int!
+
+    #自助机状态
+    status: Int!
 }
 
 #用户上传图片
