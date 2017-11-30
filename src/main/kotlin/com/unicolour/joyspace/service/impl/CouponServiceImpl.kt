@@ -8,6 +8,7 @@ import com.unicolour.joyspace.service.CouponService
 import com.unicolour.joyspace.service.CouponValidateContext
 import com.unicolour.joyspace.service.CouponValidateResult
 import com.unicolour.joyspace.service.CouponValidateResult.*
+import com.unicolour.joyspace.service.ManagerService
 import graphql.schema.DataFetcher
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
@@ -18,6 +19,9 @@ import kotlin.collections.ArrayList
 
 @Component
 open class CouponServiceImpl : CouponService {
+    @Autowired
+    lateinit var managerService : ManagerService
+
     @Autowired
     lateinit var userLoginSessionDao: UserLoginSessionDao
 
@@ -79,7 +83,8 @@ open class CouponServiceImpl : CouponService {
                                         coupon = c,
                                         user = user,
                                         printStationId = printStationId,
-                                        positionId = printStation?.position?.id ?: 0,
+                                        positionId = printStation?.positionId ?: 0,
+                                        companyId = printStation?.companyId ?: 0,
                                         claimMethod = CouponClaimMethod.SCAN_PRINT_STATION_CODE)
 
                                 val checkResult = validateCoupon(context,
@@ -201,10 +206,7 @@ open class CouponServiceImpl : CouponService {
                     val constrains = coupon.constrains.filter { it.constrainsType == CouponConstrainsType.POSITION.value }
                     if (constrains.isEmpty()) { null } else { constrains.map { it.value } }
                 }
-                "companyIdList" -> {
-                    val constrains = coupon.constrains.filter { it.constrainsType == CouponConstrainsType.COMPANY.value }
-                    if (constrains.isEmpty()) { null } else { constrains.map { it.value } }
-                }
+                "companyIdList" -> arrayOf(coupon.companyId)
                 "productIdList" -> {
                     val constrains = coupon.constrains.filter { it.constrainsType == CouponConstrainsType.PRODUCT.value }
                     if (constrains.isEmpty()) { null } else { constrains.map { it.value } }
@@ -322,12 +324,12 @@ open class CouponServiceImpl : CouponService {
                 .filter { it.constrainsType == CouponConstrainsType.POSITION.value }
                 .map { it.value }
 
-        return if (printStationIdConstrains.isEmpty() ||
-                printStationIdConstrains.contains(printStationId) ||
-                positionIdConstrains.contains(positionId)) {
+        return if (coupon.companyId == context.companyId &&
+                (printStationIdConstrains.isEmpty() ||
+                 printStationIdConstrains.contains(printStationId) ||
+                 positionIdConstrains.contains(positionId))) {
             VALID
-        }
-        else {
+        } else {
             NOT_USABLE_IN_THIS_PRINT_STATION
         }
     }
@@ -339,9 +341,12 @@ open class CouponServiceImpl : CouponService {
                               selectedProductIds: Set<Int>,
                               selectedPositionIds: Set<Int>,
                               selectedPrintStationIds: Set<Int>) {
+        val loginManager = managerService.loginManager
+
         val coupon = Coupon()
         coupon.name = name
         coupon.code = code
+        coupon.companyId = loginManager!!.companyId
         coupon.claimMethod = couponClaimMethod.value
         coupon.maxUses = maxUses
         coupon.maxUsesPerUser = maxUsesPerUser

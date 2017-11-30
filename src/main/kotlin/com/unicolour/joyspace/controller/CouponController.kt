@@ -54,11 +54,13 @@ class CouponController {
             @RequestParam(name = "name", required = false, defaultValue = "") name: String?,
             @RequestParam(name = "pageno", required = false, defaultValue = "1") pageno: Int): ModelAndView {
 
+        val loginManager = managerService.loginManager
+
         val pageable = PageRequest(pageno - 1, 20, Sort.Direction.DESC, "id")
         val coupons = if (name == null || name == "")
-            couponDao.findAll(pageable)
+            couponDao.findByCompanyId(loginManager!!.companyId, pageable)
         else
-            couponDao.findByName(name, pageable)
+            couponDao.findByNameIgnoreCaseAndCompanyId(name, loginManager!!.companyId, pageable)
 
         modelAndView.model.put("inputCouponName", name)
 

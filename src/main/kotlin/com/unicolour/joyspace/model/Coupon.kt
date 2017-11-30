@@ -23,6 +23,10 @@ class Coupon {
 
     @Column
     @NotNull
+    var companyId: Int = 0   //属于哪个投放商
+
+    @Column
+    @NotNull
     var claimMethod: Int = 0
 
     //最大使用次数(0表示无限制)
@@ -91,8 +95,7 @@ class CouponConstrains {
 
 enum class CouponConstrainsType(val value:Int, val dispName:String) {
     PRINT_STATION(1, "自助机"),
-    POSITION(2, "投放地点"),
-    COMPANY(3, "投放商"),   // 投放商 > 投放地点 > 自助机
+    POSITION(2, "投放地点"),  //投放地点 > 自助机
 
     PRODUCT(4, "产品"),
     PRODUCT_TYPE(5, "产品类型"),  // 产品类型 > 产品
