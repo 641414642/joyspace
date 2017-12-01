@@ -106,9 +106,8 @@ enum class CouponConstrainsType(val value:Int, val dispName:String) {
 
 //优惠券获取方式
 enum class CouponClaimMethod(val value:Int, val dispName:String) {
-    SCAN_PRINT_STATION_CODE(1, "扫描自助机二维码自动获取"),
-    INPUT_CODE(2, "输入代码手动获取"),
-    SCAN_CODE(3, "扫优惠券二维码或条形码获取")
+    SCAN_PRINT_STATION_CODE(1, "自动获取"),
+    INPUT_CODE(2, "手动获取")
 }
 
 /** 用户优惠券列表 */
