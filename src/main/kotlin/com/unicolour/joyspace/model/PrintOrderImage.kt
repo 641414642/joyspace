@@ -35,4 +35,16 @@ class PrintOrderImage {
     @JoinColumn(name = "user_image_file_id")
     var userImageFile: UserImageFile? = null
     //endregion
+
+    @Column
+    @NotNull
+    var status: Int = PrintOrderImageStatus.CREATED.value
+}
+
+enum class PrintOrderImageStatus(val value:Int, val displayText: String) {
+    CREATED(0, "已创建"),
+    UPLOADED(1, "已上传"),
+    DOWNLOADED(2, "已下载"),
+    PROCESSED(3, "已处理"),
+    PRINTED(4, "已打印")
 }

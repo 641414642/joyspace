@@ -17,6 +17,9 @@ type QueryType {
     #查找最近的自助机
     findNearestPrintStation(longitude: Float!, latitude: Float!): PrintStationFindResultSingle!
 
+    #获取订单
+    printOrder(sessionId: String!, printOrderId: Int!): PrintOrderResult!
+
     ###############################自助机调用的接口######################################3
     #查找指定自助机的待打印订单
     getPrintOrder(sessionId: String!, idAfter: Int!): PrintOrder
@@ -60,6 +63,9 @@ type MutationType {
 
     #更新订单状态为已打印
     printOrderPrinted(sessionId: String!, printOrderId: Int!) : RequestResult!
+
+    #更新订单图片状态
+    updatePrintOrderImageStatus(sessionId: String!, printOrderImageId: Int!, status: Int!): RequestResult!
 }
 
 #模板信息
@@ -300,6 +306,8 @@ type UserImageFile {
 
 #订单图片
 type PrintOrderImage {
+    id: Int!
+
     #订单id
     orderId: Int!
 
@@ -314,6 +322,9 @@ type PrintOrderImage {
 
     #图片处理参数
     processParams: String
+
+    #状态
+    status: Int!
 }
 
 #订单项目
@@ -423,4 +434,15 @@ type ClaimCouponResult {
 
     #优惠券
     coupon: Coupon
+}
+
+type PrintOrderResult {
+    #结果代码 0: 成功
+    result: Int!
+
+    #结果的描述
+    description: String
+
+    #订单
+    printOrder: PrintOrder
 }

@@ -65,7 +65,8 @@ class GraphQLServiceImpl : GraphQLService {
                     typeWiring.dataFetcher("findPrintStationsByDistance", printStationService.byDistanceDataFetcher)
                     typeWiring.dataFetcher("findPrintStationsByCity", printStationService.byCityDataFetcher)
                     typeWiring.dataFetcher("findNearestPrintStation", printStationService.nearestDataFetcher)
-                    typeWiring.dataFetcher("getPrintOrder", printOrderService.printOrderDataFetcher)
+                    typeWiring.dataFetcher("printOrder", printOrderService.printOrderDataFetcher)
+                    typeWiring.dataFetcher("getPrintOrder", printOrderService.printStationPrintOrderDataFetcher)
                     typeWiring.dataFetcher("getTemplateFileUrl", templateService.templateFileUrlDataFetcher)
                     typeWiring.dataFetcher("templates", templateService.templatesDataFetcher)
                 })
@@ -80,6 +81,7 @@ class GraphQLServiceImpl : GraphQLService {
                     typeWiring.dataFetcher("printStationLogin", printStationService.loginDataFetcher)
                     typeWiring.dataFetcher("printOrderDownloaded", printOrderService.printerOrderDownloadedDataFetcher)
                     typeWiring.dataFetcher("printOrderPrinted", printOrderService.printerOrderPrintedDataFetcher)
+                    typeWiring.dataFetcher("updatePrintOrderImageStatus", printOrderService.updatePrintOrderImageStatusDataFetcher)
                 })
                 .type("RequestResult", { typeWiring ->
                     typeWiring.dataFetcher("description", { environment ->

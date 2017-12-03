@@ -192,6 +192,7 @@ open class PrintOrderServiceImpl : PrintOrderService {
                 orderImg.name = tplImg.name
                 orderImg.userImageFile = if (userImgId == 0) null else userImageFileDao.findOne(userImgId)
                 orderImg.processParams = processParams
+                orderImg.status = PrintOrderImageStatus.CREATED.value
 
                 printOrderImageDao.save(orderImg)
 
@@ -234,6 +235,7 @@ open class PrintOrderServiceImpl : PrintOrderService {
             else {
                 orderImg.userImageFile = userImageFileDao.findOne(imgInfo.imageId)
                 orderImg.processParams = objectMapper.writeValueAsString(imageProcessParam)
+                orderImg.status = PrintOrderImageStatus.UPLOADED.value
 
                 printOrderImageDao.save(orderImg)
                 return checkOrderImageUploaded(orderImg.orderId)
@@ -260,13 +262,13 @@ open class PrintOrderServiceImpl : PrintOrderService {
         }
     }
 
-    override val printOrderDataFetcher: DataFetcher<PrintOrder?>
+    override val printStationPrintOrderDataFetcher: DataFetcher<PrintOrder?>
         get() {
             return DataFetcher { env ->
-                val sessionId = env.getArgument<String>("sessionId")
+                val printStationSessionId = env.getArgument<String>("sessionId")
                 val idAfter = env.getArgument<Int>("idAfter")
 
-                val session = printStationLoginSessionDao.findOne(sessionId)
+                val session = printStationLoginSessionDao.findOne(printStationSessionId)
                 if (session == null) {
                     null
                 }
@@ -276,6 +278,28 @@ open class PrintOrderServiceImpl : PrintOrderService {
                             payed = true,
                             imageFileUploaded = true,
                             idAfter = idAfter)
+                }
+            }
+        }
+
+    override val printOrderDataFetcher: DataFetcher<PrintOrderResult>
+        get() {
+            return DataFetcher { env ->
+                val userSessionId = env.getArgument<String>("sessionId")
+                val printOrderId = env.getArgument<Int>("printOrderId")
+
+                val session = userLoginSessionDao.findOne(userSessionId)
+                if (session == null) {
+                    PrintOrderResult(1, "用户没有登录")
+                }
+                else {
+                    val printOrder = printOrderDao.findOne(printOrderId)
+                    if (printOrder != null && printOrder.userId == session.userId) {
+                        PrintOrderResult(0, null, printOrder)
+                    }
+                    else {
+                        PrintOrderResult(2, "不是此用户的订单")
+                    }
                 }
             }
         }
@@ -293,6 +317,36 @@ open class PrintOrderServiceImpl : PrintOrderService {
                 updatePrintOrderState(env, "printed")
             }
         }
+
+    override val updatePrintOrderImageStatusDataFetcher: DataFetcher<GraphQLRequestResult>
+        get() {
+            return DataFetcher { env ->
+                updatePrintOrderImageStatus(env)
+            }
+        }
+
+    private fun updatePrintOrderImageStatus(env: DataFetchingEnvironment): GraphQLRequestResult {
+        val sessionId = env.getArgument<String>("sessionId")
+        val printOrderImageId: Int = env.getArgument<Int>("printOrderImageId")
+        val status: Int = env.getArgument<Int>("status")
+
+
+        val loginSession = printStationLoginSessionDao.findOne(sessionId)
+        return if (loginSession == null || System.currentTimeMillis() > loginSession.expireTime.timeInMillis) {
+            GraphQLRequestResult(ResultCode.INVALID_PRINT_STATION_LOGIN_SESSION)
+        } else {
+            val printOrderImage = printOrderImageDao.findOne(printOrderImageId)
+
+            if (printOrderImage == null) {
+                GraphQLRequestResult(ResultCode.PRINT_ORDER_NOT_FOUND)
+            }
+            else {
+                printOrderImage.status = status
+                printOrderImageDao.save(printOrderImage)
+                GraphQLRequestResult(ResultCode.SUCCESS)
+            }
+        }
+    }
 
     private fun updatePrintOrderState(env: DataFetchingEnvironment, state: String): GraphQLRequestResult {
         val sessionId = env.getArgument<String>("sessionId")

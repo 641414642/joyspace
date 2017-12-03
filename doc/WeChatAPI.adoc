@@ -298,6 +298,7 @@
 	{
 		"errcode" : 0,
 		"errmsg": null,
+		"orderId": x,         //订单id
 		"wxPayParams": {
 			"timeStamp" : "1499865120",
 			"nonceStr": "asdfasdfasdfas",
@@ -350,6 +351,41 @@
                "allImagesUploaded": true    //true表示整个订单所有的用户图片都已经上传完成, false 表示还有未上传的用户图片文件
            }
 ----
+
+==== 查询订单图片状态:
+- URL: /api/order/status
+- Method: GET
+- 参数:
+|==========================================================
+|参数名         |描述
+|sessionId      |登录返回的sessionId
+|printOrderId   |创建订单接口返回的订单id
+|==========================================================
+
+- 返回:
+
+----
+        {
+            "errcode": 0,
+            "errmsg": null,
+            "printOrder": {
+                "orderItems": [
+                    {
+                        "images": [
+                            { "status": 1 }    //图片状态,  1: 已上传,   2: 已下载到自助机,   3: 已处理,   4: 已打印
+                        ]
+                    },
+                    {
+                        "images": [
+                            { "status": 2 }
+                        ]
+                    }
+                    ...
+                ]
+            }
+    	}
+----
+
 
 ==== 返回用户优惠券列表，同时领取符合条件的新优惠券
 - URL: /api/user/coupons
