@@ -663,8 +663,10 @@ open class TemplateServiceImpl : TemplateService {
         transform.translate(w / 2.0, h / 2.0)   //坐标原点移到图片框中心位置
 
         //用户平移
-        if (imageParam.horTranslate != 0.0 || imageParam.verTranslate != 0.0) {
-            transform.translate(imageParam.horTranslate, imageParam.verTranslate)
+        val horTranslate:Double = translateToMM(imageParam.horTranslate, w)
+        val verTranslate:Double = translateToMM(imageParam.verTranslate, h)
+        if (horTranslate != 0.0 || verTranslate != 0.0) {
+            transform.translate(horTranslate, verTranslate)
         }
 
         //用户缩放
@@ -706,5 +708,14 @@ open class TemplateServiceImpl : TemplateService {
         imageElement.parentNode.replaceChild(rectElement, imageElement)
 
         return patternImgElement
+    }
+
+    private fun translateToMM(translateStr: String?, sizeInMM: Double) : Double {
+        return when {
+            translateStr.isNullOrBlank() -> 0.0
+            translateStr!!.endsWith("mm") -> translateStr.substring(0, translateStr.length - 2).toDouble()
+            translateStr.endsWith('%') -> translateStr.substring(0, translateStr.length - 1).toDouble() / 100.0 * sizeInMM
+            else -> translateStr.toDouble() * sizeInMM
+        }
     }
 }

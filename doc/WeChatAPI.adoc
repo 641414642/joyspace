@@ -335,8 +335,8 @@
 |initialRotate |图片初始旋转角度，必须是 0, 90, 180, 270 中的某一个
 |scale         |图片缩放比例
 |rotate        |图片旋转角度
-|horTranslate  |图片水平移动距离，单位mm
-|verTranslate  |图片垂直移动距离，单位mm
+|horTranslate  |图片水平移动距离。 数值如果以毫米为单位，结尾要加上mm，例如 "5.6mm"; 数值如果是百分比，结尾要加上%，例如 "25.3%"; 如果结尾没有mm或%，作为比例数值处理，例如 "0.253", 等价于"25.3%"
+|verTranslate  |图片垂直移动距离。 (处理方式同 horTranslate)
 |brightness    |亮度调整 (0~2), 数值为1时保持不变
 |saturate      |饱和度调整 (0~2), 数值为1时保持不变
 |effect        |图片效果, none: 没有,  grayscale: 黑白图片效果,  sepia: 怀旧效果

@@ -4,8 +4,8 @@ open class ImageProcessParams(
     var initialRotate: Int = 0,
     var scale: Double = 1.0,
     var rotate: Double = 0.0,
-    var horTranslate: Double = 0.0,
-    var verTranslate: Double = 0.0,
+    var horTranslate: String = "0",
+    var verTranslate: String = "0",
     var brightness: Double = 1.0,
     var saturate: Double = 1.0,
     var effect: String = "none") {
