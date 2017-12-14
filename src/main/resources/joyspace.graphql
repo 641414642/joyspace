@@ -22,7 +22,7 @@ type QueryType {
 
     ###############################自助机调用的接口######################################3
     #查找指定自助机的待打印订单
-    getPrintOrder(sessionId: String!, idAfter: Int!): PrintOrder
+    getPrintOrders(sessionId: String!): [PrintOrder!]!
 
     #查询模板列表
     templates(sessionId: String!): [Template!]!

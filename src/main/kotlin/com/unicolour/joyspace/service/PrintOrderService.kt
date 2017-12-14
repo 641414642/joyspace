@@ -8,7 +8,7 @@ import org.springframework.web.multipart.MultipartFile
 
 interface PrintOrderService {
     val imageFilesDataFetcher: DataFetcher<Array<UserImageFile>>
-    val printStationPrintOrderDataFetcher: DataFetcher<PrintOrder?>
+    val printStationPrintOrdersDataFetcher: DataFetcher<List<PrintOrder>>
     val printOrderDataFetcher: DataFetcher<PrintOrderResult>
     val printerOrderDownloadedDataFetcher: DataFetcher<GraphQLRequestResult>
     val printerOrderPrintedDataFetcher: DataFetcher<GraphQLRequestResult>

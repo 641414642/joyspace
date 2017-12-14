@@ -66,7 +66,7 @@ class GraphQLServiceImpl : GraphQLService {
                     typeWiring.dataFetcher("findPrintStationsByCity", printStationService.byCityDataFetcher)
                     typeWiring.dataFetcher("findNearestPrintStation", printStationService.nearestDataFetcher)
                     typeWiring.dataFetcher("printOrder", printOrderService.printOrderDataFetcher)
-                    typeWiring.dataFetcher("getPrintOrder", printOrderService.printStationPrintOrderDataFetcher)
+                    typeWiring.dataFetcher("getPrintOrders", printOrderService.printStationPrintOrdersDataFetcher)
                     typeWiring.dataFetcher("getTemplateFileUrl", templateService.templateFileUrlDataFetcher)
                     typeWiring.dataFetcher("templates", templateService.templatesDataFetcher)
                 })

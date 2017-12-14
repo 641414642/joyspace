@@ -1,16 +1,17 @@
 package com.unicolour.joyspace.dao
 
 import com.unicolour.joyspace.model.PrintOrder
+import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.CrudRepository
+import org.springframework.data.repository.query.Param
 import java.util.*
 
 interface PrintOrderDao : CrudRepository<PrintOrder, Int> {
-    fun findFirstByPrintStationIdAndPayedAndImageFileUploadedAndIdAfter(
-            printStationId: Int,
-            payed: Boolean,
-            imageFileUploaded: Boolean,
-            idAfter: Int): PrintOrder?
-
     fun existsByOrderNo(orderNo: String) : Boolean
     fun findByOrderNo(orderNo: String): PrintOrder?
+
+    @Query("SELECT p FROM PrintOrder p WHERE p.printStationId=:printStationId AND p.payed=true AND p.imageFileUploaded=true AND p.downloadedToPrintStation=false AND p.updateTime>=:updateTime")
+    fun findUnDownloadedPrintOrders(
+            @Param("printStationId") printStationId: Int,
+            @Param("updateTime") updateTime: Calendar): List<PrintOrder>
 }

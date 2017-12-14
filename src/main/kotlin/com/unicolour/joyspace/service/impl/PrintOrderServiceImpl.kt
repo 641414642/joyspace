@@ -254,6 +254,7 @@ open class PrintOrderServiceImpl : PrintOrderService {
         if (missingImageCount == 0L) {
             val order= printOrderDao.findOne(orderId)
             order.imageFileUploaded = true
+            order.updateTime = Calendar.getInstance()
             printOrderDao.save(order)
             return true
         }
@@ -262,22 +263,20 @@ open class PrintOrderServiceImpl : PrintOrderService {
         }
     }
 
-    override val printStationPrintOrderDataFetcher: DataFetcher<PrintOrder?>
+    override val printStationPrintOrdersDataFetcher: DataFetcher<List<PrintOrder>>
         get() {
             return DataFetcher { env ->
                 val printStationSessionId = env.getArgument<String>("sessionId")
-                val idAfter = env.getArgument<Int>("idAfter")
 
                 val session = printStationLoginSessionDao.findOne(printStationSessionId)
                 if (session == null) {
-                    null
+                    emptyList()
                 }
                 else {
-                    printOrderDao.findFirstByPrintStationIdAndPayedAndImageFileUploadedAndIdAfter(
-                            printStationId = session.printStationId,
-                            payed = true,
-                            imageFileUploaded = true,
-                            idAfter = idAfter)
+                    val time =  Calendar.getInstance()
+                    time.add(Calendar.DAY_OF_MONTH, -1)   //1天之内的订单
+
+                    printOrderDao.findUnDownloadedPrintOrders(session.printStationId, time)
                 }
             }
         }
@@ -363,9 +362,11 @@ open class PrintOrderServiceImpl : PrintOrderService {
                 } else {
                     if (state == "downloaded") {
                         order.downloadedToPrintStation = true
+                        order.updateTime = Calendar.getInstance()
                     }
                     else if (state == "printed") {
                         order.printedOnPrintStation = true
+                        order.updateTime = Calendar.getInstance()
                     }
 
                     printOrderDao.save(order)
@@ -522,6 +523,7 @@ open class PrintOrderServiceImpl : PrintOrderService {
                 //XXX 检查金额
 
                 printOrder.payed = true
+                printOrder.updateTime = Calendar.getInstance()
                 printOrderDao.save(printOrder)
 
                 return null
