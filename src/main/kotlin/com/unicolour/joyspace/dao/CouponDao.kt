@@ -9,7 +9,7 @@ import org.springframework.data.repository.query.Param
 
 interface CouponDao : PagingAndSortingRepository<Coupon, Int> {
     fun findByIdInOrderByDiscountDesc(idList: List<Int>): List<Coupon>
-    fun findByCode(code: String): Coupon
+    fun findByCodeIgnoreCase(code: String): Coupon?
 
     fun findByIdNotIn(couponIds: List<Int>): Iterable<Coupon>
 

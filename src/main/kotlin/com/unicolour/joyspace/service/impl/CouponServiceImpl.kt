@@ -155,37 +155,40 @@ open class CouponServiceImpl : CouponService {
 
                     synchronized(couponLock, {
                         transactionTemplate.execute {
-                            val coupon = couponDao.findByCode(code)
-
-                            val oldUserCoupon = userCouponDao.findByUserIdAndCouponId(session.userId, coupon.id)
-                            if (oldUserCoupon != null) {
-                                ClaimCouponResult(1, "用户已经领取过此优惠券")
+                            val coupon = couponDao.findByCodeIgnoreCase(code)
+                            if (coupon == null) {
+                                ClaimCouponResult(1, "您输入的信息不正确，请核对后再次输入", coupon)
                             }
                             else {
-                                val context = CouponValidateContext(
-                                        coupon = coupon,
-                                        user = user)
-
-                                //XXX 用户maxUse check
-                                val checkResult = validateCoupon(context,
-                                        this::validateCouponByTime,
-                                        this::validateCouponByMaxUses,
-                                        this::validateCouponByUserRegTime)
-
-                                if (checkResult == VALID) {
-                                    val userCoupon = UserCoupon()
-                                    userCoupon.couponId = coupon.id
-                                    userCoupon.userId = session.userId
-                                    userCoupon.usageCount = 0
-                                    userCoupon.claimTime = Date()
-                                    userCouponDao.save(userCoupon)
-
-                                    coupon.claimCount++
-                                    couponDao.save(coupon)
-
-                                    ClaimCouponResult(0, null, coupon)
+                                val oldUserCoupon = userCouponDao.findByUserIdAndCouponId(session.userId, coupon!!.id)
+                                if (oldUserCoupon != null) {
+                                    ClaimCouponResult(1, "用户已经领取过此优惠券")
                                 } else {
-                                    ClaimCouponResult(1, checkResult.desc)
+                                    val context = CouponValidateContext(
+                                            coupon = coupon,
+                                            user = user)
+
+                                    //XXX 用户maxUse check
+                                    val checkResult = validateCoupon(context,
+                                            this::validateCouponByTime,
+                                            this::validateCouponByMaxUses,
+                                            this::validateCouponByUserRegTime)
+
+                                    if (checkResult == VALID) {
+                                        val userCoupon = UserCoupon()
+                                        userCoupon.couponId = coupon.id
+                                        userCoupon.userId = session.userId
+                                        userCoupon.usageCount = 0
+                                        userCoupon.claimTime = Date()
+                                        userCouponDao.save(userCoupon)
+
+                                        coupon.claimCount++
+                                        couponDao.save(coupon)
+
+                                        ClaimCouponResult(0, null, coupon)
+                                    } else {
+                                        ClaimCouponResult(1, checkResult.desc)
+                                    }
                                 }
                             }
                         }
