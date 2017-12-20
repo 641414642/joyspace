@@ -4,6 +4,7 @@ import com.unicolour.joyspace.dao.PrintStationDao
 import com.unicolour.joyspace.dao.PrintStationLoginSessionDao
 import com.unicolour.joyspace.model.PrintStationStatus.OFFLINE
 import com.unicolour.joyspace.model.PrintStationStatus.WORKING
+import com.unicolour.joyspace.service.ScheduledTasks
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
@@ -12,7 +13,7 @@ import javax.transaction.Transactional
 
 
 @Component
-open class ScheduledTasks {
+open class ScheduledTasksImpl : ScheduledTasks {
     @Autowired
     lateinit var printStationLoginSessionDao: PrintStationLoginSessionDao
 
@@ -21,7 +22,7 @@ open class ScheduledTasks {
 
     @Scheduled(initialDelay = 6000, fixedDelay = 6000)  //1分钟更新一次自助机状态
     @Transactional
-    fun updatePrintStationStatus() {
+    override fun updatePrintStationStatus() {
         printStationDao.findAll().forEach({
             if (it.status == WORKING.value || it.status == OFFLINE.value) {
                 var offline = true
