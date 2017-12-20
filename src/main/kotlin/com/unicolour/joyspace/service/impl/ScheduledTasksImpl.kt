@@ -20,7 +20,7 @@ open class ScheduledTasksImpl : ScheduledTasks {
     @Autowired
     lateinit var printStationDao: PrintStationDao
 
-    @Scheduled(initialDelay = 6000, fixedDelay = 6000)  //1分钟更新一次自助机状态
+    @Scheduled(initialDelay = 60000, fixedDelay = 60000)  //1分钟更新一次自助机状态
     @Transactional
     override fun updatePrintStationStatus() {
         printStationDao.findAll().forEach({
