@@ -42,6 +42,7 @@
 						<th>名称</th>
 						<th>代码</th>
 						<th>类型</th>
+						<th>状态</th>
 						<th>有效期</th>
 						<th>领取 / 使用 / 最大使用次数</th>
 						<th>优惠</th>
@@ -56,6 +57,8 @@
 							<td th:case="2">输入代码获取</td>
 							<td th:case="3">扫码获取</td>
 						</th:block>
+						<td th:if="${coupon.enabled}"><span class="label label-success">启用</span></td>
+						<td th:unless="${coupon.enabled}"><span class="label label-danger">禁用</span></td>
 						<td>
 							<span th:if="${coupon.begin != null}" th:text="${#calendars.format(coupon.begin, 'yyyy-MM-dd')}"></span>
 							<span> ~ </span>

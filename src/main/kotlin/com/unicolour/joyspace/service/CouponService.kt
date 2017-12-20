@@ -20,7 +20,9 @@ enum class CouponValidateResult(val desc:String) {
 
     USER_REG_NOT_LONG_ENOUGH("用户注册时间不够"),
 
-    NOT_USABLE_IN_THIS_PRINT_STATION("不能在此自助机使用")
+    NOT_USABLE_IN_THIS_PRINT_STATION("不能在此自助机使用"),
+
+    DISABLED("已禁用")
 }
 
 class CouponValidateContext(
@@ -44,6 +46,13 @@ interface CouponService {
      * @return
      */
     fun validateCouponByTime(context: CouponValidateContext): CouponValidateResult
+
+    /**
+     * 检查优惠券是否已禁用
+     * @param context
+     * @return
+     */
+    fun validateCouponEnabled(context: CouponValidateContext): CouponValidateResult
 
     /**
      * 检查优惠券是否超出最大使用次数
@@ -85,7 +94,7 @@ interface CouponService {
 
     fun getDataFetcher(fieldName:String): DataFetcher<Any>
 
-    fun createCoupon(name: String, code: String, couponClaimMethod: CouponClaimMethod,
+    fun createCoupon(name: String, code: String, enabled: Boolean, couponClaimMethod: CouponClaimMethod,
                      maxUses: Int, maxUsesPerUser: Int, minExpense: Int, discount: Int,
                      begin: Date, expire: Date, userRegDays: Int,
                      selectedProductTypes: Set<ProductType>,
@@ -93,7 +102,7 @@ interface CouponService {
                      selectedPositionIds: Set<Int>,
                      selectedPrintStationIds: Set<Int>)
 
-    fun updateCoupon(id: Int, name: String, code: String, couponClaimMethod: CouponClaimMethod,
+    fun updateCoupon(id: Int, name: String, code: String, enabled: Boolean, couponClaimMethod: CouponClaimMethod,
                      maxUses: Int, maxUsesPerUser: Int, minExpense: Int, discount: Int,
                      begin: Date, expire: Date, userRegDays: Int,
                      selectedProductTypes: Set<ProductType>,

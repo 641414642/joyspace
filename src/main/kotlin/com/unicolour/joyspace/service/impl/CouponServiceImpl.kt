@@ -109,7 +109,7 @@ open class CouponServiceImpl : CouponService {
                                 }
                             }
 
-                            //删除不存在、过期、超过最大使用次数的优惠券
+                            //删除已禁用、不存在、过期、超过最大使用次数的优惠券
                             for (userCoupon in userCoupons) {
                                 val coupon = couponDao.findOne(userCoupon.couponId)
                                 val context = CouponValidateContext(
@@ -121,6 +121,7 @@ open class CouponServiceImpl : CouponService {
                                             COUPON_NOT_EXIST
                                         } else {
                                             validateCoupon(context,
+                                                    this::validateCouponEnabled,
                                                     this::validateCouponByTime,
                                                     this::validateCouponByMaxUses,
                                                     this::validateCouponByMaxUses)
@@ -170,6 +171,7 @@ open class CouponServiceImpl : CouponService {
 
                                     //XXX 用户maxUse check
                                     val checkResult = validateCoupon(context,
+                                            this::validateCouponEnabled,
                                             this::validateCouponByTime,
                                             this::validateCouponByMaxUses,
                                             this::validateCouponByUserRegTime)
@@ -286,6 +288,16 @@ open class CouponServiceImpl : CouponService {
         }
     }
 
+    override fun validateCouponEnabled(context: CouponValidateContext): CouponValidateResult {
+        val coupon = context.coupon
+        return if (!coupon.enabled) {
+            DISABLED
+        }
+        else {
+            VALID
+        }
+    }
+
     override fun validateCouponByClaimMethod(context: CouponValidateContext): CouponValidateResult {
         val coupon = context.coupon
         return if (coupon.claimMethod == context.claimMethod.value) {
@@ -338,7 +350,7 @@ open class CouponServiceImpl : CouponService {
     }
 
     @Transactional
-    override fun createCoupon(name: String, code: String, couponClaimMethod: CouponClaimMethod, maxUses: Int,
+    override fun createCoupon(name: String, code: String, enabled: Boolean, couponClaimMethod: CouponClaimMethod, maxUses: Int,
                               maxUsesPerUser: Int, minExpense: Int, discount: Int, begin: Date, expire: Date, userRegDays: Int,
                               selectedProductTypes: Set<ProductType>,
                               selectedProductIds: Set<Int>,
@@ -349,6 +361,7 @@ open class CouponServiceImpl : CouponService {
         val coupon = Coupon()
         coupon.name = name
         coupon.code = code
+        coupon.enabled = enabled
         coupon.companyId = loginManager!!.companyId
         coupon.claimMethod = couponClaimMethod.value
         coupon.maxUses = maxUses
@@ -404,7 +417,7 @@ open class CouponServiceImpl : CouponService {
     }
 
     @Transactional
-    override fun updateCoupon(id: Int, name: String, code: String, couponClaimMethod: CouponClaimMethod, maxUses: Int,
+    override fun updateCoupon(id: Int, name: String, code: String, enabled: Boolean, couponClaimMethod: CouponClaimMethod, maxUses: Int,
                               maxUsesPerUser: Int, minExpense: Int, discount: Int, begin: Date, expire: Date, userRegDays: Int,
                               selectedProductTypes: Set<ProductType>,
                               selectedProductIds: Set<Int>,
@@ -417,6 +430,7 @@ open class CouponServiceImpl : CouponService {
         else {
             coupon.name = name
             coupon.code = code
+            coupon.enabled = enabled
             coupon.claimMethod = couponClaimMethod.value
             coupon.maxUses = maxUses
             coupon.maxUsesPerUser = maxUsesPerUser

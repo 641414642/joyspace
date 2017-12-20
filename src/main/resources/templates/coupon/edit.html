@@ -61,6 +61,13 @@
                         <span class="help-block"></span>
                     </div>
                     <div class="form-group">
+                        <div style="display:inline-block;" class="checkbox">
+                            <label>
+                                <input type="checkbox" th:checked="${coupon.enabled==false}" th:name="disabled" th:text="禁用"/>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="form-group">
                         <label for="claimMethod" class="control-label">获取方式:</label>
                         <select name="claimMethod" class="form-control" id="claimMethod">
                             <option th:each="m : ${claimMethods}"

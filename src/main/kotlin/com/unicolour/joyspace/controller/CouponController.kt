@@ -130,6 +130,7 @@ class CouponController {
             coupon.expire = Date.from(now.plusDays(7).atStartOfDay(ZoneId.systemDefault()).toInstant())
             coupon.minExpense = 100
             coupon.discount = 10
+            coupon.enabled = true
         }
 
         modelAndView.model["coupons"] = couponDao.findAll()
@@ -164,6 +165,7 @@ class CouponController {
             @RequestParam(name = "id", required = true) id: Int,
             @RequestParam(name = "name", required = true) name: String,
             @RequestParam(name = "code", required = true) code: String,
+            @RequestParam(name = "disabled", required = false) disabled: Boolean?,
             @RequestParam(name = "claimMethod", required = true) claimMethod: Int,
             @RequestParam(name = "maxUses", required = true) maxUses: Int,
             @RequestParam(name = "maxUsesPerUser", required = true) maxUsesPerUser: Int,
@@ -176,6 +178,7 @@ class CouponController {
             @RequestParam(name = "positionIds", required = true) positionIds: String,
             @RequestParam(name = "printStationIds", required = true) printStationIds: String
     ): Boolean {
+        val enabled = !(disabled != null && disabled)
 
         val selectedProductTypes = ProductType.values()
                 .filter { !request.getParameter("productType_${it.value}").isNullOrBlank() }
@@ -199,13 +202,13 @@ class CouponController {
         val df = SimpleDateFormat("yyyy-MM-dd")
         val couponClaimMethod = CouponClaimMethod.values().find{ it.value == claimMethod }
         if (id <= 0) {
-            couponService.createCoupon(name, code, couponClaimMethod!!, maxUses, maxUsesPerUser,
+            couponService.createCoupon(name, code, enabled, couponClaimMethod!!, maxUses, maxUsesPerUser,
                     (minExpense * 100).toInt(), (discount * 100).toInt(),
                     df.parse(begin), df.parse(expire), userRegDays,
                     selectedProductTypes, selectedProductIds, selectedPositionIds, selectedPrintStationIds)
             return true
         } else {
-            return couponService.updateCoupon(id, name, code, couponClaimMethod!!, maxUses, maxUsesPerUser,
+            return couponService.updateCoupon(id, name, code, enabled, couponClaimMethod!!, maxUses, maxUsesPerUser,
                     (minExpense * 100).toInt(), (discount * 100).toInt(),
                     df.parse(begin), df.parse(expire), userRegDays,
                     selectedProductTypes, selectedProductIds, selectedPositionIds, selectedPrintStationIds)
