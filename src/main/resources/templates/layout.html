@@ -167,10 +167,9 @@
 						<li th:class="${viewContent=='priceList_list' ? 'active' : ''}"><a href="#" th:href="@{/priceList/list}"><i class="fa fa-circle-o"></i>价目表</a></li>
 						<li th:class="${viewContent=='position_list' ? 'active' : ''}"><a href="#" th:href="@{/position/list}"><i class="fa fa-circle-o"></i>投放地点</a></li>
 						<li th:class="${viewContent=='printStation_list' ? 'active' : ''}"><a href="#" th:href="@{/printStation/list}"><i class="fa fa-circle-o"></i>自助打印机</a></li>
-						<li th:class="${viewContent=='coupon_list' ? 'active' : ''}"><a href="#" th:href="@{/coupon/list}"><i class="fa fa-circle-o"></i>优惠券</a></li>
 					</ul>
 				</li>
-				<li class="treeview">
+				<li th:class="${viewCat=='business_mgr' ? 'treeview active' : 'treeview'}" class="treeview">
 					<a href="#">
 						<i class="fa fa-laptop"></i>
 						<span>业务管理</span>
@@ -179,20 +178,18 @@
             			</span>
 					</a>
 					<ul class="treeview-menu">
-						<li><a href="#"><i class="fa fa-circle-o"></i>订单查询</a></li>
-						<li><a href="#"><i class="fa fa-circle-o"></i>订单列表</a></li>
+						<li th:class="${viewContent=='printOrder_list' ? 'active' : ''}"><a href="#" th:href="@{/printOrder/list}"><i class="fa fa-circle-o"></i>订单</a></li>
 					</ul>
 				</li>
-				<li class="treeview">
+				<li th:class="${viewCat=='coupon_mgr' ? 'treeview active' : 'treeview'}" class="treeview">
 					<a href="#">
-						<i class="fa fa-edit"></i> <span>代金券管理</span>
+						<i class="fa fa-edit"></i> <span>优惠券管理</span>
 						<span class="pull-right-container">
               				<i class="fa fa-angle-left pull-right"></i>
             			</span>
 					</a>
 					<ul class="treeview-menu">
-						<li><a href="#"><i class="fa fa-circle-o"></i>新增代金券</a></li>
-						<li><a href="#"><i class="fa fa-circle-o"></i>代金券列表</a></li>
+						<li th:class="${viewContent=='coupon_list' ? 'active' : ''}"><a href="#" th:href="@{/coupon/list}"><i class="fa fa-circle-o"></i>优惠券</a></li>
 					</ul>
 				</li>
 			</ul>
@@ -215,6 +212,7 @@
 		<div th:case="'position_list'" th:include="position/list :: content"></div>
 		<div th:case="'printStation_list'" th:include="printStation/list :: content"></div>
 		<div th:case="'coupon_list'" th:include="coupon/list :: content"></div>
+		<div th:case="'printOrder_list'" th:include="printOrder/list :: content"></div>
 		<div th:case="*"></div>
 		<!-- /.content -->
 	</div>

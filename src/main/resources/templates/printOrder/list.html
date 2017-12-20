@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<meta charset="utf-8" />
+</head>
+<body>
+<div th:fragment="content">
+	<!-- Content Header (Page header) -->
+	<section class="content-header">
+		<h1>订单列表</h1>
+		<ol class="breadcrumb">
+			<li class="active">业务管理</li>
+			<li class="active">订单列表</li>
+		</ol>
+	</section>
+
+	<!-- Main content -->
+	<section class="content">
+		<div class="box">
+			<div class="box-header with-border">
+				<form th:action="@{/printOrder/list}" method="get" target="_self">
+					<input type="hidden" id="pageNoField" name="pageno" />
+					<div class="form-inline">
+						<label class="form-label">订单编号</label>
+						<input class="form-control" type="text" name="orderNo" th:value="${inputOrderNo}" />
+						&nbsp;&nbsp;
+						<button type="submit" class="btn btn-default btn-sm">查询</button>
+						<a href="#" th:href="@{/printOrder/list}" class="btn btn-default btn-sm">重置</a>
+					</div>
+				</form>
+			</div>
+
+			<div class="box-body">
+				<table class="table table-bordered table-striped">
+					<tr>
+						<th>ID</th>
+						<th>编号</th>
+						<th>创建时间</th>
+						<th>自助机</th>
+						<th>状态</th>
+					</tr>
+					<tr th:each="order : ${printOrders}">
+						<td th:text="${order.id}"></td>
+						<td th:text="${order.orderNo}"></td>
+						<td th:text="${order.createTime == null ? '' : #calendars.format(order.createTime, 'yyyy-MM-dd HH:mm')}"></td>
+						<td th:text="${order.printStationId}"></td>
+						<td>
+							<img th:unless="${order.payed}" src="../../static/img/money_gray.png" th:src="@{/img/money_gray.png}" title="未支付" />
+							<img th:if="${order.payed}" src="../../static/img/money_green.png" th:src="@{/img/money_green.png}" title="已支付"  />
+
+							<img th:unless="${order.imageFileUploaded}" src="../../static/img/imgupload_gray.png" th:src="@{/img/imgupload_gray.png}" title="图片未上传完" />
+							<img th:if="${order.imageFileUploaded}" src="../../static/img/imgupload_green.png" th:src="@{/img/imgupload_green.png}" title="图片已上传完"  />
+
+							<img th:unless="${order.downloadedToPrintStation}" src="../../static/img/download_gray.png" th:src="@{/img/download_gray.png}" title="订单未下载到自助机" />
+							<img th:if="${order.downloadedToPrintStation}" src="../../static/img/download_green.png" th:src="@{/img/download_green.png}" title="订单已下载到自助机" />
+
+							<img th:unless="${order.printedOnPrintStation}" src="../../static/img/print_gray.png" th:src="@{/img/print_gray.png}" title="未打印" />
+							<img th:if="${order.printedOnPrintStation}" src="../../static/img/print_green.png" th:src="@{/img/print_green.png}" title="已打印" />
+						</td>
+					</tr>
+				</table>
+			</div>
+
+			<div class="box-footer clearfix" th:include="pager :: content(${pager}, 'pageNoField')">
+			</div>
+		</div>
+	</section>
+</div>
+</body>
+</html>

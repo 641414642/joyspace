@@ -69,7 +69,7 @@ class CouponController {
 
         modelAndView.model.put("coupons", coupons.content)
 
-        modelAndView.model.put("viewCat", "product_mgr")
+        modelAndView.model.put("viewCat", "coupon_mgr")
         modelAndView.model.put("viewContent", "coupon_list")
         modelAndView.viewName = "layout"
 

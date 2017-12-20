@@ -1,6 +1,8 @@
 package com.unicolour.joyspace.dao
 
 import com.unicolour.joyspace.model.PrintOrder
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.CrudRepository
 import org.springframework.data.repository.query.Param
@@ -14,4 +16,7 @@ interface PrintOrderDao : CrudRepository<PrintOrder, Int> {
     fun findUnDownloadedPrintOrders(
             @Param("printStationId") printStationId: Int,
             @Param("updateTime") updateTime: Calendar): List<PrintOrder>
+
+    fun findByCompanyIdOrderByIdDesc(companyId: Int, pageable: Pageable): Page<PrintOrder>
+    fun findByOrderNoIgnoreCaseAndCompanyId(orderNo: String, companyId: Int, pageable: Pageable): Page<PrintOrder>
 }
