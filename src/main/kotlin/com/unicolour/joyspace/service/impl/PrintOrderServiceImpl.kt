@@ -268,7 +268,7 @@ open class PrintOrderServiceImpl : PrintOrderService {
             return DataFetcher { env ->
                 val printStationSessionId = env.getArgument<String>("sessionId")
 
-                val session = printStationLoginSessionDao.findOne(printStationSessionId)
+                val session = printStationService.getPrintStationLoginSession(printStationSessionId)
                 if (session == null) {
                     emptyList()
                 }
@@ -330,8 +330,8 @@ open class PrintOrderServiceImpl : PrintOrderService {
         val status: Int = env.getArgument<Int>("status")
 
 
-        val loginSession = printStationLoginSessionDao.findOne(sessionId)
-        return if (loginSession == null || System.currentTimeMillis() > loginSession.expireTime.timeInMillis) {
+        val loginSession = printStationService.getPrintStationLoginSession(sessionId)
+        return if (loginSession == null) {
             GraphQLRequestResult(ResultCode.INVALID_PRINT_STATION_LOGIN_SESSION)
         } else {
             val printOrderImage = printOrderImageDao.findOne(printOrderImageId)
@@ -351,8 +351,8 @@ open class PrintOrderServiceImpl : PrintOrderService {
         val sessionId = env.getArgument<String>("sessionId")
         val printOrderId = env.getArgument<Int>("printOrderId")
 
-        val loginSession = printStationLoginSessionDao.findOne(sessionId)
-        return if (loginSession == null || System.currentTimeMillis() > loginSession.expireTime.timeInMillis) {
+        val loginSession = printStationService.getPrintStationLoginSession(sessionId)
+        return if (loginSession == null) {
             GraphQLRequestResult(ResultCode.INVALID_PRINT_STATION_LOGIN_SESSION)
         } else {
             val order = printOrderDao.findOne(printOrderId)
