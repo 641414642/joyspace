@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta charset="utf-8" />
+    <!-- Bootstrap 3.3.6 -->
+    <link rel="stylesheet" href="../../static/thirdparty/bootstrap/css/bootstrap.min.css" th:href="@{/thirdparty/bootstrap/css/bootstrap.min.css}" />
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="../../static/thirdparty/fontawesome/css/font-awesome.min.css" th:href="@{/thirdparty/fontawesome/css/font-awesome.min.css}" />
+    <!-- Ionicons -->
+    <link rel="stylesheet" href="../../static/thirdparty/ionicons/css/ionicons.min.css" th:href="@{/thirdparty/ionicons/css/ionicons.min.css}" />
+    <!-- Theme style -->
+    <link rel="stylesheet" href="../../static/thirdparty/adminlte/css/AdminLTE.min.css" th:href="@{/thirdparty/adminlte/css/AdminLTE.min.css}" />
+    <!-- AdminLTE Skins. Choose a skin from the css/skins
+         folder instead of downloading all of them to reduce the load. -->
+    <link rel="stylesheet" href="../../static/thirdparty/adminlte/css/skins/_all-skins.min.css" th:href="@{/thirdparty/adminlte/css/skins/_all-skins.min.css}" />
+
+    <!-- jQuery 2.2.3 -->
+    <script src="../../static/thirdparty/plugins/jQuery/jquery-2.2.3.min.js" th:src="@{/thirdparty/plugins/jQuery/jquery-2.2.3.min.js}"></script>
+    <!-- Bootstrap 3.3.6 -->
+    <script src="../../static/thirdparty/bootstrap/js/bootstrap.min.js" th:src="@{/thirdparty/bootstrap/js/bootstrap.min.js}"></script>
+    <!-- SlimScroll -->
+    <script src="../../static/thirdparty/plugins/slimScroll/jquery.slimscroll.min.js" th:src="@{/thirdparty/plugins/slimScroll/jquery.slimscroll.min.js}"></script>
+    <!-- FastClick -->
+    <script src="../../static/thirdparty/plugins/fastclick/fastclick.js" th:src="@{/thirdparty/plugins/fastclick/fastclick.js}"></script>
+    <!-- AdminLTE App -->
+    <script src="../../static/thirdparty/adminlte/js/app.min.js" th:src="@{/thirdparty/adminlte/js/app.min.js}"></script>
+
+    <script type="text/javascript">
+		$(document).ready(function() {
+			$('#editDialog').modal('show');
+		});
+	</script>
+</head>
+<body>
+<div class="modal fade" role="dialog" id="editDialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content" th:fragment="content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+                <h4 class="modal-title" th:text="订单详情"></h4>
+            </div>
+            <div id="printOrderDetail">
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="orderNo" class="control-label">订单编号:</label>
+                        <input type="text" th:readonly="true" class="form-control" name="orderNo" id="orderNo" th:value="${printOrder.orderNo}" />
+                    </div>
+                    <div class="form-group">
+                        <label for="createTime" class="control-label">提交时间:</label>
+                        <input type="text" th:readonly="true" class="form-control" name="createTime" id="createTime" th:value="${printOrder.createTime == null ? '' : #calendars.format(printOrder.createTime, 'yyyy-MM-dd HH:mm:ss')}" />
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label">订单项列表:</label>
+                        <table class="table table-bordered">
+                            <tr>
+                                <th>产品名称</th>
+                                <th>打印份数</th>
+                                <th>图片状态</th>
+                                <th>操作</th>
+                            </tr>
+                            <th:block th:each="orderItem : ${orderItems}">
+                                <tr th:each="orderItemImage,iterStat : ${orderItem.first.orderImages}">
+                                    <td th:if="${iterStat.index==0}" th:rowspan="${iterStat.size}" th:text="${orderItem.second.name}"></td>
+                                    <td th:if="${iterStat.index==0}" th:rowspan="${iterStat.size}" th:text="${orderItem.first.copies}"></td>
+                                    <th:block th:switch="${orderItemImage.status}">
+                                        <td th:case="0">未上传</td>
+                                        <td th:case="1">已上传</td>
+                                        <td th:case="2">已下载</td>
+                                        <td th:case="3">已处理</td>
+                                        <td th:case="4">已打印</td>
+                                    </th:block>
+                                    <td>
+                                        <a target="_blank" href="#" th:if="${orderItemImage.status != 0}" th:href="${baseUrl + '/assets/user/' + orderItemImage.userImageFile.userId + '/' + orderItemImage.userImageFile.sessionId + '/' + orderItemImage.userImageFile.fileName + '.' + orderItemImage.userImageFile.type}">查看图片</a>
+                                    </td>
+                                </tr>
+                            </th:block>
+                        </table>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-dismiss="modal">关闭</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

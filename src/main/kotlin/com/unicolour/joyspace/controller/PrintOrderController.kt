@@ -1,21 +1,32 @@
 package com.unicolour.joyspace.controller
 
 import com.unicolour.joyspace.dao.PrintOrderDao
+import com.unicolour.joyspace.dao.PrintOrderItemDao
+import com.unicolour.joyspace.dao.ProductDao
 import com.unicolour.joyspace.service.ManagerService
 import com.unicolour.joyspace.util.Pager
+import com.unicolour.joyspace.util.getBaseUrl
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestMethod
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.servlet.ModelAndView
+import javax.servlet.http.HttpServletRequest
 
 @Controller
 class PrintOrderController {
 
     @Autowired
     lateinit var printOrderDao: PrintOrderDao
+
+    @Autowired
+    lateinit var printOrderItemDao: PrintOrderItemDao
+
+    @Autowired
+    lateinit var productDao: ProductDao
 
     @Autowired
     lateinit var managerService: ManagerService
@@ -47,4 +58,23 @@ class PrintOrderController {
 
         return modelAndView
     }
+
+
+    @RequestMapping(path = arrayOf("/printOrder/detail"), method = arrayOf(RequestMethod.GET))
+    fun printOrderDetail(request: HttpServletRequest, modelAndView: ModelAndView, @RequestParam(name = "id", required = true) id: Int): ModelAndView {
+        val baseUrl = getBaseUrl(request)
+
+        val printOrder = printOrderDao.findOne(id)
+        val printOrderItems = printOrderItemDao.findByPrintOrderId(id)
+
+        val idProductMap = productDao.findByIdIn(printOrderItems.map { it.productId }).map { Pair(it.id, it) }.toMap()
+
+        modelAndView.model.put("printOrder", printOrder)
+        modelAndView.model.put("baseUrl", baseUrl)
+        modelAndView.model.put("orderItems", printOrderItems.map { Pair(it, idProductMap[it.productId]) })
+        modelAndView.viewName = "/printOrder/detail :: content"
+
+        return modelAndView
+    }
+
 }

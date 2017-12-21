@@ -38,13 +38,18 @@
 						<th>编号</th>
 						<th>创建时间</th>
 						<th>自助机</th>
+						<th>总价(元)</th>
+						<th>折扣(元)</th>
 						<th>状态</th>
+						<th>操作</th>
 					</tr>
 					<tr th:each="order : ${printOrders}">
 						<td th:text="${order.id}"></td>
 						<td th:text="${order.orderNo}"></td>
 						<td th:text="${order.createTime == null ? '' : #calendars.format(order.createTime, 'yyyy-MM-dd HH:mm')}"></td>
 						<td th:text="${order.printStationId}"></td>
+						<td th:text="${#numbers.formatDecimal(order.totalFee / 100.0, 1, 'DEFAULT', 2, 'DEFAULT')}"></td>
+						<td th:text="${#numbers.formatDecimal(order.discount / 100.0, 1, 'DEFAULT', 2, 'DEFAULT')}"></td>
 						<td>
 							<img th:unless="${order.payed}" src="../../static/img/money_gray.png" th:src="@{/img/money_gray.png}" title="未支付" />
 							<img th:if="${order.payed}" src="../../static/img/money_green.png" th:src="@{/img/money_green.png}" title="已支付"  />
@@ -58,6 +63,9 @@
 							<img th:unless="${order.printedOnPrintStation}" src="../../static/img/print_gray.png" th:src="@{/img/print_gray.png}" title="未打印" />
 							<img th:if="${order.printedOnPrintStation}" src="../../static/img/print_green.png" th:src="@{/img/print_green.png}" title="已打印" />
 						</td>
+						<td>
+							<a href="#" th:attr="data-url=@{/printOrder/detail(id=${order.id})}" onclick="return viewPrintOrderDetail(event)">详情</a>
+						</td>
 					</tr>
 				</table>
 			</div>
@@ -66,6 +74,7 @@
 			</div>
 		</div>
 	</section>
+	<script src="../../static/js/order.js" th:src="@{/js/order.js}"></script>
 </div>
 </body>
 </html>
