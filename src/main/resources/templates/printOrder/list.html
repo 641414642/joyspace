@@ -67,8 +67,8 @@
 							<img th:unless="${orderWrapper.order.payed}" src="../../static/img/money_gray.png" th:src="@{/img/money_gray.png}" title="未支付" />
 							<img th:if="${orderWrapper.order.payed}" src="../../static/img/money_green.png" th:src="@{/img/money_green.png}" title="已支付"  />
 
-							<img th:unless="${orderWrapper.order.imageFileUploaded}" src="../../static/img/imgupload_gray.png" th:src="@{/img/imgupload_gray.png}" title="图片未上传完" />
-							<img th:if="${orderWrapper.order.imageFileUploaded}" src="../../static/img/imgupload_green.png" th:src="@{/img/imgupload_green.png}" title="图片已上传完"  />
+							<img th:unless="${orderWrapper.order.imageFileUploaded}" src="../../static/img/imgupload_gray.png" th:src="@{/img/upload_gray.png}" title="图片未上传完" />
+							<img th:if="${orderWrapper.order.imageFileUploaded}" src="../../static/img/imgupload_green.png" th:src="@{/img/upload_green.png}" title="图片已上传完"  />
 
 							<img th:unless="${orderWrapper.order.downloadedToPrintStation}" src="../../static/img/download_gray.png" th:src="@{/img/download_gray.png}" title="订单未下载到自助机" />
 							<img th:if="${orderWrapper.order.downloadedToPrintStation}" src="../../static/img/download_green.png" th:src="@{/img/download_green.png}" title="订单已下载到自助机" />
