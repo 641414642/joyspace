@@ -1,8 +1,8 @@
 package com.unicolour.joyspace.controller
 
-import com.unicolour.joyspace.dao.PrintOrderDao
-import com.unicolour.joyspace.dao.PrintOrderItemDao
-import com.unicolour.joyspace.dao.ProductDao
+import com.unicolour.joyspace.dao.*
+import com.unicolour.joyspace.model.Position
+import com.unicolour.joyspace.model.PrintOrder
 import com.unicolour.joyspace.service.ManagerService
 import com.unicolour.joyspace.util.Pager
 import com.unicolour.joyspace.util.getBaseUrl
@@ -20,6 +20,15 @@ import javax.servlet.http.HttpServletRequest
 class PrintOrderController {
 
     @Autowired
+    lateinit var printStationDao: PrintStationDao
+
+    @Autowired
+    lateinit var positionDao: PositionDao
+
+    @Autowired
+    lateinit var userDao: UserDao
+
+    @Autowired
     lateinit var printOrderDao: PrintOrderDao
 
     @Autowired
@@ -35,26 +44,47 @@ class PrintOrderController {
     fun printOrderList(
             modelAndView: ModelAndView,
             @RequestParam(name = "orderNo", required = false, defaultValue = "") orderNo: String?,
+            @RequestParam(name = "partial", required = false, defaultValue = "false") partial: Boolean?,
             @RequestParam(name = "pageno", required = false, defaultValue = "1") pageno: Int): ModelAndView {
 
         val loginManager = managerService.loginManager
 
-        val pageable = PageRequest(pageno - 1, 20, Sort.Direction.DESC, "id")
+        val pageable = PageRequest(pageno - 1, 50, Sort.Direction.DESC, "id")
         val printOrders = if (orderNo == null || orderNo == "")
             printOrderDao.findByCompanyIdOrderByIdDesc(loginManager!!.companyId, pageable)
         else
             printOrderDao.findByOrderNoIgnoreCaseAndCompanyId(orderNo, loginManager!!.companyId, pageable)
+
+        val idUserMap = userDao.findByIdIn(printOrders.content.map { it.userId }).map { Pair(it.id, it) }.toMap()
+        val idPrintStationMap = printStationDao.findByIdIn(printOrders.content.map { it.printStationId }).map { Pair(it.id, it) }.toMap()
+        val idPositionMap = positionDao.findByIdIn(idPrintStationMap.values.map { it.positionId }).map { Pair(it.id, it) }.toMap()
 
         modelAndView.model.put("inputOrderNo", orderNo)
 
         val pager = Pager(printOrders.totalPages, 7, pageno - 1)
         modelAndView.model.put("pager", pager)
 
-        modelAndView.model.put("printOrders", printOrders.content)
+        class PrintOrderWrapper(val order: PrintOrder, val position: Position, val userName: String)
 
-        modelAndView.model.put("viewCat", "business_mgr")
-        modelAndView.model.put("viewContent", "printOrder_list")
-        modelAndView.viewName = "layout"
+        modelAndView.model.put("printOrders", printOrders.content.map {
+            val printStation = idPrintStationMap[it.printStationId]!!
+            val position = idPositionMap[printStation.positionId]!!
+            val user = idUserMap[it.userId]!!
+            var userName = user.nickName ?: user.fullName ?: ""
+            if (userName != "") {
+                userName = " / " + userName
+            }
+            PrintOrderWrapper(it, position, "ID:${user.id}" + userName)
+        })
+
+        if (partial == true) {
+            modelAndView.viewName = "/printOrder/list :: order_list_content"
+        }
+        else {
+            modelAndView.model.put("viewCat", "business_mgr")
+            modelAndView.model.put("viewContent", "printOrder_list")
+            modelAndView.viewName = "layout"
+        }
 
         return modelAndView
     }

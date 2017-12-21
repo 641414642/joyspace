@@ -14,4 +14,5 @@ interface PrintStationDao : PagingAndSortingRepository<PrintStation, Int> {
     fun findByCompanyId(companyId: Int): List<PrintStation>
 
     fun findByCityId(cityId: Int): List<PrintStation>
+    fun findByIdIn(idList: List<Int>): List<PrintStation>
 }

@@ -8,4 +8,5 @@ interface UserDao : PagingAndSortingRepository<User, Int> {
     fun findByPhone(phoneNumber: String): User?
     fun findByUserName(userName: String): User?
     fun findByNickName(nickName: String): User?
+    fun findByIdIn(idList: List<Int>): List<User>
 }

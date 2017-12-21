@@ -13,4 +13,5 @@ interface PositionDao : PagingAndSortingRepository<Position, Int> {
 
     fun findByCompanyId(companyId: Int, pageable: Pageable): Page<Position>
     fun findByCompanyId(companyId: Int): List<Position>
+    fun findByIdIn(idList: List<Int>): List<Position>
 }
