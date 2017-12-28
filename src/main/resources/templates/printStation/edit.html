@@ -50,11 +50,6 @@
                         <span class="help-block"></span>
                     </div>
                     <div class="form-group">
-                        <label for="wxQrCode" class="control-label">微信二维码:</label>
-                        <input type="text" name="wxQrCode" class="form-control" id="wxQrCode" th:value="${printStation.wxQrCode}" />
-                        <span class="help-block"></span>
-                    </div>
-                    <div class="form-group">
                         <label for="position" class="control-label">投放地点:</label>
                         <select name="positionId" class="form-control" id="position">
                             <option th:each="position : ${positions}"
@@ -67,13 +62,40 @@
                     </div>
                     <div class="form-group">
                         <label class="control-label">产品:</label>
-                        <div>
-                            <div style="display:inline-block; margin-right:20px" class="checkbox" th:each="product : ${products}">
-                                <label>
-                                    <input type="checkbox" th:checked="${product.selected}"
-                                           th:name="${'product_' + product.productId}"
-                                           th:text="${product.productName + ' (' + product.templateName + ')'}"/>
-                                </label>
+                        <div class="nav-tabs-custom">
+                            <ul class="nav nav-tabs">
+                                <li class="active"><a href="#photo" data-toggle="tab">普通照片</a></li>
+                                <li><a href="#template" data-toggle="tab">模板拼图</a></li>
+                                <li><a href="#id_photo" data-toggle="tab">证件照</a></li>
+                            </ul>
+                            <div class="tab-content">
+                                <div class="active tab-pane" id="photo">
+                                    <div style="display:inline-block; margin-right:20px" class="checkbox" th:each="product : ${photo_products}">
+                                        <label>
+                                            <input type="checkbox" th:checked="${product.selected}"
+                                                   th:name="${'product_' + product.productId}"
+                                                   th:text="${product.productName + ' (' + product.templateName + ')'}"/>
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="tab-pane" id="template">
+                                    <div style="display:inline-block; margin-right:20px" class="checkbox" th:each="product : ${template_products}">
+                                        <label>
+                                            <input type="checkbox" th:checked="${product.selected}"
+                                                   th:name="${'product_' + product.productId}"
+                                                   th:text="${product.productName + ' (' + product.templateName + ')'}"/>
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="tab-pane" id="id_photo">
+                                    <div style="display:inline-block; margin-right:20px" class="checkbox" th:each="product : ${id_photo_products}">
+                                        <label>
+                                            <input type="checkbox" th:checked="${product.selected}"
+                                                   th:name="${'product_' + product.productId}"
+                                                   th:text="${product.productName + ' (' + product.templateName + ')'}"/>
+                                        </label>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>

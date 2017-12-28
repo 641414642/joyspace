@@ -64,7 +64,7 @@ class PositionController {
 
         modelAndView.model.put("positions", positions.content)
 
-        modelAndView.model.put("viewCat", "product_mgr")
+        modelAndView.model.put("viewCat", "business_mgr")
         modelAndView.model.put("viewContent", "position_list")
         modelAndView.viewName = "layout"
 

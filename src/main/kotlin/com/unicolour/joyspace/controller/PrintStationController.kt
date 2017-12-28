@@ -6,9 +6,11 @@ import com.unicolour.joyspace.dao.PrintStationProductDao
 import com.unicolour.joyspace.dao.ProductDao
 import com.unicolour.joyspace.dto.ProductItem
 import com.unicolour.joyspace.model.PrintStation
+import com.unicolour.joyspace.model.ProductType
 import com.unicolour.joyspace.service.ManagerService
 import com.unicolour.joyspace.service.PrintStationService
 import com.unicolour.joyspace.util.Pager
+import com.unicolour.joyspace.util.getBaseUrl
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
@@ -59,7 +61,7 @@ class PrintStationController {
 
         modelAndView.model.put("printStations", printStations.content)
 
-        modelAndView.model.put("viewCat", "product_mgr")
+        modelAndView.model.put("viewCat", "business_mgr")
         modelAndView.model.put("viewContent", "printStation_list")
         modelAndView.viewName = "layout"
 
@@ -86,12 +88,21 @@ class PrintStationController {
         }
 
         val allProducts = productDao.findByCompanyId(loginManager!!.companyId)
-                .map { ProductItem(it.id, it.name, it.template.name, supportedProductIdSet.contains(it.id)) }
+                .map {
+                    ProductItem(
+                            productId = it.id,
+                            productType = it.template.type,
+                            productName = it.name,
+                            templateName = it.template.name,
+                            selected = supportedProductIdSet.contains(it.id))
+                }
 
         modelAndView.model.put("create", id <= 0)
         modelAndView.model.put("printStation", printStation)
-        modelAndView.model.put("positions", positionDao.findAll())
-        modelAndView.model.put("products", allProducts)
+        modelAndView.model.put("positions", positionDao.findByCompanyId(loginManager!!.companyId))
+        modelAndView.model.put("photo_products", allProducts.filter { it.productType == ProductType.PHOTO.value })
+        modelAndView.model.put("template_products", allProducts.filter { it.productType == ProductType.TEMPLATE.value })
+        modelAndView.model.put("id_photo_products", allProducts.filter { it.productType == ProductType.ID_PHOTO.value })
         modelAndView.model.put("productIds", allProducts.map { it.productId }.joinToString(separator = ","))
         modelAndView.viewName = "/printStation/edit :: content"
 
@@ -104,7 +115,6 @@ class PrintStationController {
             request: HttpServletRequest,
             @RequestParam(name = "id", required = true) id: Int,
             @RequestParam(name = "password", required = true) password: String,
-            @RequestParam(name = "wxQrCode", required = true) wxQrCode: String,
             @RequestParam(name = "positionId", required = true) positionId: Int,
             @RequestParam(name = "productIds", required = true) productIds: String
     ): Boolean {
@@ -114,12 +124,13 @@ class PrintStationController {
                 .filter { !request.getParameter("product_${it}").isNullOrBlank() }
                 .map { it.toInt() }
                 .toSet()
+        val baseUrl = getBaseUrl(request)
 
         if (id <= 0) {
-            printStationService.createPrintStation(password, wxQrCode, positionId, selectedProductIds)
+            printStationService.createPrintStation(baseUrl, password, positionId, selectedProductIds)
             return true
         } else {
-            return printStationService.updatePrintStation(id, password, wxQrCode, positionId, selectedProductIds)
+            return printStationService.updatePrintStation(id, baseUrl, password, positionId, selectedProductIds)
         }
     }
 

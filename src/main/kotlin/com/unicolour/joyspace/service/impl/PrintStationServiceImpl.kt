@@ -164,7 +164,7 @@ open class PrintStationServiceImpl : PrintStationService {
     }
 
     @Transactional
-    override fun createPrintStation(password: String, wxQrCode: String, positionId: Int, selectedProductIds: Set<Int>): PrintStation? {
+    override fun createPrintStation(baseUrl: String, password: String, positionId: Int, selectedProductIds: Set<Int>): PrintStation? {
         val loginManager = managerService.loginManager
         if (loginManager == null) {
             return null
@@ -173,13 +173,15 @@ open class PrintStationServiceImpl : PrintStationService {
         val manager = managerDao.findOne(loginManager.managerId)
 
         val printStation = PrintStation()
-        printStation.wxQrCode = wxQrCode
         printStation.company = manager.company
         printStation.position = positionDao.findOne(positionId)
         printStation.city = printStation.position.city
         printStation.password = passwordEncoder.encode(password)
         printStation.status = PrintStationStatus.OFFLINE.value
 
+        printStationDao.save(printStation)
+
+        printStation.wxQrCode = "$baseUrl/printStation/${printStation.id}"
         printStationDao.save(printStation)
 
         for (productId in selectedProductIds) {
@@ -194,11 +196,11 @@ open class PrintStationServiceImpl : PrintStationService {
     }
 
     @Transactional
-    override fun updatePrintStation(id: Int, password: String, wxQrCode: String, positionId: Int, selectedProductIds: Set<Int>): Boolean {
+    override fun updatePrintStation(id: Int, baseUrl: String, password: String, positionId: Int, selectedProductIds: Set<Int>): Boolean {
         val printStation = printStationDao.findOne(id)
 
         if (printStation != null) {
-            printStation.wxQrCode = wxQrCode
+            printStation.wxQrCode = "$baseUrl/printStation/${printStation.id}"
             printStation.position = positionDao.findOne(positionId)
             printStation.city = printStation.position.city
             if (!password.isNullOrEmpty()) {

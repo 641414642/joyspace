@@ -8,6 +8,7 @@ class ProductTypeItem(
 
 class ProductItem(
         val productId: Int,
+        val productType: Int,
         val productName: String,
         val templateName: String,
         val selected: Boolean
