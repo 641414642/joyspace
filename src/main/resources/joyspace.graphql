@@ -20,7 +20,7 @@ type QueryType {
     #获取订单
     printOrder(sessionId: String!, printOrderId: Int!): PrintOrderResult!
 
-    ###############################自助机调用的接口######################################3
+    ###############################自助机调用的接口######################################
     #查找指定自助机的待打印订单
     getPrintOrders(sessionId: String!): [PrintOrder!]!
 
@@ -54,7 +54,7 @@ type MutationType {
     #获取优惠券
     claimCoupon(sessionId: String!, couponCode: String!): ClaimCouponResult!
 
-    ###############################自助机调用的接口######################################3
+    ###############################自助机调用的接口######################################
     #自助机登录
     printStationLogin(printStationId: Int! password: String!) : PrintStationLoginRequestResult!
 

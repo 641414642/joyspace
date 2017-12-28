@@ -270,7 +270,7 @@ open class PrintOrderServiceImpl : PrintOrderService {
 
                 val session = printStationService.getPrintStationLoginSession(printStationSessionId)
                 if (session == null) {
-                    emptyList()
+                    throw org.springframework.security.access.AccessDeniedException("PrintStation login session invalid")
                 }
                 else {
                     val time =  Calendar.getInstance()

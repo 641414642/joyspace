@@ -509,7 +509,7 @@ open class TemplateServiceImpl : TemplateService {
 
                 val loginSession = printStationService.getPrintStationLoginSession(sessionId)
                 if (loginSession == null) {
-                    null
+                    throw org.springframework.security.access.AccessDeniedException("PrintStation login session invalid")
                 }
                 else {
                     val template = templateDao.findOne(templateId)
