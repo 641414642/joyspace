@@ -19,3 +19,47 @@
     background-position: center;
     background-size: auto;
 }
+
+.order_status {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    font-size: 0;
+    margin-right:5px;
+    margin-top:2px;
+}
+
+.order_status.un_payed {
+    background-image: url(../img/money_gray.png);
+}
+
+.order_status.payed {
+    background-image: url(../img/money_green.png);
+}
+
+.order_status.un_uploaded {
+    background-image: url(../img/upload_gray.png);
+}
+
+.order_status.uploaded {
+    background-image: url(../img/upload_green.png);
+}
+
+.order_status.un_downloaded {
+    background-image: url(../img/download_gray.png);
+}
+
+.order_status.downloaded {
+    background-image: url(../img/download_green.png);
+}
+
+.order_status.un_printed {
+    background-image: url(../img/print_gray.png);
+    margin-right:0;
+}
+
+.order_status.printed {
+    background-image: url(../img/print_green.png);
+    margin-right:0;
+}
+

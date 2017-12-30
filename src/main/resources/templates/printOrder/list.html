@@ -51,7 +51,7 @@
 						<th style="width:100px">用户</th>
 						<th style="width:100px">总价(元)</th>
 						<th style="width:100px">折扣(元)</th>
-						<th style="width:150px">状态</th>
+						<th style="width:110px">状态</th>
 						<th style="width:50px">操作</th>
 					</tr>
 					<tr th:each="orderWrapper : ${printOrders}">
@@ -63,18 +63,18 @@
 						<td th:text="${orderWrapper.userName}"></td>
 						<td th:text="${#numbers.formatDecimal(orderWrapper.order.totalFee / 100.0, 1, 'DEFAULT', 2, 'DEFAULT')}"></td>
 						<td th:text="${#numbers.formatDecimal(orderWrapper.order.discount / 100.0, 1, 'DEFAULT', 2, 'DEFAULT')}"></td>
-						<td>
-							<img th:unless="${orderWrapper.order.payed}" src="../../static/img/money_gray.png" th:src="@{/img/money_gray.png}" title="未支付" />
-							<img th:if="${orderWrapper.order.payed}" src="../../static/img/money_green.png" th:src="@{/img/money_green.png}" title="已支付"  />
+						<td style="font-size:0">
+							<div th:unless="${orderWrapper.order.payed}" class="order_status un_payed" title="未支付"></div>
+							<div th:if="${orderWrapper.order.payed}" class="order_status payed" title="已支付"></div>
 
-							<img th:unless="${orderWrapper.order.imageFileUploaded}" src="../../static/img/imgupload_gray.png" th:src="@{/img/upload_gray.png}" title="图片未上传完" />
-							<img th:if="${orderWrapper.order.imageFileUploaded}" src="../../static/img/imgupload_green.png" th:src="@{/img/upload_green.png}" title="图片已上传完"  />
+							<div th:unless="${orderWrapper.order.imageFileUploaded}" class="order_status un_uploaded" title="图片未上传完"></div>
+							<div th:if="${orderWrapper.order.imageFileUploaded}" class="order_status uploaded" title="图片已上传完" ></div>
 
-							<img th:unless="${orderWrapper.order.downloadedToPrintStation}" src="../../static/img/download_gray.png" th:src="@{/img/download_gray.png}" title="订单未下载到自助机" />
-							<img th:if="${orderWrapper.order.downloadedToPrintStation}" src="../../static/img/download_green.png" th:src="@{/img/download_green.png}" title="订单已下载到自助机" />
+							<div th:unless="${orderWrapper.order.downloadedToPrintStation}" class="order_status un_downloaded" title="订单未下载到自助机"></div>
+							<div th:if="${orderWrapper.order.downloadedToPrintStation}" class="order_status downloaded" title="订单已下载到自助机"></div>
 
-							<img th:unless="${orderWrapper.order.printedOnPrintStation}" src="../../static/img/print_gray.png" th:src="@{/img/print_gray.png}" title="未打印" />
-							<img th:if="${orderWrapper.order.printedOnPrintStation}" src="../../static/img/print_green.png" th:src="@{/img/print_green.png}" title="已打印" />
+							<div th:unless="${orderWrapper.order.printedOnPrintStation}" class="order_status un_printed" title="未打印"></div>
+							<div th:if="${orderWrapper.order.printedOnPrintStation}" class="order_status printed" title="已打印"></div>
 						</td>
 						<td>
 							<a href="#" th:attr="data-url=@{/printOrder/detail(id=${orderWrapper.order.id})}" onclick="return viewPrintOrderDetail(event)">详情</a>
