@@ -87,7 +87,8 @@ class PrintStationController {
             printStation = PrintStation()
         }
 
-        val allProducts = productDao.findByCompanyId(loginManager!!.companyId)
+        val allProducts = productDao.findByCompanyIdOrderBySequenceAsc(loginManager!!.companyId)
+                .sortedBy { it.sequence }
                 .map {
                     ProductItem(
                             productId = it.id,
