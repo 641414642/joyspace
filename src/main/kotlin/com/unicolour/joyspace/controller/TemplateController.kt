@@ -75,20 +75,26 @@ class TemplateController {
     }
 
     @RequestMapping(path = arrayOf("/template/edit"), method = arrayOf(RequestMethod.POST))
-    @ResponseBody
     fun editTemplate(
+            modelAndView: ModelAndView,
             @RequestParam(name = "id", required = true) id: Int,
             @RequestParam(name = "name", required = true) name: String,
             @RequestParam(name = "type", required = true) type: Int,
             @RequestParam("templateFile") templateFile: MultipartFile?
-    ): Boolean {
+    ): ModelAndView {
 
         val productType = ProductType.values().find{ it.value == type }
+        var success = false
         if (id <= 0) {
             templateService.createTemplate(name, productType!!, templateFile!!)
-            return true
+            success = true
         } else {
-            return templateService.updateTemplate(id, name, productType!!, templateFile)
+            success = templateService.updateTemplate(id, name, productType!!, templateFile)
         }
+
+        modelAndView.model["success"] = success
+        modelAndView.viewName = "/template/templateFileUploaded"
+
+        return modelAndView
     }
 }
