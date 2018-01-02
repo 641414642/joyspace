@@ -21,4 +21,7 @@ class PrintStationLoginSession {
     //过期时间
     @Column
     lateinit var expireTime: Calendar
+
+    @Column
+    var version: Int = 0
 }

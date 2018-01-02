@@ -1,11 +1,9 @@
 package com.unicolour.joyspace.controller
 
-import com.unicolour.joyspace.dao.PositionDao
-import com.unicolour.joyspace.dao.PrintStationDao
-import com.unicolour.joyspace.dao.PrintStationProductDao
-import com.unicolour.joyspace.dao.ProductDao
+import com.unicolour.joyspace.dao.*
 import com.unicolour.joyspace.dto.ProductItem
 import com.unicolour.joyspace.model.PrintStation
+import com.unicolour.joyspace.model.PrintStationLoginSession
 import com.unicolour.joyspace.model.ProductType
 import com.unicolour.joyspace.service.ManagerService
 import com.unicolour.joyspace.service.PrintStationService
@@ -18,7 +16,6 @@ import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.servlet.ModelAndView
 import javax.servlet.http.HttpServletRequest
-import javax.websocket.server.PathParam
 
 @Controller
 class PrintStationController {
@@ -41,6 +38,9 @@ class PrintStationController {
     @Autowired
     lateinit var managerService: ManagerService
 
+    @Autowired
+    lateinit var printStationLoginSessionDao: PrintStationLoginSessionDao
+
     @RequestMapping("/printStation/list")
     fun printStationList(
             modelAndView: ModelAndView,
@@ -59,7 +59,17 @@ class PrintStationController {
         val pager = Pager(printStations.totalPages, 7, pageno - 1)
         modelAndView.model.put("pager", pager)
 
-        modelAndView.model.put("printStations", printStations.content)
+        class PrintStationInfo(val printStation: PrintStation, val session: PrintStationLoginSession?)
+
+        modelAndView.model.put("printStations",
+                printStations.content.map {
+                    var session = printStationLoginSessionDao.findByPrintStationId(it.id)
+                    if (session != null && System.currentTimeMillis() > session.expireTime.timeInMillis) {
+                        session = null
+                    }
+
+                    PrintStationInfo(it, session)
+                })
 
         modelAndView.model.put("viewCat", "business_mgr")
         modelAndView.model.put("viewContent", "printStation_list")

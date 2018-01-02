@@ -115,11 +115,12 @@ open class PrintStationServiceImpl : PrintStationService {
             return DataFetcher<PrintStationLoginResult> { env ->
                 val printStationId = env.getArgument<Int>("printStationId")
                 val password = env.getArgument<String>("password")
-                transactionTemplate.execute { login(printStationId, password) }
+                val version =  env.getArgument<Int?>("version")
+                transactionTemplate.execute { login(printStationId, password, version) }
             }
         }
 
-    private fun login(printStationId: Int, password: String): PrintStationLoginResult {
+    private fun login(printStationId: Int, password: String, version: Int?): PrintStationLoginResult {
         val printStation = printStationDao.findOne(printStationId)
 
         if (printStation != null) {
@@ -134,6 +135,7 @@ open class PrintStationServiceImpl : PrintStationService {
                 session.printStationId = printStation.id
                 session.expireTime = Calendar.getInstance()
                 session.expireTime.add(Calendar.SECOND, 3600)
+                session.version = version ?: 0
                 printStationLoginSessionDao.save(session)
 
                 return PrintStationLoginResult(sessionId = session.id)
