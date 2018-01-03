@@ -15,6 +15,7 @@ import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.servlet.ModelAndView
+import java.util.*
 import javax.servlet.http.HttpServletRequest
 
 @Controller
@@ -59,16 +60,23 @@ class PrintStationController {
         val pager = Pager(printStations.totalPages, 7, pageno - 1)
         modelAndView.model.put("pager", pager)
 
-        class PrintStationInfo(val printStation: PrintStation, val session: PrintStationLoginSession?)
+        class PrintStationInfo(val printStation: PrintStation, val online: Boolean, val version: String)
+
+        val time = Calendar.getInstance()
+        time.add(Calendar.SECOND, 3600 - 30)
 
         modelAndView.model.put("printStations",
                 printStations.content.map {
-                    var session = printStationLoginSessionDao.findByPrintStationId(it.id)
-                    if (session != null && System.currentTimeMillis() > session.expireTime.timeInMillis) {
-                        session = null
+                    val session = printStationLoginSessionDao.findByPrintStationId(it.id)
+                    var online = false
+                    var version = ""
+
+                    if (session != null && session.expireTime.timeInMillis > time.timeInMillis) {    //自助机30秒之内访问过后台
+                        online = true
+                        version = if (session.version <= 0) "" else session.version.toString()
                     }
 
-                    PrintStationInfo(it, session)
+                    PrintStationInfo(it, online, version)
                 })
 
         modelAndView.model.put("viewCat", "business_mgr")

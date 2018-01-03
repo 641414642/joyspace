@@ -179,7 +179,7 @@ open class PrintStationServiceImpl : PrintStationService {
         printStation.position = positionDao.findOne(positionId)
         printStation.city = printStation.position.city
         printStation.password = passwordEncoder.encode(password)
-        printStation.status = PrintStationStatus.OFFLINE.value
+        printStation.status = PrintStationStatus.NORMAL.value
 
         printStationDao.save(printStation)
 

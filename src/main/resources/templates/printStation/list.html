@@ -43,6 +43,8 @@
 						<th>投放商</th>
 						<th>投放地点</th>
 						<th>状态</th>
+						<th>在线状态</th>
+						<th>软件版本</th>
 						<th>操作</th>
 					</tr>
 					<tr th:each="ps : ${printStations}">
@@ -50,12 +52,18 @@
 						<td th:text="${ps.printStation.wxQrCode}"></td>
 						<td th:text="${ps.printStation.company?.name}"></td>
 						<td th:text="${ps.printStation.position.name}"></td>
-						<th:block th:switch="${ps.printStation.status}">
-							<td th:case="0">正常</td>
-							<td th:case="1">离线</td>
-							<td th:case="2">故障</td>
-							<td th:case="3">耗材用完</td>
-						</th:block>
+						<td>
+							<th:block th:switch="${ps.printStation.status}">
+								<span th:case="0" class="label label-success">正常</span>
+								<span th:case="1" class="label label-danger">故障</span>
+								<span th:case="2" class="label label-warning">耗材用完</span>
+							</th:block>
+						</td>
+						<td>
+							<span th:if="${ps.online}" class="label label-success">在线</span>
+							<span th:unless="${ps.online}" class="label label-default">离线</span>
+						</td>
+						<td th:text="${ps.version}"></td>
 						<td>
 							<a href="#" th:attr="data-qrcode=${ps.printStation.wxQrCode}" onclick="return showPrintStationQrCode(event, true)" style="padding-right:5px">二维码</a>
 							<a href="#" th:attr="data-url=@{/printStation/edit(id=${ps.printStation.id},mode='edit')}" onclick="return createOrEditPrintStation(event, true)">编辑</a>
