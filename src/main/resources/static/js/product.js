@@ -20,6 +20,13 @@ function createOrEditTemplate(event) {
     return false;
 }
 
+//添加编辑广告
+function createOrEditAdSet(event) {
+    $('#modalTemplate').removeClass().addClass("modal fade");
+    showModal(event);
+    return false;
+}
+
 //上传产品图片文件
 function manageProductImageFiles(event) {
     $('#modalTemplate').removeClass().addClass("modal fade");

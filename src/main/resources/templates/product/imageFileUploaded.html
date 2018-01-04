@@ -5,7 +5,7 @@
 	<meta charset="utf-8" />
 </head>
 <body>
-<div id="newImgBlock" class="product_img_block" th:attr="data-imgFileId=${uploadedImg.id}">
+<div id="newImgBlock" class="img_block" th:attr="data-imgFileId=${uploadedImg.id}">
 	<a th:href="${uploadedImg.url}" target="_blank">
 		<div class="img_display" th:style="'background-image: url(' + ${uploadedImg.url} + ')'"></div>
 	</a>

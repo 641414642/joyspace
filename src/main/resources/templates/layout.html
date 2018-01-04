@@ -178,6 +178,7 @@
 					<ul class="treeview-menu">
 						<li th:class="${viewContent=='position_list' ? 'active' : ''}"><a href="#" th:href="@{/position/list}"><i class="fa fa-circle-o"></i>投放地点</a></li>
 						<li th:class="${viewContent=='printStation_list' ? 'active' : ''}"><a href="#" th:href="@{/printStation/list}"><i class="fa fa-circle-o"></i>自助打印机</a></li>
+						<li th:class="${viewContent=='adSet_list' ? 'active' : ''}"><a href="#" th:href="@{/adSet/list}"><i class="fa fa-circle-o"></i>广告</a></li>
 						<li th:class="${viewContent=='printOrder_list' ? 'active' : ''}"><a href="#" th:href="@{/printOrder/list}"><i class="fa fa-circle-o"></i>订单</a></li>
 					</ul>
 				</li>
@@ -213,6 +214,7 @@
 		<div th:case="'printStation_list'" th:include="printStation/list :: content"></div>
 		<div th:case="'coupon_list'" th:include="coupon/list :: content"></div>
 		<div th:case="'printOrder_list'" th:include="printOrder/list :: content"></div>
+		<div th:case="'adSet_list'" th:include="adSet/list :: content"></div>
 		<div th:case="*"></div>
 		<!-- /.content -->
 	</div>

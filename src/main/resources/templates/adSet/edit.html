@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta charset="utf-8" />
+    <!-- Bootstrap 3.3.6 -->
+    <link rel="stylesheet" href="../../static/thirdparty/bootstrap/css/bootstrap.min.css" th:href="@{/thirdparty/bootstrap/css/bootstrap.min.css}" />
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="../../static/thirdparty/fontawesome/css/font-awesome.min.css" th:href="@{/thirdparty/fontawesome/css/font-awesome.min.css}" />
+    <!-- Ionicons -->
+    <link rel="stylesheet" href="../../static/thirdparty/ionicons/css/ionicons.min.css" th:href="@{/thirdparty/ionicons/css/ionicons.min.css}" />
+    <!-- Theme style -->
+    <link rel="stylesheet" href="../../static/thirdparty/adminlte/css/AdminLTE.min.css" th:href="@{/thirdparty/adminlte/css/AdminLTE.min.css}" />
+    <!-- AdminLTE Skins. Choose a skin from the css/skins
+         folder instead of downloading all of them to reduce the load. -->
+    <link rel="stylesheet" href="../../static/thirdparty/adminlte/css/skins/_all-skins.min.css" th:href="@{/thirdparty/adminlte/css/skins/_all-skins.min.css}" />
+
+    <link rel="stylesheet" href="../static/css/bootstrap-datepicker3.css" th:href="@{/css/bootstrap-datepicker3.min.css}" />
+
+    <!-- jQuery 2.2.3 -->
+    <script src="../../static/thirdparty/plugins/jQuery/jquery-2.2.3.min.js" th:src="@{/thirdparty/plugins/jQuery/jquery-2.2.3.min.js}"></script>
+    <!-- Bootstrap 3.3.6 -->
+    <script src="../../static/thirdparty/bootstrap/js/bootstrap.min.js" th:src="@{/thirdparty/bootstrap/js/bootstrap.min.js}"></script>
+    <!-- SlimScroll -->
+    <script src="../../static/thirdparty/plugins/slimScroll/jquery.slimscroll.min.js" th:src="@{/thirdparty/plugins/slimScroll/jquery.slimscroll.min.js}"></script>
+    <!-- FastClick -->
+    <script src="../../static/thirdparty/plugins/fastclick/fastclick.js" th:src="@{/thirdparty/plugins/fastclick/fastclick.js}"></script>
+    <!-- AdminLTE App -->
+    <script src="../../static/thirdparty/adminlte/js/app.min.js" th:src="@{/thirdparty/adminlte/js/app.min.js}"></script>
+    <!-- datepicker -->
+    <script src="../../static/js/bootstrap-datepicker.min.js" th:src="@{/js/bootstrap-datepicker.min.js}"></script>
+
+    <script type="text/javascript">
+		$(document).ready(function() {
+			$('#editDialog').modal('show');
+		});
+	</script>
+</head>
+<body>
+<div class="modal fade" role="dialog" id="editDialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content" th:fragment="content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+                <h4 class="modal-title" th:text="${create ? '新建' : '修改'}"></h4>
+            </div>
+            <form id="editAdSetForm" target="_blank" th:action="@{/adSet/edit}" method="post" enctype="multipart/form-data">
+                <input type="hidden" name="id" th:value="${adSet.id}" />
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="name" class="control-label">名称:</label>
+                        <input type="text" name="name" class="form-control" id="name" th:value="${adSet.name}" />
+                        <span class="help-block"></span>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label">图片列表:</label>
+                        <table id="adImageTable" class="table table-bordered table-striped">
+                            <tr>
+                                <th>图片</th>
+                                <th>播放持续时间(秒)</th>
+                                <th>操作</th>
+                            </tr>
+                            <tr th:each="adImage : ${adImageFiles}">
+                                <td>
+                                    <div class="img_block">
+                                        <a th:href="${adImage.url}" target="_blank">
+                                            <div class="img_display" th:style="width:50px;height:50px;background-image: url(' + ${adImage.url} + ')'"></div>
+                                        </a>
+                                    </div>
+                                </td>
+                                <td th:text="${adImage.duration}"></td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="img_block">
+                                        <div class="img_display upload" style="width:50px;height:50px">
+                                            <input id="adImgFileInput" style="margin:0; padding:0; cursor:pointer; opacity:0; width:100%; height:100%;" type="file" accept="image/jpeg,image/png" name="imageFile" />
+                                        </div>
+                                        <span>&nbsp;</span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <input type="text" name="duration" />
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary">确定</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+</body>
+</html>

@@ -90,7 +90,7 @@
             <div class="modal-body">
                 <h5>缩略图</h5>
                 <div>
-                    <div class="product_img_block" th:each="thumbImg : ${thumbImages}" th:attr="data-imgFileId=${thumbImg.id}" >
+                    <div class="img_block" th:each="thumbImg : ${thumbImages}" th:attr="data-imgFileId=${thumbImg.id}" >
                         <a th:href="${thumbImg.url}" target="_blank">
                             <div class="img_display" th:style="'background-image: url(' + ${thumbImg.url} + ')'"></div>
                         </a>
@@ -99,7 +99,7 @@
                             <a href="#" onclick="return deleteProductImage(event)">删除</a>
                         </form>
                     </div>
-                    <div class="product_img_block" id="thumbImgUpload">
+                    <div class="img_block" id="thumbImgUpload">
                         <form id="uploadProductThumbImgFileForm" target="target_iframe" method="post" th:action="@{/product/uploadImageFile}" enctype="multipart/form-data">
                             <input type="hidden" name="id" th:value="${product.id}" />
                             <input type="hidden" name="type" th:value="thumb" />
@@ -112,7 +112,7 @@
                 </div>
                 <h5>预览图</h5>
                 <div>
-                    <div class="product_img_block" th:each="prevImg : ${previewImages}" th:attr="data-imgFileId=${prevImg.id}">
+                    <div class="img_block" th:each="prevImg : ${previewImages}" th:attr="data-imgFileId=${prevImg.id}">
                         <a th:href="${prevImg.url}" target="_blank">
                             <div class="img_display" th:style="'background-image: url(' + ${prevImg.url} + ')'"></div>
                         </a>
@@ -121,7 +121,7 @@
                             <a href="#" onclick="return deleteProductImage(event)">删除</a>
                         </form>
                     </div>
-                    <div class="product_img_block" id="prevImgUpload">
+                    <div class="img_block" id="prevImgUpload">
                         <form id="uploadProductPrevImgFileForm" target="target_iframe" method="post" th:action="@{/product/uploadImageFile}" enctype="multipart/form-data">
                             <input type="hidden" name="id" th:value="${product.id}" />
                             <input type="hidden" name="type" th:value="preview" />

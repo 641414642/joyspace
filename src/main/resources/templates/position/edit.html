@@ -102,7 +102,7 @@
             <div class="modal-body">
                 <h5>投放地点图片</h5>
                 <div>
-                    <div class="product_img_block" th:each="img : ${images}" th:attr="data-imgFileId=${img.id}" >
+                    <div class="img_block" th:each="img : ${images}" th:attr="data-imgFileId=${img.id}" >
                         <a th:href="${img.url}" target="_blank">
                             <div class="img_display" th:style="'background-image: url(' + ${img.url} + ')'"></div>
                         </a>
@@ -111,7 +111,7 @@
                             <a href="#" onclick="return deletePositionImage(event)">删除</a>
                         </form>
                     </div>
-                    <div class="product_img_block" id="imgUpload">
+                    <div class="img_block" id="imgUpload">
                         <form id="uploadPositionImgFileForm" target="target_iframe" method="post" th:action="@{/position/uploadImageFile}" enctype="multipart/form-data">
                             <input type="hidden" name="id" th:value="${position.id}" />
                             <div class="img_display upload">
