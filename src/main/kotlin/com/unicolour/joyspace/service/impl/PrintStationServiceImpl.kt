@@ -116,17 +116,26 @@ open class PrintStationServiceImpl : PrintStationService {
                 val printStationId = env.getArgument<Int>("printStationId")
                 val password = env.getArgument<String>("password")
                 val version =  env.getArgument<Int?>("version")
-                transactionTemplate.execute { login(printStationId, password, version) }
+                val uuid =  env.getArgument<String?>("uuid")
+                transactionTemplate.execute { login(printStationId, password, version, uuid) }
             }
         }
 
-    private fun login(printStationId: Int, password: String, version: Int?): PrintStationLoginResult {
+    private fun login(printStationId: Int, password: String, version: Int?, uuid: String?): PrintStationLoginResult {
         val printStation = printStationDao.findOne(printStationId)
 
         if (printStation != null) {
             if (passwordEncoder.matches(password, printStation.password)) {
                 var session = printStationLoginSessionDao.findByPrintStationId(printStation.id)
                 if (session != null) {
+                    val time = Calendar.getInstance()
+                    time.add(Calendar.SECOND, 3600 - 30)
+
+                    if (session.expireTime.timeInMillis > time.timeInMillis) {    //自助机30秒之内访问过后台
+                        if (!session.uuid.isNullOrBlank() && session.uuid != uuid) {  //其他自助机已经登录
+                            return PrintStationLoginResult(result = 3)
+                        }
+                    }
                     printStationLoginSessionDao.delete(session)
                 }
 
@@ -136,6 +145,7 @@ open class PrintStationServiceImpl : PrintStationService {
                 session.expireTime = Calendar.getInstance()
                 session.expireTime.add(Calendar.SECOND, 3600)
                 session.version = version ?: 0
+                session.uuid = uuid
                 printStationLoginSessionDao.save(session)
 
                 return PrintStationLoginResult(sessionId = session.id)

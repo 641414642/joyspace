@@ -24,4 +24,7 @@ class PrintStationLoginSession {
 
     @Column
     var version: Int = 0
+
+    @Column(length = 40)
+    var uuid: String? = null
 }
