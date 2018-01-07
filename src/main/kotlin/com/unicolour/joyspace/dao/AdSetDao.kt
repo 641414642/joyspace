@@ -7,5 +7,6 @@ import org.springframework.data.repository.PagingAndSortingRepository
 
 interface AdSetDao : PagingAndSortingRepository<AdSet, Int> {
     fun findByCompanyId(companyId: Int, pageable: Pageable): Page<AdSet>
+    fun findByCompanyId(companyId: Int): List<AdSet>
     fun findByNameIgnoreCaseAndCompanyId(name: String, companyId: Int, pageable: Pageable): Page<AdSet>
 }

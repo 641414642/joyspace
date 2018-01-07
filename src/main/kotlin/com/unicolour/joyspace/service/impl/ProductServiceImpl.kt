@@ -146,7 +146,7 @@ open class ProductServiceImpl : ProductService {
 
                 val process = pb.start()
 
-                var retStr:String = "";
+                var retStr:String = ""
                 BufferedReader(InputStreamReader(process.inputStream)).use { reader ->
                     retStr = reader.readText()
                 }

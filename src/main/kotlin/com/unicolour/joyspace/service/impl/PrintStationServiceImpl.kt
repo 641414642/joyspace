@@ -9,15 +9,21 @@ import com.unicolour.joyspace.service.PrintStationService
 import com.unicolour.joyspace.service.ProductService
 import graphql.schema.DataFetcher
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.support.TransactionTemplate
+import java.io.File
+import java.text.SimpleDateFormat
 import java.util.*
 import javax.transaction.Transactional
 import kotlin.collections.HashMap
 
 @Service
 open class PrintStationServiceImpl : PrintStationService {
+    @Value("\${com.unicolour.joyspace.assetsDir}")
+    lateinit var assetsDir: String
+
     @Autowired
     lateinit var managerService : ManagerService
 
@@ -26,6 +32,9 @@ open class PrintStationServiceImpl : PrintStationService {
 
     @Autowired
     lateinit var positionDao : PositionDao
+
+    @Autowired
+    lateinit var adSetDao : AdSetDao
 
     @Autowired
     lateinit var printStationDao: PrintStationDao
@@ -53,6 +62,8 @@ open class PrintStationServiceImpl : PrintStationService {
 
     @Autowired
     lateinit var printStationLoginSessionDao: PrintStationLoginSessionDao
+
+    private val dateTimeFormat: ThreadLocal<SimpleDateFormat> = ThreadLocal.withInitial { SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS") }
 
     @Transactional
     override fun getPrintStationLoginSession(sessionId: String): PrintStationLoginSession? {
@@ -176,7 +187,7 @@ open class PrintStationServiceImpl : PrintStationService {
     }
 
     @Transactional
-    override fun createPrintStation(baseUrl: String, password: String, positionId: Int, selectedProductIds: Set<Int>): PrintStation? {
+    override fun createPrintStation(baseUrl: String, password: String, positionId: Int, adSetId: Int, selectedProductIds: Set<Int>): PrintStation? {
         val loginManager = managerService.loginManager
         if (loginManager == null) {
             return null
@@ -187,6 +198,7 @@ open class PrintStationServiceImpl : PrintStationService {
         val printStation = PrintStation()
         printStation.company = manager.company
         printStation.position = positionDao.findOne(positionId)
+        printStation.adSet = adSetDao.findOne(adSetId)
         printStation.city = printStation.position.city
         printStation.password = passwordEncoder.encode(password)
         printStation.status = PrintStationStatus.NORMAL.value
@@ -208,12 +220,13 @@ open class PrintStationServiceImpl : PrintStationService {
     }
 
     @Transactional
-    override fun updatePrintStation(id: Int, baseUrl: String, password: String, positionId: Int, selectedProductIds: Set<Int>): Boolean {
+    override fun updatePrintStation(id: Int, baseUrl: String, password: String, positionId: Int, adSetId: Int, selectedProductIds: Set<Int>): Boolean {
         val printStation = printStationDao.findOne(id)
 
         if (printStation != null) {
             printStation.wxQrCode = "$baseUrl/printStation/${printStation.id}"
             printStation.position = positionDao.findOne(positionId)
+            printStation.adSet = adSetDao.findOne(adSetId)
             printStation.city = printStation.position.city
             if (!password.isNullOrEmpty()) {
                 printStation.password = passwordEncoder.encode(password)
@@ -313,6 +326,43 @@ open class PrintStationServiceImpl : PrintStationService {
                         }
 
                 PrintStationFindResult(printStations = printStations)
+            }
+        }
+
+    override val newAdSetDataFetcher: DataFetcher<AdSet?>
+        get() {
+            return DataFetcher { env ->
+                val printStationSessionId = env.getArgument<String>("sessionId")
+                val currentAdSetId = env.getArgument<Int>("currentAdSetId")
+                val currentAdSetTime = dateTimeFormat.get().parse(env.getArgument<String>("currentAdSetTime"))
+
+                val session = getPrintStationLoginSession(printStationSessionId)
+                if (session == null) {
+                    throw org.springframework.security.access.AccessDeniedException("PrintStation login session invalid")
+                }
+                else {
+                    val printStation = printStationDao.findOne(session.printStationId)
+                    val adSet = printStation?.adSet
+                    if (adSet != null && (adSet.id != currentAdSetId || adSet.updateTime.timeInMillis > currentAdSetTime.time)) {
+                        adSet
+                    }
+                    else {
+                        null
+                    }
+                }
+            }
+        }
+
+    override val currentSoftwareVersionDataFetcher: DataFetcher<Int>
+        get() {
+            return DataFetcher {
+                try {
+                    val versionFile = File(assetsDir, "home/currentVersion.txt")
+                    versionFile.reader().use { it.readText().toInt() }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    0
+                }
             }
         }
 

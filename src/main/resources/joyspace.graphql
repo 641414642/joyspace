@@ -24,6 +24,12 @@ type QueryType {
     #查找指定自助机的待打印订单
     getPrintOrders(sessionId: String!): [PrintOrder!]!
 
+    #自助机的广告
+    getNewAdSet(sessionId: String!, currentAdSetId: Int!, currentAdSetTime: String!): AdSet
+
+    #自助机软件版本
+    currentSoftwareVersion: Int!
+
     #查询模板列表
     templates(sessionId: String!): [Template!]!
 
@@ -378,7 +384,7 @@ type PrintStationFindResultSingle {
 
 #优惠券
 type Coupon {
-    id: Int
+    id: Int!
 
     #名称
     name: String!
@@ -445,4 +451,23 @@ type PrintOrderResult {
 
     #订单
     printOrder: PrintOrder
+}
+
+type AdSet {
+    id: Int!
+    name: String!
+    updateTime: String!
+    imageFiles: [AdImageFile!]!
+}
+
+type AdImageFile {
+    id: Int!
+    fileName: String!
+    fileType: String!
+    width: Int!
+    height: Int!
+    description: String!
+    duration: Int!
+    sequence: Int!
+    url: String!
 }

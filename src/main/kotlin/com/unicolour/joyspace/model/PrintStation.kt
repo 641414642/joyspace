@@ -54,6 +54,16 @@ class PrintStation {
 
     @Column(name = "status")
     var status: Int = PrintStationStatus.NORMAL.value
+
+    //region 广告
+    /** 城市ID */
+    @Column(name = "ad_set_id", insertable = false, updatable = false)
+    var adSetId: Int? = null
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "ad_set_id")
+    var adSet: AdSet? = null
+    //endregion
 }
 
 enum class PrintStationStatus(val value:Int, val message:String) {

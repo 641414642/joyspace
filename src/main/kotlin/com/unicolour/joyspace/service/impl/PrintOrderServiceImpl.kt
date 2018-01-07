@@ -19,30 +19,27 @@ import org.springframework.http.HttpMethod
 import org.springframework.stereotype.Service
 import org.springframework.web.client.RestTemplate
 import org.springframework.web.multipart.MultipartFile
+import java.io.InputStreamReader
+import java.io.StringReader
 import java.math.BigInteger
+import java.net.URL
 import java.nio.charset.StandardCharsets
 import java.security.MessageDigest
 import java.security.SecureRandom
 import java.text.SimpleDateFormat
 import java.util.*
-import javax.transaction.Transactional
-import kotlin.experimental.and
-import java.io.InputStreamReader
-import java.io.StringReader
-import java.net.URL
 import javax.annotation.PostConstruct
+import javax.transaction.Transactional
 import javax.xml.bind.JAXBContext
 import javax.xml.bind.Unmarshaller
 import kotlin.collections.ArrayList
+import kotlin.experimental.and
 
 
 @Service
 open class PrintOrderServiceImpl : PrintOrderService {
     @Autowired
     lateinit var printStationDao: PrintStationDao
-
-    @Autowired
-    lateinit var printStationLoginSessionDao: PrintStationLoginSessionDao
 
     @Autowired
     lateinit var printStationService: PrintStationService

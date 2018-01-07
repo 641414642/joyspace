@@ -1,6 +1,7 @@
 package com.unicolour.joyspace.service
 
 import com.unicolour.joyspace.dto.*
+import com.unicolour.joyspace.model.AdSet
 import com.unicolour.joyspace.model.PrintOrder
 import com.unicolour.joyspace.model.UserImageFile
 import graphql.schema.DataFetcher

@@ -1,7 +1,10 @@
 package com.unicolour.joyspace.service.impl
 
 import com.unicolour.joyspace.dto.GraphQLRequestResult
+import com.unicolour.joyspace.model.AdImageFile
+import com.unicolour.joyspace.model.AdSet
 import com.unicolour.joyspace.service.*
+import com.unicolour.joyspace.util.formatWithMillisecond
 import graphql.schema.GraphQLSchema
 import graphql.schema.idl.RuntimeWiring
 import graphql.schema.idl.SchemaGenerator
@@ -38,6 +41,9 @@ class GraphQLServiceImpl : GraphQLService {
     @Autowired
     lateinit var couponService: CouponService
 
+    @Autowired
+    lateinit var adSetService: AdSetService
+
     private var graphQLSchema: GraphQLSchema? = null
 
     @Synchronized
@@ -65,6 +71,8 @@ class GraphQLServiceImpl : GraphQLService {
                     typeWiring.dataFetcher("findPrintStationsByDistance", printStationService.byDistanceDataFetcher)
                     typeWiring.dataFetcher("findPrintStationsByCity", printStationService.byCityDataFetcher)
                     typeWiring.dataFetcher("findNearestPrintStation", printStationService.nearestDataFetcher)
+                    typeWiring.dataFetcher("getNewAdSet", printStationService.newAdSetDataFetcher)
+                    typeWiring.dataFetcher("currentSoftwareVersion", printStationService.currentSoftwareVersionDataFetcher)
                     typeWiring.dataFetcher("printOrder", printOrderService.printOrderDataFetcher)
                     typeWiring.dataFetcher("getPrintOrders", printOrderService.printStationPrintOrdersDataFetcher)
                     typeWiring.dataFetcher("getTemplateFileUrl", templateService.templateFileUrlDataFetcher)
@@ -131,6 +139,19 @@ class GraphQLServiceImpl : GraphQLService {
                 })
                 .type("UserImageFile", { typeWiring ->
                     typeWiring.dataFetcher("url", imageService.getImageFileUrlDataFetcher())
+                })
+                .type("AdSet", { typeWiring ->
+                    typeWiring.dataFetcher("updateTime", { env ->
+                        env.getSource<AdSet>().updateTime.formatWithMillisecond()
+                    })
+                })
+                .type("AdImageFile", { typeWiring ->
+                    typeWiring.dataFetcher("url", { env ->
+                        val imageFile = env.getSource<AdImageFile>()
+                        val context = env.getContext<HashMap<String, Any>>()
+                        val baseUrl = context["baseUrl"] as String
+                        adSetService.getAdImageUrl(baseUrl, imageFile)
+                    })
                 })
                 .type("Coupon", { typeWiring ->
                     typeWiring.dataFetcher("printStationIdList", couponService.getDataFetcher("printStationIdList"))

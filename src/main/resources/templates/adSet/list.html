@@ -38,17 +38,23 @@
 			<div class="box-body">
 				<table class="table table-bordered table-striped">
 					<tr>
-						<th>ID</th>
-						<th>名称</th>
-						<th>图片数量</th>
-						<th>操作</th>
+						<th style="width:80px">ID</th>
+						<th style="width:150px">名称</th>
+						<th>图片</th>
+						<th style="width:150px">操作</th>
 					</tr>
-					<tr th:each="adSet : ${adSets}">
-						<td th:text="${adSet.id}"></td>
-						<td th:text="${adSet.name}"></td>
-						<td th:text="${adSet.imageCount}"></td>
-						<td>
-							<a href="#" th:attr="data-url=@{/adSet/edit(id=${adSet.id},mode='edit')}" onclick="return createOrEditAdSet(event, true)" style="padding-right:5px">编辑</a>
+					<tr th:each="ad : ${adSets}">
+						<td th:text="${ad.adSet.id}" valign="middle" style="vertical-align:middle"></td>
+						<td th:text="${ad.adSet.name}" valign="middle" style="vertical-align:middle"></td>
+						<td style="font-size:0">
+							<div class="ad_img_block" th:each="adImageFile : ${ad.adImageFiles}" style="margin-right:5px">
+								<a th:href="${adImageFile.url}" target="_blank" th:title="'播放时间 ' + ${adImageFile.duration} + ' 秒'">
+									<div class="ad_img_display" th:style="'background-image: url(' + ${adImageFile.url} + ')'"></div>
+								</a>
+							</div>
+						</td>
+						<td valign="middle" style="vertical-align:middle">
+							<a href="#" th:attr="data-url=@{/adSet/edit(id=${ad.adSet.id},mode='edit')}" onclick="return createOrEditAdSet(event, true)">编辑</a>
 						</td>
 					</tr>
 				</table>

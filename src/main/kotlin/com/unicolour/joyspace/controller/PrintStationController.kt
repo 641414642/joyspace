@@ -31,6 +31,9 @@ class PrintStationController {
     lateinit var positionDao: PositionDao
 
     @Autowired
+    lateinit var adSetDao: AdSetDao
+
+    @Autowired
     lateinit var productDao: ProductDao
 
     @Autowired
@@ -119,6 +122,7 @@ class PrintStationController {
         modelAndView.model.put("create", id <= 0)
         modelAndView.model.put("printStation", printStation)
         modelAndView.model.put("positions", positionDao.findByCompanyId(loginManager!!.companyId))
+        modelAndView.model.put("adSets", adSetDao.findByCompanyId(loginManager!!.companyId))
         modelAndView.model.put("photo_products", allProducts.filter { it.productType == ProductType.PHOTO.value })
         modelAndView.model.put("template_products", allProducts.filter { it.productType == ProductType.TEMPLATE.value })
         modelAndView.model.put("id_photo_products", allProducts.filter { it.productType == ProductType.ID_PHOTO.value })
@@ -135,6 +139,7 @@ class PrintStationController {
             @RequestParam(name = "id", required = true) id: Int,
             @RequestParam(name = "password", required = true) password: String,
             @RequestParam(name = "positionId", required = true) positionId: Int,
+            @RequestParam(name = "adSetId", required = true) adSetId: Int,
             @RequestParam(name = "productIds", required = true) productIds: String
     ): Boolean {
 
@@ -146,10 +151,10 @@ class PrintStationController {
         val baseUrl = getBaseUrl(request)
 
         if (id <= 0) {
-            printStationService.createPrintStation(baseUrl, password, positionId, selectedProductIds)
+            printStationService.createPrintStation(baseUrl, password, positionId, adSetId, selectedProductIds)
             return true
         } else {
-            return printStationService.updatePrintStation(id, baseUrl, password, positionId, selectedProductIds)
+            return printStationService.updatePrintStation(id, baseUrl, password, positionId, adSetId, selectedProductIds)
         }
     }
 

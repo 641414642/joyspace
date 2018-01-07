@@ -45,6 +45,7 @@
 						<th>状态</th>
 						<th>在线状态</th>
 						<th>软件版本</th>
+						<th>广告</th>
 						<th>操作</th>
 					</tr>
 					<tr th:each="ps : ${printStations}">
@@ -64,6 +65,7 @@
 							<span th:unless="${ps.online}" class="label label-default">离线</span>
 						</td>
 						<td th:text="${ps.version}"></td>
+						<td th:text="${ps.printStation.adSet?.name}"></td>
 						<td>
 							<a href="#" th:attr="data-qrcode=${ps.printStation.wxQrCode}" onclick="return showPrintStationQrCode(event, true)" style="padding-right:5px">二维码</a>
 							<a href="#" th:attr="data-url=@{/printStation/edit(id=${ps.printStation.id},mode='edit')}" onclick="return createOrEditPrintStation(event, true)">编辑</a>

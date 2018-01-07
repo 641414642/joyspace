@@ -20,10 +20,6 @@ class AdSet {
     @NotNull
     var companyId: Int = 0   //属于哪个投放商
 
-    @Column
-    @NotNull
-    var imageCount: Int = 0
-
     @NotNull
     @Column
     lateinit var createTime: Calendar
