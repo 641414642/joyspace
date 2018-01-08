@@ -37,21 +37,8 @@ open class AdSetServiceImpl : AdSetService {
         return "$baseUrl/assets/ad/${adImageFile.adSet.id}/images/${adImageFile.fileName}.${adImageFile.fileType}"
     }
 
-    @Transactional
-    override fun createAdSet(name: String, imgFiles: List<Pair<Part, Int>>) {
-        val loginManager = managerService.loginManager
-        val now = Calendar.getInstance()
-
-        val adSet = AdSet()
-        adSet.name = name
-        adSet.createTime = now
-        adSet.updateTime = now
-        adSet.companyId = loginManager!!.companyId
-
-        adSetDao.save(adSet)
-
-        var seq = 0
-
+    private fun saveAdImageFiles(imgFiles: List<Pair<Part, Int>>, adSet: AdSet, seq: Int) {
+        var seq1 = seq
         for (imgFile in imgFiles) {
             val uuid = UUID.randomUUID().toString().replace("-", "")
             val file = File(assetsDir, "/ad/${adSet.id}/images/${uuid}")
@@ -73,8 +60,7 @@ open class AdSetServiceImpl : AdSetService {
             if (retCode != 0) {
                 file.delete()
                 throw IOException("not valid image file")
-            }
-            else {
+            } else {
                 val patternStr = Pattern.quote(file.absolutePath) + "\\s(\\w+)\\s(\\d+)x(\\d+)\\s.*"
                 val pattern = Pattern.compile(patternStr)
                 val matcher = pattern.matcher(retStr)
@@ -96,7 +82,7 @@ open class AdSetServiceImpl : AdSetService {
                 adImageFile.fileType = imgType
                 adImageFile.width = imgWid
                 adImageFile.height = imgHei
-                adImageFile.sequence = seq++
+                adImageFile.sequence = seq1++
 
                 val fileWithExt = File(file.parent, "${file.name}.$imgType")
                 file.renameTo(fileWithExt)
@@ -104,6 +90,22 @@ open class AdSetServiceImpl : AdSetService {
                 adImageFileDao.save(adImageFile)
             }
         }
+    }
+
+    @Transactional
+    override fun createAdSet(name: String, imgFiles: List<Pair<Part, Int>>) {
+        val loginManager = managerService.loginManager
+        val now = Calendar.getInstance()
+
+        val adSet = AdSet()
+        adSet.name = name
+        adSet.createTime = now
+        adSet.updateTime = now
+        adSet.companyId = loginManager!!.companyId
+
+        adSetDao.save(adSet)
+
+        saveAdImageFiles(imgFiles, adSet, 1)
     }
 
     @Transactional
@@ -117,6 +119,8 @@ open class AdSetServiceImpl : AdSetService {
             adSet.updateTime = Calendar.getInstance()
 
             adSetDao.save(adSet)
+
+            saveAdImageFiles(imgFiles, adSet, adSet.imageFiles.map { it.sequence }.max() ?: 0 + 1)
             return true
         }
     }

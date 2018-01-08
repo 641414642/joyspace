@@ -357,8 +357,8 @@ open class PrintStationServiceImpl : PrintStationService {
         get() {
             return DataFetcher {
                 try {
-                    val versionFile = File(assetsDir, "home/currentVersion.txt")
-                    versionFile.reader().use { it.readText().toInt() }
+                    val versionFile = File(assetsDir, "home/current.txt")
+                    versionFile.reader().use { it.readText().trim(' ', '\r', '\n', '\t').toInt() }
                 } catch (e: Exception) {
                     e.printStackTrace()
                     0
