@@ -4,6 +4,7 @@ import com.unicolour.joyspace.dao.ManagerDao
 import com.unicolour.joyspace.dto.LoginManagerDetail
 import com.unicolour.joyspace.model.Manager
 import com.unicolour.joyspace.service.ManagerService
+import com.unicolour.joyspace.service.WeiXinService
 import com.unicolour.joyspace.util.Pager
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -29,6 +30,9 @@ class ManagerController {
 
     @Autowired
     lateinit var managerService: ManagerService
+
+    @Autowired
+    lateinit var weiXinService: WeiXinService
 
     @RequestMapping("/manager/list")
     fun adminUserList(
@@ -66,6 +70,12 @@ class ManagerController {
 
     @RequestMapping(path = arrayOf("/manager/change_pass"), method = arrayOf(RequestMethod.GET))
     fun changePassword(): String = "/manager/change_pass :: content"
+
+    @RequestMapping(path = arrayOf("/manager/bind_weixin"), method = arrayOf(RequestMethod.GET))
+    fun bindWeiXin(): String {
+        weiXinService.createWxQrCode()
+        return "/manager/change_pass :: content"
+    }
 
     @RequestMapping(path = arrayOf("/manager/change_pass"), method = arrayOf(RequestMethod.POST))
     @ResponseBody

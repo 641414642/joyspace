@@ -52,6 +52,10 @@ class Manager {
     @NotNull
     var isEnabled: Boolean = false
 
+    /** 微信OpenID */
+    @Column(length = 200)
+    var wxOpenId: String? = null
+
     //region 店面
     /** 店面ID */
     @Column(name = "company_id", insertable = false, updatable = false)
