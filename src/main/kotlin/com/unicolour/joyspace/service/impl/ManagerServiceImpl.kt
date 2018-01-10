@@ -1,26 +1,99 @@
 package com.unicolour.joyspace.service.impl
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.unicolour.joyspace.dao.ManagerDao
 import com.unicolour.joyspace.dto.LoginManagerDetail
 import com.unicolour.joyspace.model.Company
 import com.unicolour.joyspace.model.Manager
 import com.unicolour.joyspace.service.ManagerService
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Value
+import org.springframework.http.HttpMethod
+import org.springframework.http.HttpStatus
 import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.security.core.userdetails.UsernameNotFoundException
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
+import org.springframework.transaction.support.TransactionTemplate
+import org.springframework.web.client.RestTemplate
 import java.util.*
+import kotlin.collections.HashMap
 
 @Service
-class ManagerServiceImpl : ManagerService {
+open class ManagerServiceImpl : ManagerService {
+    @Value("\${com.unicolour.wxManagerAppId}")
+    lateinit var wxManagerAppId: String
+
+    @Value("\${com.unicolour.wxManagerAppSecret}")
+    lateinit var wxManagerAppSecret: String
+
     @Autowired
     lateinit var managerDao: ManagerDao
 
     @Autowired
     lateinit var passwordEncoder: PasswordEncoder
+
+    @Autowired
+    lateinit var restTemplate: RestTemplate
+
+    @Autowired
+    lateinit var objectMapper: ObjectMapper
+
+    @Autowired
+    lateinit var transactionTemplate: TransactionTemplate
+
+    private val managerIdBindKeyMap: MutableMap<Int, String> = Collections.synchronizedMap(HashMap())
+
+    override fun createManagerBindKey(): String {
+        val manager = loginManager
+
+        return if (manager != null) {
+            val bindKey = """${manager.managerId}/${UUID.randomUUID().toString().replace("-", "").substring(8)}"""
+            managerIdBindKeyMap[manager.managerId] = bindKey
+            bindKey
+        }
+        else {
+            ""
+        }
+    }
+
+    override fun bindWeiXinAccount(bindKey: String, code: String): Boolean {
+        //XXX 验证后面的部分
+        val managerId = bindKey.substringBefore('/').toInt()
+        val manager = managerDao.findOne(managerId)
+        if (manager != null) {
+            val resp = restTemplate.exchange(
+                    "https://api.weixin.qq.com/sns/jscode2session?appid={appid}&secret={secret}&js_code={js_code}&grant_type={grant_type}",
+                    HttpMethod.GET,
+                    null,
+                    String::class.java,
+                    mapOf(
+                            "appid" to wxManagerAppId,
+                            "secret" to wxManagerAppSecret,
+                            "js_code" to code,
+                            "grant_type" to "authorization_code"
+                    )
+            )
+
+            if (resp != null && resp.statusCode == HttpStatus.OK) {
+                val bodyStr = resp.body
+                val body: JSCode2SessionResult = objectMapper.readValue(bodyStr, JSCode2SessionResult::class.java)
+
+                if (body.errcode == 0 && body.openid != null && body.session_key != null) {
+                    transactionTemplate.execute {
+                        manager.wxOpenId = body.openid
+                        managerDao.save(manager)
+                    }
+
+                    return true
+                }
+            }
+        }
+
+        return false
+    }
 
     @Throws(UsernameNotFoundException::class)
     override fun loadUserByUsername(username: String): UserDetails {

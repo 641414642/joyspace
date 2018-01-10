@@ -8,8 +8,7 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.*
 import org.springframework.stereotype.Component
 import org.springframework.web.client.RestTemplate
-import java.nio.file.Files
-import java.nio.file.Paths
+import java.util.*
 
 
 @Component
@@ -23,23 +22,41 @@ class WeiXinServiceImpl : WeiXinService {
     @Value("\${com.unicolour.wxAppSecret}")
     lateinit var wxAppSecret: String
 
+    @Value("\${com.unicolour.wxManagerAppId}")
+    lateinit var wxManagerAppId: String
+
+    @Value("\${com.unicolour.wxManagerAppSecret}")
+    lateinit var wxManagerAppSecret: String
+
     @Autowired
     lateinit var objectMapper: ObjectMapper
 
-    private var _accessToken: String? = null
-    private var _accessTokenExpire: Long = 0
+    private var _appAccessToken: String? = null
+    private var _appAccessTokenExpire: Long = 0
 
-    override val accessToken: String? get() {
+    private var _managerAppAccessToken: String? = null
+    private var _managerAppAccessTokenExpire: Long = 0
+
+    val appAccessToken: String? get() {
         synchronized(this, {
-            if (_accessToken == null || System.currentTimeMillis() >= _accessTokenExpire) {
-                getAccsssToken()
+            if (_appAccessToken == null || System.currentTimeMillis() >= _appAccessTokenExpire) {
+                getAccsssToken(false)
             }
-            return _accessToken
+            return _appAccessToken
         })
     }
 
-    override fun createWxQrCode() {
-        val token = accessToken
+    val managerAppAccessToken: String? get() {
+        synchronized(this, {
+            if (_managerAppAccessToken == null || System.currentTimeMillis() >= _managerAppAccessTokenExpire) {
+                getAccsssToken(true)
+            }
+            return _managerAppAccessToken
+        })
+    }
+
+    override fun createWxQrCode(scene: String, page: String, width: Int): String {
+        val token = managerAppAccessToken
         if (token != null) {
             val url = "https://api.weixin.qq.com/wxa/getwxacodeunlimit?access_token=$token"
 
@@ -48,29 +65,34 @@ class WeiXinServiceImpl : WeiXinService {
 
             val requestJson =
 """{
-"scene":"abcdefg",
-"page":"pages/index/index",
-"width":430,
+"scene":"$scene",
+"width":$width,
 "auto_color":true
 }"""
+//"page":"$page",
             val entity = HttpEntity<String>(requestJson, headers)
 
             val resp = restTemplate.postForEntity(url, entity, ByteArray::class.java)
             if (resp != null && resp.statusCode == HttpStatus.OK) {
-                Files.write(Paths.get("R:\\test.png"), resp.body)
+                return "data:image/jpeg;base64," + Base64.getEncoder().encodeToString(resp.body)
             }
         }
+
+        return ""
     }
 
-    private fun getAccsssToken() {
+    private fun getAccsssToken(managerApp: Boolean) {
+        val appId = if (managerApp) wxManagerAppId else wxAppId
+        val appSecret = if (managerApp) wxManagerAppSecret else wxAppSecret
+
         val resp = restTemplate.exchange(
                 "https://api.weixin.qq.com/cgi-bin/token?grant_type={grant_type}&appid={appid}&secret={secret}",
                 HttpMethod.GET,
                 null,
                 String::class.java,
                 mapOf(
-                        "appid" to wxAppId,
-                        "secret" to wxAppSecret,
+                        "appid" to appId,
+                        "secret" to appSecret,
                         "grant_type" to "client_credential"
                 )
         )
@@ -80,11 +102,23 @@ class WeiXinServiceImpl : WeiXinService {
             val body: GetAccessTokenResult = objectMapper.readValue(bodyStr, GetAccessTokenResult::class.java)
 
             if (body.errcode == 0 && !body.access_token.isNullOrEmpty()) {
-                _accessToken = body.access_token
-                _accessTokenExpire = System.currentTimeMillis() + body.expires_in!! * 1000 - 60000
+                if (managerApp) {
+                    _managerAppAccessToken = body.access_token
+                    _managerAppAccessTokenExpire = System.currentTimeMillis() + body.expires_in!! * 1000 - 60000
+                }
+                else {
+                    _appAccessToken = body.access_token
+                    _appAccessTokenExpire = System.currentTimeMillis() + body.expires_in!! * 1000 - 60000
+                }
             } else {
-                _accessToken = null
-                _accessTokenExpire = 0
+                if (managerApp) {
+                    _managerAppAccessToken = null
+                    _managerAppAccessTokenExpire = 0
+                }
+                else {
+                    _appAccessToken = null
+                    _appAccessTokenExpire = 0
+                }
             }
         }
     }

@@ -72,9 +72,20 @@ class ManagerController {
     fun changePassword(): String = "/manager/change_pass :: content"
 
     @RequestMapping(path = arrayOf("/manager/bind_weixin"), method = arrayOf(RequestMethod.GET))
-    fun bindWeiXin(): String {
-        weiXinService.createWxQrCode()
-        return "/manager/change_pass :: content"
+    fun bindWeiXin(modelAndView: ModelAndView): ModelAndView {
+        val bindKey = managerService.createManagerBindKey()
+        val qrCodeImgDataUrl = weiXinService.createWxQrCode(bindKey, "page/index/index")
+
+        modelAndView.model.put("qrCodeImageDataUrl", qrCodeImgDataUrl)
+        modelAndView.viewName = "/manager/bind_weixin :: content"
+
+        return modelAndView
+    }
+
+    @RequestMapping(path = arrayOf("/manager/bind_weixin"), method = arrayOf(RequestMethod.POST))
+    @ResponseBody
+    fun bindWeiXin(bindKey: String, code: String): Boolean{
+        return managerService.bindWeiXinAccount(bindKey, code)
     }
 
     @RequestMapping(path = arrayOf("/manager/change_pass"), method = arrayOf(RequestMethod.POST))

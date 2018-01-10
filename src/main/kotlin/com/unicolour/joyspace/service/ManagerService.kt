@@ -10,4 +10,6 @@ interface ManagerService : UserDetailsService {
     fun resetPassword(userId: Int, password: String): Boolean
     fun login(userName: String, password: String): Manager?
     val loginManager: LoginManagerDetail?
+    fun createManagerBindKey(): String
+    fun bindWeiXinAccount(bindKey: String, code: String): Boolean
 }

@@ -1,7 +1,6 @@
 package com.unicolour.joyspace.service
 
 interface WeiXinService {
-    val accessToken: String?
-    fun createWxQrCode()
+    fun createWxQrCode(scene: String, page: String, width: Int = 300): String
 }
 
