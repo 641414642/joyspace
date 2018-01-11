@@ -2,9 +2,13 @@ package com.unicolour.joyspace.service.impl
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.unicolour.joyspace.dao.ManagerDao
+import com.unicolour.joyspace.dao.ManagerWxLoginSessionDao
 import com.unicolour.joyspace.dto.LoginManagerDetail
+import com.unicolour.joyspace.dto.WxLoginResult
 import com.unicolour.joyspace.model.Company
 import com.unicolour.joyspace.model.Manager
+import com.unicolour.joyspace.model.ManagerWxLoginSession
+import com.unicolour.joyspace.model.UserLoginSession
 import com.unicolour.joyspace.service.ManagerService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
@@ -33,6 +37,9 @@ open class ManagerServiceImpl : ManagerService {
     lateinit var managerDao: ManagerDao
 
     @Autowired
+    lateinit var managerWxLoginSessionDao: ManagerWxLoginSessionDao
+
+    @Autowired
     lateinit var passwordEncoder: PasswordEncoder
 
     @Autowired
@@ -59,40 +66,73 @@ open class ManagerServiceImpl : ManagerService {
         }
     }
 
-    override fun bindWeiXinAccount(bindKey: String, code: String): Boolean {
-        //XXX 验证后面的部分
-        val managerId = bindKey.substringBefore('/').toInt()
-        val manager = managerDao.findOne(managerId)
-        if (manager != null) {
-            val resp = restTemplate.exchange(
-                    "https://api.weixin.qq.com/sns/jscode2session?appid={appid}&secret={secret}&js_code={js_code}&grant_type={grant_type}",
-                    HttpMethod.GET,
-                    null,
-                    String::class.java,
-                    mapOf(
-                            "appid" to wxManagerAppId,
-                            "secret" to wxManagerAppSecret,
-                            "js_code" to code,
-                            "grant_type" to "authorization_code"
-                    )
-            )
+    override fun managerWeiXinLogin(bindKey: String?, code: String): WxLoginResult {
+        val resp = restTemplate.exchange(
+                "https://api.weixin.qq.com/sns/jscode2session?appid={appid}&secret={secret}&js_code={js_code}&grant_type={grant_type}",
+                HttpMethod.GET,
+                null,
+                String::class.java,
+                mapOf(
+                        "appid" to wxManagerAppId,
+                        "secret" to wxManagerAppSecret,
+                        "js_code" to code,
+                        "grant_type" to "authorization_code"
+                )
+        )
 
-            if (resp != null && resp.statusCode == HttpStatus.OK) {
-                val bodyStr = resp.body
-                val body: JSCode2SessionResult = objectMapper.readValue(bodyStr, JSCode2SessionResult::class.java)
+        if (resp != null && resp.statusCode == HttpStatus.OK) {
+            val bodyStr = resp.body
+            val body: JSCode2SessionResult = objectMapper.readValue(bodyStr, JSCode2SessionResult::class.java)
 
-                if (body.errcode == 0 && body.openid != null && body.session_key != null) {
-                    transactionTemplate.execute {
-                        manager.wxOpenId = body.openid
-                        managerDao.save(manager)
+            if (body.errcode == 0 && body.openid != null && body.session_key != null) {
+                val manager = managerDao.findByWxOpenId(body.openid!!)
+                if (manager == null) {  //微信账号没有绑定管理员
+                    if (bindKey.isNullOrBlank()) {
+                        return WxLoginResult(1, "WeiXin account not bind to manager")
+                    } else {
+                        //XXX 验证后面的部分
+                        val managerId = bindKey!!.substringBefore('/').toInt()
+                        val bindManager = managerDao.findOne(managerId)
+                        if (bindManager == null) {
+                            return WxLoginResult(2, "Bind WeiXin account failed, manager(id=$managerId) not found")
+                        } else {
+                            return transactionTemplate.execute {
+                                bindManager.wxOpenId = body.openid
+                                managerDao.save(bindManager)
+
+                                val session = createManagerWxLoginSession(bindManager, body)
+                                WxLoginResult(0, "Bind WeiXin account and login success", session.id)
+                            }
+                        }
                     }
-
-                    return true
+                } else {   //微信账号已绑定管理员
+                    return transactionTemplate.execute {
+                        val session = createManagerWxLoginSession(manager, body)
+                        WxLoginResult(sessionId = session.id)
+                    }
                 }
             }
         }
 
-        return false
+        return WxLoginResult(3, "WeiXin login request failed")
+    }
+
+    private fun createManagerWxLoginSession(manager: Manager, body: JSCode2SessionResult): ManagerWxLoginSession {
+        var session = managerWxLoginSessionDao.findByManagerId(manager.id)
+        if (session == null) {
+            session = ManagerWxLoginSession()
+            session.id = UUID.randomUUID().toString().replace("-", "")
+            session.managerId = manager.id
+        }
+
+        session.wxSessionKey = body.session_key!!
+        session.wxOpenId = body.openid!!
+
+        session.expireTime = Calendar.getInstance()
+        session.expireTime.add(Calendar.SECOND, 3600)
+
+        managerWxLoginSessionDao.save(session)
+        return session
     }
 
     @Throws(UsernameNotFoundException::class)

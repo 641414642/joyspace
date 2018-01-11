@@ -14,4 +14,5 @@ interface ManagerDao : PagingAndSortingRepository<Manager, Int> {
     fun findByCompanyId(companyId: Int, pageRequest: Pageable): Page<Manager>
     fun findByUserNameOrFullName(userName: String, fullName: String): Manager?
     fun findByUserName(userName: String): Manager?
+    fun findByWxOpenId(wxOpenId: String): Manager?
 }

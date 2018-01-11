@@ -2,18 +2,13 @@ package com.unicolour.joyspace.controller
 
 import com.unicolour.joyspace.dao.ManagerDao
 import com.unicolour.joyspace.dto.LoginManagerDetail
-import com.unicolour.joyspace.model.Manager
 import com.unicolour.joyspace.service.ManagerService
 import com.unicolour.joyspace.service.WeiXinService
 import com.unicolour.joyspace.util.Pager
-import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
-import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Sort
-import org.springframework.security.core.Authentication
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.RequestMapping
@@ -80,12 +75,6 @@ class ManagerController {
         modelAndView.viewName = "/manager/bind_weixin :: content"
 
         return modelAndView
-    }
-
-    @RequestMapping(path = arrayOf("/manager/bind_weixin"), method = arrayOf(RequestMethod.POST))
-    @ResponseBody
-    fun bindWeiXin(bindKey: String, code: String): Boolean{
-        return managerService.bindWeiXinAccount(bindKey, code)
     }
 
     @RequestMapping(path = arrayOf("/manager/change_pass"), method = arrayOf(RequestMethod.POST))

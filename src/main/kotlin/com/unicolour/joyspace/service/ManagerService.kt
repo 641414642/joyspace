@@ -1,6 +1,7 @@
 package com.unicolour.joyspace.service
 
 import com.unicolour.joyspace.dto.LoginManagerDetail
+import com.unicolour.joyspace.dto.WxLoginResult
 import com.unicolour.joyspace.model.Company
 import com.unicolour.joyspace.model.Manager
 import org.springframework.security.core.userdetails.UserDetailsService
@@ -11,5 +12,5 @@ interface ManagerService : UserDetailsService {
     fun login(userName: String, password: String): Manager?
     val loginManager: LoginManagerDetail?
     fun createManagerBindKey(): String
-    fun bindWeiXinAccount(bindKey: String, code: String): Boolean
+    fun managerWeiXinLogin(bindKey: String?, code: String): WxLoginResult
 }

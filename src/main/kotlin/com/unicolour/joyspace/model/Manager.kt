@@ -1,8 +1,7 @@
 package com.unicolour.joyspace.model
 
-import java.util.Calendar
+import java.util.*
 import javax.persistence.*
-
 import javax.validation.constraints.NotNull
 
 @Entity
