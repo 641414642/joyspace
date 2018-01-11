@@ -159,7 +159,7 @@ open class PrintStationServiceImpl : PrintStationService {
                 session.uuid = uuid
                 printStationLoginSessionDao.save(session)
 
-                return PrintStationLoginResult(sessionId = session.id)
+                return PrintStationLoginResult(sessionId = session.id, printerType = printStation.printerType)
             }
             else {
                 return PrintStationLoginResult(result = 2)
@@ -187,7 +187,7 @@ open class PrintStationServiceImpl : PrintStationService {
     }
 
     @Transactional
-    override fun createPrintStation(baseUrl: String, password: String, positionId: Int, adSetId: Int, selectedProductIds: Set<Int>): PrintStation? {
+    override fun createPrintStation(baseUrl: String, password: String, positionId: Int, printerType: String, adSetId: Int, selectedProductIds: Set<Int>): PrintStation? {
         val loginManager = managerService.loginManager
         if (loginManager == null) {
             return null
@@ -198,6 +198,7 @@ open class PrintStationServiceImpl : PrintStationService {
         val printStation = PrintStation()
         printStation.company = manager.company
         printStation.position = positionDao.findOne(positionId)
+        printStation.printerType = printerType
         printStation.adSet = adSetDao.findOne(adSetId)
         printStation.city = printStation.position.city
         printStation.password = passwordEncoder.encode(password)
@@ -220,12 +221,13 @@ open class PrintStationServiceImpl : PrintStationService {
     }
 
     @Transactional
-    override fun updatePrintStation(id: Int, baseUrl: String, password: String, positionId: Int, adSetId: Int, selectedProductIds: Set<Int>): Boolean {
+    override fun updatePrintStation(id: Int, baseUrl: String, password: String, positionId: Int, printerType: String, adSetId: Int, selectedProductIds: Set<Int>): Boolean {
         val printStation = printStationDao.findOne(id)
 
         if (printStation != null) {
             printStation.wxQrCode = "$baseUrl/printStation/${printStation.id}"
             printStation.position = positionDao.findOne(positionId)
+            printStation.printerType = printerType
             printStation.adSet = adSetDao.findOne(adSetId)
             printStation.city = printStation.position.city
             if (!password.isNullOrEmpty()) {

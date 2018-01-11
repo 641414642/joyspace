@@ -139,6 +139,7 @@ class PrintStationController {
             @RequestParam(name = "id", required = true) id: Int,
             @RequestParam(name = "password", required = true) password: String,
             @RequestParam(name = "positionId", required = true) positionId: Int,
+            @RequestParam(name = "printerType", required = true) printerType: String,
             @RequestParam(name = "adSetId", required = true) adSetId: Int,
             @RequestParam(name = "productIds", required = true) productIds: String
     ): Boolean {
@@ -151,10 +152,10 @@ class PrintStationController {
         val baseUrl = getBaseUrl(request)
 
         if (id <= 0) {
-            printStationService.createPrintStation(baseUrl, password, positionId, adSetId, selectedProductIds)
+            printStationService.createPrintStation(baseUrl, password, positionId, printerType, adSetId, selectedProductIds)
             return true
         } else {
-            return printStationService.updatePrintStation(id, baseUrl, password, positionId, adSetId, selectedProductIds)
+            return printStationService.updatePrintStation(id, baseUrl, password, positionId, printerType, adSetId, selectedProductIds)
         }
     }
 

@@ -110,6 +110,9 @@ type PrintStationLoginRequestResult {
 
     #登录sessionId
     sessionId: String
+
+    #打印机信号
+    printerType: String!
 }
 
 #登录请求结果
@@ -287,6 +290,9 @@ type PrintStation {
 
     #投放商id
     companyId: Int!
+
+    #打印机型号
+    printerType: String
 
     #自助机状态
     status: Int!

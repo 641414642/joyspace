@@ -30,6 +30,10 @@ class PrintStation {
     @Column(length = 128)
     lateinit var password: String
 
+    @Column(length = 128)
+    @NotNull
+    lateinit var printerType: String
+
     //region 店面
     /** 店面ID */
     @Column(name = "company_id", insertable = false, updatable = false)

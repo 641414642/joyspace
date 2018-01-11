@@ -8,5 +8,8 @@ class PrintStationLoginResult(
         //3: 其他自助机已登录
         var result: Int = 0,
 
-        var sessionId: String? = null
+        var sessionId: String? = null,
+
+        //打印机型号
+        var printerType: String = ""
 )

@@ -39,9 +39,9 @@
 				<table class="table table-bordered table-striped">
 					<tr>
 						<th>ID</th>
-						<th>微信二维码</th>
 						<th>投放商</th>
 						<th>投放地点</th>
+						<th>打印机型号</th>
 						<th>状态</th>
 						<th>在线状态</th>
 						<th>软件版本</th>
@@ -50,9 +50,9 @@
 					</tr>
 					<tr th:each="ps : ${printStations}">
 						<td th:text="${ps.printStation.id}"></td>
-						<td th:text="${ps.printStation.wxQrCode}"></td>
 						<td th:text="${ps.printStation.company?.name}"></td>
 						<td th:text="${ps.printStation.position.name}"></td>
+						<td th:text="${ps.printStation.printerType}"></td>
 						<td>
 							<th:block th:switch="${ps.printStation.status}">
 								<span th:case="0" class="label label-success">正常</span>
