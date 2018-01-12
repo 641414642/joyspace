@@ -63,8 +63,8 @@
                     <div class="form-group">
                         <label for="printerType" class="control-label">打印机型号:</label>
                         <select name="printerType" class="form-control" id="printerType">
-                            <option value="CY">CY</option>
-                            <option value="EPSON SL-D700">EPSON SL-D700</option>
+                            <option value="CY" th:selected="${printStation.printerType == 'CY'}">CY</option>
+                            <option value="EPSON SL-D700" th:selected="${printStation.printerType == 'EPSON SL-D700'}">EPSON SL-D700</option>
                         </select>
                         <span class="help-block"></span>
                     </div>
