@@ -14,6 +14,7 @@ interface PrintOrderService {
     val printerOrderDownloadedDataFetcher: DataFetcher<GraphQLRequestResult>
     val printerOrderPrintedDataFetcher: DataFetcher<GraphQLRequestResult>
     val updatePrintOrderImageStatusDataFetcher: DataFetcher<GraphQLRequestResult>
+    val wxUserNickNameDataFetcher: DataFetcher<String?>
 
     fun createOrder(orderInput: OrderInput): PrintOrder
     fun startPayment(orderId: Int, baseUrl:String): WxPayParams

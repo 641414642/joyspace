@@ -137,6 +137,9 @@ class GraphQLServiceImpl : GraphQLService {
                 .type("PrintOrderItem", { typeWiring ->
                     typeWiring.dataFetcher("imageFiles", printOrderService.imageFilesDataFetcher)
                 })
+                .type("PrintOrder", { typeWiring ->
+                    typeWiring.dataFetcher("wxUserNickName", printOrderService.wxUserNickNameDataFetcher)
+                })
                 .type("UserImageFile", { typeWiring ->
                     typeWiring.dataFetcher("url", imageService.getImageFileUrlDataFetcher())
                 })

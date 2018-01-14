@@ -162,11 +162,11 @@ open class PrintStationServiceImpl : PrintStationService {
                 return PrintStationLoginResult(sessionId = session.id, printerType = printStation.printerType)
             }
             else {
-                return PrintStationLoginResult(result = 2)
+                return PrintStationLoginResult(result = 2)  //密码错误
             }
         }
         else {
-            return PrintStationLoginResult(result = 1)
+            return PrintStationLoginResult(result = 1)  //没有找到指定的自助打印机
         }
     }
 

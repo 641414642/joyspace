@@ -321,6 +321,15 @@ open class PrintOrderServiceImpl : PrintOrderService {
             }
         }
 
+    override val wxUserNickNameDataFetcher: DataFetcher<String?>
+        get() {
+            return DataFetcher { env ->
+                val printOrder = env.getSource<PrintOrder>()
+                val user = userDao.findOne(printOrder.userId)
+                user?.nickName
+            }
+        }
+
     private fun updatePrintOrderImageStatus(env: DataFetchingEnvironment): GraphQLRequestResult {
         val sessionId = env.getArgument<String>("sessionId")
         val printOrderImageId: Int = env.getArgument<Int>("printOrderImageId")

@@ -362,6 +362,7 @@ type PrintOrderItem {
 #订单
 type PrintOrder {
     id: Int!
+    wxUserNickName: String
     printOrderItems: [PrintOrderItem!]
 }
 
