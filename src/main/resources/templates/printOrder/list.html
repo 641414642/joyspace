@@ -77,7 +77,13 @@
 							<div th:if="${orderWrapper.order.printedOnPrintStation}" class="order_status printed" title="已打印"></div>
 						</td>
 						<td>
-							<a href="#" th:attr="data-url=@{/printOrder/detail(id=${orderWrapper.order.id})}" onclick="return viewPrintOrderDetail(event)">详情</a>
+							<a href="#">
+								<i class="fa fa-fw fa-eye"
+								   th:attr="data-url=@{/printOrder/detail(id=${orderWrapper.order.id})}"
+								   onclick="return viewPrintOrderDetail(event)"
+								   title="查看详情">
+								</i>
+							</a>
 						</td>
 					</tr>
 				</table>

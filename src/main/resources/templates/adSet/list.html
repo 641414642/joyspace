@@ -54,7 +54,13 @@
 							</div>
 						</td>
 						<td valign="middle" style="vertical-align:middle">
-							<a href="#" th:attr="data-url=@{/adSet/edit(id=${ad.adSet.id},mode='edit')}" onclick="return createOrEditAdSet(event, true)">编辑</a>
+							<a href="#" style="margin-right:5px">
+								<i class="fa fa-fw fa-pencil"
+								   th:attr="data-url=@{/adSet/edit(id=${ad.adSet.id},mode='edit')}"
+								   onclick="return createOrEditAdSet(event, true)"
+								   title="编辑">
+								</i>
+							</a>
 						</td>
 					</tr>
 				</table>

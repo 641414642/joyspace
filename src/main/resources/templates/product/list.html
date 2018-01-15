@@ -54,10 +54,34 @@
 						<td th:text="${product.template.minImageCount}"></td>
 						<td th:text="${#numbers.formatDecimal(product.defaultPrice / 100.0, 1, 'DEFAULT', 2, 'DEFAULT')}"></td>
 						<td>
-							<a href="#" th:attr="data-url=@{/product/edit(id=${product.id},mode='edit')}" onclick="return createOrEditProduct(event, true)" style="padding-right:5px">编辑</a>
-							<a href="#" th:attr="data-url=@{/product/manageImageFiles(productId=${product.id})}" onclick="return manageProductImageFiles(event, true)">图片管理</a>
-							<a href="#" th:attr="data-url=@{/product/move(id=${product.id},up='true')}" onclick="return moveProduct(event)">上移</a>
-							<a href="#" th:attr="data-url=@{/product/move(id=${product.id},up='false')}" onclick="return moveProduct(event)">下移</a>
+							<a href="#" style="margin-right:5px">
+								<i class="fa fa-fw fa-pencil"
+								   th:attr="data-url=@{/product/edit(id=${product.id},mode='edit')}"
+								   onclick="return createOrEditProduct(event, true)"
+								   title="编辑">
+								</i>
+							</a>
+							<a href="#" style="margin-right:5px">
+								<i class="fa fa-fw fa-image"
+								   th:attr="data-url=@{/product/manageImageFiles(productId=${product.id})}"
+								   onclick="return manageProductImageFiles(event, true)"
+								   title="图片管理">
+								</i>
+							</a>
+							<a href="#" style="margin-right:5px">
+								<i class="fa fa-fw fa-arrow-up"
+								   th:attr="data-url=@{/product/move(id=${product.id},up='true')}"
+								   onclick="return moveProduct(event)"
+								   title="上移">
+								</i>
+							</a>
+							<a href="#">
+								<i class="fa fa-fw fa-arrow-down"
+								   th:attr="data-url=@{/product/move(id=${product.id},up='false')}"
+								   onclick="return moveProduct(event)"
+								   title="下移">
+								</i>
+							</a>
 						</td>
 					</tr>
 				</table>

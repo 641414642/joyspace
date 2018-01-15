@@ -30,7 +30,7 @@
 
 						<div class="pull-right">
 							<a href="#" th:attr="data-url=@{/priceList/edit(id=0,mode='create')}" class="btn btn-primary btn-sm" onclick="return createOrEditPriceList(event, true)">新建</a>
-R						</div>
+						</div>
 					</div>
 				</form>
 			</div>
@@ -50,8 +50,20 @@ R						</div>
 						<td th:text="${priceList.company?.name}"></td>
 						<td th:text="${priceList.createTime == null ? '' : #calendars.format(priceList.createTime, 'yyyy-MM-dd HH:mm')}"></td>
 						<td>
-							<a href="#" th:attr="data-url=@{/priceList/edit(id=${priceList.id},mode='view')}" onclick="return viewPriceList(event, true)" style="padding-right:5px">查看</a>
-							<a href="#" th:attr="data-url=@{/priceList/edit(id=${priceList.id},mode='edit')}" onclick="return createOrEditPriceList(event, true)">编辑</a>
+							<a href="#" style="margin-right:5px">
+								<i class="fa fa-fw fa-eye"
+								   th:attr="data-url=@{/priceList/edit(id=${priceList.id},mode='view')}"
+								   onclick="return viewPriceList(event, true)"
+								   title="查看">
+								</i>
+							</a>
+							<a href="#">
+								<i class="fa fa-fw fa-pencil"
+								   th:attr="data-url=@{/priceList/edit(id=${priceList.id},mode='edit')}"
+								   onclick="return createOrEditPriceList(event, true)"
+								   title="编辑">
+								</i>
+							</a>
 						</td>
 					</tr>
 				</table>

@@ -52,7 +52,13 @@
 						<td th:text="${#numbers.formatDecimal(template.width, 1, 'DEFAULT', 2, 'DEFAULT') + ' x ' + #numbers.formatDecimal(template.height, 1, 'NONE', 2, 'POINT')}"></td>
 						<td th:text="${template.minImageCount}"></td>
 						<td>
-							<a href="#" th:attr="data-url=@{/template/edit(id=${template.id},mode='edit')}" onclick="return createOrEditTemplate(event, true)" style="padding-right:5px">编辑</a>
+							<a href="#">
+								<i class="fa fa-fw fa-pencil"
+								   th:attr="data-url=@{/template/edit(id=${template.id},mode='edit')}"
+								   onclick="return createOrEditTemplate(event, true)"
+								   title="编辑">
+								</i>
+							</a>
 						</td>
 					</tr>
 				</table>

@@ -67,8 +67,20 @@
 						<td th:text="${ps.version}"></td>
 						<td th:text="${ps.printStation.adSet?.name}"></td>
 						<td>
-							<a href="#" th:attr="data-qrcode=${ps.printStation.wxQrCode}" onclick="return showPrintStationQrCode(event, true)" style="padding-right:5px">二维码</a>
-							<a href="#" th:attr="data-url=@{/printStation/edit(id=${ps.printStation.id},mode='edit')}" onclick="return createOrEditPrintStation(event, true)">编辑</a>
+							<a href="#" style="margin-right:5px">
+								<i class="fa fa-fw fa-qrcode"
+								   th:attr="data-qrcode=${ps.printStation.wxQrCode}"
+								   onclick="return showPrintStationQrCode(event, true)"
+								   title="二维码">
+								</i>
+							</a>
+							<a href="#">
+								<i class="fa fa-fw fa-pencil"
+								   th:attr="data-url=@{/printStation/edit(id=${ps.printStation.id},mode='edit')}"
+								   onclick="return createOrEditPrintStation(event, true)"
+								   title="编辑">
+								</i>
+							</a>
 						</td>
 					</tr>
 				</table>

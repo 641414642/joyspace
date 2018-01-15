@@ -52,9 +52,23 @@
 						<td th:text="${position.company?.name}"></td>
 						<td th:text="${position.priceList?.name}"></td>
 						<td>
-							<a href="#" th:attr="data-url=@{/position/edit(id=${position.id},mode='edit')}" onclick="return createOrEditPosition(event, true)" style="padding-right:5px">编辑</a>
-							<a href="#" th:attr="data-url=@{/position/manageImageFiles(positionId=${position.id})}" onclick="return managePositionImageFiles(event, true)">图片管理</a>
-							<a href="#" th:href="${'http://apis.map.qq.com/uri/v1/geocoder?coord=' + position.latitude + ',' + position.longitude + '&amp;referer=joyspace'}" target="_blank">地图定位</a>
+							<a href="#" style="margin-right:5px">
+								<i class="fa fa-fw fa-pencil"
+								   th:attr="data-url=@{/position/edit(id=${position.id},mode='edit')}"
+								   onclick="return createOrEditPosition(event, true)"
+								   title="编辑">
+								</i>
+							</a>
+							<a href="#" style="margin-right:5px">
+								<i class="fa fa-fw fa-image"
+								   th:attr="data-url=@{/position/manageImageFiles(positionId=${position.id})}"
+								   onclick="return managePositionImageFiles(event, true)"
+								   title="图片管理">
+								</i>
+							</a>
+							<a th:href="${'http://apis.map.qq.com/uri/v1/geocoder?coord=' + position.latitude + ',' + position.longitude + '&amp;referer=joyspace'}" target="_blank">
+								<i class="fa fa-fw fa-map-marker" title="地图定位"></i>
+							</a>
 						</td>
 					</tr>
 				</table>

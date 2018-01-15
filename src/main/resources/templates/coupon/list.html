@@ -69,15 +69,23 @@
 							<span> / </span>
 							<span th:text="${coupon.usageCount}"></span>
 							<span> / </span>
-							<span th:text="${coupon.maxUses}"></span>
+							<span th:if="${coupon.maxUses == 0}">无限制</span>
+							<span th:unless="${coupon.maxUses == 0}" th:text="${coupon.maxUses}"></span>
 						</td>
 						<td>
+							<span> 满 </span>
 							<span th:text="${#numbers.formatDecimal(coupon.minExpense / 100.0, 1, 'DEFAULT', 2, 'DEFAULT')}"></span>
-							<span> - </span>
+							<span> 减 </span>
 							<span th:text="${#numbers.formatDecimal(coupon.discount / 100.0, 1, 'DEFAULT', 2, 'DEFAULT')}"></span>
 						</td>
 						<td>
-							<a href="#" th:attr="data-url=@{/coupon/edit(id=${coupon.id},mode='edit')}" onclick="return createOrEditCoupon(event, true)" style="padding-right:5px">编辑</a>
+							<a href="#">
+								<i class="fa fa-fw fa-pencil"
+								   th:attr="data-url=@{/coupon/edit(id=${coupon.id},mode='edit')}"
+								   onclick="return createOrEditCoupon(event, true)"
+								   title="编辑">
+								</i>
+							</a>
 						</td>
 					</tr>
 				</table>
