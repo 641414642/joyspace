@@ -147,13 +147,22 @@ open class ManagerServiceImpl : ManagerService {
                     manager.userName,
                     manager.password,
                     manager.isEnabled,
-                    true, true, true, Arrays.asList(SimpleGrantedAuthority("USER")))
+                    true,
+                    true,
+                    true,
+                    manager.roles.split(',').map { SimpleGrantedAuthority("ROLE_$it") })
         } else {
             throw UsernameNotFoundException(username + " not found.")
         }
     }
 
-    override fun createManager(userName: String, password: String, fullName: String, cellPhone: String, email: String, company: Company): Manager {
+    override fun createManager(userName: String,
+                               password: String,
+                               fullName: String,
+                               cellPhone: String,
+                               email: String,
+                               roles: String,
+                               company: Company): Manager {
         val manager = Manager()
 
         manager.userName = userName
@@ -163,6 +172,7 @@ open class ManagerServiceImpl : ManagerService {
         manager.email = email
         manager.createTime = Calendar.getInstance()
         manager.isEnabled = true
+        manager.roles = roles
         manager.company = company
 
         managerDao.save(manager)

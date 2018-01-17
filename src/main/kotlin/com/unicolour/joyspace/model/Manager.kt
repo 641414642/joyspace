@@ -65,4 +65,9 @@ class Manager {
     @NotNull
     lateinit var company: Company
     //endregion
+
+    /** 管理员角色, 可能有多个, 用逗号分隔 */
+    @Column(length = 200)
+    @NotNull
+    lateinit var roles: String
 }

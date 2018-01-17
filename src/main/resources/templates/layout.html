@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
 	<meta charset="utf-8" />
 	<meta http-equiv="X-UA-Compatible" content="IE=edge" />
@@ -56,7 +56,7 @@
 					<li class="dropdown user user-menu">
 						<a href="#" class="dropdown-toggle" data-toggle="dropdown">
 							<img src="../static/img/user-512x512.png" th:src="@{/img/user-512x512.png}" class="user-image" alt="用户" />
-							<span class="hidden-xs" th:text="${LoginUserDispName}">管理员</span>
+							<span class="hidden-xs" th:text="${LoginManagerDispName}">管理员</span>
 						</a>
 						<ul class="dropdown-menu">
 							<!-- User image -->
@@ -64,8 +64,8 @@
 								<img src="../static/img/user-512x512.png" th:src="@{/img/user-512x512.png}" class="img-circle" alt="用户" />
 
 								<p>
-									<small th:text="'登录名: ' + ${LoginUserName}"></small>
-									<small th:if="${LoginUserRegTime != null}" th:text="'注册时间: ' + ${LoginUserRegTime}"></small>
+									<small th:text="'登录名: ' + ${LoginManagerName}"></small>
+									<small th:if="${LoginManagerRegTime != null}" th:text="'注册时间: ' + ${LoginManagerRegTime}"></small>
 								</p>
 							</li>
 
@@ -116,7 +116,7 @@
 						<li th:class="${viewContent=='manager_list' ? 'active' : ''}"><a href="#" th:href="@{/manager/list}"><i class="fa fa-circle-o"></i>管理员列表</a></li>
 					</ul>
 				</li>
-				<li th:class="${viewCat=='user_mgr' ? 'treeview active' : 'treeview'}" class="treeview">
+				<li sec:authorize="hasRole('ROLE_SUPERADMIN')" th:class="${viewCat=='user_mgr' ? 'treeview active' : 'treeview'}" class="treeview">
 					<a href="#">
 						<i class="fa fa-files-o"></i>
 						<span>用户管理</span>
@@ -129,7 +129,7 @@
 						<li th:class="${viewContent=='company_list' ? 'active' : ''}"><a href="#" th:href="@{/company/list}"><i class="fa fa-circle-o"></i>投放商列表</a></li>
 					</ul>
 				</li>
-				<li th:class="${viewCat=='pay_mgr' ? 'treeview active' : 'treeview'}" class="treeview">
+				<li sec:authorize="hasRole('ROLE_SUPERADMIN')"  th:class="${viewCat=='pay_mgr' ? 'treeview active' : 'treeview'}" class="treeview">
 					<a href="../widgets.html">
 						<i class="fa fa-th"></i> <span>支付管理</span>
 						<span class="pull-right-container">

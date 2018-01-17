@@ -31,7 +31,12 @@ class CompanyServiceImpl : CompanyService {
 
         companyDao.save(company)
 
-        managerService.createManager(username, password, fullname, phone, email, company)
+        var roles = "ADMIN"
+        if (username == "admin") {
+            roles = "SUPERADMIN,ADMIN"
+        }
+
+        managerService.createManager(username, password, fullname, phone, email, roles, company)
 
         return company
     }
