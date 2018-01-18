@@ -144,6 +144,18 @@ Car 60 91 1x2 6x4 5 5"""))
                 r++
             }
 
+            val lineWidth = 0.1
+            for (rIndex in 0 until row) {
+                val y = offsetY + (h + vGap) * rIndex
+                tpl += """<line x1="0" y1="${y - lineWidth/2}" x2="$tplW" y2="${y - lineWidth/2}" style="stroke:rgb(0,0,0);stroke-width:0.1mm" />"""
+                tpl += """<line x1="0" y1="${y + h + lineWidth/2}" x2="$tplW" y2="${y + h + lineWidth/2}" style="stroke:rgb(0,0,0);stroke-width:0.1mm" />"""
+            }
+            for (cIndex in 0 until col) {
+                val x = offsetX + (w + hGap) * cIndex
+                tpl += """<line x1="${x - lineWidth/2}" y1="0" x2="${x - lineWidth/2}" y2="$tplH" style="stroke:rgb(0,0,0);stroke-width:0.1mm" />"""
+                tpl += """<line x1="${x + w + lineWidth/2}" y1="0" x2="${x + w + lineWidth/2}" y2="$tplH" style="stroke:rgb(0,0,0);stroke-width:0.1mm" />"""
+            }
+
             tpl += "</svg>"
 
             val tplDir = File(outputDir.toFile(), name)
