@@ -125,7 +125,7 @@
 						</span>
 					</a>
 					<ul class="treeview-menu">
-						<li><a href="#"><i class="fa fa-circle-o"></i>会员列表</a></li>
+						<!--<li><a href="#"><i class="fa fa-circle-o"></i>会员列表</a></li>-->
 						<li th:class="${viewContent=='company_list' ? 'active' : ''}"><a href="#" th:href="@{/company/list}"><i class="fa fa-circle-o"></i>投放商列表</a></li>
 					</ul>
 				</li>
@@ -138,8 +138,10 @@
 					</a>
 					<ul class="treeview-menu">
 						<li th:class="${viewContent=='wxpay_list' ? 'active' : ''}"><a href="#" th:href="@{/wx_pay/list}"><i class="fa fa-circle-o"></i>微信支付列表</a></li>
+<!--
 						<li th:class="${viewContent=='alipay_list' ? 'active' : ''}"><a href="#" th:href="@{/ali_pay/list}"><i class="fa fa-circle-o"></i>支付宝支付列表</a></li>
 						<li><a href="#"><i class="fa fa-circle-o"></i>店铺支付方式列表</a></li>
+-->
 					</ul>
 				</li>
 				<li th:class="${viewCat=='product_mgr' ? 'treeview active' : 'treeview'}" class="treeview">

@@ -1,4 +1,4 @@
 //添加编辑店面
-function createOrEditCompany(event) {
-    return showPostFormModal(event, 'editCompanyForm', null, true);
+function createOrEditCompany(event, create) {
+    return showPostFormModal(event, create ? 'createCompanyForm' : 'editCompanyForm', null, true);
 }

@@ -1,6 +1,8 @@
 package com.unicolour.joyspace.controller
 
 import com.unicolour.joyspace.dao.CompanyDao
+import com.unicolour.joyspace.dao.WeiXinPayConfigDao
+import com.unicolour.joyspace.dto.WxPayParams
 import com.unicolour.joyspace.model.Company
 import com.unicolour.joyspace.service.CompanyService
 import com.unicolour.joyspace.util.Pager
@@ -19,6 +21,9 @@ class CompanyController {
 
     @Autowired
     lateinit var companyDao: CompanyDao
+
+    @Autowired
+    lateinit var weiXinPayConfigDao: WeiXinPayConfigDao
 
     @Autowired
     lateinit var companyService: CompanyService
@@ -58,13 +63,21 @@ class CompanyController {
             company = companyDao.findOne(id)
         }
 
+        val wxPayConfigs = weiXinPayConfigDao.findAll()
+
         if (company == null) {
             company = Company()
         }
 
+        modelAndView.model.put("wxPayConfigs", wxPayConfigs)
         modelAndView.model.put("create", id <= 0)
         modelAndView.model.put("company", company)
-        modelAndView.viewName = "/company/edit :: content"
+        if (id > 0) {
+            modelAndView.viewName = "/company/edit :: content_edit"
+        }
+        else {
+            modelAndView.viewName = "/company/edit :: content_create"
+        }
 
         return modelAndView
     }
@@ -78,14 +91,15 @@ class CompanyController {
             @RequestParam(name = "fullname", required = true) fullname: String,
             @RequestParam(name = "phone", required = true) phone: String,
             @RequestParam(name = "email", required = true) email: String,
-            @RequestParam(name = "password", required = true) password: String
+            @RequestParam(name = "password", required = true) password: String,
+            @RequestParam(name = "wxPayConfigId", required = true) wxPayConfigId: Int
     ): Boolean {
 
         if (id <= 0) {
-            companyService.createCompany(name, null, username, fullname, phone, email, password)
+            companyService.createCompany(name, null, username, fullname, phone, email, password, wxPayConfigId)
             return true
         } else {
-            return companyService.updateCompany(id, name)
+            return companyService.updateCompany(id, name, wxPayConfigId)
         }
     }
 }

@@ -33,24 +33,24 @@
 	</script>
 </head>
 <body>
-<div class="modal fade" role="dialog" id="editDialog">
+<div class="modal fade" role="dialog" id="createDialog">
     <div class="modal-dialog" role="document">
-        <div class="modal-content" th:fragment="content">
+        <div class="modal-content" th:fragment="content_create">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
-                <h4 class="modal-title" th:text="${create ? '新建' : '修改'}"></h4>
+                <h4 class="modal-title" th:text="新建"></h4>
             </div>
-            <form id="editCompanyForm" th:action="@{/company/edit}" method="post">
+            <form id="createCompanyForm" th:action="@{/company/edit}" method="post">
                 <input type="hidden" name="id" th:value="${company.id}" />
                 <div class="modal-body">
                     <div class="form-group">
                         <label for="name" class="control-label">名称:</label>
-                        <input type="text" th:readonly="${!create}" name="name" class="form-control" id="name" th:value="${company.name}" />
+                        <input type="text" name="name" class="form-control" id="name" th:value="${company.name}" />
                         <span class="help-block"></span>
                     </div>
                     <div class="form-group">
                         <label for="user_name" class="control-label">管理员登录帐号:</label>
-                        <input type="text" th:readonly="${!create}" name="username" class="form-control" id="user_name" />
+                        <input type="text" name="username" class="form-control" id="user_name" />
                         <span class="help-block"></span>
                     </div>
                     <div class="form-group">
@@ -74,6 +74,61 @@
                         <span class="help-block"></span>
                     </div>
 
+                    <div class="form-group">
+                        <label for="wxPayConfig" class="control-label">微信支付参数:</label>
+                        <select name="wxPayConfigId" class="form-control" id="wxPayConfig">
+                            <option value="0" th:selected="${company.weiXinPayConfigId == null || company.weiXinPayConfigId == 0}">使用系统缺省(优利绚彩)</option>
+                            <option th:each="wxpc : ${wxPayConfigs}"
+                                    th:value="${wxpc.id}"
+                                    th:text="${wxpc.name}"
+                                    th:selected="${wxpc.id == company.weiXinPayConfigId}">
+                            </option>
+                        </select>
+                        <span class="help-block"></span>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary">确定</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<div class="modal fade" role="dialog" id="editDialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content" th:fragment="content_edit">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+                <h4 class="modal-title" th:text="编辑"></h4>
+            </div>
+            <form id="editCompanyForm" th:action="@{/company/edit}" method="post">
+                <input type="hidden" name="id" th:value="${company.id}" />
+                <input type="hidden" name="username" />
+                <input type="hidden" name="fullname" />
+                <input type="hidden" name="password" />
+                <input type="hidden" name="phone" />
+                <input type="hidden" name="email" />
+
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="nameEdit" class="control-label">名称:</label>
+                        <input type="text" name="name" class="form-control" id="nameEdit" th:value="${company.name}" />
+                        <span class="help-block"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="wxPayConfigEdit" class="control-label">微信支付参数:</label>
+                        <select name="wxPayConfigId" class="form-control" id="wxPayConfigEdit">
+                            <option value="0" th:selected="${company.weiXinPayConfigId == null || company.weiXinPayConfigId == 0}">使用系统缺省(优利绚彩)</option>
+                            <option th:each="wxpc : ${wxPayConfigs}"
+                                    th:value="${wxpc.id}"
+                                    th:text="${wxpc.name}"
+                                    th:selected="${wxpc.id == company.weiXinPayConfigId}">
+                            </option>
+                        </select>
+                        <span class="help-block"></span>
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <button type="submit" class="btn btn-primary">确定</button>

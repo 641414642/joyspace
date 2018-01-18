@@ -28,4 +28,14 @@ class Company {
     @JoinColumn(name = "default_price_list_id")
     var defaultPriceList: PriceList? = null
     //endregion
+
+    //region 微信支付参数
+    /** 微信支付参数ID */
+    @Column(name = "wei_xin_pay_config_id", insertable = false, updatable = false)
+    var weiXinPayConfigId: Int? = null
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "wei_xin_pay_config_id")
+    var weiXinPayConfig: WeiXinPayConfig? = null
+    //endregion
 }

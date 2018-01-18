@@ -1,6 +1,7 @@
 package com.unicolour.joyspace.service.impl
 
 import com.unicolour.joyspace.dao.CompanyDao
+import com.unicolour.joyspace.dao.WeiXinPayConfigDao
 import com.unicolour.joyspace.model.Company
 import com.unicolour.joyspace.model.PriceList
 import com.unicolour.joyspace.service.CompanyService
@@ -15,6 +16,9 @@ class CompanyServiceImpl : CompanyService {
     lateinit var companyDao: CompanyDao
 
     @Autowired
+    lateinit var weiXinPayConfigDao: WeiXinPayConfigDao
+
+    @Autowired
     lateinit var managerService: ManagerService
 
     override fun createCompany(name: String, defPriceList: PriceList?,
@@ -22,12 +26,14 @@ class CompanyServiceImpl : CompanyService {
                                fullname: String,
                                phone: String,
                                email: String,
-                               password: String): Company {
+                               password: String,
+                               wxPayConfigId: Int): Company {
         val company = Company()
 
         company.name = name
         company.createTime = Calendar.getInstance()
         company.defaultPriceList = defPriceList
+        company.weiXinPayConfig = weiXinPayConfigDao.findOne(wxPayConfigId)
 
         companyDao.save(company)
 
@@ -41,10 +47,11 @@ class CompanyServiceImpl : CompanyService {
         return company
     }
 
-    override fun updateCompany(companyId: Int, name: String): Boolean {
+    override fun updateCompany(companyId: Int, name: String, wxPayConfigId: Int): Boolean {
         val company = companyDao.findOne(companyId)
         if (company != null) {
             company.name = name
+            company.weiXinPayConfig = weiXinPayConfigDao.findOne(wxPayConfigId)
             companyDao.save(company)
 
             return true

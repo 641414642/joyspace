@@ -37,7 +37,7 @@ open class WebSecurityConfig : WebSecurityConfigurerAdapter() {
         http.csrf().disable()
                 .authorizeRequests()
                 .antMatchers(*permitAllPatterns).permitAll()
-                .antMatchers("/company/**").hasAnyRole("ROLE_SUPERADMIN")
+                //.antMatchers("/company/**").hasAnyRole("ROLE_SUPERADMIN")
                 .anyRequest().authenticated()
                 .and()
             .formLogin()

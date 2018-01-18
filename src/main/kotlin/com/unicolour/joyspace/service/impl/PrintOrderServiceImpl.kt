@@ -54,6 +54,9 @@ open class PrintOrderServiceImpl : PrintOrderService {
     lateinit var printOrderDao: PrintOrderDao
 
     @Autowired
+    lateinit var companyDao: CompanyDao
+
+    @Autowired
     lateinit var userDao: UserDao
 
     @Autowired
@@ -434,6 +437,18 @@ open class PrintOrderServiceImpl : PrintOrderService {
 
     override fun startPayment(orderId: Int, baseUrl:String): WxPayParams {
         val order = printOrderDao.findOne(orderId)
+        val company = companyDao.findOne(order.companyId)
+        val wxPayConfig = company.weiXinPayConfig
+
+        var appId: String = wxAppId
+        var mchId: String = wxMchId
+        var payKey: String = wxPayKey
+
+        if (wxPayConfig != null && wxPayConfig.appId != null && wxPayConfig.mchId != null && wxPayConfig.keyVal != null) {
+            appId = wxPayConfig.appId!!
+            mchId = wxPayConfig.mchId!!
+            payKey = wxPayConfig.keyVal!!
+        }
 
         val user = userDao.findOne(order.userId)
         val openId: String = user?.wxOpenId ?: ""
@@ -445,10 +460,10 @@ open class PrintOrderServiceImpl : PrintOrderService {
         val notifyUrl = "$baseUrl/wxpay/notify"
         val ipAddress: String = java.net.InetAddress.getByName(URL(baseUrl).host).hostAddress
 
-        val requestBody = getPaymentRequestParams(TreeMap(hashMapOf<String, String>(
-                "appid" to wxAppId,
+        val requestBody = getPaymentRequestParams(payKey, TreeMap(hashMapOf<String, String>(
+                "appid" to appId,
                 "body" to "优利绚彩-照片打印",
-                "mch_id" to wxMchId,
+                "mch_id" to mchId,
                 "nonce_str" to nonceStr,
                 "notify_url" to notifyUrl,
                 "openid" to openId,
@@ -476,7 +491,7 @@ open class PrintOrderServiceImpl : PrintOrderService {
             val result = wxUnifyOrderResultUnmarshaller.unmarshal(StringReader(resultStr)) as WxUnifyOrderResult
 
             if (result.return_code == "SUCCESS" && result.result_code == "SUCCESS") {
-                return createWxPayParams(result, nonceStr)
+                return createWxPayParams(payKey, result, nonceStr)
             }
             else {
                 throw ProcessException(3, "return_code=${result.return_code}, result_code=${result.result_code}")
@@ -484,7 +499,7 @@ open class PrintOrderServiceImpl : PrintOrderService {
         }
     }
 
-    private fun createWxPayParams(res: WxUnifyOrderResult, nonceStr: String): WxPayParams {
+    private fun createWxPayParams(payKey:String, res: WxUnifyOrderResult, nonceStr: String): WxPayParams {
         val timeStamp = (System.currentTimeMillis() / 1000).toString()
 
         val kvs = "appId=$wxAppId" +
@@ -492,7 +507,7 @@ open class PrintOrderServiceImpl : PrintOrderService {
                 "&package=prepay_id=${res.prepay_id}" +
                 "&signType=MD5" +
                 "&timeStamp=$timeStamp" +
-                "&key=$wxPayKey"
+                "&key=$payKey"
 
         val md5Digist = MessageDigest.getInstance("MD5")
         val sign = bytesToHexString(md5Digist.digest(kvs.toByteArray(StandardCharsets.US_ASCII)))
@@ -537,7 +552,7 @@ open class PrintOrderServiceImpl : PrintOrderService {
         }
     }
 
-    private fun getPaymentRequestParams(varMap: TreeMap<String, String>): String {
+    private fun getPaymentRequestParams(payKey: String, varMap: TreeMap<String, String>): String {
         val sb = StringBuilder("<xml>")
         val sj = StringJoiner("&")
 
@@ -549,7 +564,7 @@ open class PrintOrderServiceImpl : PrintOrderService {
             sb.append("<$key>$value</$key>")
         }
 
-        sj.add("key=$wxPayKey")
+        sj.add("key=$payKey")
 
         val md5Digist = MessageDigest.getInstance("MD5")
         val sign = bytesToHexString(md5Digist.digest(sj.toString().toByteArray(StandardCharsets.UTF_8)))

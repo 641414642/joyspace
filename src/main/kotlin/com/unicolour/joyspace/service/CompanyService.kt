@@ -9,7 +9,8 @@ interface CompanyService {
                       fullname: String,
                       phone: String,
                       email: String,
-                      password: String) : Company
+                      password: String,
+                      wxPayConfigId: Int) : Company
 
-    fun updateCompany(companyId: Int, name: String): Boolean
+    fun updateCompany(companyId: Int, name: String, wxPayConfigId: Int): Boolean
 }
