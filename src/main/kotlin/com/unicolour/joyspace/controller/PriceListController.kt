@@ -79,7 +79,8 @@ class PriceListController {
                     if (priceMap.containsKey(it.id))
                         String.format("%.2f", priceMap[it.id]!! / 100.0)
                     else
-                        "")
+                        ""
+            )
         }
 
         modelAndView.model.put("mode", mode)

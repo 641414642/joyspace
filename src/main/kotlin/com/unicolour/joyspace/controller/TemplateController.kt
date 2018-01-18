@@ -12,7 +12,6 @@ import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestMethod
 import org.springframework.web.bind.annotation.RequestParam
-import org.springframework.web.bind.annotation.ResponseBody
 import org.springframework.web.multipart.MultipartFile
 import org.springframework.web.servlet.ModelAndView
 
@@ -29,15 +28,23 @@ class TemplateController {
     fun templateList(
             modelAndView: ModelAndView,
             @RequestParam(name = "name", required = false, defaultValue = "") name: String?,
+            @RequestParam(name = "type", required = false, defaultValue = "-1") type: Int,
             @RequestParam(name = "pageno", required = false, defaultValue = "1") pageno: Int): ModelAndView {
 
         val pageable = PageRequest(pageno - 1, 20, Sort.Direction.ASC, "id")
-        val templates = if (name == null || name == "")
-            templateDao.findAll(pageable)
-        else
-            templateDao.findByName(name, pageable)
+        val nameIsNullOrBlank = name.isNullOrBlank()
+        val templates =
+                if (nameIsNullOrBlank && type < 0)
+                    templateDao.findAll(pageable)
+                else if (!nameIsNullOrBlank && type >= 0)
+                    templateDao.findByNameAndType(name!!, type, pageable)
+                else if (type >= 0)
+                    templateDao.findByType(type, pageable)
+                else
+                    templateDao.findByName(name!!, pageable)
 
         modelAndView.model.put("inputTemplateName", name)
+        modelAndView.model.put("inputTemplateType", type)
 
         val pager = Pager(templates.totalPages, 7, pageno - 1)
         modelAndView.model.put("pager", pager)

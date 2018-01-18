@@ -10,4 +10,9 @@ import org.springframework.data.repository.query.Param
 interface TemplateDao : PagingAndSortingRepository<Template, Int> {
     @Query("SELECT t FROM Template t WHERE LOWER(t.name) LIKE LOWER(CONCAT('%', :name, '%'))")
     fun findByName(@Param("name") name: String, pageable: Pageable): Page<Template>
+
+    fun findByType(type: Int, pageable: Pageable): Page<Template>
+
+    @Query("SELECT t FROM Template t WHERE t.type=:type AND LOWER(t.name) LIKE LOWER(CONCAT('%', :name, '%'))")
+    fun findByNameAndType(@Param("name") name: String, @Param("type") type: Int, pageable: Pageable): Page<Template>
 }
