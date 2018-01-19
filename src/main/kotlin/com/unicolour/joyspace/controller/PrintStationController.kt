@@ -106,6 +106,7 @@ class PrintStationController {
 
         if (printStation == null) {
             printStation = PrintStation()
+            printStation.printerType = "CY"
         }
 
         val allProducts = productDao.findByCompanyIdOrderBySequenceAsc(loginManager!!.companyId)
