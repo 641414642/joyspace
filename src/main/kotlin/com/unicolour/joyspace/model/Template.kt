@@ -46,6 +46,22 @@ class Template : Serializable {
     @Column(length = 50)
     @NotNull
     var uuid: String = ""
+
+//    //region 投放商
+//    /** 投放商ID */
+//    @Column(name = "company_id", insertable = false, updatable = false)
+//    var companyId: Int = 0
+//
+//    @ManyToOne(fetch = FetchType.LAZY)
+//    @JoinColumn(name = "company_id")
+//    @NotNull
+//    lateinit var company: Company
+//    //endregion
+//
+//    /** 是否是公用模板 */
+//    @Column
+//    @NotNull
+//    var publicTemplate: Boolean = false
 }
 
 /** 产品模板中的图片信息 */

@@ -4,8 +4,10 @@ import com.unicolour.joyspace.dao.*
 import com.unicolour.joyspace.dto.ImageParam
 import com.unicolour.joyspace.dto.PreviewParam
 import com.unicolour.joyspace.dto.TemplatePreviewResult
+import com.unicolour.joyspace.exception.NoPermissionException
 import com.unicolour.joyspace.model.*
 import com.unicolour.joyspace.service.ImageService
+import com.unicolour.joyspace.service.ManagerService
 import com.unicolour.joyspace.service.PrintStationService
 import com.unicolour.joyspace.service.TemplateService
 import graphql.schema.DataFetcher
@@ -49,6 +51,12 @@ open class TemplateServiceImpl : TemplateService {
 
     @Value("\${com.unicolour.joyspace.assetsDir}")
     lateinit var assetsDir: String
+
+    @Autowired
+    lateinit var managerDao: ManagerDao
+
+    @Autowired
+    lateinit var managerService: ManagerService
 
     @Autowired
     lateinit var userLoginSessionDao: UserLoginSessionDao
@@ -96,19 +104,35 @@ open class TemplateServiceImpl : TemplateService {
     }
 
     @Transactional
-    override fun createTemplate(name: String, type: ProductType, templateFile: MultipartFile) {
-        val tpl = Template()
-        tpl.currentVersion = 1
-        tpl.minImageCount = 0
-        tpl.name = name
-        tpl.type = type.value
-        tpl.width = 0.0
-        tpl.height = 0.0
-        tpl.uuid = UUID.randomUUID().toString().replace("-", "")
+    override fun createTemplate(publicTemplate: Boolean, name: String, type: ProductType, templateFile: MultipartFile) {
+        val loginManager = managerService.loginManager
+        val isSuperAdmin = managerService.loginManagerHasRole("ROLE_SUPERADMIN")
 
-        templateDao.save(tpl)
+        if (loginManager != null) {
+            if (!isSuperAdmin && publicTemplate) {
+                throw NoPermissionException("Create public template not allowed for this manager")
+            }
 
-        saveTemplateFiles(tpl, templateFile)
+//            val manager = managerDao.findOne(loginManager.managerId)
+
+            val tpl = Template()
+            tpl.currentVersion = 1
+            tpl.minImageCount = 0
+            tpl.name = name
+            tpl.type = type.value
+            tpl.width = 0.0
+            tpl.height = 0.0
+//            tpl.company = manager.company
+//            tpl.publicTemplate = publicTemplate
+            tpl.uuid = UUID.randomUUID().toString().replace("-", "")
+
+            templateDao.save(tpl)
+
+            saveTemplateFiles(tpl, templateFile)
+        }
+        else {
+            throw NoPermissionException("Login required")
+        }
     }
 
     private fun saveTemplateFiles(tpl: Template, templateFile: MultipartFile) {

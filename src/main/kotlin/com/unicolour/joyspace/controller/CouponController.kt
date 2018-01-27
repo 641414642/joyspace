@@ -110,9 +110,9 @@ class CouponController {
 
         val allProductTypes = ProductType.values()
                 .map { ProductTypeItem(it.value, it.dispName, supportedProductTypes.contains(it.value)) }
-        val allProducts = productDao.findByCompanyIdOrderBySequenceAsc(loginManager!!.companyId)
+        val allProducts = productDao.findAllByOrderBySequenceAsc()
                 .map { ProductItem(it.id, it.template.type ,it.name, it.template.name, supportedProductIdSet.contains(it.id)) }
-        val allPositions = positionDao.findByCompanyId(loginManager.companyId)
+        val allPositions = positionDao.findByCompanyId(loginManager!!.companyId)
                 .map { PositionItem(it.id, it.name, it.address, supportedPositionIdSet.contains(it.id)) }
         val allPrintStations = printStationDao.findByCompanyId(loginManager.companyId)
                 .map { PrintStationItem(it.id, "自助机${it.id}", it.position.name, supportedPrintStationIdSet.contains(it.id)) }

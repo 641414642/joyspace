@@ -3,6 +3,7 @@ package com.unicolour.joyspace.controller
 import com.unicolour.joyspace.dao.PriceListDao
 import com.unicolour.joyspace.dao.ProductDao
 import com.unicolour.joyspace.model.PriceList
+import com.unicolour.joyspace.service.ManagerService
 import com.unicolour.joyspace.service.PriceListService
 import com.unicolour.joyspace.util.Pager
 import org.springframework.beans.factory.annotation.Autowired
@@ -18,6 +19,8 @@ import javax.servlet.http.HttpServletRequest
 
 @Controller
 class PriceListController {
+    @Autowired
+    lateinit var managerService: ManagerService
 
     @Autowired
     lateinit var priceListDao: PriceListDao
@@ -34,11 +37,19 @@ class PriceListController {
             @RequestParam(name = "name", required = false, defaultValue = "") name: String?,
             @RequestParam(name = "pageno", required = false, defaultValue = "1") pageno: Int): ModelAndView {
 
+        val loginManager = managerService.loginManager
+
+        if (loginManager == null) {
+            modelAndView.viewName = "empty"
+            return modelAndView
+        }
+
         val pageable = PageRequest(pageno - 1, 20, Sort.Direction.ASC, "id")
-        val priceLists = if (name == null || name == "")
-            priceListDao.findAll(pageable)
-        else
-            priceListDao.findByName(name, pageable)
+        val priceLists =
+                if (name == null || name == "")
+                    priceListDao.findByCompanyId(loginManager.companyId, pageable)
+                else
+                    priceListDao.findByCompanyIdAndName(loginManager.companyId, name, pageable)
 
         modelAndView.model.put("inputPriceListName", name)
 

@@ -182,6 +182,10 @@ open class ManagerServiceImpl : ManagerService {
         return manager
     }
 
+    override fun loginManagerHasRole(role: String): Boolean {
+        return (loginManager?.authorities ?: emptyList()).map { it.authority }.contains(role)
+    }
+
     override fun resetPassword(userId: Int, password: String): Boolean {
         val manager = managerDao.findOne(userId)
 

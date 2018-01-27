@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 	<meta charset="utf-8" />
@@ -44,7 +44,7 @@
 						<th>尺寸(毫米)</th>
 						<th>最小图片数量</th>
 						<th>缺省价格(元)</th>
-						<th>操作</th>
+						<th sec:authorize="hasRole('ROLE_SUPERADMIN')">操作</th>
 					</tr>
 					<tr th:each="product : ${products}">
 						<td th:text="${product.id}"></td>
@@ -53,7 +53,7 @@
 						<td th:text="${#numbers.formatDecimal(product.template.width, 1, 'DEFAULT', 2, 'DEFAULT') + ' x ' + #numbers.formatDecimal(product.template.height, 1, 'DEFAULT', 2, 'DEFAULT')}"></td>
 						<td th:text="${product.template.minImageCount}"></td>
 						<td th:text="${#numbers.formatDecimal(product.defaultPrice / 100.0, 1, 'DEFAULT', 2, 'DEFAULT')}"></td>
-						<td>
+						<td sec:authorize="hasRole('ROLE_SUPERADMIN')">
 							<a href="#" style="margin-right:5px">
 								<i class="fa fa-fw fa-pencil"
 								   th:attr="data-url=@{/product/edit(id=${product.id},mode='edit')}"

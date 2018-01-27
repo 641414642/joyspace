@@ -54,10 +54,13 @@ class ProductController {
         }
 
         val pageable = PageRequest(pageno - 1, 20, Sort.Direction.ASC, "sequence")
-        val products = if (name == null || name == "")
-            productDao.findByCompanyId(loginManager.companyId, pageable)
-        else
-            productDao.findByCompanyIdAndName(loginManager.companyId, name, pageable)
+        val products =
+                if (name == null || name == "")
+                    //productDao.findByCompanyId(loginManager.companyId, pageable)
+                    productDao.findAll(pageable)
+                else
+                    //productDao.findByCompanyIdAndName(loginManager.companyId, name, pageable)
+                    productDao.findByName(name, pageable)
 
         modelAndView.model.put("inputProductName", name)
 

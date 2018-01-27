@@ -42,8 +42,8 @@ class Product {
     @OneToMany(mappedBy = "product")
     lateinit var imageFiles: List<ProductImageFile>
 
-    //region 店面
-    /** 店面ID */
+    //region 投放商
+    /** 投放商ID */
     @Column(name = "company_id", insertable = false, updatable = false)
     var companyId: Int = 0
 
