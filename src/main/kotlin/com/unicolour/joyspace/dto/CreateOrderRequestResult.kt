@@ -10,6 +10,7 @@ class CheckOrderRequestResult(
 
 class CreateOrderRequestResult(
         val orderId: Int,
+        val orderNo: String?,
         val wxPayParams: WxPayParams?,
         val orderItems: List<OrderItemRet>?,
         val totalFee: Int,
@@ -18,7 +19,7 @@ class CreateOrderRequestResult(
         errmsg: String? = null)
     : CommonRequestResult(errcode, errmsg)
 {
-    constructor(errcode: Int, errmsg: String?) : this(0, null, null, 0, 0, errcode, errmsg)
+    constructor(errcode: Int, errmsg: String?) : this(0, null,null, null, 0, 0, errcode, errmsg)
 }
 
 class OrderItemRet(

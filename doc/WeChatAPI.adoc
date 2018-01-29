@@ -299,6 +299,7 @@
 		"errcode" : 0,
 		"errmsg": null,
 		"orderId": x,         //订单id
+		"orderNo": "xxxxxxxxx",    //订单编号
 		"wxPayParams": {
 			"timeStamp" : "1499865120",
 			"nonceStr": "asdfasdfasdfas",

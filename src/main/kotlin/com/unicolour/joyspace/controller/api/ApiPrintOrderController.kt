@@ -55,7 +55,7 @@ class ApiPrintOrderController {
             val params = printOrderService.startPayment(order.id, baseUrl)
             //val params: WxPayParams? = null
             val orderItems = order.printOrderItems.map { OrderItemRet(it.id, it.productId) }
-            return ResponseEntity.ok(CreateOrderRequestResult(order.id, params, orderItems, order.totalFee, order.discount))
+            return ResponseEntity.ok(CreateOrderRequestResult(order.id, order.orderNo, params, orderItems, order.totalFee, order.discount))
         } catch(e: ProcessException) {
             e.printStackTrace()
             return ResponseEntity.ok(CreateOrderRequestResult(e.errcode, e.message))
