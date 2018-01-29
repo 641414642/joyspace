@@ -151,9 +151,7 @@ class GraphQLServiceImpl : GraphQLService {
                 .type("AdImageFile", { typeWiring ->
                     typeWiring.dataFetcher("url", { env ->
                         val imageFile = env.getSource<AdImageFile>()
-                        val context = env.getContext<HashMap<String, Any>>()
-                        val baseUrl = context["baseUrl"] as String
-                        adSetService.getAdImageUrl(baseUrl, imageFile)
+                        adSetService.getAdImageUrl(imageFile)
                     })
                 })
                 .type("Coupon", { typeWiring ->

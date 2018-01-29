@@ -1,7 +1,6 @@
 package com.unicolour.joyspace.controller.app
 
 import com.unicolour.joyspace.service.GraphQLService
-import com.unicolour.joyspace.util.getBaseUrl
 import graphql.GraphQL
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.*
@@ -46,7 +45,6 @@ query {
 }
 """
         val context = hashMapOf<String, Any>(
-                "baseUrl" to getBaseUrl(request),
                 "refLatitude" to latitude,
                 "refLongitude" to longitude)
 
@@ -88,7 +86,6 @@ query {
 }
 """
         val context = hashMapOf<String, Any>(
-                "baseUrl" to getBaseUrl(request),
                 "refLatitude" to latitude,
                 "refLongitude" to longitude)
 
@@ -131,9 +128,7 @@ query {
 	}
 }
 """
-        val context = hashMapOf<String, Any>("baseUrl" to getBaseUrl(request))
-
-        val queryResult = graphQL.execute(query, null, context, emptyMap())
+        val queryResult = graphQL.execute(query, null, null, emptyMap())
         val data:Map<String, Any> = queryResult.getData()
         val printStation = data["printStation"] as? Map<*, *>?
         return printStation?.get("products")

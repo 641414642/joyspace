@@ -1,6 +1,7 @@
 package com.unicolour.joyspace.service
 
 import com.unicolour.joyspace.model.Company
+import com.unicolour.joyspace.model.CompanyWxAccount
 import com.unicolour.joyspace.model.PriceList
 
 interface CompanyService {
@@ -13,4 +14,7 @@ interface CompanyService {
                       wxPayConfigId: Int) : Company
 
     fun updateCompany(companyId: Int, name: String, wxPayConfigId: Int): Boolean
+
+    /** 返回可用的微信收款账户 */
+    fun getAvailableWxAccount(companyId: Int): CompanyWxAccount?
 }

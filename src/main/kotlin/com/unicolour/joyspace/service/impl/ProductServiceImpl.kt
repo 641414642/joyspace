@@ -21,6 +21,9 @@ import javax.transaction.Transactional
 
 @Service
 open class ProductServiceImpl : ProductService {
+    @Value("\${com.unicolour.joyspace.baseUrl}")
+    lateinit var baseUrl: String
+
     @Value("\${com.unicolour.joyspace.assetsDir}")
     lateinit var assetsDir: String
 
@@ -279,8 +282,6 @@ open class ProductServiceImpl : ProductService {
                 "idPhotoMaskImageUrl" -> {
                     val tpl = product.template
                     if (tpl.type == ProductType.ID_PHOTO.value) {
-                        val context = env.getContext<HashMap<String, Any>>()
-                        val baseUrl = context["baseUrl"]
                         "${baseUrl}/assets/template/preview/${tpl.id}_v${tpl.currentVersion}/mask.png"
                     }
                     else {
@@ -289,16 +290,12 @@ open class ProductServiceImpl : ProductService {
                 }
                 "imageRequired" -> product.template.minImageCount
                 "thumbnailImageUrl" -> {
-                    val context = env.getContext<HashMap<String, Any>>()
-                    val baseUrl = context["baseUrl"]
                     product.imageFiles
                             .filter { it.type == ProductImageFileType.THUMB.value }
                             .map { "$baseUrl/assets/product/images/${it.id}.${it.fileType}" }
                             .firstOrNull()
                 }
                 "previewImageUrls" -> {
-                    val context = env.getContext<HashMap<String, Any>>()
-                    val baseUrl = context["baseUrl"]
                     product.imageFiles
                             .filter { it.type == ProductImageFileType.PREVIEW.value }
                             .map { "$baseUrl/assets/product/images/${it.id}.${it.fileType}" }
@@ -318,8 +315,6 @@ open class ProductServiceImpl : ProductService {
                     }
                 }
                 "templateUrl" -> {
-                    val context = env.getContext<HashMap<String, Any>>()
-                    val baseUrl = context["baseUrl"]
                     val tpl = product.template
 
                     "$baseUrl/assets/template/preview/${tpl.id}_v${tpl.currentVersion}/template.svg"

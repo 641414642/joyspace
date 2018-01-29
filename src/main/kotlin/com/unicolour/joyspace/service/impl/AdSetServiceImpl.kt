@@ -24,6 +24,9 @@ open class AdSetServiceImpl : AdSetService {
     @Value("\${com.unicolour.joyspace.assetsDir}")
     lateinit var assetsDir: String
 
+    @Value("\${com.unicolour.joyspace.baseUrl}")
+    lateinit var baseUrl: String
+
     @Autowired
     lateinit var adSetDao: AdSetDao
 
@@ -33,7 +36,7 @@ open class AdSetServiceImpl : AdSetService {
     @Autowired
     lateinit var managerService : ManagerService
 
-    override fun getAdImageUrl(baseUrl:String, adImageFile: AdImageFile): String {
+    override fun getAdImageUrl(adImageFile: AdImageFile): String {
         return "$baseUrl/assets/ad/${adImageFile.adSet.id}/images/${adImageFile.fileName}.${adImageFile.fileType}"
     }
 

@@ -5,7 +5,6 @@ import com.unicolour.joyspace.model.*
 import com.unicolour.joyspace.service.AdSetService
 import com.unicolour.joyspace.service.ManagerService
 import com.unicolour.joyspace.util.Pager
-import com.unicolour.joyspace.util.getBaseUrl
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
@@ -33,12 +32,10 @@ class AdSetController {
 
     @RequestMapping("/adSet/list")
     fun adSetList(
-            request: HttpServletRequest,
             modelAndView: ModelAndView,
             @RequestParam(name = "name", required = false, defaultValue = "") name: String?,
             @RequestParam(name = "pageno", required = false, defaultValue = "1") pageno: Int): ModelAndView {
 
-        val baseUrl = getBaseUrl(request)
         val loginManager = managerService.loginManager
 
         val pageable = PageRequest(pageno - 1, 20, Sort.Direction.DESC, "id")
@@ -55,7 +52,7 @@ class AdSetController {
                     adImageFiles = it.imageFiles.map { imgFile ->
                         AdImageFileInfo(
                                 id = imgFile.id,
-                                url = adSetService.getAdImageUrl(baseUrl, imgFile),
+                                url = adSetService.getAdImageUrl(imgFile),
                                 duration = imgFile.duration
                         )
                     }
@@ -78,9 +75,7 @@ class AdSetController {
     @RequestMapping(path = arrayOf("/adSet/edit"), method = arrayOf(RequestMethod.GET))
     fun editAdSet(
             modelAndView: ModelAndView,
-            request: HttpServletRequest,
             @RequestParam(name = "id", required = true) id: Int): ModelAndView {
-        val baseUrl = getBaseUrl(request)
         val loginManager = managerService.loginManager
 
         var adSet: AdSet? = null
@@ -90,7 +85,7 @@ class AdSetController {
             imageFiles = adSet.imageFiles.map {
                 AdImageFileInfo(
                         id = it.id,
-                        url = adSetService.getAdImageUrl(baseUrl, it),
+                        url = adSetService.getAdImageUrl(it),
                         duration = it.duration
                 )
             }

@@ -39,3 +39,31 @@ class Company {
     var weiXinPayConfig: WeiXinPayConfig? = null
     //endregion
 }
+
+//收款帐户信息
+@Entity
+@Table(name = "company_wx_account")
+class CompanyWxAccount {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    var id: Int = 0
+
+    //属于哪个投放商
+    @Column
+    @NotNull
+    var companyId: Int = 0
+
+    //收款openId
+    @Column
+    @NotNull
+    lateinit var openId: String
+
+    //收款人姓名
+    @Column(length = 50)
+    @NotNull
+    lateinit var name: String
+
+    @Column
+    @NotNull
+    var enabled: Boolean = false   //是否可用
+}

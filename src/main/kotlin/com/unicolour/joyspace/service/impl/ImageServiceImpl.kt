@@ -20,6 +20,9 @@ import kotlin.collections.HashMap
 
 @Service
 class ImageServiceImpl : ImageService {
+    @Value("\${com.unicolour.joyspace.baseUrl}")
+    lateinit var baseUrl: String
+
     @Value("\${com.unicolour.joyspace.assetsDir}")
     lateinit var assetsDir: String
 
@@ -32,7 +35,7 @@ class ImageServiceImpl : ImageService {
     @Autowired
     lateinit var productDao: ProductDao
 
-    override fun uploadImage(sessionId: String, imgFile: MultipartFile?, baseUrl: String): ImageInfo {
+    override fun uploadImage(sessionId: String, imgFile: MultipartFile?): ImageInfo {
         val session = userLoginSessionDao.findOne(sessionId);
 
         if (session == null) {
@@ -187,13 +190,11 @@ class ImageServiceImpl : ImageService {
     override fun getImageFileUrlDataFetcher(): DataFetcher<String> {
         return DataFetcher { env ->
             val imageFile = env.getSource<UserImageFile>()
-            val context = env.getContext<HashMap<String, Any>>()
-            val baseUrl = context["baseUrl"]
             "${baseUrl}/assets/user/${imageFile.userId}/${imageFile.sessionId}/${imageFile.fileName}.${imageFile.type}"
         }
     }
 
-    override fun getImageUrl(baseUrl: String, userImgFile: UserImageFile): String {
+    override fun getImageUrl(userImgFile: UserImageFile): String {
         return "${baseUrl}/assets/user/${userImgFile.userId}/${userImgFile.sessionId}/${userImgFile.fileName}.${userImgFile.type}"
     }
 

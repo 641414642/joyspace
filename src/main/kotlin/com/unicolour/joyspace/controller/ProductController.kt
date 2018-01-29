@@ -7,10 +7,9 @@ import com.unicolour.joyspace.model.Product
 import com.unicolour.joyspace.model.ProductImageFileType
 import com.unicolour.joyspace.service.ManagerService
 import com.unicolour.joyspace.service.ProductService
-import com.unicolour.joyspace.service.TemplateService
 import com.unicolour.joyspace.util.Pager
-import com.unicolour.joyspace.util.getBaseUrl
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Controller
@@ -20,10 +19,11 @@ import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.ResponseBody
 import org.springframework.web.multipart.MultipartFile
 import org.springframework.web.servlet.ModelAndView
-import javax.servlet.http.HttpServletRequest
 
 @Controller
 class ProductController {
+    @Value("\${com.unicolour.joyspace.baseUrl}")
+    lateinit var baseUrl: String
 
     @Autowired
     lateinit var productDao: ProductDao
@@ -128,11 +128,9 @@ class ProductController {
     @RequestMapping(path = arrayOf("/product/manageImageFiles"), method = arrayOf(RequestMethod.GET))
     @ResponseBody
     fun manageImageFiles(
-            request: HttpServletRequest,
             modelAndView: ModelAndView,
             @RequestParam(name = "productId", required = true) productId: Int): ModelAndView {
 
-        val baseUrl = getBaseUrl(request)
         val product = productDao.findOne(productId)
 
         modelAndView.model.put("product", product)
@@ -154,14 +152,11 @@ class ProductController {
 
     @RequestMapping(path = arrayOf("/product/uploadImageFile"), method = arrayOf(RequestMethod.POST))
     fun uploadProductImages(
-            request: HttpServletRequest,
             modelAndView: ModelAndView,
             @RequestParam(name = "id", required = true) id: Int,
             @RequestParam(name = "type", required = true) type: String,
             @RequestParam("imageFile") imageFile: MultipartFile?
     ): ModelAndView {
-        val baseUrl = getBaseUrl(request)
-
         val imgType = if (type == "thumb") ProductImageFileType.THUMB else ProductImageFileType.PREVIEW
         val uploadedImgFile = productService.uploadProductImageFile(id, imgType, imageFile)
 

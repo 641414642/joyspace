@@ -5,8 +5,8 @@ import com.unicolour.joyspace.model.Position
 import com.unicolour.joyspace.model.PrintOrder
 import com.unicolour.joyspace.service.ManagerService
 import com.unicolour.joyspace.util.Pager
-import com.unicolour.joyspace.util.getBaseUrl
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Controller
@@ -14,10 +14,11 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestMethod
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.servlet.ModelAndView
-import javax.servlet.http.HttpServletRequest
 
 @Controller
 class PrintOrderController {
+    @Value("\${com.unicolour.joyspace.baseUrl}")
+    lateinit var baseUrl: String
 
     @Autowired
     lateinit var printStationDao: PrintStationDao
@@ -91,9 +92,7 @@ class PrintOrderController {
 
 
     @RequestMapping(path = arrayOf("/printOrder/detail"), method = arrayOf(RequestMethod.GET))
-    fun printOrderDetail(request: HttpServletRequest, modelAndView: ModelAndView, @RequestParam(name = "id", required = true) id: Int): ModelAndView {
-        val baseUrl = getBaseUrl(request)
-
+    fun printOrderDetail(modelAndView: ModelAndView, @RequestParam(name = "id", required = true) id: Int): ModelAndView {
         val printOrder = printOrderDao.findOne(id)
         val printOrderItems = printOrderItemDao.findByPrintOrderId(id)
 

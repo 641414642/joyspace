@@ -3,7 +3,6 @@ package com.unicolour.joyspace.controller.api
 import com.unicolour.joyspace.dto.CommonRequestResult
 import com.unicolour.joyspace.dto.ImageInfo
 import com.unicolour.joyspace.service.ImageService
-import com.unicolour.joyspace.util.getBaseUrl
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.RequestMapping
@@ -20,11 +19,9 @@ class ApiImageController {
     lateinit var imageService: ImageService
 
     @RequestMapping("/api/image", method = arrayOf(RequestMethod.POST))
-    fun uploadImage(request: HttpServletRequest,
-                    @RequestParam("sessionId") sessionId: String,
+    fun uploadImage(@RequestParam("sessionId") sessionId: String,
                     @RequestParam("image") imgFile: MultipartFile?) : ResponseEntity<ImageInfo> {
-        val baseUrl = getBaseUrl(request)
-        val imgInfo = imageService.uploadImage(sessionId, imgFile, baseUrl)
+        val imgInfo = imageService.uploadImage(sessionId, imgFile)
 
         return ResponseEntity.ok(imgInfo)
     }

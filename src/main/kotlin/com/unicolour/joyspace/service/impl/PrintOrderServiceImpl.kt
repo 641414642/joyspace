@@ -5,11 +5,13 @@ import com.unicolour.joyspace.dao.*
 import com.unicolour.joyspace.dto.*
 import com.unicolour.joyspace.exception.ProcessException
 import com.unicolour.joyspace.model.*
+import com.unicolour.joyspace.service.CompanyService
 import com.unicolour.joyspace.service.ImageService
 import com.unicolour.joyspace.service.PrintOrderService
 import com.unicolour.joyspace.service.PrintStationService
 import graphql.schema.DataFetcher
 import graphql.schema.DataFetchingEnvironment
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.core.io.Resource
@@ -17,6 +19,7 @@ import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
 import org.springframework.stereotype.Service
+import org.springframework.transaction.support.TransactionTemplate
 import org.springframework.web.client.RestTemplate
 import org.springframework.web.multipart.MultipartFile
 import java.io.InputStreamReader
@@ -38,8 +41,18 @@ import kotlin.experimental.and
 
 @Service
 open class PrintOrderServiceImpl : PrintOrderService {
+    companion object {
+        val logger = LoggerFactory.getLogger(PrintOrderServiceImpl::class.java)
+    }
+
+    @Value("\${com.unicolour.joyspace.baseUrl}")
+    lateinit var baseUrl: String
+
     @Autowired
     lateinit var printStationDao: PrintStationDao
+
+    @Autowired
+    lateinit var companyService: CompanyService
 
     @Autowired
     lateinit var printStationService: PrintStationService
@@ -69,6 +82,12 @@ open class PrintOrderServiceImpl : PrintOrderService {
     lateinit var printOrderImageDao: PrintOrderImageDao
 
     @Autowired
+    lateinit var wxEntTransferRecordDao: WxEntTransferRecordDao
+
+    @Autowired
+    lateinit var wxEntTransferRecordItemDao: WxEntTransferRecordItemDao
+
+    @Autowired
     lateinit var productDao: ProductDao
 
     @Autowired
@@ -89,10 +108,16 @@ open class PrintOrderServiceImpl : PrintOrderService {
     @Autowired
     lateinit var objectMapper: ObjectMapper
 
+    @Autowired
+    lateinit var transactionTemplate: TransactionTemplate
+
     @Value("\${com.unicolour.wxAppId}")
     lateinit var wxAppId: String
 
-    @Value("\${com.unicolour.wxMchId}")  //商户号
+    @Value("\${com.unicolour.wxMchAppId}")
+    lateinit var wxMchAppId: String
+
+    @Value("\${com.unicolour.wxMchId}")  //商户id
     lateinit var wxMchId: String
 
     @Value("\${com.unicolour.wxPayKey}")
@@ -100,11 +125,13 @@ open class PrintOrderServiceImpl : PrintOrderService {
 
     private lateinit var wxUnifyOrderResultUnmarshaller: Unmarshaller
     private lateinit var wxPayNotifyUnmarshaller: Unmarshaller
+    private lateinit var wxEnterprisePayResultUnmarshaller: Unmarshaller
 
     @PostConstruct
     fun initialize() {
         wxUnifyOrderResultUnmarshaller = JAXBContext.newInstance(WxUnifyOrderResult::class.java).createUnmarshaller()
         wxPayNotifyUnmarshaller = JAXBContext.newInstance(WxPayNotify::class.java).createUnmarshaller()
+        wxEnterprisePayResultUnmarshaller = JAXBContext.newInstance(WxEnterprisePayResult::class.java).createUnmarshaller()
     }
 
     @Transactional
@@ -137,6 +164,7 @@ open class PrintOrderServiceImpl : PrintOrderService {
         newOrder.imageFileUploaded = false
         newOrder.downloadedToPrintStation = false
         newOrder.printedOnPrintStation = false
+        newOrder.transfered = false
 
         val orderItems = ArrayList<PrintOrderItem>()
         newOrder.printOrderItems = orderItems
@@ -226,7 +254,7 @@ open class PrintOrderServiceImpl : PrintOrderService {
 
     @Transactional
     override fun uploadOrderItemImage(sessionId: String, orderItemId: Int, name:String, imageProcessParam: ImageProcessParams, imgFile: MultipartFile?): Boolean {
-        val imgInfo = imageService.uploadImage(sessionId, imgFile, "")
+        val imgInfo = imageService.uploadImage(sessionId, imgFile)
         if (imgInfo.errcode == 0) {
             val orderImg = printOrderImageDao.findByOrderItemIdAndName(orderItemId, name)
             if (orderImg == null) {
@@ -306,14 +334,18 @@ open class PrintOrderServiceImpl : PrintOrderService {
     override val printerOrderDownloadedDataFetcher: DataFetcher<GraphQLRequestResult>
         get() {
             return DataFetcher { env ->
-                updatePrintOrderState(env, "downloaded")
+                transactionTemplate.execute {
+                    updatePrintOrderState(env, "downloaded")
+                }
             }
         }
 
     override val printerOrderPrintedDataFetcher: DataFetcher<GraphQLRequestResult>
         get() {
             return DataFetcher { env ->
-                updatePrintOrderState(env, "printed")
+                transactionTemplate.execute {
+                    updatePrintOrderState(env, "printed")
+                }
             }
         }
 
@@ -379,12 +411,62 @@ open class PrintOrderServiceImpl : PrintOrderService {
                     }
 
                     printOrderDao.save(order)
+                    if (!order.transfered && order.totalFee - order.discount > 100) {
+                        startWxEntTransfer(order)
+                    }
+
                     GraphQLRequestResult(ResultCode.SUCCESS)
                 }
             } else {
                 GraphQLRequestResult(ResultCode.PRINT_ORDER_NOT_FOUND)
             }
         }
+    }
+
+    private fun createTradeNo(): String {
+        val dateTime = SimpleDateFormat("yyyyMMdd").format(Date())
+        val randomStr = BigInteger(4 * 8, secureRandom).toString(36).toUpperCase()
+        var tradeNo:String
+        do {
+            tradeNo = "$dateTime$randomStr"
+        } while (wxEntTransferRecordDao.existsByTradeNo(tradeNo))
+
+        return tradeNo
+    }
+
+    private fun startWxEntTransfer(order: PrintOrder) {
+        synchronized(this, {
+            val transferRecordItem = wxEntTransferRecordItemDao.findByPrintOrderId(order.id)
+            if (transferRecordItem == null) {
+                val account = companyService.getAvailableWxAccount(order.companyId)
+                if (account != null) {
+                    val record = WxEntTransferRecord()
+                    record.amount = order.totalFee - order.discount
+                    record.companyId = order.companyId
+                    record.transferTime = Calendar.getInstance()
+                    record.tradeNo = createTradeNo()
+                    record.receiverName = account.name
+                    record.receiverOpenId = account.openId
+
+                    wxEntTransferRecordDao.save(record)
+
+                    val recordItem = WxEntTransferRecordItem()
+                    recordItem.amount = record.amount
+                    recordItem.printOrderId = order.id
+                    recordItem.recordId = record.id
+
+                    wxEntTransferRecordItemDao.save(recordItem)
+
+                    order.transfered = true
+                    printOrderDao.save(order)
+
+                    doWxEntTransfer(record)
+                }
+                else {
+                    logger.info("No available WxAccount for companyId=${order.companyId}")
+                }
+            }
+        })
     }
 
     override fun calculateOrderFee(orderInput: OrderInput) : Pair<Int, Int> {
@@ -435,7 +517,7 @@ open class PrintOrderServiceImpl : PrintOrderService {
         return Pair(totalFee, discount)
     }
 
-    override fun startPayment(orderId: Int, baseUrl:String): WxPayParams {
+    override fun startPayment(orderId: Int): WxPayParams {
         val order = printOrderDao.findOne(orderId)
         val company = companyDao.findOne(order.companyId)
         val wxPayConfig = company.weiXinPayConfig
@@ -581,6 +663,61 @@ open class PrintOrderServiceImpl : PrintOrderService {
             buf.append(String.format("%02X", b and 0xff.toByte()))
         }
         return buf.toString()
+    }
+
+    private fun doWxEntTransfer(record: WxEntTransferRecord) {
+        logger.info("Start WxEntTransfer for companyId=${record.companyId}, receiverOpenId=${record.receiverOpenId}, amount=${record.amount}")
+
+        var nonceStr: String = BigInteger(32 * 8, secureRandom).toString(36).toUpperCase()
+        if (nonceStr.length > 32) {
+            nonceStr = nonceStr.substring(0, 32)
+        }
+
+        val ipAddress: String = java.net.InetAddress.getByName(URL(baseUrl).host).hostAddress
+
+        val params = TreeMap(hashMapOf(
+                "mch_appid" to wxMchAppId,
+                "mchid" to wxMchId,
+                "nonce_str" to nonceStr,
+                "partner_trade_no" to record.tradeNo,
+                "openid" to record.receiverOpenId,
+                "check_name" to "FORCE_CHECK",
+                "re_user_name" to record.receiverName,
+                "amount" to record.amount.toString(),
+                "desc" to "悦印订单款",
+                "spbill_create_ip" to ipAddress
+        ))
+
+        val requestBody = getPaymentRequestParams(wxPayKey, params)
+
+        val headers = HttpHeaders()
+        headers.set(HttpHeaders.CONTENT_TYPE, "text/xml;charset=UTF-8")
+
+        val request = HttpEntity<String>(requestBody, headers)
+        val response = restTemplate.exchange(
+                "https://api.mch.weixin.qq.com/mmpaymkttransfers/promotion/transfers",
+                HttpMethod.POST,
+                request,
+                Resource::class.java)
+
+
+        InputStreamReader(response.body.inputStream, StandardCharsets.UTF_8).use {
+            val resultStr = String(response.body.inputStream.readBytes(), StandardCharsets.UTF_8)
+            println(resultStr)
+
+            val result = wxEnterprisePayResultUnmarshaller.unmarshal(StringReader(resultStr)) as WxEnterprisePayResult
+
+            if (result.return_code == "SUCCESS" && result.result_code == "SUCCESS") {
+                logger.info("Done WxEntTransfer for companyId=${record.companyId}, receiverOpenId=${record.receiverOpenId}, amount=${record.amount}")
+
+                record.transferTime.time = SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(result.payment_time)
+                wxEntTransferRecordDao.save(record)
+
+                return
+            }
+        }
+
+        throw ProcessException(1, "Failed WxEntTransfer for companyId=${record.companyId}, receiverOpenId=${record.receiverOpenId}, amount=${record.amount}")
     }
 }
 

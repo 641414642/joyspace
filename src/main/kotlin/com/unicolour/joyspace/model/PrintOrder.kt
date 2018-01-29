@@ -73,6 +73,11 @@ class PrintOrder {
     @NotNull
     var printedOnPrintStation: Boolean = false
 
+    //是否已经转账给投放商
+    @Column
+    @NotNull
+    var transfered: Boolean = false
+
     @OneToMany(mappedBy = "printOrder")
     lateinit var printOrderItems: List<PrintOrderItem>
 }

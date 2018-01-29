@@ -48,6 +48,8 @@ const val X_LINK_NAMESPACE: String = "http://www.w3.org/1999/xlink"
 
 @Service
 open class TemplateServiceImpl : TemplateService {
+    @Value("\${com.unicolour.joyspace.baseUrl}")
+    lateinit var baseUrl: String
 
     @Value("\${com.unicolour.joyspace.assetsDir}")
     lateinit var assetsDir: String
@@ -369,7 +371,7 @@ open class TemplateServiceImpl : TemplateService {
         }
     }
 
-    override fun createPreview(previewParam: PreviewParam, baseUrl: String): TemplatePreviewResult {
+    override fun createPreview(previewParam: PreviewParam): TemplatePreviewResult {
         val session = userLoginSessionDao.findOne(previewParam.sessionId)
 
         if (session == null) {
@@ -433,7 +435,7 @@ open class TemplateServiceImpl : TemplateService {
                                 }
                             }
 
-                            val userImgUrl = imageService.getImageUrl(baseUrl, userImgFile!!)
+                            val userImgUrl = imageService.getImageUrl(userImgFile!!)
                             val userImgFileUrl =  imageService.getImageFileUrl(userImgFile)
 
                             val newImgEle = replaceImageElementWithPattern(defsElement!!, imgEle, userImgFileUrl, userImgFile.width, userImgFile.height, prevImg)
@@ -450,7 +452,6 @@ open class TemplateServiceImpl : TemplateService {
                 else {
                     val imgSrc = imgEle.getAttributeNS(X_LINK_NAMESPACE, "href")
                     if (!imgSrc.startsWith("data:")) {
-                        val imgUrl = "${baseUrl}/assets/template/preview/${tplId}_v${tplVer}/$imgSrc"
                         val imgFileUrl = File(assetsDir, "/template/preview/${tplId}_v${tplVer}/$imgSrc").toURI().toURL().toExternalForm()
 
                         imgEle.setAttributeNS(X_LINK_NAMESPACE, "xlink:href", imgFileUrl)
@@ -541,9 +542,6 @@ open class TemplateServiceImpl : TemplateService {
                         null
                     }
                     else {
-                        val context = env.getContext<HashMap<String, Any>>()
-                        val baseUrl = context["baseUrl"]
-
                         "${baseUrl}/assets/template/production/${template.id}_v${templateVersion}_${template.uuid}.zip"
                     }
                 }
@@ -568,8 +566,6 @@ open class TemplateServiceImpl : TemplateService {
             val tplImg = env.getSource<TemplateImageInfo>()
             when (fieldName) {
                 "url" -> {
-                    val context = env.getContext<HashMap<String, Any>>()
-                    val baseUrl = context["baseUrl"]
                     val path = tplImg.href?.replace('\\', '/')
 
                     "${baseUrl}/assets/template/preview/${tplImg.templateId}_v${tplImg.templateVersion}/${path}"

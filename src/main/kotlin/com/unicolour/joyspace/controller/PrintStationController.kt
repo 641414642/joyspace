@@ -8,7 +8,6 @@ import com.unicolour.joyspace.model.ProductType
 import com.unicolour.joyspace.service.ManagerService
 import com.unicolour.joyspace.service.PrintStationService
 import com.unicolour.joyspace.util.Pager
-import com.unicolour.joyspace.util.getBaseUrl
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
@@ -150,13 +149,12 @@ class PrintStationController {
                 .filter { !request.getParameter("product_${it}").isNullOrBlank() }
                 .map { it.toInt() }
                 .toSet()
-        val baseUrl = getBaseUrl(request)
 
         if (id <= 0) {
-            printStationService.createPrintStation(baseUrl, password, positionId, printerType, adSetId, selectedProductIds)
+            printStationService.createPrintStation(password, positionId, printerType, adSetId, selectedProductIds)
             return true
         } else {
-            return printStationService.updatePrintStation(id, baseUrl, password, positionId, printerType, adSetId, selectedProductIds)
+            return printStationService.updatePrintStation(id, password, positionId, printerType, adSetId, selectedProductIds)
         }
     }
 

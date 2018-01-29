@@ -4,7 +4,6 @@ import com.unicolour.joyspace.dto.*
 import com.unicolour.joyspace.exception.ProcessException
 import com.unicolour.joyspace.service.GraphQLService
 import com.unicolour.joyspace.service.PrintOrderService
-import com.unicolour.joyspace.util.getBaseUrl
 import graphql.GraphQL
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
@@ -47,12 +46,11 @@ class ApiPrintOrderController {
     }
 
     @RequestMapping("/api/order/create", method = arrayOf(RequestMethod.POST))
-    fun createOrder(request: HttpServletRequest, @RequestBody orderInput: OrderInput) :
+    fun createOrder(@RequestBody orderInput: OrderInput) :
             ResponseEntity<CreateOrderRequestResult> {
         try {
-            val baseUrl = getBaseUrl(request)
             val order = printOrderService.createOrder(orderInput)
-            val params = printOrderService.startPayment(order.id, baseUrl)
+            val params = printOrderService.startPayment(order.id)
             //val params: WxPayParams? = null
             val orderItems = order.printOrderItems.map { OrderItemRet(it.id, it.productId) }
             return ResponseEntity.ok(CreateOrderRequestResult(order.id, order.orderNo, params, orderItems, order.totalFee, order.discount))

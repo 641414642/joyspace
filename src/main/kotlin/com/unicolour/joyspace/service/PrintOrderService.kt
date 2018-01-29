@@ -17,7 +17,7 @@ interface PrintOrderService {
     val wxUserNickNameDataFetcher: DataFetcher<String?>
 
     fun createOrder(orderInput: OrderInput): PrintOrder
-    fun startPayment(orderId: Int, baseUrl:String): WxPayParams
+    fun startPayment(orderId: Int): WxPayParams
 
     fun processWxPayNotify(requestBodyStr: String): String?
 

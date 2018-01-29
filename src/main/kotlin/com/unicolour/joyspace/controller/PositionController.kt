@@ -7,8 +7,8 @@ import com.unicolour.joyspace.model.Position
 import com.unicolour.joyspace.service.ManagerService
 import com.unicolour.joyspace.service.PositionService
 import com.unicolour.joyspace.util.Pager
-import com.unicolour.joyspace.util.getBaseUrl
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Controller
@@ -22,6 +22,8 @@ import javax.servlet.http.HttpServletRequest
 
 @Controller
 class PositionController {
+    @Value("\${com.unicolour.joyspace.baseUrl}")
+    lateinit var baseUrl: String
 
     @Autowired
     lateinit var positionDao: PositionDao
@@ -117,11 +119,9 @@ class PositionController {
     @RequestMapping(path = arrayOf("/position/manageImageFiles"), method = arrayOf(RequestMethod.GET))
     @ResponseBody
     fun manageImageFiles(
-            request: HttpServletRequest,
             modelAndView: ModelAndView,
             @RequestParam(name = "positionId", required = true) positionId: Int): ModelAndView {
 
-        val baseUrl = getBaseUrl(request)
         val position = positionDao.findOne(positionId)
 
         modelAndView.model.put("position", position)
@@ -139,13 +139,10 @@ class PositionController {
 
     @RequestMapping(path = arrayOf("/position/uploadImageFile"), method = arrayOf(RequestMethod.POST))
     fun uploadPositionImages(
-            request: HttpServletRequest,
             modelAndView: ModelAndView,
             @RequestParam(name = "id", required = true) id: Int,
             @RequestParam("imageFile") imageFile: MultipartFile?
     ): ModelAndView {
-        val baseUrl = getBaseUrl(request)
-
         val uploadedImgFile = positionService.uploadPositionImageFile(id, imageFile)
 
         if (uploadedImgFile != null) {

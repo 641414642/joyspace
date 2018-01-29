@@ -3,7 +3,6 @@ package com.unicolour.joyspace.controller.api
 import com.unicolour.joyspace.dao.PrintStationDao
 import com.unicolour.joyspace.model.PrintStation
 import com.unicolour.joyspace.service.GraphQLService
-import com.unicolour.joyspace.util.getBaseUrl
 import graphql.GraphQL
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.*
@@ -71,9 +70,7 @@ query {
 	}
 }
 """
-        val context = hashMapOf<String, Any>("baseUrl" to getBaseUrl(request))
-
-        val queryResult = graphQL.execute(query, null, context, emptyMap())
+        val queryResult = graphQL.execute(query, null, null, emptyMap())
         val data:Map<String, Any> = queryResult.getData()
         return data["printStation"]
     }

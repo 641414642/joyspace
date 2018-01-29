@@ -24,6 +24,9 @@ open class PrintStationServiceImpl : PrintStationService {
     @Value("\${com.unicolour.joyspace.assetsDir}")
     lateinit var assetsDir: String
 
+    @Value("\${com.unicolour.joyspace.baseUrl}")
+    lateinit var baseUrl: String
+
     @Autowired
     lateinit var managerService : ManagerService
 
@@ -97,7 +100,6 @@ open class PrintStationServiceImpl : PrintStationService {
                 "transportation" -> printStation.position.transportation
                 "images" -> {
                     val context = env.getContext<HashMap<String, Any>>()
-                    val baseUrl = context["baseUrl"]
                     printStation.position.imageFiles
                             .map { "${baseUrl}/assets/position/images/${it.id}.${it.fileType}" }
                 }
@@ -187,7 +189,7 @@ open class PrintStationServiceImpl : PrintStationService {
     }
 
     @Transactional
-    override fun createPrintStation(baseUrl: String, password: String, positionId: Int, printerType: String, adSetId: Int, selectedProductIds: Set<Int>): PrintStation? {
+    override fun createPrintStation(password: String, positionId: Int, printerType: String, adSetId: Int, selectedProductIds: Set<Int>): PrintStation? {
         val loginManager = managerService.loginManager
         if (loginManager == null) {
             return null
@@ -221,7 +223,7 @@ open class PrintStationServiceImpl : PrintStationService {
     }
 
     @Transactional
-    override fun updatePrintStation(id: Int, baseUrl: String, password: String, positionId: Int, printerType: String, adSetId: Int, selectedProductIds: Set<Int>): Boolean {
+    override fun updatePrintStation(id: Int, password: String, positionId: Int, printerType: String, adSetId: Int, selectedProductIds: Set<Int>): Boolean {
         val printStation = printStationDao.findOne(id)
 
         if (printStation != null) {
