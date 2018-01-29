@@ -70,7 +70,7 @@ mutation {
 
         val queryResult = graphQL.execute(query, null, context, emptyMap())
         val data:Map<String, Any> = queryResult.getData()
-        return data["userCouponList"]
+        return data["recordUserInfo"]
     }
 
 }
