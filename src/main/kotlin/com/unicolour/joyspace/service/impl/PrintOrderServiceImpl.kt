@@ -412,8 +412,9 @@ open class PrintOrderServiceImpl : PrintOrderService {
                     }
 
                     printOrderDao.save(order)
-                    if (!order.transfered && order.totalFee - order.discount > 100) {
-                        startWxEntTransfer(order)
+                    val transferAmount = calcTransferAmount(order)
+                    if (!order.transfered && transferAmount > 100) {
+                        startWxEntTransfer(order, transferAmount)
                     }
 
                     GraphQLRequestResult(ResultCode.SUCCESS)
@@ -422,6 +423,18 @@ open class PrintOrderServiceImpl : PrintOrderService {
                 GraphQLRequestResult(ResultCode.PRINT_ORDER_NOT_FOUND)
             }
         }
+    }
+
+    private fun calcTransferAmount(order: PrintOrder): Int {
+        var amount = order.totalFee - order.discount
+        val proportion = order.transferProportion / 1000.0
+        if (proportion > 0.5) {
+            amount = (amount * proportion + 0.5).toInt()
+        }
+        else {
+            amount = amount - (amount * (1.0 - proportion) + 0.5).toInt()
+        }
+        return amount
     }
 
     private fun createTradeNo(): String {
@@ -435,14 +448,14 @@ open class PrintOrderServiceImpl : PrintOrderService {
         return tradeNo
     }
 
-    private fun startWxEntTransfer(order: PrintOrder) {
+    private fun startWxEntTransfer(order: PrintOrder, transferAmount: Int) {
         synchronized(this, {
             val transferRecordItem = wxEntTransferRecordItemDao.findByPrintOrderId(order.id)
             if (transferRecordItem == null) {
                 val account = companyService.getAvailableWxAccount(order.companyId)
                 if (account != null) {
                     val record = WxEntTransferRecord()
-                    record.amount = order.totalFee - order.discount
+                    record.amount = transferAmount
                     record.companyId = order.companyId
                     record.transferTime = Calendar.getInstance()
                     record.tradeNo = createTradeNo()

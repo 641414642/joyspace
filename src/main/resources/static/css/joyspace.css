@@ -90,12 +90,10 @@
 
 .order_status.un_printed {
     background-image: url(../img/print_gray.png);
-    margin-right:0;
 }
 
 .order_status.printed {
     background-image: url(../img/print_green.png);
-    margin-right:0;
 }
 
 .order_status.un_transfered {

@@ -70,8 +70,8 @@ class PrintStation {
     //endregion
 
     //分账比例 x 1000
-    @Column(name = "status")
-    var transferProportion: Int = 1
+    @Column(name = "transfer_proportion")
+    var transferProportion: Int = 1000
 }
 
 enum class PrintStationStatus(val value:Int, val message:String) {

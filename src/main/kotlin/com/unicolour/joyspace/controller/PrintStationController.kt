@@ -139,6 +139,7 @@ class PrintStationController {
             @RequestParam(name = "id", required = true) id: Int,
             @RequestParam(name = "password", required = true) password: String,
             @RequestParam(name = "positionId", required = true) positionId: Int,
+            @RequestParam(name = "proportion", required = true) proportion: Double,
             @RequestParam(name = "printerType", required = true) printerType: String,
             @RequestParam(name = "adSetId", required = true) adSetId: Int,
             @RequestParam(name = "productIds", required = true) productIds: String
@@ -151,10 +152,10 @@ class PrintStationController {
                 .toSet()
 
         if (id <= 0) {
-            printStationService.createPrintStation(password, positionId, printerType, adSetId, selectedProductIds)
+            printStationService.createPrintStation(password, positionId, (proportion * 10).toInt(), printerType, adSetId, selectedProductIds)
             return true
         } else {
-            return printStationService.updatePrintStation(id, password, positionId, printerType, adSetId, selectedProductIds)
+            return printStationService.updatePrintStation(id, password, positionId, (proportion * 10).toInt(), printerType, adSetId, selectedProductIds)
         }
     }
 

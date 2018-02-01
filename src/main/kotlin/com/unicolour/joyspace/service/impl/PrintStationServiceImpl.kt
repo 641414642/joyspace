@@ -189,7 +189,7 @@ open class PrintStationServiceImpl : PrintStationService {
     }
 
     @Transactional
-    override fun createPrintStation(password: String, positionId: Int, printerType: String, adSetId: Int, selectedProductIds: Set<Int>): PrintStation? {
+    override fun createPrintStation(password: String, positionId: Int, transferProportion:Int, printerType: String, adSetId: Int, selectedProductIds: Set<Int>): PrintStation? {
         val loginManager = managerService.loginManager
         if (loginManager == null) {
             return null
@@ -200,6 +200,7 @@ open class PrintStationServiceImpl : PrintStationService {
         val printStation = PrintStation()
         printStation.company = manager.company
         printStation.position = positionDao.findOne(positionId)
+        printStation.transferProportion =  transferProportion
         printStation.printerType = printerType
         printStation.adSet = adSetDao.findOne(adSetId)
         printStation.city = printStation.position.city
@@ -223,12 +224,13 @@ open class PrintStationServiceImpl : PrintStationService {
     }
 
     @Transactional
-    override fun updatePrintStation(id: Int, password: String, positionId: Int, printerType: String, adSetId: Int, selectedProductIds: Set<Int>): Boolean {
+    override fun updatePrintStation(id: Int, password: String, positionId: Int, transferProportion:Int, printerType: String, adSetId: Int, selectedProductIds: Set<Int>): Boolean {
         val printStation = printStationDao.findOne(id)
 
         if (printStation != null) {
             printStation.wxQrCode = "$baseUrl/printStation/${printStation.id}"
             printStation.position = positionDao.findOne(positionId)
+            printStation.transferProportion =  transferProportion
             printStation.printerType = printerType
             printStation.adSet = adSetDao.findOne(adSetId)
             printStation.city = printStation.position.city
