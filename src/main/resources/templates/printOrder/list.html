@@ -75,6 +75,9 @@
 
 							<div th:unless="${orderWrapper.order.printedOnPrintStation}" class="order_status un_printed" title="未打印"></div>
 							<div th:if="${orderWrapper.order.printedOnPrintStation}" class="order_status printed" title="已打印"></div>
+
+							<div th:unless="${orderWrapper.order.transfered}" class="order_status un_transfered" title="未转账"></div>
+							<div th:if="${orderWrapper.order.transfered}" class="order_status transfered" title="已转账"></div>
 						</td>
 						<td>
 							<a href="#">

@@ -98,6 +98,16 @@
     margin-right:0;
 }
 
+.order_status.un_transfered {
+    background-image: url(../img/transfer_gray.png);
+    margin-right:0;
+}
+
+.order_status.transfered {
+    background-image: url(../img/transfer_green.png);
+    margin-right:0;
+}
+
 .print_order_image_param {
     display: none;
     max-width: 100px;
