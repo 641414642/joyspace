@@ -73,6 +73,10 @@ class PrintOrder {
     @NotNull
     var printedOnPrintStation: Boolean = false
 
+    //分账比例 x 1000
+    @Column(name = "status")
+    var transferProportion: Int = 1
+
     //是否已经转账给投放商
     @Column
     @NotNull

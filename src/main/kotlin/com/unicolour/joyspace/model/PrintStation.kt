@@ -68,6 +68,10 @@ class PrintStation {
     @JoinColumn(name = "ad_set_id")
     var adSet: AdSet? = null
     //endregion
+
+    //分账比例 x 1000
+    @Column(name = "status")
+    var transferProportion: Int = 1
 }
 
 enum class PrintStationStatus(val value:Int, val message:String) {

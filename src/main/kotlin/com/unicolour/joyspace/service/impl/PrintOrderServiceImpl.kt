@@ -165,6 +165,7 @@ open class PrintOrderServiceImpl : PrintOrderService {
         newOrder.downloadedToPrintStation = false
         newOrder.printedOnPrintStation = false
         newOrder.transfered = false
+        newOrder.transferProportion = printStation.transferProportion
 
         val orderItems = ArrayList<PrintOrderItem>()
         newOrder.printOrderItems = orderItems
