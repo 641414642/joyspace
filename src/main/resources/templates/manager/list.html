@@ -41,6 +41,7 @@
 						<th>ID</th>
 						<th>姓名</th>
 						<th>登录帐号</th>
+						<th>投放商</th>
 						<th>电话</th>
 						<th>手机</th>
 						<th>邮件</th>
@@ -52,6 +53,7 @@
 						<td th:text="${manager.id}"></td>
 						<td th:text="${manager.fullName}"></td>
 						<td th:text="${manager.userName}"></td>
+						<td th:text="${manager.company.name}"></td>
 						<td th:text="${manager.phone}"></td>
 						<td th:text="${manager.cellPhone}"></td>
 						<td th:text="${manager.email}"></td>

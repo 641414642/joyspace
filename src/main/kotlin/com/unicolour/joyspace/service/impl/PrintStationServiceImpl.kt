@@ -34,6 +34,9 @@ open class PrintStationServiceImpl : PrintStationService {
     lateinit var managerDao : ManagerDao
 
     @Autowired
+    lateinit var companyDao: CompanyDao
+
+    @Autowired
     lateinit var positionDao : PositionDao
 
     @Autowired
@@ -189,16 +192,20 @@ open class PrintStationServiceImpl : PrintStationService {
     }
 
     @Transactional
-    override fun createPrintStation(password: String, positionId: Int, transferProportion:Int, printerType: String, adSetId: Int, selectedProductIds: Set<Int>): PrintStation? {
+    override fun createPrintStation(companyId: Int, password: String, positionId: Int, transferProportion:Int, printerType: String, adSetId: Int, selectedProductIds: Set<Int>): PrintStation? {
         val loginManager = managerService.loginManager
         if (loginManager == null) {
+            return null
+        }
+
+        if (!managerService.loginManagerHasRole("ROLE_SUPERADMIN")) {
             return null
         }
 
         val manager = managerDao.findOne(loginManager.managerId)
 
         val printStation = PrintStation()
-        printStation.company = manager.company
+        printStation.company = companyDao.findOne(companyId)
         printStation.position = positionDao.findOne(positionId)
         printStation.transferProportion =  transferProportion
         printStation.printerType = printerType
@@ -224,18 +231,22 @@ open class PrintStationServiceImpl : PrintStationService {
     }
 
     @Transactional
-    override fun updatePrintStation(id: Int, password: String, positionId: Int, transferProportion:Int, printerType: String, adSetId: Int, selectedProductIds: Set<Int>): Boolean {
+    override fun updatePrintStation(id: Int, companyId: Int, password: String, positionId: Int, transferProportion:Int, printerType: String, adSetId: Int, selectedProductIds: Set<Int>): Boolean {
         val printStation = printStationDao.findOne(id)
 
         if (printStation != null) {
             printStation.wxQrCode = "$baseUrl/printStation/${printStation.id}"
             printStation.position = positionDao.findOne(positionId)
-            printStation.transferProportion =  transferProportion
-            printStation.printerType = printerType
             printStation.adSet = adSetDao.findOne(adSetId)
             printStation.city = printStation.position.city
             if (!password.isNullOrEmpty()) {
                 printStation.password = passwordEncoder.encode(password)
+            }
+
+            if (!managerService.loginManagerHasRole("ROLE_SUPERADMIN")) {
+                printStation.company = companyDao.findOne(companyId)
+                printStation.transferProportion = transferProportion
+                printStation.printerType = printerType
             }
 
             printStationDao.save(printStation)

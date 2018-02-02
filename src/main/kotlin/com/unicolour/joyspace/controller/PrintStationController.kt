@@ -36,6 +36,9 @@ class PrintStationController {
     lateinit var productDao: ProductDao
 
     @Autowired
+    lateinit var companyDao: CompanyDao
+
+    @Autowired
     lateinit var printStationProductDao: PrintStationProductDao
 
     @Autowired
@@ -108,7 +111,8 @@ class PrintStationController {
             printStation.printerType = "CY"
         }
 
-        val allProducts = productDao.findByCompanyIdOrderBySequenceAsc(loginManager!!.companyId)
+        //val allProducts = productDao.findByCompanyIdOrderBySequenceAsc(loginManager!!.companyId)
+        val allProducts = productDao.findAll()
                 .sortedBy { it.sequence }
                 .map {
                     ProductItem(
@@ -121,7 +125,9 @@ class PrintStationController {
 
         modelAndView.model.put("create", id <= 0)
         modelAndView.model.put("printStation", printStation)
-        modelAndView.model.put("positions", positionDao.findByCompanyId(loginManager!!.companyId))
+        //modelAndView.model.put("positions", positionDao.findByCompanyId(loginManager!!.companyId))
+        modelAndView.model.put("positions", positionDao.findAll())
+        modelAndView.model.put("companies", companyDao.findAll())
         modelAndView.model.put("adSets", adSetDao.findByCompanyId(loginManager!!.companyId))
         modelAndView.model.put("photo_products", allProducts.filter { it.productType == ProductType.PHOTO.value })
         modelAndView.model.put("template_products", allProducts.filter { it.productType == ProductType.TEMPLATE.value })
@@ -137,10 +143,11 @@ class PrintStationController {
     fun editPrintStation(
             request: HttpServletRequest,
             @RequestParam(name = "id", required = true) id: Int,
+            @RequestParam(name = "companyId", required = false, defaultValue = "0") companyId: Int,
             @RequestParam(name = "password", required = true) password: String,
             @RequestParam(name = "positionId", required = true) positionId: Int,
-            @RequestParam(name = "proportion", required = true) proportion: Double,
-            @RequestParam(name = "printerType", required = true) printerType: String,
+            @RequestParam(name = "proportion", required = false, defaultValue = "0") proportion: Double,
+            @RequestParam(name = "printerType", required = true, defaultValue = "") printerType: String,
             @RequestParam(name = "adSetId", required = true) adSetId: Int,
             @RequestParam(name = "productIds", required = true) productIds: String
     ): Boolean {
@@ -152,10 +159,10 @@ class PrintStationController {
                 .toSet()
 
         if (id <= 0) {
-            printStationService.createPrintStation(password, positionId, (proportion * 10).toInt(), printerType, adSetId, selectedProductIds)
+            printStationService.createPrintStation(companyId, password, positionId, (proportion * 10).toInt(), printerType, adSetId, selectedProductIds)
             return true
         } else {
-            return printStationService.updatePrintStation(id, password, positionId, (proportion * 10).toInt(), printerType, adSetId, selectedProductIds)
+            return printStationService.updatePrintStation(id, companyId, password, positionId, (proportion * 10).toInt(), printerType, adSetId, selectedProductIds)
         }
     }
 
