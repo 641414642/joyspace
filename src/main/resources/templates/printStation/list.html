@@ -76,7 +76,7 @@
 								   title="二维码">
 								</i>
 							</a>
-							<a href="#">
+							<a href="#" sec:authorize="hasRole('ROLE_SUPERADMIN')">
 								<i class="fa fa-fw fa-pencil"
 								   th:attr="data-url=@{/printStation/edit(id=${ps.printStation.id},mode='edit')}"
 								   onclick="return createOrEditPrintStation(event, true)"
