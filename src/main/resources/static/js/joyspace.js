@@ -37,6 +37,26 @@ $('#changePwdModal').on('show.bs.modal', function () {
     $('#changePwdModal input').val('');
 })
 
+//显示form错误信息
+function showFormGroupErrMsg(elementName, errMsg) {
+    var ele = $("[name='" + elementName + "']");
+    var grp = ele.parent(".form-group");
+    var helpBlock = grp.find(".help-block");
+
+    if (errMsg === null || errMsg === "") {
+        grp.removeClass("has-error");
+        helpBlock.text("");
+    }
+    else {
+        grp.addClass("has-error");
+        helpBlock.text(errMsg);
+    }
+}
+
+function clearFormGroupErrMsg(ele) {
+    $(ele).find(".form-group").removeClass("has-error");
+}
+
 //显示对话框
 function showModal(event, onloadfunc) {
     var source = event.target || event.srcElement;
@@ -49,7 +69,7 @@ function showModal(event, onloadfunc) {
     return false;
 }
 
-function showPostFormModal(event, formId, modalSyleClass, reload, validateFunc) {
+function showPostFormModal(event, formId, modalSyleClass, reload, validateFunc, resultProcessFunc) {
     $('#modalTemplate').removeClass().addClass("modal fade");
 
     if (modalSyleClass) {
@@ -65,9 +85,19 @@ function showPostFormModal(event, formId, modalSyleClass, reload, validateFunc) 
                     url: frm.attr('action'),
                     data: frm.serialize(),
                     success: function (data) {
-                        $('#modalTemplate').modal('hide');
-                        if (reload) {
-                            window.location.reload();
+                        if (typeof resultProcessFunc === "function") {
+                            if (resultProcessFunc(data)) {
+                                $('#modalTemplate').modal('hide');
+                                if (reload) {
+                                    window.location.reload();
+                                }
+                            }
+                        }
+                        else {
+                            $('#modalTemplate').modal('hide');
+                            if (reload) {
+                                window.location.reload();
+                            }
                         }
                     }
                 });

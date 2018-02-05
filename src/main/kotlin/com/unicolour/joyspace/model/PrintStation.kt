@@ -60,7 +60,7 @@ class PrintStation {
     var status: Int = PrintStationStatus.NORMAL.value
 
     //region 广告
-    /** 城市ID */
+    /** 广告ID */
     @Column(name = "ad_set_id", insertable = false, updatable = false)
     var adSetId: Int? = null
 

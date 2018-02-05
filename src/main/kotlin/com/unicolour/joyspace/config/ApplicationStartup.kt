@@ -37,7 +37,7 @@ class ApplicationStartup : ApplicationListener<ApplicationReadyEvent> {
         //创建缺省店面和管理员
         val companies = companyDao.findAll()
         if (!companies.iterator().hasNext()) {
-            companyService.createCompany("缺省店面", null, "admin", "管理员", "", "", "123456", 0)
+            companyService.createCompany("缺省店面", null, "admin", "管理员", "", "", "123456")
         }
 
         //缺省城市(北京)

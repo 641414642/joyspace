@@ -4,11 +4,12 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.unicolour.joyspace.dao.ManagerDao
 import com.unicolour.joyspace.dao.ManagerWxLoginSessionDao
 import com.unicolour.joyspace.dto.LoginManagerDetail
+import com.unicolour.joyspace.dto.ResultCode
 import com.unicolour.joyspace.dto.WxLoginResult
+import com.unicolour.joyspace.exception.ProcessException
 import com.unicolour.joyspace.model.Company
 import com.unicolour.joyspace.model.Manager
 import com.unicolour.joyspace.model.ManagerWxLoginSession
-import com.unicolour.joyspace.model.UserLoginSession
 import com.unicolour.joyspace.service.ManagerService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
@@ -163,6 +164,10 @@ open class ManagerServiceImpl : ManagerService {
                                email: String,
                                roles: String,
                                company: Company): Manager {
+        if (managerDao.existsByUserNameIgnoreCase(userName)) {
+            throw ProcessException(ResultCode.MANAGER_ALREADY_EXISTS, "名称为${userName}的管理员已存在")
+        }
+
         val manager = Manager()
 
         manager.userName = userName

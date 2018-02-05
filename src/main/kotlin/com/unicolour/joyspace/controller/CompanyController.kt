@@ -2,7 +2,10 @@ package com.unicolour.joyspace.controller
 
 import com.unicolour.joyspace.dao.CompanyDao
 import com.unicolour.joyspace.dao.WeiXinPayConfigDao
+import com.unicolour.joyspace.dto.CommonRequestResult
+import com.unicolour.joyspace.dto.ResultCode
 import com.unicolour.joyspace.dto.WxPayParams
+import com.unicolour.joyspace.exception.ProcessException
 import com.unicolour.joyspace.model.Company
 import com.unicolour.joyspace.service.CompanyService
 import com.unicolour.joyspace.util.Pager
@@ -91,15 +94,21 @@ class CompanyController {
             @RequestParam(name = "fullname", required = true) fullname: String,
             @RequestParam(name = "phone", required = true) phone: String,
             @RequestParam(name = "email", required = true) email: String,
-            @RequestParam(name = "password", required = true) password: String,
-            @RequestParam(name = "wxPayConfigId", required = true) wxPayConfigId: Int
-    ): Boolean {
+            @RequestParam(name = "password", required = true) password: String
+    ): CommonRequestResult {
 
-        if (id <= 0) {
-            companyService.createCompany(name, null, username, fullname, phone, email, password, wxPayConfigId)
-            return true
-        } else {
-            return companyService.updateCompany(id, name, wxPayConfigId)
+        try {
+            if (id <= 0) {
+                companyService.createCompany(name.trim(), null, username.trim(), fullname, phone, email, password)
+            } else {
+                companyService.updateCompany(id, name.trim())
+            }
+            return CommonRequestResult()
+        }catch(e: ProcessException) {
+            return CommonRequestResult(e.errcode, e.message)
+        } catch (e: Exception) {
+            val msg = if (id <= 0) "创建投放商失败" else "修改投放商失败"
+            return CommonRequestResult(ResultCode.OTHER_ERROR.value, msg)
         }
     }
 }

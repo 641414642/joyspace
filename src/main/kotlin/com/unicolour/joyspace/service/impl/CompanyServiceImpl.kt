@@ -4,6 +4,8 @@ import com.unicolour.joyspace.dao.CompanyDao
 import com.unicolour.joyspace.dao.CompanyWxAccountDao
 import com.unicolour.joyspace.dao.WeiXinPayConfigDao
 import com.unicolour.joyspace.dao.WxEntTransferRecordDao
+import com.unicolour.joyspace.dto.ResultCode
+import com.unicolour.joyspace.exception.ProcessException
 import com.unicolour.joyspace.model.Company
 import com.unicolour.joyspace.model.CompanyWxAccount
 import com.unicolour.joyspace.model.PriceList
@@ -12,9 +14,10 @@ import com.unicolour.joyspace.service.ManagerService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import java.util.*
+import javax.transaction.Transactional
 
 @Service
-class CompanyServiceImpl : CompanyService {
+open class CompanyServiceImpl : CompanyService {
     @Autowired
     lateinit var companyDao: CompanyDao
 
@@ -30,19 +33,23 @@ class CompanyServiceImpl : CompanyService {
     @Autowired
     lateinit var managerService: ManagerService
 
+    @Transactional
     override fun createCompany(name: String, defPriceList: PriceList?,
                                username: String,
                                fullname: String,
                                phone: String,
                                email: String,
-                               password: String,
-                               wxPayConfigId: Int): Company {
+                               password: String): Company {
+        if (companyDao.existsByNameIgnoreCase(name)) {
+            throw ProcessException(ResultCode.COMPANY_ALREADY_EXISTS, "名称为${name}的投放商已存在")
+        }
+
         val company = Company()
 
         company.name = name
         company.createTime = Calendar.getInstance()
         company.defaultPriceList = defPriceList
-        company.weiXinPayConfig = weiXinPayConfigDao.findOne(wxPayConfigId)
+        company.weiXinPayConfig = null
 
         companyDao.save(company)
 
@@ -56,11 +63,10 @@ class CompanyServiceImpl : CompanyService {
         return company
     }
 
-    override fun updateCompany(companyId: Int, name: String, wxPayConfigId: Int): Boolean {
+    override fun updateCompany(companyId: Int, name: String): Boolean {
         val company = companyDao.findOne(companyId)
         if (company != null) {
             company.name = name
-            company.weiXinPayConfig = weiXinPayConfigDao.findOne(wxPayConfigId)
             companyDao.save(company)
 
             return true

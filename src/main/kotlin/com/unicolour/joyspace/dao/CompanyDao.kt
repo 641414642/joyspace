@@ -10,4 +10,6 @@ import org.springframework.data.repository.query.Param
 interface CompanyDao : PagingAndSortingRepository<Company, Int> {
     @Query("SELECT c FROM Company c WHERE LOWER(c.name) LIKE LOWER(CONCAT('%', :name, '%'))")
     fun findByName(@Param("name") name: String, pageable: Pageable) : Page<Company>
+
+    fun existsByNameIgnoreCase(name: String): Boolean
 }
