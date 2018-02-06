@@ -50,7 +50,7 @@ class CompanyController {
 
         modelAndView.model.put("companies", companies.content)
 
-        modelAndView.model.put("viewCat", "user_mgr")
+        modelAndView.model.put("viewCat", "system_mgr")
         modelAndView.model.put("viewContent", "company_list")
         modelAndView.viewName = "layout"
 

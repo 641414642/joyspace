@@ -53,6 +53,7 @@ function showFormGroupErrMsg(elementName, errMsg) {
     }
 }
 
+//清除错误信息
 function clearFormGroupErrMsg(ele) {
     $(ele).find(".form-group").removeClass("has-error");
 }
@@ -69,11 +70,11 @@ function showModal(event, onloadfunc) {
     return false;
 }
 
-function showPostFormModal(event, formId, modalSyleClass, reload, validateFunc, resultProcessFunc) {
+function showPostFormModal(event, formId, modalStyleClass, reload, validateFunc, resultProcessFunc) {
     $('#modalTemplate').removeClass().addClass("modal fade");
 
-    if (modalSyleClass) {
-        $('#modalTemplate').addClass(modalSyleClass);
+    if (modalStyleClass) {
+        $('#modalTemplate').addClass(modalStyleClass);
     }
 
     showModal(event, function() {

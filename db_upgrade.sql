@@ -9,3 +9,5 @@ alter table print_station alter column transfer_proportion set not null;
 alter table print_order add column transfer_proportion integer;
 update print_order set transfer_proportion=1000;
 alter table print_order alter column transfer_proportion set not null;
+
+update ad_set set company_id=0 where company_id=1;

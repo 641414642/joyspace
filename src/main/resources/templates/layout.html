@@ -110,7 +110,7 @@
 			<!-- sidebar menu: : style can be found in sidebar.less -->
 			<ul class="sidebar-menu">
 				<!--<li class="header">MAIN NAVIGATION</li>-->
-				<li th:class="${viewCat=='admin_mgr' ? 'treeview active' : 'treeview'}" class="treeview">
+				<li th:class="${viewCat=='system_mgr' ? 'treeview active' : 'treeview'}" class="treeview">
 					<a href="#">
 						<i class="fa fa-dashboard"></i> <span>系统管理</span>
 						<span class="pull-right-container">
@@ -119,19 +119,9 @@
 					</a>
 					<ul class="treeview-menu">
 						<li th:class="${viewContent=='manager_list' ? 'active' : ''}"><a href="#" th:href="@{/manager/list}"><i class="fa fa-circle-o"></i>管理员列表</a></li>
-					</ul>
-				</li>
-				<li sec:authorize="hasRole('ROLE_SUPERADMIN')" th:class="${viewCat=='user_mgr' ? 'treeview active' : 'treeview'}" class="treeview">
-					<a href="#">
-						<i class="fa fa-files-o"></i>
-						<span>用户管理</span>
-						<span class="pull-right-container">
-							<i class="fa fa-angle-left pull-right"></i>
-						</span>
-					</a>
-					<ul class="treeview-menu">
 						<!--<li><a href="#"><i class="fa fa-circle-o"></i>会员列表</a></li>-->
-						<li th:class="${viewContent=='company_list' ? 'active' : ''}"><a href="#" th:href="@{/company/list}"><i class="fa fa-circle-o"></i>投放商列表</a></li>
+						<li th:class="${viewContent=='company_list' ? 'active' : ''}" sec:authorize="hasRole('ROLE_SUPERADMIN')"><a href="#" th:href="@{/company/list}"><i class="fa fa-circle-o"></i>投放商列表</a></li>
+						<li th:class="${viewContent=='activation_code_list' ? 'active' : ''}" sec:authorize="hasRole('ROLE_SUPERADMIN')"><a href="#" th:href="@{/activationCode/list}"><i class="fa fa-circle-o"></i>自助机激活码</a></li>
 					</ul>
 				</li>
 				<li sec:authorize="hasRole('ROLE_SUPERADMIN')"  th:class="${viewCat=='pay_mgr' ? 'treeview active' : 'treeview'}" class="treeview">
@@ -211,6 +201,7 @@
 		<div th:case="'coupon_list'" th:include="coupon/list :: content"></div>
 		<div th:case="'printOrder_list'" th:include="printOrder/list :: content"></div>
 		<div th:case="'adSet_list'" th:include="adSet/list :: content"></div>
+		<div th:case="'activation_code_list'" th:include="activationCode/list :: content"></div>
 		<div th:case="*"></div>
 		<!-- /.content -->
 	</div>

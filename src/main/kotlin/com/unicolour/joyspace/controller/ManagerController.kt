@@ -56,7 +56,7 @@ class ManagerController {
 
         modelAndView.model.put("users", users.content)
 
-        modelAndView.model.put("viewCat", "admin_mgr")
+        modelAndView.model.put("viewCat", "system_mgr")
         modelAndView.model.put("viewContent", "manager_list")
         modelAndView.viewName = "layout"
 
