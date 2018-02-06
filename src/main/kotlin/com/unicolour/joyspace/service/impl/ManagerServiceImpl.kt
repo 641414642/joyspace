@@ -143,6 +143,7 @@ open class ManagerServiceImpl : ManagerService {
             LoginManagerDetail(
                     manager.id,
                     manager.companyId,
+                    manager.company.name,
                     manager.createTime,
                     manager.fullName,
                     manager.userName,

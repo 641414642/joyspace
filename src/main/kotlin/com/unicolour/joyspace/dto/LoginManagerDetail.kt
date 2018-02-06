@@ -6,6 +6,7 @@ import java.util.*
 
 class LoginManagerDetail(val managerId: Int,
                          val companyId: Int,
+                         val companyName: String,
                          val createTime: Calendar,
                          val fullName: String?,
                          username: String,

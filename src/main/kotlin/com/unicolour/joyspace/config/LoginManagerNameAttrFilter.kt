@@ -21,6 +21,7 @@ class LoginManagerNameAttrFilter : Filter {
             val dispName = if (userDetail.fullName.isNullOrEmpty()) auth.name else userDetail.fullName
             val regTime = userDetail.createTime.format()
 
+            req.setAttribute("LoginManagerCompanyName", userDetail.companyName)
             req.setAttribute("LoginManagerDispName", dispName)
             req.setAttribute("LoginManagerName", auth.name)
             req.setAttribute("LoginManagerRegTime", regTime)
