@@ -267,6 +267,10 @@ open class PrintStationServiceImpl : PrintStationService {
         }
     }
 
+    @Transactional
+    override fun activatePrintStation(code: String, password: String, positionId: Int, selectedProductIds: Set<Int>) {
+    }
+
     override val printStationDataFetcher: DataFetcher<PrintStation>
         get() {
             return DataFetcher { env ->

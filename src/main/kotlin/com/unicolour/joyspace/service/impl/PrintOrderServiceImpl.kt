@@ -234,9 +234,9 @@ open class PrintOrderServiceImpl : PrintOrderService {
 
     private fun createOrderNo(): String {
         val dateTime = SimpleDateFormat("yyyyMMdd").format(Date())
-        val randomStr = BigInteger(4 * 8, secureRandom).toString(36).toUpperCase()
         var orderNo:String
         do {
+            val randomStr = BigInteger(4 * 8, secureRandom).toString(36).toUpperCase()
             orderNo = "$dateTime-$randomStr"
         } while (printOrderDao.existsByOrderNo(orderNo))
 
@@ -439,9 +439,9 @@ open class PrintOrderServiceImpl : PrintOrderService {
 
     private fun createTradeNo(): String {
         val dateTime = SimpleDateFormat("yyyyMMdd").format(Date())
-        val randomStr = BigInteger(4 * 8, secureRandom).toString(36).toUpperCase()
         var tradeNo:String
         do {
+            val randomStr = BigInteger(4 * 8, secureRandom).toString(36).toUpperCase()
             tradeNo = "$dateTime$randomStr"
         } while (wxEntTransferRecordDao.existsByTradeNo(tradeNo))
 

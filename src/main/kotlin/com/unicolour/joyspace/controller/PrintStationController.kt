@@ -1,6 +1,7 @@
 package com.unicolour.joyspace.controller
 
 import com.unicolour.joyspace.dao.*
+import com.unicolour.joyspace.dto.CommonRequestResult
 import com.unicolour.joyspace.dto.ProductItem
 import com.unicolour.joyspace.model.PrintStation
 import com.unicolour.joyspace.model.PrintStationLoginSession
@@ -164,6 +165,56 @@ class PrintStationController {
         } else {
             return printStationService.updatePrintStation(id, companyId, password, positionId, (proportion * 10).toInt(), printerType, adSetId, selectedProductIds)
         }
+    }
+
+    @RequestMapping(path = arrayOf("/printStation/activate"), method = arrayOf(RequestMethod.GET))
+    fun activatePrintStation(modelAndView: ModelAndView): ModelAndView {
+        //val loginManager = managerService.loginManager
+
+        val supportedProductIdSet: Set<Int> = emptySet<Int>()
+
+        val printStation = PrintStation()
+
+        //val allProducts = productDao.findByCompanyIdOrderBySequenceAsc(loginManager!!.companyId)
+        val allProducts = productDao.findAll()
+                .sortedBy { it.sequence }
+                .map {
+                    ProductItem(
+                            productId = it.id,
+                            productType = it.template.type,
+                            productName = it.name,
+                            templateName = it.template.name,
+                            selected = supportedProductIdSet.contains(it.id))
+                }
+
+        modelAndView.model.put("printStation", printStation)
+        modelAndView.model.put("positions", positionDao.findAll())
+        modelAndView.model.put("photo_products", allProducts.filter { it.productType == ProductType.PHOTO.value })
+        modelAndView.model.put("template_products", allProducts.filter { it.productType == ProductType.TEMPLATE.value })
+        modelAndView.model.put("id_photo_products", allProducts.filter { it.productType == ProductType.ID_PHOTO.value })
+        modelAndView.model.put("productIds", allProducts.map { it.productId }.joinToString(separator = ","))
+        modelAndView.viewName = "/printStation/activate :: content"
+
+        return modelAndView
+    }
+
+    @RequestMapping(path = arrayOf("/printStation/activate"), method = arrayOf(RequestMethod.POST))
+    @ResponseBody
+    fun activatePrintStation(
+            request: HttpServletRequest,
+            @RequestParam(name = "code", required = true) code: String,
+            @RequestParam(name = "printStationPassword", required = true) password: String,
+            @RequestParam(name = "positionId", required = true) positionId: Int,
+            @RequestParam(name = "productIds", required = true) productIds: String
+    ): CommonRequestResult {
+
+        val selectedProductIds = productIds
+                .split(',')
+                .filter { !request.getParameter("product_${it}").isNullOrBlank() }
+                .map { it.toInt() }
+                .toSet()
+        printStationService.activatePrintStation(code, password, positionId, selectedProductIds)
+        return CommonRequestResult()
     }
 
     @RequestMapping("/printStation/{id}")
