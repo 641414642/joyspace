@@ -30,6 +30,21 @@ class Position {
     @NotNull
     var latitude: Double = 0.0
 
+    @Column(length = 100)
+    var addressNation: String? = null
+
+    @Column(length = 100)
+    var addressProvince: String? = null
+
+    @Column(length = 100)
+    var addressCity: String? = null
+
+    @Column(length = 100)
+    var addressDistrict: String? = null
+
+    @Column(length = 100)
+    var addressStreet: String? = null
+
     /** 交通情况 */
     @Column(length = 1000)
     var transportation: String = ""
@@ -43,17 +58,6 @@ class Position {
     @JoinColumn(name = "company_id")
     @NotNull
     lateinit var company: Company
-    //endregion
-
-    //region 城市
-    /** 城市ID */
-    @Column(name = "city_id", insertable = false, updatable = false)
-    var cityId: Int = 0
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "city_id")
-    @NotNull
-    lateinit var city: City
     //endregion
 
     //region 价目表列

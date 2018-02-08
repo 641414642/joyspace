@@ -44,16 +44,20 @@ class PrintStation {
     lateinit var company: Company
     //endregion
 
-    //region 城市
-    /** 城市ID */
-    @Column(name = "city_id", insertable = false, updatable = false)
-    var cityId: Int = 0
+    @Column(length = 100)
+    var addressNation: String? = null
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "city_id")
-    @NotNull
-    lateinit var city: City
-    //endregion
+    @Column(length = 100)
+    var addressProvince: String? = null
+
+    @Column(length = 100)
+    var addressCity: String? = null
+
+    @Column(length = 100)
+    var addressDistrict: String? = null
+
+    @Column(length = 100)
+    var addressStreet: String? = null
 
     @Column(name = "status")
     var status: Int = PrintStationStatus.NORMAL.value

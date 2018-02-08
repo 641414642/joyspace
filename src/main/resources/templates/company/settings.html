@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta charset="utf-8" />
+</head>
+<body>
+<div th:fragment="content">
+    <!-- Content Header (Page header) -->
+    <section class="content-header">
+        <h1>系统设置</h1>
+        <ol class="breadcrumb">
+            <li class="active">系统管理</li>
+            <li class="active">系统设置</li>
+        </ol>
+    </section>
+
+    <!-- Main content -->
+    <section class="content">
+        <div class="box">
+            <div class="box-body">
+                <form th:action="@{/company/settings}" method="post" target="_self">
+                <div class="form-group">
+                    <label for="defaultPriceList" class="control-label">缺省价目表:</label>
+                    <select name="defaultPriceListId" class="form-control" id="defaultPriceList">
+                        <option th:selected="${companyDefaultPriceListId==0}" value="0">&lt;无&gt;</option>
+                        <option th:each="priceList : ${priceLists}"
+                                th:value="${priceList.id}"
+                                th:text="${priceList.name}"
+                                th:selected="${companyDefaultPriceListId == priceList.id}">
+                        </option>
+                    </select>
+                    <span class="help-block"></span>
+                </div>
+                </form>
+            </div>
+        </div>
+    </section>
+</div>
+</body>
+</html>

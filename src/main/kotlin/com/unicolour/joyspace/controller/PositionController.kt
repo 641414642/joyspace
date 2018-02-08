@@ -3,6 +3,9 @@ package com.unicolour.joyspace.controller
 import com.unicolour.joyspace.dao.PositionDao
 import com.unicolour.joyspace.dao.PositionImageFileDao
 import com.unicolour.joyspace.dao.PriceListDao
+import com.unicolour.joyspace.dto.CommonRequestResult
+import com.unicolour.joyspace.dto.ResultCode
+import com.unicolour.joyspace.exception.ProcessException
 import com.unicolour.joyspace.model.Position
 import com.unicolour.joyspace.service.ManagerService
 import com.unicolour.joyspace.service.PositionService
@@ -105,16 +108,23 @@ class PositionController {
             @RequestParam(name = "transportation", required = true) transportation: String,
             @RequestParam(name = "longitudeAndLatitude", required = true) longitudeAndLatitude: String,
             @RequestParam(name = "priceListId", required = true) priceListId: Int
-    ): Boolean {
-        val split = longitudeAndLatitude.split(',', ' ', ';', '|', '，', '/', '\\')
-        val latitude = split[0].toDouble()
-        val longitude = split[1].toDouble()
+    ): CommonRequestResult {
+        try {
+            val split = longitudeAndLatitude.split(',', ' ', ';', '|', '，', '/', '\\')
+            val latitude = split[0].toDouble()
+            val longitude = split[1].toDouble()
 
-        if (id <= 0) {
-            positionService.createPosition(name, address, transportation, longitude, latitude, priceListId)
-            return true
-        } else {
-            return positionService.updatePosition(id, name, address, transportation, longitude, latitude, priceListId)
+            if (id <= 0) {
+                positionService.createPosition(name, address, transportation, longitude, latitude, priceListId)
+            } else {
+                positionService.updatePosition(id, name, address, transportation, longitude, latitude, priceListId)
+            }
+            return CommonRequestResult()
+        } catch (e: ProcessException) {
+            return CommonRequestResult(e.errcode, e.message)
+        } catch (e: Exception) {
+            val action = if (id < 0) "创建" else "编辑"
+            return CommonRequestResult(ResultCode.OTHER_ERROR.value, "${action}失败")
         }
     }
 

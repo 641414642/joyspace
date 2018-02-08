@@ -1,17 +1,14 @@
 package com.unicolour.joyspace.config
 
-import com.unicolour.joyspace.dao.*
-import com.unicolour.joyspace.model.City
-import com.unicolour.joyspace.model.Company
-import com.unicolour.joyspace.model.Manager
-import com.unicolour.joyspace.model.Position
+import com.unicolour.joyspace.dao.CompanyDao
+import com.unicolour.joyspace.dao.PositionDao
+import com.unicolour.joyspace.dao.PrintStationDao
 import com.unicolour.joyspace.service.CompanyService
+import com.unicolour.joyspace.service.ManagerService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.context.event.ApplicationReadyEvent
 import org.springframework.context.ApplicationListener
 import org.springframework.stereotype.Component
-
-import com.unicolour.joyspace.service.ManagerService
 
 @Component
 class ApplicationStartup : ApplicationListener<ApplicationReadyEvent> {
@@ -25,9 +22,6 @@ class ApplicationStartup : ApplicationListener<ApplicationReadyEvent> {
     lateinit var companyService: CompanyService
 
     @Autowired
-    lateinit var cityDao: CityDao
-
-    @Autowired
     lateinit var positionDao: PositionDao
 
     @Autowired
@@ -38,19 +32,6 @@ class ApplicationStartup : ApplicationListener<ApplicationReadyEvent> {
         val companies = companyDao.findAll()
         if (!companies.iterator().hasNext()) {
             companyService.createCompany("缺省店面", null, "admin", "管理员", "", "", "123456")
-        }
-
-        //缺省城市(北京)
-        val cities = cityDao.findAll()
-        if (!cities.iterator().hasNext()) {
-            val defCity = City()
-            defCity.name = "北京"
-            defCity.minLatitude = 39.550648
-            defCity.maxLatitude = 40.313043
-            defCity.minLongitude = 115.911255
-            defCity.maxLongitude = 116.993408
-
-            cityDao.save(defCity)
         }
     }
 }

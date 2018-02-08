@@ -4,10 +4,7 @@ import com.unicolour.joyspace.dao.*
 import com.unicolour.joyspace.dto.*
 import com.unicolour.joyspace.exception.ProcessException
 import com.unicolour.joyspace.model.*
-import com.unicolour.joyspace.service.ManagerService
-import com.unicolour.joyspace.service.PriceListService
-import com.unicolour.joyspace.service.PrintStationService
-import com.unicolour.joyspace.service.ProductService
+import com.unicolour.joyspace.service.*
 import graphql.schema.DataFetcher
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
@@ -41,6 +38,9 @@ open class PrintStationServiceImpl : PrintStationService {
     lateinit var positionDao : PositionDao
 
     @Autowired
+    lateinit var positionService: PositionService
+
+    @Autowired
     lateinit var adSetDao : AdSetDao
 
     @Autowired
@@ -60,9 +60,6 @@ open class PrintStationServiceImpl : PrintStationService {
 
     @Autowired
     lateinit var printStationProductDao: PrintStationProductDao
-
-    @Autowired
-    lateinit var cityDao: CityDao
 
     @Autowired
     lateinit var passwordEncoder: PasswordEncoder
@@ -214,7 +211,11 @@ open class PrintStationServiceImpl : PrintStationService {
         printStation.transferProportion =  transferProportion
         printStation.printerType = printerType
         printStation.adSet = adSetDao.findOne(adSetId)
-        printStation.city = printStation.position.city
+        printStation.addressNation = printStation.position.addressNation
+        printStation.addressProvince = printStation.position.addressProvince
+        printStation.addressCity = printStation.position.addressCity
+        printStation.addressDistrict = printStation.position.addressDistrict
+        printStation.addressStreet = printStation.position.addressStreet
         printStation.password = passwordEncoder.encode(password)
         printStation.status = PrintStationStatus.NORMAL.value
 
@@ -242,7 +243,11 @@ open class PrintStationServiceImpl : PrintStationService {
             printStation.wxQrCode = "$baseUrl/printStation/${printStation.id}"
             printStation.position = positionDao.findOne(positionId)
             printStation.adSet = adSetDao.findOne(adSetId)
-            printStation.city = printStation.position.city
+            printStation.addressNation = printStation.position.addressNation
+            printStation.addressProvince = printStation.position.addressProvince
+            printStation.addressCity = printStation.position.addressCity
+            printStation.addressDistrict = printStation.position.addressDistrict
+            printStation.addressStreet = printStation.position.addressStreet
             if (!password.isNullOrEmpty()) {
                 printStation.password = passwordEncoder.encode(password)
             }
@@ -293,7 +298,11 @@ open class PrintStationServiceImpl : PrintStationService {
         printStation.transferProportion =  activationCode.transferProportion
         printStation.printerType = activationCode.printerType
         printStation.adSet = if (activationCode.adSetId == null) null else adSetDao.findOne(activationCode.adSetId)
-        printStation.city = printStation.position.city
+        printStation.addressNation = printStation.position.addressNation
+        printStation.addressProvince = printStation.position.addressProvince
+        printStation.addressCity = printStation.position.addressCity
+        printStation.addressDistrict = printStation.position.addressDistrict
+        printStation.addressStreet = printStation.position.addressStreet
         printStation.password = passwordEncoder.encode(password)
         printStation.status = PrintStationStatus.NORMAL.value
 
@@ -329,15 +338,15 @@ open class PrintStationServiceImpl : PrintStationService {
                 val longitude = env.getArgument<Double>("longitude")
                 val latitude = env.getArgument<Double>("latitude")
 
-                val city = cityDao.findByLocation(longitude, latitude)
-                if (city == null) {
+                val addressComponent = positionService.getAddressComponent(longitude, latitude)
+                if (addressComponent == null) {
                     PrintStationFindResult(
                             result = ResultCode.CITY_NOT_FOUND.value,
                             description = ResultCode.CITY_NOT_FOUND.desc,
                             printStations = emptyList())
                 }
                 else {
-                    PrintStationFindResult(printStations = printStationDao.findByCityId(city.id))
+                    PrintStationFindResult(printStations = printStationDao.findByAddressCity(addressComponent.city))
                 }
             }
         }
@@ -348,15 +357,15 @@ open class PrintStationServiceImpl : PrintStationService {
                 val longitude = env.getArgument<Double>("longitude")
                 val latitude = env.getArgument<Double>("latitude")
 
-                val city = cityDao.findByLocation(longitude, latitude)
-                if (city == null) {
+                val addressComponent = positionService.getAddressComponent(longitude, latitude)
+                if (addressComponent == null) {
                     PrintStationFindResultSingle(
                             result = ResultCode.CITY_NOT_FOUND.value,
                             description = ResultCode.CITY_NOT_FOUND.desc,
                             printStation = null)
                 }
                 else {
-                    val printStations = printStationDao.findByCityId(city.id)
+                    val printStations = printStationDao.findByAddressCity(addressComponent.city)
                     val nearest = printStations.minBy { distance(longitude, latitude, it.position.longitude, it.position.latitude) }
 
                     if (nearest == null) {

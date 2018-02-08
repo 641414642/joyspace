@@ -43,11 +43,6 @@ function activatePrintStation(event) {
     return showPostFormModal(event, 'activatePrintStationForm', null, true, validateActivationInput, processActivationResult);
 }
 
-//添加编辑投放地点
-function createOrEditPosition(event) {
-    return showPostFormModal(event, 'editPositionForm', null, true);
-}
-
 //添加编辑产品
 function createOrEditProduct(event) {
     return showPostFormModal(event, 'editProductForm', null, true);
