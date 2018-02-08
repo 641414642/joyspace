@@ -2,6 +2,7 @@ package com.unicolour.joyspace.service.impl
 
 import com.unicolour.joyspace.dao.*
 import com.unicolour.joyspace.dto.*
+import com.unicolour.joyspace.exception.ProcessException
 import com.unicolour.joyspace.model.*
 import com.unicolour.joyspace.service.ManagerService
 import com.unicolour.joyspace.service.PriceListService
@@ -44,6 +45,9 @@ open class PrintStationServiceImpl : PrintStationService {
 
     @Autowired
     lateinit var printStationDao: PrintStationDao
+
+    @Autowired
+    lateinit var printStationActivationCodeDao: PrintStationActivationCodeDao
 
     @Autowired
     lateinit var priceListService: PriceListService
@@ -269,6 +273,46 @@ open class PrintStationServiceImpl : PrintStationService {
 
     @Transactional
     override fun activatePrintStation(code: String, password: String, positionId: Int, selectedProductIds: Set<Int>) {
+        val loginManager = managerService.loginManager
+        if (loginManager == null) {
+            throw ProcessException(1, "")
+        }
+
+        val activationCode = printStationActivationCodeDao.findByCode(code)
+        if (activationCode == null) {
+            throw ProcessException(ResultCode.INVALID_ACTIVATION_CODE)
+        }
+        else if (activationCode.used) {
+            throw ProcessException(ResultCode.ACTIVATION_CODE_USED)
+        }
+
+        val printStation = PrintStation()
+        printStation.id = activationCode.printStationId
+        printStation.company = companyDao.findOne(loginManager.companyId)
+        printStation.position = positionDao.findOne(positionId)
+        printStation.transferProportion =  activationCode.transferProportion
+        printStation.printerType = activationCode.printerType
+        printStation.adSet = if (activationCode.adSetId == null) null else adSetDao.findOne(activationCode.adSetId)
+        printStation.city = printStation.position.city
+        printStation.password = passwordEncoder.encode(password)
+        printStation.status = PrintStationStatus.NORMAL.value
+
+        printStationDao.save(printStation)
+
+        printStation.wxQrCode = "$baseUrl/printStation/${printStation.id}"
+        printStationDao.save(printStation)
+
+        for (productId in selectedProductIds) {
+            val printStationProduct = PrintStationProduct()
+            printStationProduct.product = productDao.findOne(productId)
+            printStationProduct.printStation = printStation
+
+            printStationProductDao.save(printStationProduct)
+        }
+
+        activationCode.useTime = Calendar.getInstance()
+        activationCode.used = true
+        printStationActivationCodeDao.save(activationCode)
     }
 
     override val printStationDataFetcher: DataFetcher<PrintStation>

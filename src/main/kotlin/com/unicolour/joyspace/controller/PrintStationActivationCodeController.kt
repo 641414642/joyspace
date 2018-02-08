@@ -86,7 +86,7 @@ class PrintStationActivationCodeController {
             @RequestParam(name = "quantity", required = true) quantity: Int,
             @RequestParam(name = "printerType", required = true) printerType: String,
             @RequestParam(name = "proportion", required = true) proportion: Int,
-            @RequestParam(name = "adSetId", required = true) adSetId: Int
+            @RequestParam(name = "adSetId", required = false, defaultValue = "0") adSetId: Int
     ): CommonRequestResult {
         try {
             val success = printStationActivationCodeService.batchCreateActivationCodes(

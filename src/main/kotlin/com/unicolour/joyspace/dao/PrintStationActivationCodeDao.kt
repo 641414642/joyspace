@@ -9,4 +9,5 @@ interface PrintStationActivationCodeDao : PagingAndSortingRepository<PrintStatio
     fun existsByCode(code: String): Boolean
     fun findByUsedIsTrue(pageable: Pageable): Page<PrintStationActivationCode>
     fun findByUsedIsFalse(pageable: Pageable): Page<PrintStationActivationCode>
+    fun findByCode(code: String): PrintStationActivationCode?
 }

@@ -3,6 +3,8 @@ package com.unicolour.joyspace.controller
 import com.unicolour.joyspace.dao.*
 import com.unicolour.joyspace.dto.CommonRequestResult
 import com.unicolour.joyspace.dto.ProductItem
+import com.unicolour.joyspace.dto.ResultCode
+import com.unicolour.joyspace.exception.ProcessException
 import com.unicolour.joyspace.model.PrintStation
 import com.unicolour.joyspace.model.PrintStationLoginSession
 import com.unicolour.joyspace.model.ProductType
@@ -208,13 +210,19 @@ class PrintStationController {
             @RequestParam(name = "productIds", required = true) productIds: String
     ): CommonRequestResult {
 
-        val selectedProductIds = productIds
-                .split(',')
-                .filter { !request.getParameter("product_${it}").isNullOrBlank() }
-                .map { it.toInt() }
-                .toSet()
-        printStationService.activatePrintStation(code, password, positionId, selectedProductIds)
-        return CommonRequestResult()
+        try {
+            val selectedProductIds = productIds
+                    .split(',')
+                    .filter { !request.getParameter("product_${it}").isNullOrBlank() }
+                    .map { it.toInt() }
+                    .toSet()
+            printStationService.activatePrintStation(code, password, positionId, selectedProductIds)
+            return CommonRequestResult()
+        } catch (e: ProcessException) {
+            return CommonRequestResult(e.errcode, e.message)
+        } catch (e: Exception) {
+            return CommonRequestResult(ResultCode.OTHER_ERROR.value, "创建自助机失败")
+        }
     }
 
     @RequestMapping("/printStation/{id}")

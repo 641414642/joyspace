@@ -15,6 +15,8 @@ enum class ResultCode(val value:Int, val desc:String, val descEn: String) {
     INVALID_PRINT_STATION_LOGIN_SESSION(11, "自助机没有登录或登录超时", "PrintStation not login or session timeout"),
     NOT_IN_THIS_PRINT_STATION(12, "不是此自助机的订单", "Print order not in this print station"),
     INVALID_USER_LOGIN_SESSION(13, "用户没有登录", "User not login"),
+    INVALID_ACTIVATION_CODE(14, "无效的激活码", "Invalid activation code"),
+    ACTIVATION_CODE_USED(15, "激活码已经使用过", "Activation code has bean used"),
 
     COMPANY_ALREADY_EXISTS(20, "同名投放商已存在", "Company with same name already exists"),
     MANAGER_ALREADY_EXISTS(21, "同名管理员已存在", "Manager with same name already exists"),
