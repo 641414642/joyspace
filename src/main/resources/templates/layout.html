@@ -124,7 +124,7 @@
 						<li th:class="${viewContent=='activation_code_list' ? 'active' : ''}" sec:authorize="hasRole('ROLE_SUPERADMIN')"><a href="#" th:href="@{/activationCode/list}"><i class="fa fa-circle-o"></i>自助机激活码</a></li>
 					</ul>
 				</li>
-				<li sec:authorize="hasRole('ROLE_SUPERADMIN')"  th:class="${viewCat=='pay_mgr' ? 'treeview active' : 'treeview'}" class="treeview">
+				<li sec:authorize="hasRole('ROLE_SUPERADMIN')" th:class="${viewCat=='pay_mgr' ? 'treeview active' : 'treeview'}" class="treeview">
 					<a href="../widgets.html">
 						<i class="fa fa-th"></i> <span>支付管理</span>
 						<span class="pull-right-container">
@@ -148,7 +148,7 @@
 			            </span>
 					</a>
 					<ul class="treeview-menu">
-						<li th:class="${viewContent=='template_list' ? 'active' : ''}"><a href="#" th:href="@{/template/list}"><i class="fa fa-circle-o"></i>模板列表</a></li>
+						<li sec:authorize="hasRole('ROLE_SUPERADMIN')" th:class="${viewContent=='template_list' ? 'active' : ''}"><a href="#" th:href="@{/template/list}"><i class="fa fa-circle-o"></i>模板列表</a></li>
 						<li th:class="${viewContent=='product_list' ? 'active' : ''}"><a href="#" th:href="@{/product/list}"><i class="fa fa-circle-o"></i>产品列表</a></li>
 						<li th:class="${viewContent=='priceList_list' ? 'active' : ''}"><a href="#" th:href="@{/priceList/list}"><i class="fa fa-circle-o"></i>价目表</a></li>
 					</ul>

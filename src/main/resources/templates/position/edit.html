@@ -54,13 +54,9 @@
                         <span class="help-block"></span>
                     </div>
                     <div class="form-group">
-                        <label for="longitude" class="control-label">经度:</label>
-                        <input type="text"  name="longitude" class="form-control" id="longitude" th:value="${position.longitude}" />
-                        <span class="help-block"></span>
-                    </div>
-                    <div class="form-group">
-                        <label for="latitude" class="control-label">纬度:</label>
-                        <input type="text"  name="latitude" class="form-control" id="latitude" th:value="${position.latitude}" />
+                        <label for="longitudeAndLatitude" class="control-label">经纬度:</label>
+                        <input type="text" name="longitudeAndLatitude" class="form-control" id="longitudeAndLatitude"
+                               th:value="${position.latitude + ',' + position.longitude}" />
                         <span class="help-block"></span>
                     </div>
                     <div class="form-group">

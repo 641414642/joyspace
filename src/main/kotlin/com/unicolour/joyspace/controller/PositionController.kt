@@ -103,10 +103,12 @@ class PositionController {
             @RequestParam(name = "name", required = true) name: String,
             @RequestParam(name = "address", required = true) address: String,
             @RequestParam(name = "transportation", required = true) transportation: String,
-            @RequestParam(name = "longitude", required = true) longitude: Double,
-            @RequestParam(name = "latitude", required = true) latitude: Double,
+            @RequestParam(name = "longitudeAndLatitude", required = true) longitudeAndLatitude: String,
             @RequestParam(name = "priceListId", required = true) priceListId: Int
     ): Boolean {
+        val split = longitudeAndLatitude.split(',', ' ', ';', '|', '，', '/', '\\')
+        val latitude = split[0].toDouble()
+        val longitude = split[1].toDouble()
 
         if (id <= 0) {
             positionService.createPosition(name, address, transportation, longitude, latitude, priceListId)
