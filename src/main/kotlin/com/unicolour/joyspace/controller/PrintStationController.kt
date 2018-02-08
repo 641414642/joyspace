@@ -171,7 +171,7 @@ class PrintStationController {
 
     @RequestMapping(path = arrayOf("/printStation/activate"), method = arrayOf(RequestMethod.GET))
     fun activatePrintStation(modelAndView: ModelAndView): ModelAndView {
-        //val loginManager = managerService.loginManager
+        val loginManager = managerService.loginManager
 
         val supportedProductIdSet: Set<Int> = emptySet<Int>()
 
@@ -190,7 +190,7 @@ class PrintStationController {
                 }
 
         modelAndView.model.put("printStation", printStation)
-        modelAndView.model.put("positions", positionDao.findAll())
+        modelAndView.model.put("positions", positionDao.findByCompanyId(loginManager!!.companyId))
         modelAndView.model.put("photo_products", allProducts.filter { it.productType == ProductType.PHOTO.value })
         modelAndView.model.put("template_products", allProducts.filter { it.productType == ProductType.TEMPLATE.value })
         modelAndView.model.put("id_photo_products", allProducts.filter { it.productType == ProductType.ID_PHOTO.value })
