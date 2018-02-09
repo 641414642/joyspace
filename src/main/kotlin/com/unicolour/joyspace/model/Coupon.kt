@@ -95,7 +95,7 @@ class CouponConstrains {
 
 enum class CouponConstrainsType(val value:Int, val dispName:String) {
     PRINT_STATION(1, "自助机"),
-    POSITION(2, "投放地点"),  //投放地点 > 自助机
+    POSITION(2, "店面"),  //店面 > 自助机
 
     PRODUCT(4, "产品"),
     PRODUCT_TYPE(5, "产品类型"),  // 产品类型 > 产品

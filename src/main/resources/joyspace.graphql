@@ -285,7 +285,7 @@ type PrintStation {
     #支持的产品列表
     products: [Product!]
 
-    #投放地点id
+    #店面id
     positionId: Int!
 
     #投放商id
@@ -414,7 +414,7 @@ type Coupon {
     #可以使用的自助机id列表, 为null表示无限制
     printStationIdList: [Int!]
 
-    #可以使用的投放地点id列表, 为null表示无限制
+    #可以使用的店面id列表, 为null表示无限制
     positionIdList: [Int!]
 
     #可以使用的投放商id列表, 为null表示无限制

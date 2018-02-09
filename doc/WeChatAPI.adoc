@@ -63,7 +63,7 @@
     "wxQrCode": "https://test.uni-colour.com/printStation/1",
     "longitude": 116.33511,         //自助机位置经度
     "latitude": 39.95392,           //自助机位置维度
-    "positionId": xx,               //投放地点id
+    "positionId": xx,               //店面id
     "companyId": xx,                //投放商id
     "status": x,                    //状态 (0: 正常, 1: 离线, 2: 故障, 3: 打印耗材用完)
     "products": [
@@ -414,7 +414,7 @@
                         "minExpense": 1000,             //使用优惠券所需要的最小金额（分）
                         "discount": 200,                 //折扣金额（分）
                         "printStationIdList": [xx,xx,xx,xx],        //可以使用的自助机id列表, 为null表示无限制
-                        "positionIdList": [xx,xx,xx,xx],            //可以使用的投放地点id列表, 为null表示无限制
+                        "positionIdList": [xx,xx,xx,xx],            //可以使用的店面id列表, 为null表示无限制
                         "companyIdList": [xx,xx,xx,xx],            //可以使用的投放商id列表, 为null表示无限制
                         "productIdList": [xx,xx,xx,xx],            //可以使用的产品id列表, 为null表示无限制
                         "productTypeList": [xx,xx,xx]            //可以使用的产品类型, 为null表示无限制 (产品类型 0: 普通照片, 1: 证件照, 2: 模板拼图)
@@ -449,7 +449,7 @@
                     "minExpense": 1000,             //使用优惠券所需要的最小金额（分）
                     "discount": 200,                 //折扣金额（分）
                     "printStationIdList": [xx,xx,xx,xx],        //可以使用的自助机id列表, 为null表示无限制
-                    "positionIdList": [xx,xx,xx,xx],            //可以使用的投放地点id列表, 为null表示无限制
+                    "positionIdList": [xx,xx,xx,xx],            //可以使用的店面id列表, 为null表示无限制
                     "companyIdList": [xx,xx,xx,xx],            //可以使用的投放商id列表, 为null表示无限制
                     "productIdList": [xx,xx,xx,xx],            //可以使用的产品id列表, 为null表示无限制
                     "productTypeList": [xx,xx,xx]            //可以使用的产品类型, 为null表示无限制 (产品类型 0: 普通照片, 1: 证件照, 2: 模板拼图)

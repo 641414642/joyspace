@@ -145,7 +145,7 @@ open class PositionServiceImpl : PositionService {
 
             positionDao.save(position)
 
-            //更新属于此投放地点的所有自助机的地址信息
+            //更新属于此店面的所有自助机的地址信息
             val printStations = printStationDao.findByPositionId(position.id)
             for (printStation in printStations) {
                 printStation.addressNation = position.addressNation

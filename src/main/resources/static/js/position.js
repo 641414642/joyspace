@@ -27,7 +27,7 @@ function validatePositionInput() {
     return true;
 }
 
-//添加编辑投放地点
+//添加编辑店面
 function createOrEditPosition(event) {
     return showPostFormModal(event, 'editPositionForm', null, true, validatePositionInput, processPositionResult);
 }

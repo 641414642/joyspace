@@ -104,7 +104,7 @@ function deleteProductImage(event) {
     }
 }
 
-//上传投放地点图片文件
+//上传店面图片文件
 function managePositionImageFiles(event) {
     $('#modalTemplate').removeClass().addClass("modal fade");
     showModal(event, function() {
@@ -115,7 +115,7 @@ function managePositionImageFiles(event) {
     return false;
 }
 
-//删除投放地点图片
+//删除店面图片
 function deletePositionImage(event) {
     if (confirm("您确定要删除此图片吗?")) {
         var source = event.target || event.srcElement;

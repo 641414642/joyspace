@@ -3,7 +3,7 @@ package com.unicolour.joyspace.model
 import javax.persistence.*
 import javax.validation.constraints.NotNull
 
-/** 投放地点 */
+/** 店面 */
 @Entity
 @Table(name = "position")
 class Position {
@@ -78,7 +78,7 @@ class Position {
 }
 
 
-/** 投放地点图片 */
+/** 店面图片 */
 @Entity
 @Table(name = "position_image_file")
 class PositionImageFile {
@@ -91,7 +91,7 @@ class PositionImageFile {
     @Column(length = 10)
     lateinit var fileType: String
 
-    /** 属于哪个投放地点 */
+    /** 属于哪个店面 */
     @Column(name = "position_id", insertable = false, updatable = false)
     var positionId: Int = 0
 

@@ -92,11 +92,11 @@
         <div class="modal-content" th:fragment="manageImageFiles">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
-                <h4 class="modal-title" th:text="${'投放地点图片 - ' + position.name }"></h4>
+                <h4 class="modal-title" th:text="${'店面图片 - ' + position.name }"></h4>
                 <iframe name="target_iframe" src="about:blank" th:src="@{/empty}" style="display:none"></iframe>
             </div>
             <div class="modal-body">
-                <h5>投放地点图片</h5>
+                <h5>店面图片</h5>
                 <div>
                     <div class="img_block" th:each="img : ${images}" th:attr="data-imgFileId=${img.id}" >
                         <a th:href="${img.url}" target="_blank">
