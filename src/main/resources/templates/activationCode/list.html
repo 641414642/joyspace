@@ -32,7 +32,7 @@
 						<a href="#" th:href="@{/activationCode/list}" class="btn btn-default btn-sm">重置</a>
 
 						<div class="pull-right">
-							<a href="#" th:attr="data-url=@{/activationCode/create}" class="btn btn-primary btn-sm" onclick="return createActivationCode(event, true)">新建</a>
+							<a href="#" th:attr="data-url=@{/activationCode/create}" class="btn btn-primary btn-sm" onclick="return createActivationCode(event)">新建</a>
 						</div>
 					</div>
 				</form>
@@ -45,29 +45,31 @@
 						<th style="width:200px">激活码</th>
 						<th style="width:150px">打印机型号</th>
 						<th style="width:150px">分账比例</th>
+						<th style="width:150px">广告</th>
 						<th style="width:150px">创建时间</th>
 						<th style="width:150px">状态</th>
 						<th style="width:150px">使用时间</th>
-						<!--<th style="width:150px">操作</th>-->
+						<th style="width:150px">操作</th>
 					</tr>
 					<tr th:each="code : ${codes}">
 						<td th:text="${code.printStationId}"></td>
 						<td th:text="${code.code}"></td>
 						<td th:text="${code.printerType}"></td>
 						<td th:text="${#numbers.formatDecimal(code.transferProportion / 10.0, 1, 'DEFAULT', 1, 'DEFAULT') + '%'}"></td>
+						<td th:text="${code.adSetName}"></td>
 						<td th:text="${code.createTime == null ? '' : #calendars.format(code.createTime, 'yyyy-MM-dd HH:mm')}"></td>
 						<td th:if="${code.used}"><span class="label label-danger">已使用</span></td>
 						<td th:unless="${code.used}"><span class="label label-success">未使用</span></td>
 						<td th:text="${code.useTime == null ? '' : #calendars.format(code.useTime, 'yyyy-MM-dd HH:mm')}"></td>
-						<!--<td>-->
-							<!--<a th:unless="${code.used}" href="#" style="margin-right:5px">-->
-								<!--<i class="fa fa-fw fa-pencil"-->
-								   <!--th:attr="data-url=@{/activationCode/edit(id=${code.id})}"-->
-								   <!--onclick="return createOrEditActivationCode(event, true)"-->
-								   <!--title="编辑">-->
-								<!--</i>-->
-							<!--</a>-->
-						<!--</td>-->
+						<td>
+							<a th:unless="${code.used}" href="#" style="margin-right:5px">
+								<i class="fa fa-fw fa-pencil"
+								   th:attr="data-url=@{/activationCode/edit(id=${code.id})}"
+								   onclick="return editActivationCode(event)"
+								   title="编辑">
+								</i>
+							</a>
+						</td>
 					</tr>
 				</table>
 			</div>

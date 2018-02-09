@@ -1,5 +1,6 @@
 package com.unicolour.joyspace.dao
 
+import com.unicolour.joyspace.model.AliPayConfig
 import com.unicolour.joyspace.model.PrintStation
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
@@ -16,4 +17,7 @@ interface PrintStationDao : PagingAndSortingRepository<PrintStation, Int> {
     fun findByAddressCity(cityName: String): List<PrintStation>
     fun findByIdIn(idList: List<Int>): List<PrintStation>
     fun findByPositionId(positionId: Int): List<PrintStation>
+
+    @Query("SELECT count(p) > 0 FROM PrintStation p WHERE p.id >= :minId AND p.id <= :maxId")
+    fun idExistsInRange(@Param("minId") minId: Int, @Param("maxId") maxId: Int): Boolean
 }

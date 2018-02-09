@@ -25,8 +25,11 @@ class PrintStationActivationCode {
     lateinit var printerType: String
 
     /** 广告ID */
-    @Column(name = "ad_set_id")
+    @Column
     var adSetId: Int? = null
+
+    @Column(length = 50)
+    var adSetName: String? = null
 
     //分账比例 x 1000
     @Column(name = "transfer_proportion")

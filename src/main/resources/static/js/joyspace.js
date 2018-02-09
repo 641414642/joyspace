@@ -40,7 +40,7 @@ $('#changePwdModal').on('show.bs.modal', function () {
 //显示form错误信息
 function showFormGroupErrMsg(elementName, errMsg) {
     var ele = $("[name='" + elementName + "']");
-    var grp = ele.parent(".form-group");
+    var grp = ele.closest(".form-group");
     var helpBlock = grp.find(".help-block");
 
     if (errMsg === null || errMsg === "") {

@@ -78,14 +78,28 @@ class PrintStationActivationCodeController {
         return modelAndView
     }
 
+    @RequestMapping(path = arrayOf("/activationCode/edit"), method = arrayOf(RequestMethod.GET))
+    fun editActivationCode(modelAndView: ModelAndView,
+                             @RequestParam(name = "id", required = true) id: Int
+     ): ModelAndView {
+
+        modelAndView.model["code"] = printStationActivationCodeDao.findOne(id)
+
+        val adSets = adSetDao.findByCompanyId(0)  //公用广告
+        modelAndView.model["adSets"] = adSets
+        modelAndView.model["defAdSetId"] = adSets.firstOrNull()?.id ?: 0
+
+        modelAndView.viewName = "/activationCode/edit :: content"
+
+        return modelAndView
+    }
+
     @RequestMapping(path = arrayOf("/activationCode/create"), method = arrayOf(RequestMethod.POST))
     @ResponseBody
-    fun activationCode(
-            request: HttpServletRequest,
+    fun createActivationCode(
             @RequestParam(name = "printStationIdStart", required = true) printStationIdStart: Int,
             @RequestParam(name = "quantity", required = true) quantity: Int,
             @RequestParam(name = "printerType", required = true) printerType: String,
-            @RequestParam(name = "proportion", required = true) proportion: Int,
             @RequestParam(name = "adSetId", required = false, defaultValue = "0") adSetId: Int
     ): CommonRequestResult {
         try {
@@ -93,7 +107,7 @@ class PrintStationActivationCodeController {
                     printStationIdStart,
                     quantity,
                     printerType,
-                    proportion * 10,
+                    1000,
                     adSetId)
             if (!success) {
                 throw ProcessException(ResultCode.OTHER_ERROR, "创建自助机激活码失败")
@@ -105,6 +119,33 @@ class PrintStationActivationCodeController {
             return CommonRequestResult(e.errcode, e.message)
         } catch (e: Exception) {
             return CommonRequestResult(ResultCode.OTHER_ERROR.value, "创建自助机激活码失败")
+        }
+    }
+
+    @RequestMapping(path = arrayOf("/activationCode/edit"), method = arrayOf(RequestMethod.POST))
+    @ResponseBody
+    fun editActivationCode(
+            @RequestParam(name = "id", required = true) id: Int,
+            @RequestParam(name = "proportion", required = true) proportion: Double,
+            @RequestParam(name = "printerType", required = true) printerType: String,
+            @RequestParam(name = "adSetId", required = false, defaultValue = "0") adSetId: Int
+    ): CommonRequestResult {
+        try {
+            val success = printStationActivationCodeService.updateActivationCode(
+                    id,
+                    printerType,
+                    (proportion * 10.0).toInt(),
+                    adSetId)
+            if (!success) {
+                throw ProcessException(ResultCode.OTHER_ERROR, "编辑自助机激活码失败")
+            }
+            else {
+                return CommonRequestResult(0, null)
+            }
+        } catch (e: ProcessException) {
+            return CommonRequestResult(e.errcode, e.message)
+        } catch (e: Exception) {
+            return CommonRequestResult(ResultCode.OTHER_ERROR.value, "编辑自助机激活码失败")
         }
     }
 }

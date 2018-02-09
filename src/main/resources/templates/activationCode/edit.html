@@ -32,35 +32,35 @@
 
     <script type="text/javascript">
 		$(document).ready(function() {
-			$('#createActivationCodeDialog').modal('show');
+			$('#editActivationCodeDialog').modal('show');
 		});
 	</script>
 </head>
 <body>
-<div class="modal fade" role="dialog" id="createActivationCodeDialog">
+<div class="modal fade" role="dialog" id="editActivationCodeDialog">
     <div class="modal-dialog" role="document">
         <div class="modal-content" th:fragment="content">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
                 <h4 class="modal-title">新建自助机激活码</h4>
             </div>
-            <form id="createActivationCodeForm" target="_blank" th:action="@{/activationCode/create}" method="post" enctype="multipart/form-data">
+            <form id="editActivationCodeForm" target="_blank" th:action="@{/activationCode/edit}" method="post" enctype="multipart/form-data">
+                <input type="hidden" name="id" th:value="${code.id}" />
                 <div class="modal-body">
                     <div class="form-group">
-                        <label for="printStationIdStart" class="control-label">自助机起始ID:</label>
-                        <input type="text" name="printStationIdStart" class="form-control" id="printStationIdStart" />
-                        <span class="help-block"></span>
-                    </div>
-                    <div class="form-group">
-                        <label for="quantity" class="control-label">数量:</label>
-                        <input type="text" name="quantity" class="form-control" id="quantity" value="1" />
+                        <label for="proportion" class="control-label">分账比例:</label>
+                        <div class="input-group">
+                            <input type="text" name="proportion" class="form-control" id="proportion"
+                                   th:value="${#numbers.formatDecimal(code.transferProportion / 10.0, 1, 'DEFAULT', 1, 'DEFAULT')}" />
+                            <span class="input-group-addon">%</span>
+                        </div>
                         <span class="help-block"></span>
                     </div>
                     <div class="form-group">
                         <label for="printerType" class="control-label">打印机型号:</label>
                         <select name="printerType" class="form-control" id="printerType">
-                            <option value="CY">CY</option>
-                            <option value="EPSON SL-D700">EPSON SL-D700</option>
+                            <option value="CY" th:selected="${code.printerType=='CY'}">CY</option>
+                            <option value="EPSON SL-D700" th:selected="${code.printerType=='EPSON SL-D700'}">EPSON SL-D700</option>
                         </select>
                         <span class="help-block"></span>
                     </div>
@@ -70,7 +70,7 @@
                             <option th:each="adSet : ${adSets}"
                                     th:value="${adSet.id}"
                                     th:text="${adSet.name}"
-                                    th:selected="${defAdSetId == adSet.id}">
+                                    th:selected="${code.adSetId == adSet.id}">
                             </option>
                         </select>
                         <span class="help-block"></span>
