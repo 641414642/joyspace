@@ -1,10 +1,10 @@
 = 悦印API文档
 
-== 自助打印机
+== 自助机
 
-=== 根据二维码查找自助打印机
+=== 根据二维码查找自助机
 
-返回的自助打印机信息中包含支持的产品列表
+返回的自助机信息中包含支持的产品列表
 
 *请求参数:*
 
@@ -27,9 +27,9 @@ response:
 include::snippets/api/find-print-station-by-qr-code404/http-response.adoc[]
 
 
-=== 根据id查找自助打印机
+=== 根据id查找自助机
 
-返回的自助打印机信息中包含支持的产品列表
+返回的自助机信息中包含支持的产品列表
 
 *请求参数:*
 
@@ -53,7 +53,7 @@ include::snippets/api/find-print-station-by-id404/http-response.adoc[]
 
 == 产品
 
-=== 查找指定自助打印机支持的产品列表
+=== 查找指定自助机支持的产品列表
 
 *请求参数:*
 

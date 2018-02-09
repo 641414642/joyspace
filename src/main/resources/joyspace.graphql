@@ -5,7 +5,7 @@ schema {
 
 #查询
 type QueryType {
-    #根据id查找自助打印机
+    #根据id查找自助机
     printStation(printStationId: Int!): PrintStation
 
     #根据位置查找指定距离内的自助机列表
@@ -251,7 +251,7 @@ enum ProductType {
     TEMPLATE
 }
 
-#自助打印机
+#自助机
 type PrintStation {
     id: Int!
 

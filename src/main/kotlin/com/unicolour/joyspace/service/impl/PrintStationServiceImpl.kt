@@ -172,7 +172,7 @@ open class PrintStationServiceImpl : PrintStationService {
             }
         }
         else {
-            return PrintStationLoginResult(result = 1)  //没有找到指定的自助打印机
+            return PrintStationLoginResult(result = 1)  //没有找到指定的自助机
         }
     }
 
