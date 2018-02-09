@@ -32,6 +32,7 @@ open class WebSecurityConfig : WebSecurityConfigurerAdapter() {
                 "/app/**",
                 "/graphql",
                 "/wxpay/notify",
+                "/wxmp/notify",
                 "/printStation/**")
 
         http.csrf().disable()

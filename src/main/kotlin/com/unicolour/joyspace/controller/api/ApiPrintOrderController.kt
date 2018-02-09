@@ -119,23 +119,5 @@ query {
         val data:Map<String, Any> = queryResult.getData()
         return data["printOrder"]
     }
-
-
-    @RequestMapping("/wxpay/notify",
-            method = arrayOf(RequestMethod.POST),
-            produces = arrayOf(MediaType.APPLICATION_XML_VALUE))
-    fun wxPayNotify(request: HttpServletRequest) : ResponseEntity<String> {
-        InputStreamReader(request.inputStream, StandardCharsets.UTF_8).use {
-            reader ->
-                val errmsg = printOrderService.processWxPayNotify(reader.readText())
-                val retCode = if (errmsg == null) "SUCCESS" else "FAIL"
-                val retMsg =  if (errmsg == null) "OK" else errmsg
-
-                return ResponseEntity.ok("<xml>" +
-                    "<return_code><![CDATA[$retCode]]></return_code>" +
-                    "<return_msg><![CDATA[$retMsg]]></return_msg>" +
-                    "</xml>")
-        }
-    }
 }
 
