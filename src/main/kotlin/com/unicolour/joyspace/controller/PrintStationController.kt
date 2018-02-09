@@ -189,12 +189,12 @@ class PrintStationController {
                             selected = supportedProductIdSet.contains(it.id))
                 }
 
-        modelAndView.model.put("printStation", printStation)
-        modelAndView.model.put("positions", positionDao.findByCompanyId(loginManager!!.companyId))
-        modelAndView.model.put("photo_products", allProducts.filter { it.productType == ProductType.PHOTO.value })
-        modelAndView.model.put("template_products", allProducts.filter { it.productType == ProductType.TEMPLATE.value })
-        modelAndView.model.put("id_photo_products", allProducts.filter { it.productType == ProductType.ID_PHOTO.value })
-        modelAndView.model.put("productIds", allProducts.map { it.productId }.joinToString(separator = ","))
+        modelAndView.model["printStation"] = printStation
+        modelAndView.model["positions"] = positionDao.findByCompanyId(loginManager!!.companyId)
+        modelAndView.model["photo_products"] = allProducts.filter { it.productType == ProductType.PHOTO.value }
+        modelAndView.model["template_products"] = allProducts.filter { it.productType == ProductType.TEMPLATE.value }
+        modelAndView.model["id_photo_products"] = allProducts.filter { it.productType == ProductType.ID_PHOTO.value }
+        modelAndView.model["productIds"] = allProducts.map { it.productId }.joinToString(separator = ",")
         modelAndView.viewName = "/printStation/activate :: content"
 
         return modelAndView

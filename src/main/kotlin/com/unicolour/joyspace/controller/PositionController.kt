@@ -21,7 +21,6 @@ import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.ResponseBody
 import org.springframework.web.multipart.MultipartFile
 import org.springframework.web.servlet.ModelAndView
-import javax.servlet.http.HttpServletRequest
 
 @Controller
 class PositionController {
@@ -82,6 +81,13 @@ class PositionController {
             @RequestParam(name = "id", required = true) id: Int
     ): ModelAndView {
 
+        val loginManager = managerService.loginManager
+
+        if (loginManager == null) {
+            modelAndView.viewName = "empty"
+            return modelAndView
+        }
+
         var position: Position? = null
         if (id > 0) {
             position = positionDao.findOne(id)
@@ -91,9 +97,9 @@ class PositionController {
             position = Position()
         }
 
-        modelAndView.model.put("create", id <= 0)
-        modelAndView.model.put("position", position)
-        modelAndView.model.put("priceLists", priceListDao.findAll())
+        modelAndView.model["create"] = id <= 0
+        modelAndView.model["position"] = position
+        modelAndView.model["priceLists"] = priceListDao.findByCompanyId(loginManager.companyId)
         modelAndView.viewName = "/position/edit :: content"
 
         return modelAndView

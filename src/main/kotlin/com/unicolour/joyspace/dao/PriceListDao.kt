@@ -15,4 +15,5 @@ interface PriceListDao : PagingAndSortingRepository<PriceList, Int> {
     fun findByCompanyIdAndName(@Param("companyId") companyId: Int, @Param("name") name: String, pageable: Pageable): Page<PriceList>
 
     fun findByCompanyId(companyId: Int, pageable: Pageable): Page<PriceList>
+    fun findByCompanyId(companyId: Int): List<PriceList>
 }
