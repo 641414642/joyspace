@@ -235,6 +235,10 @@ open class PrintStationServiceImpl : PrintStationService {
         return printStation
     }
 
+    override fun getPrintStationUrl(printStationId: Int): String {
+        return "$baseUrl/printStation/$printStationId"
+    }
+
     @Transactional
     override fun updatePrintStation(id: Int, companyId: Int, password: String, positionId: Int, transferProportion:Int, printerType: String, adSetId: Int, selectedProductIds: Set<Int>): Boolean {
         val printStation = printStationDao.findOne(id)

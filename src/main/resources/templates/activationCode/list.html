@@ -33,6 +33,7 @@
 
 						<div class="pull-right">
 							<a href="#" th:attr="data-url=@{/activationCode/create}" class="btn btn-primary btn-sm" onclick="return createActivationCode(event)">新建</a>
+							<a href="#" th:attr="data-url=@{/activationCode/export}" class="btn btn-primary btn-sm" onclick="return exportActivationCode(event)">导出</a>
 						</div>
 					</div>
 				</form>
@@ -51,20 +52,27 @@
 						<th style="width:150px">使用时间</th>
 						<th style="width:150px">操作</th>
 					</tr>
-					<tr th:each="code : ${codes}">
-						<td th:text="${code.printStationId}"></td>
-						<td th:text="${code.code}"></td>
-						<td th:text="${code.printerType}"></td>
-						<td th:text="${#numbers.formatDecimal(code.transferProportion / 10.0, 1, 'DEFAULT', 1, 'DEFAULT') + '%'}"></td>
-						<td th:text="${code.adSetName}"></td>
-						<td th:text="${code.createTime == null ? '' : #calendars.format(code.createTime, 'yyyy-MM-dd HH:mm')}"></td>
-						<td th:if="${code.used}"><span class="label label-danger">已使用</span></td>
-						<td th:unless="${code.used}"><span class="label label-success">未使用</span></td>
-						<td th:text="${code.useTime == null ? '' : #calendars.format(code.useTime, 'yyyy-MM-dd HH:mm')}"></td>
+					<tr th:each="c : ${codes}">
+						<td th:text="${c.code.printStationId}"></td>
+						<td th:text="${c.code.code}"></td>
+						<td th:text="${c.code.printerType}"></td>
+						<td th:text="${#numbers.formatDecimal(c.code.transferProportion / 10.0, 1, 'DEFAULT', 1, 'DEFAULT') + '%'}"></td>
+						<td th:text="${c.code.adSetName}"></td>
+						<td th:text="${c.code.createTime == null ? '' : #calendars.format(c.code.createTime, 'yyyy-MM-dd HH:mm')}"></td>
+						<td th:if="${c.code.used}"><span class="label label-danger">已使用</span></td>
+						<td th:unless="${c.code.used}"><span class="label label-success">未使用</span></td>
+						<td th:text="${c.code.useTime == null ? '' : #calendars.format(c.code.useTime, 'yyyy-MM-dd HH:mm')}"></td>
 						<td>
-							<a th:unless="${code.used}" href="#" style="margin-right:5px">
+							<a href="#" style="margin-right:5px">
+								<i class="fa fa-fw fa-qrcode"
+								   th:attr="data-qrcode=${c.qrCodeUrl}"
+								   onclick="return showPrintStationQrCode(event, true)"
+								   title="二维码">
+								</i>
+							</a>
+							<a th:unless="${c.code.used}" href="#" style="margin-right:5px">
 								<i class="fa fa-fw fa-pencil"
-								   th:attr="data-url=@{/activationCode/edit(id=${code.id})}"
+								   th:attr="data-url=@{/activationCode/edit(id=${c.code.id})}"
 								   onclick="return editActivationCode(event)"
 								   title="编辑">
 								</i>
@@ -80,6 +88,8 @@
 	</section>
 
 	<script src="../../static/js/activationCode.js" th:src="@{/js/activationCode.js}"></script>
+	<script src="../../static/js/printStation.js" th:src="@{/js/printStation.js}"></script>
+	<script src="../../static/js/qrcode.min.js" th:src="@{/js/qrcode.min.js}"></script>
 </div>
 </body>
 </html>

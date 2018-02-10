@@ -15,4 +15,6 @@ interface PrintStationActivationCodeDao : PagingAndSortingRepository<PrintStatio
 
     @Query("SELECT count(p) > 0 FROM PrintStationActivationCode p WHERE p.printStationId >= :minId AND p.printStationId <= :maxId")
     fun printStationIdExistsInRange(@Param("minId") minId: Int, @Param("maxId") maxId: Int): Boolean
+
+    fun findByPrintStationIdBetweenOrderByPrintStationId(startId: Int, endId: Int): List<PrintStationActivationCode>
 }

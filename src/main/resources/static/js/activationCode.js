@@ -76,3 +76,12 @@ function validateEditCodeInput() {
 function editActivationCode(event) {
     return showPostFormModal(event, 'editActivationCodeForm', null, true, validateEditCodeInput);
 }
+
+//导出自助机激活码
+function exportActivationCode(event) {
+    return showModal(event, function() {
+        $("#exportActivationCodeForm").submit(function(e) {
+            $('#modalTemplate').modal('hide');
+        })
+    });
+}

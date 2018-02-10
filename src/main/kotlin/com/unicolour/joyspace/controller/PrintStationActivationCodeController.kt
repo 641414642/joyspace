@@ -7,8 +7,10 @@ import com.unicolour.joyspace.exception.ProcessException
 import com.unicolour.joyspace.model.*
 import com.unicolour.joyspace.service.ManagerService
 import com.unicolour.joyspace.service.PrintStationActivationCodeService
+import com.unicolour.joyspace.service.PrintStationService
 import com.unicolour.joyspace.util.Pager
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Controller
@@ -17,10 +19,7 @@ import org.springframework.web.bind.annotation.RequestMethod
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.ResponseBody
 import org.springframework.web.servlet.ModelAndView
-import java.util.*
-import javax.servlet.http.HttpServletRequest
-import javax.servlet.http.Part
-import kotlin.collections.ArrayList
+import javax.servlet.http.HttpServletResponse
 
 @Controller
 class PrintStationActivationCodeController {
@@ -31,10 +30,16 @@ class PrintStationActivationCodeController {
     lateinit var printStationActivationCodeDao: PrintStationActivationCodeDao
 
     @Autowired
+    lateinit var printStationService: PrintStationService
+
+    @Autowired
     lateinit var adSetDao: AdSetDao
 
     @Autowired
     lateinit var printStationActivationCodeService: PrintStationActivationCodeService
+
+    @Value("\${com.unicolour.joyspace.baseUrl}")
+    lateinit var baseUrl: String
 
     @RequestMapping("/activationCode/list")
     fun activationCodeist(modelAndView: ModelAndView,
@@ -43,6 +48,8 @@ class PrintStationActivationCodeController {
     ): ModelAndView {
 
         //val loginManager = managerService.loginManager
+
+        class Code(val code: PrintStationActivationCode, val qrCodeUrl: String)
 
         val pageable = PageRequest(pageno - 1, 20, Sort.Direction.ASC, "id")
         val codes =
@@ -58,7 +65,9 @@ class PrintStationActivationCodeController {
         modelAndView.model["pager"] = pager
 
         modelAndView.model["statusInput"] = statusInput
-        modelAndView.model["codes"] = codes
+        modelAndView.model["codes"] = codes.content.map {
+            Code(it, printStationService.getPrintStationUrl(it.printStationId))
+        }
 
         modelAndView.model["viewCat"] = "system_mgr"
         modelAndView.model["viewContent"] = "activation_code_list"
@@ -147,6 +156,28 @@ class PrintStationActivationCodeController {
         } catch (e: Exception) {
             return CommonRequestResult(ResultCode.OTHER_ERROR.value, "编辑自助机激活码失败")
         }
+    }
+
+    @RequestMapping(path = arrayOf("/activationCode/export"), method = arrayOf(RequestMethod.GET))
+    fun exportActivationCodes(modelAndView: ModelAndView): ModelAndView {
+        modelAndView.viewName = "/activationCode/export :: content"
+        return modelAndView
+    }
+
+    @RequestMapping(path = arrayOf("/activationCode/export"), method = arrayOf(RequestMethod.POST))
+    fun exportActivationCodes(
+            @RequestParam(name = "startId", required = true) startId: Int,
+            @RequestParam(name = "endId", required = true) endId: Int,
+            response: HttpServletResponse) {
+        response.contentType = "text/csv"
+        response.setHeader("Content-Disposition", """attachment; filename="$startId-$endId.csv"""")
+
+        val codes = printStationActivationCodeDao.findByPrintStationIdBetweenOrderByPrintStationId(startId, endId)
+        for (code in codes) {
+            response.writer.write("${code.printStationId},${code.code},${printStationService.getPrintStationUrl(code.printStationId)}\n")
+        }
+
+        response.flushBuffer()
     }
 }
 

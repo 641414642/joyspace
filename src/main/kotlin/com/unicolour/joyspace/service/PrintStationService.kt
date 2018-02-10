@@ -25,4 +25,6 @@ interface PrintStationService {
     val currentSoftwareVersionDataFetcher: DataFetcher<Int>
     fun getDataFetcher(fieldName:String): DataFetcher<Any>
     fun getPrintStationLoginSession(sessionId: String): PrintStationLoginSession?
+
+    fun getPrintStationUrl(printStationId: Int): String
 }
