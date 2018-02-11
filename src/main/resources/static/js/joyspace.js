@@ -134,3 +134,41 @@ function changePassword(event) {
         }
     });
 }
+
+//显示二维码
+function showQrCode(event) {
+    var source = event.target || event.srcElement;
+    var qrCode = $(source).data('qrcode');
+    var dialogTitle = $(source).data('dlgtitle');
+
+    var content =
+         '<div class="modal-content">' +
+             '<div class="modal-header">' +
+                 '<button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>' +
+                 '<h4 class="modal-title">' + dialogTitle + '</h4>' +
+             '</div>' +
+             '<div class="modal-body">' +
+                  '<div id="qrCodeDiv" style="text-align:center"></div>' +
+             '</div>' +
+             '<div class="modal-footer">' +
+                  '<button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>' +
+             '</div>' +
+         '</div>';
+    $('#modalTemplate .modal-dialog').empty().append(content)
+
+    $('#qrCodeDiv').append(kjua({
+       render: 'image',
+       crisp: true,
+       size: 200,
+       fill: '#000',
+       back: '#fff',
+       text: qrCode,
+       rounded: 0,
+       quiet: 2,
+       mode: 'plain',
+   }));
+
+    $('#modalTemplate').modal('show');
+
+    return false;
+}

@@ -16,4 +16,10 @@ interface CompanyService {
 
     /** 返回可用的微信收款账户 */
     fun getAvailableWxAccount(companyId: Int): CompanyWxAccount?
+
+    /** 开始添加微信收款账户
+     * @return 返回验证码 */
+    fun startAddCompanyWxAccount(): String
+
+    fun addCompanyWxAccount(code: String, realname: String, phoneNumber: String, verifyCode: String)
 }

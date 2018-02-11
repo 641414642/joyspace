@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta charset="utf-8" />
+    <!-- Bootstrap 3.3.6 -->
+    <link rel="stylesheet" href="../../static/thirdparty/bootstrap/css/bootstrap.min.css" th:href="@{/thirdparty/bootstrap/css/bootstrap.min.css}" />
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="../../static/thirdparty/fontawesome/css/font-awesome.min.css" th:href="@{/thirdparty/fontawesome/css/font-awesome.min.css}" />
+    <!-- Ionicons -->
+    <link rel="stylesheet" href="../../static/thirdparty/ionicons/css/ionicons.min.css" th:href="@{/thirdparty/ionicons/css/ionicons.min.css}" />
+    <!-- Theme style -->
+    <link rel="stylesheet" href="../../static/thirdparty/adminlte/css/AdminLTE.min.css" th:href="@{/thirdparty/adminlte/css/AdminLTE.min.css}" />
+    <!-- AdminLTE Skins. Choose a skin from the css/skins
+         folder instead of downloading all of them to reduce the load. -->
+    <link rel="stylesheet" href="../../static/thirdparty/adminlte/css/skins/_all-skins.min.css" th:href="@{/thirdparty/adminlte/css/skins/_all-skins.min.css}" />
+
+    <!-- jQuery 2.2.3 -->
+    <script src="../../static/thirdparty/plugins/jQuery/jquery-2.2.3.min.js" th:src="@{/thirdparty/plugins/jQuery/jquery-2.2.3.min.js}"></script>
+    <!-- Bootstrap 3.3.6 -->
+    <script src="../../static/thirdparty/bootstrap/js/bootstrap.min.js" th:src="@{/thirdparty/bootstrap/js/bootstrap.min.js}"></script>
+    <!-- SlimScroll -->
+    <script src="../../static/thirdparty/plugins/slimScroll/jquery.slimscroll.min.js" th:src="@{/thirdparty/plugins/slimScroll/jquery.slimscroll.min.js}"></script>
+    <!-- FastClick -->
+    <script src="../../static/thirdparty/plugins/fastclick/fastclick.js" th:src="@{/thirdparty/plugins/fastclick/fastclick.js}"></script>
+    <!-- AdminLTE App -->
+    <script src="../../static/thirdparty/adminlte/js/app.min.js" th:src="@{/thirdparty/adminlte/js/app.min.js}"></script>
+
+    <script type="text/javascript">
+		$(document).ready(function() {
+			$('#wxAccountAddDialog').modal('show');
+		});
+	</script>
+</head>
+<body>
+<div class="modal fade" role="dialog" id="wxAccountAddDialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content" th:fragment="content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+                <h4 class="modal-title">添加微信收款账号</h4>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="control-label">请使用微信扫描以下二维码:</label>
+
+                    <div id="qrCodeDiv" th:attr="data-qrcode=${qrcode}"></div>
+                </div>
+                <div class="form-group">
+                    <label for="verifyCode" class="control-label">微信中打开页面后，请输入以下验证码:</label>
+                    <input type="text" id="verifyCode" class="form-control" readonly="readonly" value="VERIFYCODE" th:value="${verifyCode}" />
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

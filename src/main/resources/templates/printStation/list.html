@@ -77,8 +77,9 @@
 						<td>
 							<a href="#" style="margin-right:5px">
 								<i class="fa fa-fw fa-qrcode"
+								   data-dlgtitle="自助机二维码"
 								   th:attr="data-qrcode=${ps.printStation.wxQrCode}"
-								   onclick="return showPrintStationQrCode(event, true)"
+								   onclick="return showQrCode(event)"
 								   title="二维码">
 								</i>
 							</a>
@@ -100,7 +101,7 @@
 	</section>
 
 	<script src="../../static/js/printStation.js" th:src="@{/js/product.js}"></script>
-	<script src="../../static/js/qrcode.min.js" th:src="@{/js/qrcode.min.js}"></script>
+	<script src="../../static/js/kjua.min.js" th:src="@{/js/kjua.min.js}"></script>
 </div>
 </body>
 </html>

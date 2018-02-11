@@ -39,3 +39,20 @@ function validateCompanyInput() {
 function createOrEditCompany(event, create) {
     return showPostFormModal(event, create ? 'createCompanyForm' : 'editCompanyForm', null, true, validateCompanyInput, processCompanyResult);
 }
+
+//添加微信收款账户
+function startAddCompanyWxAccount(event) {
+    return showModal(event, function() {
+        $('#qrCodeDiv').append(kjua({
+           render: 'image',
+           crisp: true,
+           size: 200,
+           fill: '#000',
+           back: '#fff',
+           text: $("#qrCodeDiv").data("qrcode"),
+           rounded: 0,
+           quiet: 2,
+           mode: 'plain',
+        }));
+    });
+}

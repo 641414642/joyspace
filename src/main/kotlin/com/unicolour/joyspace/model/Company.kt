@@ -63,6 +63,30 @@ class CompanyWxAccount {
     @NotNull
     lateinit var name: String
 
+    //收款人微信昵称
+    @Column(length = 50)
+    @NotNull
+    lateinit var nickName: String
+
+    //电话号码
+    @Column(length = 20)
+    @NotNull
+    lateinit var phoneNumber: String
+
+    //头像
+    @Column(length = 1024)
+    var avatar: String? = null
+
+    //验证码
+    @Column(length = 6)
+    @NotNull
+    lateinit var verifyCode: String
+
+    //创建时间
+    @Column
+    @NotNull
+    lateinit var createTime: Calendar
+
     @Column
     @NotNull
     var enabled: Boolean = false   //是否可用

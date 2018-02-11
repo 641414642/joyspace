@@ -25,6 +25,22 @@
 
 	<link rel="stylesheet" href="../static/css/joyspace.css" th:href="@{/css/joyspace.css}" />
 
+	<!-- jQuery 2.2.3 -->
+	<script src="../static/thirdparty/plugins/jQuery/jquery-2.2.3.min.js" th:src="@{/thirdparty/plugins/jQuery/jquery-2.2.3.min.js}"></script>
+	<!-- Bootstrap 3.3.6 -->
+	<script src="../static/thirdparty/bootstrap/js/bootstrap.min.js" th:src="@{/thirdparty/bootstrap/js/bootstrap.min.js}"></script>
+	<!-- SlimScroll -->
+	<script src="../static/thirdparty/plugins/slimScroll/jquery.slimscroll.min.js" th:src="@{/thirdparty/plugins/slimScroll/jquery.slimscroll.min.js}"></script>
+	<!-- FastClick -->
+	<script src="../static/thirdparty/plugins/fastclick/fastclick.js" th:src="@{/thirdparty/plugins/fastclick/fastclick.js}"></script>
+	<!-- AdminLTE App -->
+	<script src="../static/thirdparty/adminlte/js/app.min.js" th:src="@{/thirdparty/adminlte/js/app.min.js}"></script>
+	<!-- Bootstrap datepicker -->
+	<script src="../static/js/bootstrap-datepicker.min.js" th:src="@{/js/bootstrap-datepicker.min.js}"></script>
+	<script src="../static/js/bootstrap-datepicker.zh-CN.min.js" th:src="@{/js/bootstrap-datepicker.zh-CN.min.js}"></script>
+
+	<script src="../static/js/joyspace.js" th:src="@{/js/joyspace.js}"></script>
+
 	<!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
 	<!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
 	<!--[if lt IE 9]>
@@ -122,6 +138,7 @@
 						<!--<li><a href="#"><i class="fa fa-circle-o"></i>会员列表</a></li>-->
 						<li th:class="${viewContent=='company_list' ? 'active' : ''}" sec:authorize="hasRole('ROLE_SUPERADMIN')"><a href="#" th:href="@{/company/list}"><i class="fa fa-circle-o"></i>投放商列表</a></li>
 						<li th:class="${viewContent=='activation_code_list' ? 'active' : ''}" sec:authorize="hasRole('ROLE_SUPERADMIN')"><a href="#" th:href="@{/activationCode/list}"><i class="fa fa-circle-o"></i>自助机激活码</a></li>
+						<li th:class="${viewContent=='company_wx_account' ? 'active' : ''}"><a href="#" th:href="@{/company/wxAccountList}"><i class="fa fa-circle-o"></i>微信收款账户</a></li>
 					</ul>
 				</li>
 				<li sec:authorize="hasRole('ROLE_SUPERADMIN')" th:class="${viewCat=='pay_mgr' ? 'treeview active' : 'treeview'}" class="treeview">
@@ -202,6 +219,7 @@
 		<div th:case="'printOrder_list'" th:include="printOrder/list :: content"></div>
 		<div th:case="'adSet_list'" th:include="adSet/list :: content"></div>
 		<div th:case="'activation_code_list'" th:include="activationCode/list :: content"></div>
+		<div th:case="'company_wx_account'" th:include="company/wxAccount :: content"></div>
 		<div th:case="*"></div>
 		<!-- /.content -->
 	</div>
@@ -221,20 +239,7 @@
 </div>
 <!-- ./wrapper -->
 
-<!-- jQuery 2.2.3 -->
-<script src="../static/thirdparty/plugins/jQuery/jquery-2.2.3.min.js" th:src="@{/thirdparty/plugins/jQuery/jquery-2.2.3.min.js}"></script>
-<!-- Bootstrap 3.3.6 -->
-<script src="../static/thirdparty/bootstrap/js/bootstrap.min.js" th:src="@{/thirdparty/bootstrap/js/bootstrap.min.js}"></script>
-<!-- SlimScroll -->
-<script src="../static/thirdparty/plugins/slimScroll/jquery.slimscroll.min.js" th:src="@{/thirdparty/plugins/slimScroll/jquery.slimscroll.min.js}"></script>
-<!-- FastClick -->
-<script src="../static/thirdparty/plugins/fastclick/fastclick.js" th:src="@{/thirdparty/plugins/fastclick/fastclick.js}"></script>
 <!-- AdminLTE App -->
 <script src="../static/thirdparty/adminlte/js/app.min.js" th:src="@{/thirdparty/adminlte/js/app.min.js}"></script>
-<!-- Bootstrap datepicker -->
-<script src="../static/js/bootstrap-datepicker.min.js" th:src="@{/js/bootstrap-datepicker.min.js}"></script>
-<script src="../static/js/bootstrap-datepicker.zh-CN.min.js" th:src="@{/js/bootstrap-datepicker.zh-CN.min.js}"></script>
-
-<script src="../static/js/joyspace.js" th:src="@{/js/joyspace.js}"></script>
 </body>
 </html>

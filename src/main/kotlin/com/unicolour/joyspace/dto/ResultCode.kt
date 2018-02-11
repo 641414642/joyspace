@@ -20,6 +20,7 @@ enum class ResultCode(val value:Int, val desc:String, val descEn: String) {
     GEO_DECODE_FAILED(16, "查找地址信息失败", "Failed to get address info of location"),
     PRINT_STATION_ID_EXISTS(17, "自助机ID和现有的自助机重复", ""),
     PRINT_STATION_CODE_ID_EXISTS(18, "自助机ID和现有的自助机激活码重复", ""),
+    COMPANY_WX_ACCOUNT_EXISTS(19, "此微信帐户已经添加过", ""),
 
     COMPANY_ALREADY_EXISTS(20, "同名投放商已存在", "Company with same name already exists"),
     MANAGER_ALREADY_EXISTS(21, "同名管理员已存在", "Manager with same name already exists"),
