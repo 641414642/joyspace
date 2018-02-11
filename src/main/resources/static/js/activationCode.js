@@ -81,7 +81,37 @@ function editActivationCode(event) {
 function exportActivationCode(event) {
     return showModal(event, function() {
         $("#exportActivationCodeForm").submit(function(e) {
-            $('#modalTemplate').modal('hide');
+            clearFormGroupErrMsg("#exportActivationCodeForm");
+
+            var startId = $("#exportActivationCodeForm input[name='startId']").val();
+            var endId = $("#exportActivationCodeForm input[name='endId']").val();
+
+            var hasInputError = true;
+            if (startId.length === 0 || !startId.trim()) {
+                showFormGroupErrMsg("startId", "请输入起始ID!");
+            }
+            else if (!isPositiveInt(startId)) {
+                showFormGroupErrMsg("startId", "起始ID必须是正整数!");
+            }
+            else if (endId.length === 0 || !endId.trim()) {
+                showFormGroupErrMsg("endId", "请输入结束ID!");
+            }
+            else if (!isPositiveInt(endId)) {
+                showFormGroupErrMsg("endId", "结束ID必须是正整数!");
+            }
+            else if (parseInt(endId) < parseInt(startId)) {
+                showFormGroupErrMsg("endId", "结束ID必须大于或等于起始ID!");
+            }
+            else {
+                hasInputError = false;
+            }
+
+            if (hasInputError) {
+                e.preventDefault();
+            }
+            else {
+                $('#modalTemplate').modal('hide');
+            }
         })
     });
 }
