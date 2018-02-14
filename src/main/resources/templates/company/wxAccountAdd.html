@@ -42,12 +42,15 @@
             </div>
             <div class="modal-body">
                 <div class="form-group">
-                    <label class="control-label">请使用微信扫描以下二维码:</label>
-
+                    <label class="control-label">第一步: 扫码关注优利绚彩微信公众号</label>
+                    <div id="wxmpQrCodeDiv" th:attr="data-qrcode=${wxmpQrCode}"></div>
+                </div>
+                <div class="form-group">
+                    <label class="control-label">第二步: 扫码打开添加账户页面</label>
                     <div id="qrCodeDiv" th:attr="data-qrcode=${qrcode}"></div>
                 </div>
                 <div class="form-group">
-                    <label for="verifyCode" class="control-label">微信中打开页面后，请输入以下验证码:</label>
+                    <label for="verifyCode" class="control-label">第三步: 输入用户信息和以下验证码，并点击确认按钮</label>
                     <input type="text" id="verifyCode" class="form-control" readonly="readonly" value="VERIFYCODE" th:value="${verifyCode}" />
                 </div>
             </div>

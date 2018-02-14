@@ -26,7 +26,10 @@ class CompanyController {
     @Value("\${com.unicolour.joyspace.baseUrl}")
     lateinit var baseUrl: String
 
-    //微信支付关联的公众号appId
+    //微信支付关联的公众号QrCode 和 appId
+    @Value("\${com.unicolour.wxmpQrCode}")
+    lateinit var wxmpQrCode: String
+
     @Value("\${com.unicolour.wxmpAppId}")
     lateinit var wxmpAppId: String
 
@@ -136,6 +139,7 @@ class CompanyController {
     fun startAddWxAccount(modelAndView: ModelAndView): ModelAndView {
         val verifyCode = companyService.startAddCompanyWxAccount()
 
+        modelAndView.model["wxmpQrCode"] = wxmpQrCode
         modelAndView.model["qrcode"] = "https://open.weixin.qq.com/connect/oauth2/authorize" +
             "?appid=$wxmpAppId" +
             "&redirect_uri=$baseUrl/company/wxAccountAddConfirm" +

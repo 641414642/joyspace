@@ -43,6 +43,18 @@ function createOrEditCompany(event, create) {
 //添加微信收款账户
 function startAddCompanyWxAccount(event) {
     return showModal(event, function() {
+        $('#wxmpQrCodeDiv').append(kjua({
+           render: 'image',
+           crisp: true,
+           size: 200,
+           fill: '#000',
+           back: '#fff',
+           text: $("#wxmpQrCodeDiv").data("qrcode"),
+           rounded: 0,
+           quiet: 2,
+           mode: 'plain',
+        }));
+
         $('#qrCodeDiv').append(kjua({
            render: 'image',
            crisp: true,

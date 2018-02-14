@@ -130,7 +130,7 @@ open class CompanyServiceImpl : CompanyService {
 
     @Transactional
     override fun addCompanyWxAccount(code: String, realname: String, phoneNumber: String, verifyCode: String) {
-        val account = companyWxAccountDao.findByVerifyCode(verifyCode)
+        val account = companyWxAccountDao.findByVerifyCode(verifyCode.toUpperCase())
         if (account == null) {
             throw ProcessException(ResultCode.INVALID_VERIFY_CODE)
         }
