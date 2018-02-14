@@ -21,9 +21,10 @@ enum class ResultCode(val value:Int, val desc:String, val descEn: String) {
     PRINT_STATION_ID_EXISTS(17, "自助机ID和现有的自助机重复", ""),
     PRINT_STATION_CODE_ID_EXISTS(18, "自助机ID和现有的自助机激活码重复", ""),
     COMPANY_WX_ACCOUNT_EXISTS(19, "此微信帐户已经添加过", ""),
-
     COMPANY_ALREADY_EXISTS(20, "同名投放商已存在", "Company with same name already exists"),
     MANAGER_ALREADY_EXISTS(21, "同名管理员已存在", "Manager with same name already exists"),
+    COMPANY_WX_ACCOUNT_NOT_EXISTS(22, "指定的帐户不存在", ""),
+
     SERVER_ERROR(100, "服务器错误", "Server error"),
 
     OTHER_ERROR(200, "其他错误", "Other error"),

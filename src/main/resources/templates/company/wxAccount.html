@@ -26,9 +26,54 @@
 				</div>
 			</div>
 			<div class="box-body">
+				<table class="table table-bordered table-striped">
+					<tr>
+						<th>姓名</th>
+						<th>电话</th>
+						<th>微信昵称</th>
+						<th>创建时间</th>
+						<th>操作</th>
+					</tr>
+					<tr th:each="account : ${accounts}">
+						<td th:text="${account.name}"></td>
+						<td th:text="${account.phoneNumber}"></td>
+						<td th:text="${account.nickName}"></td>
+						<td th:text="${account.createTime == null ? '' : #calendars.format(account.createTime, 'yyyy-MM-dd HH:mm')}"></td>
+						<td valign="middle" style="vertical-align:middle">
+							<a href="#" style="margin-right:5px">
+								<i class="fa fa-trash-o"
+								   th:attr="data-id=${account.id},data-name=${account.name}"
+								   onclick="return deleteCompanyWxAccount(event)"
+								   title="删除">
+								</i>
+							</a>
+						</td>
+					</tr>
+				</table>
 			</div>
 		</div>
 	</section>
+
+    <div class="modal fade" role="dialog" id="confirmDeleteDialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+                    <h4 class="modal-title">删除</h4>
+                </div>
+                <form id="deleteAccountForm" th:action="@{/company/deleteWxAccount}" method="post">
+                    <input type="hidden" name="accountId" id="accountId" />
+                    <div class="modal-body">
+                        <p>您确定要删除收款账户"<span id="accountName"></span>"吗?</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-primary">确定</button>
+                        <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 
 	<script src="../../static/js/kjua.min.js" th:src="@{/js/kjua.min.js}"></script>
 	<script src="../../static/js/company.js" th:src="@{/js/company.js}"></script>

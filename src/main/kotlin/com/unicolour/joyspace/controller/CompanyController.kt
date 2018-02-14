@@ -1,7 +1,7 @@
 package com.unicolour.joyspace.controller
 
 import com.unicolour.joyspace.dao.CompanyDao
-import com.unicolour.joyspace.dao.WeiXinPayConfigDao
+import com.unicolour.joyspace.dao.CompanyWxAccountDao
 import com.unicolour.joyspace.dto.CommonRequestResult
 import com.unicolour.joyspace.dto.ResultCode
 import com.unicolour.joyspace.exception.ProcessException
@@ -37,7 +37,7 @@ class CompanyController {
     lateinit var companyDao: CompanyDao
 
     @Autowired
-    lateinit var weiXinPayConfigDao: WeiXinPayConfigDao
+    lateinit var companyWxAccountDao: CompanyWxAccountDao
 
     @Autowired
     lateinit var companyService: CompanyService
@@ -80,13 +80,10 @@ class CompanyController {
             company = companyDao.findOne(id)
         }
 
-        val wxPayConfigs = weiXinPayConfigDao.findAll()
-
         if (company == null) {
             company = Company()
         }
 
-        modelAndView.model["wxPayConfigs"] = wxPayConfigs
         modelAndView.model["create"] = id <= 0
         modelAndView.model["company"] = company
         if (id > 0) {
@@ -128,6 +125,12 @@ class CompanyController {
 
     @RequestMapping("/company/wxAccountList", method = arrayOf(RequestMethod.GET))
     fun companyWxAccountList(modelAndView: ModelAndView): ModelAndView {
+        val loginManager = managerService.loginManager
+
+        val accounts = companyWxAccountDao.findByCompanyId(loginManager!!.companyId).filter { it.enabled }
+
+        modelAndView.model["accounts"] = accounts
+
         modelAndView.model["viewCat"] = "system_mgr"
         modelAndView.model["viewContent"] = "company_wx_account"
         modelAndView.viewName = "layout"
@@ -180,6 +183,22 @@ class CompanyController {
         }
         catch (e: Exception) {
             return CommonRequestResult(ResultCode.OTHER_ERROR.value, "添加微信收款账号失败")
+        }
+    }
+
+    @RequestMapping(path = arrayOf("/company/deleteWxAccount"), method = arrayOf(RequestMethod.POST))
+    @ResponseBody
+    fun deleteWxAccount(@RequestParam("accountId") accountId: Int): CommonRequestResult
+    {
+        try {
+            companyService.deleteCompanyWxAccount(accountId)
+            return CommonRequestResult()
+        }
+        catch (e: ProcessException) {
+            return CommonRequestResult(e.errcode, e.message)
+        }
+        catch (e: Exception) {
+            return CommonRequestResult(ResultCode.OTHER_ERROR.value, "删除微信收款账号失败")
         }
     }
 }

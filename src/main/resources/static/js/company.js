@@ -68,3 +68,32 @@ function startAddCompanyWxAccount(event) {
         }));
     });
 }
+
+//确认删除收款账户
+function deleteCompanyWxAccount(event) {
+    var source = event.target || event.srcElement;
+    $("#accountId").val($(source).data("id"));
+    $("#accountName").text($(source).data("name"));
+    $("#confirmDeleteDialog").modal("show");
+}
+
+$(function() {
+    var frm = $('#deleteAccountForm');
+    frm.submit(function (ev) {
+        $.ajax({
+            type: frm.attr('method'),
+            url: frm.attr('action'),
+            data: frm.serialize(),
+            success: function (data) {
+                if (data.errcode == 0) {
+                    window.location.reload();
+                }
+                else {
+                    alert(data.errmsg);
+                }
+            }
+        });
+
+        ev.preventDefault();
+    });
+})

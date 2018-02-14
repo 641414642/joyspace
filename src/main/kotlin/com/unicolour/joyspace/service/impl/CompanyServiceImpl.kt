@@ -228,5 +228,19 @@ open class CompanyServiceImpl : CompanyService {
 
         return account.verifyCode
     }
+
+    @Transactional
+    override fun deleteCompanyWxAccount(accountId: Int): Boolean {
+        val account = companyWxAccountDao.findOne(accountId)
+        if (account == null) {
+            ProcessException(ResultCode.INVALID_ACTIVATION_CODE)
+        }
+        else if (account.companyId != managerService.loginManager!!.companyId) {
+            ProcessException(ResultCode.OTHER_ERROR, "没有删除权限")
+        }
+
+        companyWxAccountDao.delete(accountId)
+        return true
+    }
 }
 
