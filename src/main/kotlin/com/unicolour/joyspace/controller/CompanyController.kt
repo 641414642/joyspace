@@ -1,32 +1,23 @@
 package com.unicolour.joyspace.controller
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.unicolour.joyspace.controller.api.WeixinNotifyController
 import com.unicolour.joyspace.dao.CompanyDao
 import com.unicolour.joyspace.dao.WeiXinPayConfigDao
 import com.unicolour.joyspace.dto.CommonRequestResult
-import com.unicolour.joyspace.dto.QQMapGeoDecodeResult
 import com.unicolour.joyspace.dto.ResultCode
-import com.unicolour.joyspace.dto.WxPayParams
 import com.unicolour.joyspace.exception.ProcessException
 import com.unicolour.joyspace.model.Company
 import com.unicolour.joyspace.service.CompanyService
 import com.unicolour.joyspace.service.ManagerService
-import com.unicolour.joyspace.service.impl.PositionServiceImpl
 import com.unicolour.joyspace.util.Pager
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
-import org.springframework.http.HttpMethod
-import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestMethod
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.ResponseBody
-import org.springframework.web.client.RestTemplate
 import org.springframework.web.servlet.ModelAndView
 
 @Controller
@@ -34,6 +25,10 @@ class CompanyController {
 
     @Value("\${com.unicolour.joyspace.baseUrl}")
     lateinit var baseUrl: String
+
+    //微信支付关联的公众号appId
+    @Value("\${com.unicolour.wxmpAppId}")
+    lateinit var wxmpAppId: String
 
     @Autowired
     lateinit var companyDao: CompanyDao
@@ -59,15 +54,15 @@ class CompanyController {
         else
             companyDao.findByName(name, pageable)
 
-        modelAndView.model.put("inputCompanyName", name)
+        modelAndView.model["inputCompanyName"] = name
 
         val pager = Pager(companies.totalPages, 7, pageno - 1)
-        modelAndView.model.put("pager", pager)
+        modelAndView.model["pager"] = pager
 
-        modelAndView.model.put("companies", companies.content)
+        modelAndView.model["companies"] = companies.content
 
-        modelAndView.model.put("viewCat", "system_mgr")
-        modelAndView.model.put("viewContent", "company_list")
+        modelAndView.model["viewCat"] = "system_mgr"
+        modelAndView.model["viewContent"] = "company_list"
         modelAndView.viewName = "layout"
 
         return modelAndView
@@ -88,9 +83,9 @@ class CompanyController {
             company = Company()
         }
 
-        modelAndView.model.put("wxPayConfigs", wxPayConfigs)
-        modelAndView.model.put("create", id <= 0)
-        modelAndView.model.put("company", company)
+        modelAndView.model["wxPayConfigs"] = wxPayConfigs
+        modelAndView.model["create"] = id <= 0
+        modelAndView.model["company"] = company
         if (id > 0) {
             modelAndView.viewName = "/company/edit :: content_edit"
         }
@@ -142,7 +137,7 @@ class CompanyController {
         val verifyCode = companyService.startAddCompanyWxAccount()
 
         modelAndView.model["qrcode"] = "https://open.weixin.qq.com/connect/oauth2/authorize" +
-            "?appid=wxffad6438f08103cb" +
+            "?appid=$wxmpAppId" +
             "&redirect_uri=$baseUrl/company/wxAccountAddConfirm" +
             "&response_type=code" +
             "&scope=snsapi_userinfo"
@@ -184,33 +179,3 @@ class CompanyController {
         }
     }
 }
-
-@JsonIgnoreProperties(ignoreUnknown = true)
-class GetAccessTokenResult(
-        var errcode: Int = 0,
-        var errmsg: String = "",
-
-        var access_token: String = "",
-        var expires_in: Int = 0,
-        var refresh_token: String = "",
-        var openid: String = "",
-        var scope: String = ""
-)
-
-@JsonIgnoreProperties(ignoreUnknown = true)
-class GetUserInfoResult(
-        var errcode: Int = 0,
-        var errmsg: String = "",
-
-        var openid: String = "",   //用户的唯一标识
-        var nickname:String = "",   //用户昵称
-        var headimgurl: String = ""  //用户头像，最后一个数值代表正方形头像大小（有0、46、64、96、132数值可选，0代表640*640正方形头像），用户没有头像时该项为空。若用户更换头像，原有头像URL将失效。
-        //sex  用户的性别，值为1时是男性，值为2时是女性，值为0时是未知
-        //province  用户个人资料填写的省份
-
-        //city  普通用户个人资料填写的城市
-        //country   国家，如中国为CN
-        //privilege  用户特权信息，json 数组，如微信沃卡用户为（chinaunicom）
-        //unionid  只有在用户将公众号绑定到微信开放平台帐号后，才会出现该字段。详见：获取用户个人信息（UnionID机制）
-)
-

@@ -1,11 +1,11 @@
 package com.unicolour.joyspace.service.impl
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.unicolour.joyspace.controller.GetAccessTokenResult
-import com.unicolour.joyspace.controller.GetUserInfoResult
 import com.unicolour.joyspace.dao.CompanyDao
 import com.unicolour.joyspace.dao.CompanyWxAccountDao
 import com.unicolour.joyspace.dao.WxEntTransferRecordDao
+import com.unicolour.joyspace.dto.WxGetAccessTokenResult
+import com.unicolour.joyspace.dto.WxGetUserInfoResult
 import com.unicolour.joyspace.dto.ResultCode
 import com.unicolour.joyspace.exception.ProcessException
 import com.unicolour.joyspace.model.Company
@@ -15,6 +15,7 @@ import com.unicolour.joyspace.service.CompanyService
 import com.unicolour.joyspace.service.ManagerService
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
@@ -29,6 +30,13 @@ open class CompanyServiceImpl : CompanyService {
     companion object {
         val logger = LoggerFactory.getLogger(CompanyServiceImpl::class.java)
     }
+
+    //微信支付关联的公众号appId和appSecret
+    @Value("\${com.unicolour.wxmpAppId}")
+    lateinit var wxmpAppId: String
+
+    @Value("\${com.unicolour.wxmpAppSecret}")
+    lateinit var wxmpAppSecret: String
 
     @Autowired
     lateinit var companyDao: CompanyDao
@@ -128,19 +136,23 @@ open class CompanyServiceImpl : CompanyService {
         }
 
         val resp = restTemplate.exchange(
-                "https://api.weixin.qq.com/sns/oauth2/access_token?appid={appid}&secret={secret}&code={code}&grant_type=authorization_code",
+                "https://api.weixin.qq.com/sns/oauth2/access_token" +
+                        "?appid={appid}" +
+                        "&secret={secret}" +
+                        "&code={code}" +
+                        "&grant_type=authorization_code",
                 HttpMethod.GET,
                 null,
                 String::class.java,
                 mapOf(
-                        "appid" to "wxffad6438f08103cb",   //XXX
-                        "secret" to "70ba4ab55820f8d1a9766e123e7bcadf",   //XXX
+                        "appid" to wxmpAppId,
+                        "secret" to wxmpAppSecret,
                         "code" to code
                 )
         )
 
         if (resp != null && resp.statusCode == HttpStatus.OK) {
-            val result = objectMapper.readValue(resp.body, GetAccessTokenResult::class.java)
+            val result = objectMapper.readValue(resp.body, WxGetAccessTokenResult::class.java)
             if (result.errcode == 0) {
                 if (companyWxAccountDao.existsByCompanyIdAndOpenId(account.companyId, result.openid)) {
                     ProcessException(ResultCode.COMPANY_WX_ACCOUNT_EXISTS)
@@ -171,9 +183,11 @@ open class CompanyServiceImpl : CompanyService {
     }
 
 
-    private fun getUserInfo(accessToken: String, openId: String): GetUserInfoResult? {
+    private fun getUserInfo(accessToken: String, openId: String): WxGetUserInfoResult? {
         val resp = restTemplate.exchange(
-                "https://api.weixin.qq.com/sns/userinfo?access_token={accessToken}&openid={openId}",
+                "https://api.weixin.qq.com/sns/userinfo" +
+                        "?access_token={accessToken}" +
+                        "&openid={openId}",
                 HttpMethod.GET,
                 null,
                 String::class.java,
@@ -184,7 +198,7 @@ open class CompanyServiceImpl : CompanyService {
         )
 
         if (resp != null && resp.statusCode == HttpStatus.OK) {
-            val result = objectMapper.readValue(resp.body, GetUserInfoResult::class.java)
+            val result = objectMapper.readValue(resp.body, WxGetUserInfoResult::class.java)
             if (result.errcode == 0) {
                 return result
             }
@@ -215,3 +229,4 @@ open class CompanyServiceImpl : CompanyService {
         return account.verifyCode
     }
 }
+

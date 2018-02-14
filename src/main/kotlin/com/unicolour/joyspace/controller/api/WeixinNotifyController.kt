@@ -22,8 +22,8 @@ class WeixinNotifyController {
         val logger = LoggerFactory.getLogger(WeixinNotifyController::class.java)
     }
 
-    @Value("\${com.unicolour.wxNotifyToken}")
-    lateinit var wxNotifyToken: String
+//    @Value("\${com.unicolour.wxNotifyToken}")
+//    lateinit var wxNotifyToken: String
 
     @Autowired
     lateinit var printOrderService: PrintOrderService
@@ -43,41 +43,41 @@ class WeixinNotifyController {
         }
     }
 
-    @RequestMapping("/wxmp/notify", method = arrayOf(RequestMethod.GET))
-    @ResponseBody
-    fun weixinMpNotify(@RequestParam("signature", required = true) signature: String,
-                       @RequestParam("timestamp", required = true) timestamp: String,
-                       @RequestParam("nonce", required = true) nonce: String,
-                       @RequestParam("echostr", required = true) echostr: String
-    ) : String {
+//    @RequestMapping("/wxmp/notify", method = arrayOf(RequestMethod.GET))
+//    @ResponseBody
+//    fun weixinMpNotify(@RequestParam("signature", required = true) signature: String,
+//                       @RequestParam("timestamp", required = true) timestamp: String,
+//                       @RequestParam("nonce", required = true) nonce: String,
+//                       @RequestParam("echostr", required = true) echostr: String
+//    ) : String {
+//
+//        logger.info("/wxmp/notify, signature=$signature, timestamp=$timestamp, nonce=$nonce, echostr=$echostr")
+//        return if (checkSignature(signature, timestamp, nonce)) {
+//            logger.info("/wxmp/notify check pass")
+//            echostr
+//        }
+//        else {
+//            logger.info("/wxmp/notify check failed")
+//            ""
+//        }
+//    }
 
-        logger.info("/wxmp/notify, signature=$signature, timestamp=$timestamp, nonce=$nonce, echostr=$echostr")
-        return if (checkSignature(signature, timestamp, nonce)) {
-            logger.info("/wxmp/notify check pass")
-            echostr
-        }
-        else {
-            logger.info("/wxmp/notify check failed")
-            ""
-        }
-    }
-
-    private fun checkSignature(signature: String, timestamp: String, nonce: String): Boolean {
-        try {
-            val arr = arrayOf(timestamp, nonce, wxNotifyToken)
-            Arrays.sort(arr)
-
-            val s = arr[0] + arr[1] + arr[2]
-            val md = MessageDigest.getInstance("SHA-1")
-            val digest = md.digest(s.toByteArray(charset("utf-8")))
-
-            return signature.equals(Hex.encodeHexString(digest), ignoreCase = true)
-        } catch (e: NoSuchAlgorithmException) {
-            e.printStackTrace()
-            return false
-        } catch (e: UnsupportedEncodingException) {
-            e.printStackTrace()
-            return false
-        }
-    }
+//    private fun checkSignature(signature: String, timestamp: String, nonce: String): Boolean {
+//        try {
+//            val arr = arrayOf(timestamp, nonce, wxNotifyToken)
+//            Arrays.sort(arr)
+//
+//            val s = arr[0] + arr[1] + arr[2]
+//            val md = MessageDigest.getInstance("SHA-1")
+//            val digest = md.digest(s.toByteArray(charset("utf-8")))
+//
+//            return signature.equals(Hex.encodeHexString(digest), ignoreCase = true)
+//        } catch (e: NoSuchAlgorithmException) {
+//            e.printStackTrace()
+//            return false
+//        } catch (e: UnsupportedEncodingException) {
+//            e.printStackTrace()
+//            return false
+//        }
+//    }
 }

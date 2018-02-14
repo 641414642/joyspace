@@ -111,17 +111,19 @@ open class PrintOrderServiceImpl : PrintOrderService {
     @Autowired
     lateinit var transactionTemplate: TransactionTemplate
 
+    //小程序appid
     @Value("\${com.unicolour.wxAppId}")
     lateinit var wxAppId: String
-
-    @Value("\${com.unicolour.wxMchAppId}")
-    lateinit var wxMchAppId: String
 
     @Value("\${com.unicolour.wxMchId}")  //商户id
     lateinit var wxMchId: String
 
     @Value("\${com.unicolour.wxPayKey}")
     lateinit var wxPayKey: String
+
+    //微信支付关联的公众号appid
+    @Value("\${com.unicolour.wxmpAppId}")
+    lateinit var wxmpAppId: String
 
     private lateinit var wxUnifyOrderResultUnmarshaller: Unmarshaller
     private lateinit var wxPayNotifyUnmarshaller: Unmarshaller
@@ -690,7 +692,7 @@ open class PrintOrderServiceImpl : PrintOrderService {
         val ipAddress: String = java.net.InetAddress.getByName(URL(baseUrl).host).hostAddress
 
         val params = TreeMap(hashMapOf(
-                "mch_appid" to wxMchAppId,
+                "mch_appid" to wxmpAppId,
                 "mchid" to wxMchId,
                 "nonce_str" to nonceStr,
                 "partner_trade_no" to record.tradeNo,

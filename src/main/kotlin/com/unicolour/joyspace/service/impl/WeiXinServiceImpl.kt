@@ -1,7 +1,7 @@
 package com.unicolour.joyspace.service.impl
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.unicolour.joyspace.dto.WxGetAccessTokenResult
 import com.unicolour.joyspace.service.WeiXinService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
@@ -99,7 +99,7 @@ class WeiXinServiceImpl : WeiXinService {
 
         if (resp != null && resp.statusCode == HttpStatus.OK) {
             val bodyStr = resp.body
-            val body: GetAccessTokenResult = objectMapper.readValue(bodyStr, GetAccessTokenResult::class.java)
+            val body: WxGetAccessTokenResult = objectMapper.readValue(bodyStr, WxGetAccessTokenResult::class.java)
 
             if (body.errcode == 0 && !body.access_token.isNullOrEmpty()) {
                 if (managerApp) {
@@ -124,10 +124,3 @@ class WeiXinServiceImpl : WeiXinService {
     }
 }
 
-@JsonIgnoreProperties(ignoreUnknown = true)
-class GetAccessTokenResult(
-        var access_token: String? = null,
-        var expires_in: Int? = 0,
-        var errcode: Int? = 0,
-        var errmsg: String? = null
-)
