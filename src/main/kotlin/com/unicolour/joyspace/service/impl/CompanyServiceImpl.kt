@@ -155,7 +155,7 @@ open class CompanyServiceImpl : CompanyService {
             val result = objectMapper.readValue(resp.body, WxGetAccessTokenResult::class.java)
             if (result.errcode == 0) {
                 if (companyWxAccountDao.existsByCompanyIdAndOpenId(account.companyId, result.openid)) {
-                    ProcessException(ResultCode.COMPANY_WX_ACCOUNT_EXISTS)
+                    throw ProcessException(ResultCode.COMPANY_WX_ACCOUNT_EXISTS)
                 }
 
                 val userInfo = getUserInfo(result.access_token, result.openid)
@@ -233,10 +233,10 @@ open class CompanyServiceImpl : CompanyService {
     override fun deleteCompanyWxAccount(accountId: Int): Boolean {
         val account = companyWxAccountDao.findOne(accountId)
         if (account == null) {
-            ProcessException(ResultCode.INVALID_ACTIVATION_CODE)
+            throw ProcessException(ResultCode.INVALID_ACTIVATION_CODE)
         }
         else if (account.companyId != managerService.loginManager!!.companyId) {
-            ProcessException(ResultCode.OTHER_ERROR, "没有删除权限")
+            throw ProcessException(ResultCode.OTHER_ERROR, "没有删除权限")
         }
 
         companyWxAccountDao.delete(accountId)
