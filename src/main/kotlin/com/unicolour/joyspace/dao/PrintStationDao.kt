@@ -12,6 +12,7 @@ interface PrintStationDao : PagingAndSortingRepository<PrintStation, Int> {
     fun findByWxQrCode(qrCode: String): PrintStation?
 
     fun findByCompanyId(companyId: Int, pageable: Pageable): Page<PrintStation>
+    fun findByCompanyIdAndPositionId(companyId: Int, positionId: Int, pageable: Pageable): Page<PrintStation>
     fun findByCompanyId(companyId: Int): List<PrintStation>
 
     fun findByAddressCity(cityName: String): List<PrintStation>

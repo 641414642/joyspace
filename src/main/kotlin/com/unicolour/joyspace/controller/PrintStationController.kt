@@ -53,7 +53,9 @@ class PrintStationController {
     @RequestMapping("/printStation/list")
     fun printStationList(
             modelAndView: ModelAndView,
-            @RequestParam(name = "pageno", required = false, defaultValue = "1") pageno: Int): ModelAndView {
+            @RequestParam(name = "pageno", required = false, defaultValue = "1") pageno: Int,
+            @RequestParam(name = "inputPositionId", required = false, defaultValue = "0") inputPositionId: Int
+    ): ModelAndView {
 
         val loginManager = managerService.loginManager
 
@@ -63,32 +65,36 @@ class PrintStationController {
         }
 
         val pageable = PageRequest(pageno - 1, 20, Sort.Direction.ASC, "id")
-        val printStations = printStationDao.findByCompanyId(loginManager.companyId, pageable)
+        val printStations = if (inputPositionId > 0)
+                printStationDao.findByCompanyIdAndPositionId(loginManager.companyId, inputPositionId, pageable)
+            else
+                printStationDao.findByCompanyId(loginManager.companyId, pageable)
 
         val pager = Pager(printStations.totalPages, 7, pageno - 1)
-        modelAndView.model.put("pager", pager)
+        modelAndView.model["pager"] = pager
 
         class PrintStationInfo(val printStation: PrintStation, val online: Boolean, val version: String)
 
         val time = Calendar.getInstance()
         time.add(Calendar.SECOND, 3600 - 30)
 
-        modelAndView.model.put("printStations",
-                printStations.content.map {
-                    val session = printStationLoginSessionDao.findByPrintStationId(it.id)
-                    var online = false
-                    var version = ""
+        modelAndView.model["positions"] = positionDao.findByCompanyId(loginManager.companyId)
+        modelAndView.model["printStations"] = printStations.content.map {
+            val session = printStationLoginSessionDao.findByPrintStationId(it.id)
+            var online = false
+            var version = ""
 
-                    if (session != null && session.expireTime.timeInMillis > time.timeInMillis) {    //自助机30秒之内访问过后台
-                        online = true
-                        version = if (session.version <= 0) "" else session.version.toString()
-                    }
+            if (session != null && session.expireTime.timeInMillis > time.timeInMillis) {    //自助机30秒之内访问过后台
+                online = true
+                version = if (session.version <= 0) "" else session.version.toString()
+            }
 
-                    PrintStationInfo(it, online, version)
-                })
+            PrintStationInfo(it, online, version)
+        }
 
-        modelAndView.model.put("viewCat", "business_mgr")
-        modelAndView.model.put("viewContent", "printStation_list")
+        modelAndView.model["inputPositionId"] = inputPositionId
+        modelAndView.model["viewCat"] = "business_mgr"
+        modelAndView.model["viewContent"] = "printStation_list"
         modelAndView.viewName = "layout"
 
         return modelAndView
@@ -126,16 +132,15 @@ class PrintStationController {
                             selected = supportedProductIdSet.contains(it.id))
                 }
 
-        modelAndView.model.put("create", id <= 0)
-        modelAndView.model.put("printStation", printStation)
-        //modelAndView.model.put("positions", positionDao.findByCompanyId(loginManager!!.companyId))
-        modelAndView.model.put("positions", positionDao.findAll())
-        modelAndView.model.put("companies", companyDao.findAll())
-        modelAndView.model.put("adSets", adSetDao.findByCompanyId(loginManager!!.companyId))
-        modelAndView.model.put("photo_products", allProducts.filter { it.productType == ProductType.PHOTO.value })
-        modelAndView.model.put("template_products", allProducts.filter { it.productType == ProductType.TEMPLATE.value })
-        modelAndView.model.put("id_photo_products", allProducts.filter { it.productType == ProductType.ID_PHOTO.value })
-        modelAndView.model.put("productIds", allProducts.map { it.productId }.joinToString(separator = ","))
+        modelAndView.model["create"] = id <= 0
+        modelAndView.model["printStation"] = printStation
+        modelAndView.model["positions"] = positionDao.findByCompanyId(loginManager!!.companyId)
+        modelAndView.model["companies"] = companyDao.findAll()
+        modelAndView.model["adSets"] = adSetDao.findByCompanyId(loginManager.companyId)
+        modelAndView.model["photo_products"] = allProducts.filter { it.productType == ProductType.PHOTO.value }
+        modelAndView.model["template_products"] = allProducts.filter { it.productType == ProductType.TEMPLATE.value }
+        modelAndView.model["id_photo_products"] = allProducts.filter { it.productType == ProductType.ID_PHOTO.value }
+        modelAndView.model["productIds"] = allProducts.map { it.productId }.joinToString(separator = ",")
         modelAndView.viewName = "/printStation/edit :: content"
 
         return modelAndView

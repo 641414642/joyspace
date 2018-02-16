@@ -66,8 +66,12 @@
 								   title="图片管理">
 								</i>
 							</a>
-							<a th:href="${'http://apis.map.qq.com/uri/v1/geocoder?coord=' + position.latitude + ',' + position.longitude + '&amp;referer=joyspace'}" target="_blank">
+							<a style="margin-right:5px" th:href="${'http://apis.map.qq.com/uri/v1/geocoder?coord=' + position.latitude + ',' + position.longitude + '&amp;referer=joyspace'}" target="_blank">
 								<i class="fa fa-fw fa-map-marker" title="地图定位"></i>
+							</a>
+							<a href="#" th:href="@{/printStation/list(inputPositionId=${position.id})}">
+								<i class="fa fa-print" title="查看店面下的自助机">
+								</i>
 							</a>
 						</td>
 					</tr>
