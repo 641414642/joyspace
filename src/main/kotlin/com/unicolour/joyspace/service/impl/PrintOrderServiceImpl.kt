@@ -18,6 +18,7 @@ import org.springframework.core.io.Resource
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
+import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
 import org.springframework.transaction.support.TransactionTemplate
 import org.springframework.web.client.RestTemplate
@@ -416,7 +417,13 @@ open class PrintOrderServiceImpl : PrintOrderService {
                     printOrderDao.save(order)
                     val transferAmount = calcTransferAmount(order)
                     if (!order.transfered && transferAmount > 100) {
-                        startWxEntTransfer(order, transferAmount)
+                        startWxEntTransfer(Collections.singletonList(order))
+                    }
+                    else {
+                        val notTransferedOrders = printOrderDao.findByCompanyIdAndPrintedOnPrintStationIsTrueAndTransferedIsFalse(order.companyId)
+                        if (notTransferedOrders.sumBy { calcTransferAmount(it) } > 100) {
+                            startWxEntTransfer(notTransferedOrders)
+                        }
                     }
 
                     GraphQLRequestResult(ResultCode.SUCCESS)
@@ -450,24 +457,30 @@ open class PrintOrderServiceImpl : PrintOrderService {
         return tradeNo
     }
 
-    private fun startWxEntTransfer(order: PrintOrder, transferAmount: Int) {
+    private fun startWxEntTransfer(orders: List<PrintOrder>) {
+        val account = companyService.getAvailableWxAccount(orders[0].companyId)
+        if (account == null) {
+            return
+        }
+
         synchronized(this, {
-            val transferRecordItem = wxEntTransferRecordItemDao.findByPrintOrderId(order.id)
-            if (transferRecordItem == null) {
-                val account = companyService.getAvailableWxAccount(order.companyId)
-                if (account != null) {
-                    val record = WxEntTransferRecord()
-                    record.amount = transferAmount
-                    record.companyId = order.companyId
-                    record.transferTime = Calendar.getInstance()
-                    record.tradeNo = createTradeNo()
-                    record.receiverName = account.name
-                    record.receiverOpenId = account.openId
+            val transferAmount = orders.sumBy { calcTransferAmount(it) }
 
-                    wxEntTransferRecordDao.save(record)
+            val record = WxEntTransferRecord()
+            record.amount = transferAmount
+            record.companyId = account.companyId
+            record.transferTime = Calendar.getInstance()
+            record.tradeNo = createTradeNo()
+            record.receiverName = account.name
+            record.receiverOpenId = account.openId
 
+            wxEntTransferRecordDao.save(record)
+
+            orders.forEach { order ->
+                val transferRecordItem = wxEntTransferRecordItemDao.findByPrintOrderId(order.id)
+                if (transferRecordItem == null) {
                     val recordItem = WxEntTransferRecordItem()
-                    recordItem.amount = record.amount
+                    recordItem.amount = calcTransferAmount(order)
                     recordItem.printOrderId = order.id
                     recordItem.recordId = record.id
 
@@ -475,14 +488,26 @@ open class PrintOrderServiceImpl : PrintOrderService {
 
                     order.transfered = true
                     printOrderDao.save(order)
-
-                    doWxEntTransfer(record)
-                }
-                else {
+                } else {
                     logger.info("No available WxAccount for companyId=${order.companyId}")
                 }
+
+                doWxEntTransfer(record)
             }
         })
+    }
+
+    //每天结束前的批量转账
+    @Scheduled(cron = "0 55 23 * * *")
+    fun doBatchTransfer() {
+        val companies = companyDao.findAll()
+        companies.forEach{ company ->
+            val notTransferedOrders = printOrderDao.findByCompanyIdAndPrintedOnPrintStationIsTrueAndTransferedIsFalse(company.id)
+            if (notTransferedOrders.sumBy { calcTransferAmount(it) } > 100) {
+                startWxEntTransfer(notTransferedOrders)
+                Thread.sleep(5000)
+            }
+        }
     }
 
     override fun calculateOrderFee(orderInput: OrderInput) : Pair<Int, Int> {

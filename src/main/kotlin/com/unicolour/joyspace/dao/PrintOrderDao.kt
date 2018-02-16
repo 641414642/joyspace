@@ -19,4 +19,5 @@ interface PrintOrderDao : CrudRepository<PrintOrder, Int> {
 
     fun findByCompanyIdOrderByIdDesc(companyId: Int, pageable: Pageable): Page<PrintOrder>
     fun findByOrderNoIgnoreCaseAndCompanyId(orderNo: String, companyId: Int, pageable: Pageable): Page<PrintOrder>
+    fun findByCompanyIdAndPrintedOnPrintStationIsTrueAndTransferedIsFalse(companyId: Int): List<PrintOrder>
 }
