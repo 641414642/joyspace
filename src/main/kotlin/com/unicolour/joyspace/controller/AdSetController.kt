@@ -18,6 +18,7 @@ import java.util.*
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.Part
 import kotlin.collections.ArrayList
+import kotlin.collections.HashMap
 
 @Controller
 class AdSetController {
@@ -113,9 +114,10 @@ class AdSetController {
     @RequestMapping(path = arrayOf("/adSet/edit"), method = arrayOf(RequestMethod.POST))
     @ResponseBody
     fun editAdSet(
+            modelAndView: ModelAndView,
             request: HttpServletRequest,
             @RequestParam(name = "id", required = true) id: Int,
-            @RequestParam(name = "name", required = true) name: String): Boolean {
+            @RequestParam(name = "name", required = true) name: String): ModelAndView {
 
         val adImageFiles = ArrayList<Pair<Part, Int>>()
         for (i in 1 .. 100) {
@@ -133,10 +135,24 @@ class AdSetController {
 
         if (id <= 0) {
             adSetService.createAdSet(name, adImageFiles)
-            return true
         } else {
-            return adSetService.updateAdSet(id, name, adImageFiles)
+            val adSetIdDurationMap = HashMap<Int, Int>()
+            val adSet = adSetDao.findOne(id)
+            adSet.imageFiles.forEach {
+                val duration = request.getPart("duration_${it.id}")
+                if (duration.size > 0) {
+                    val durationVal = duration.inputStream.use { it.reader().readText().toInt() }
+                    if (durationVal > 0) {
+                        adSetIdDurationMap[it.id] = durationVal
+                    }
+                }
+            }
+
+            adSetService.updateAdSet(id, name, adImageFiles, adSetIdDurationMap)
         }
+
+        modelAndView.viewName = "adSet/adSetEditCompleted"
+        return modelAndView
     }
 }
 

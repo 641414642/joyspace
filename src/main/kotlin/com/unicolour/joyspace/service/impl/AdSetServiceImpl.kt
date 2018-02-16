@@ -4,7 +4,6 @@ import com.unicolour.joyspace.dao.AdImageFileDao
 import com.unicolour.joyspace.dao.AdSetDao
 import com.unicolour.joyspace.model.AdImageFile
 import com.unicolour.joyspace.model.AdSet
-import com.unicolour.joyspace.model.ProductImageFile
 import com.unicolour.joyspace.service.AdSetService
 import com.unicolour.joyspace.service.ManagerService
 import org.springframework.beans.factory.annotation.Autowired
@@ -18,6 +17,7 @@ import java.util.*
 import java.util.regex.Pattern
 import javax.servlet.http.Part
 import javax.transaction.Transactional
+import kotlin.collections.HashMap
 
 @Component
 open class AdSetServiceImpl : AdSetService {
@@ -112,7 +112,7 @@ open class AdSetServiceImpl : AdSetService {
     }
 
     @Transactional
-    override fun updateAdSet(id: Int, name: String, imgFiles: List<Pair<Part, Int>>): Boolean {
+    override fun updateAdSet(id: Int, name: String, imgFiles: List<Pair<Part, Int>>, adSetIdDurationMap: HashMap<Int, Int>): Boolean {
         val adSet = adSetDao.findOne(id)
         if (adSet == null) {
             return false
@@ -124,6 +124,13 @@ open class AdSetServiceImpl : AdSetService {
             adSetDao.save(adSet)
 
             saveAdImageFiles(imgFiles, adSet, adSet.imageFiles.map { it.sequence }.max() ?: 0 + 1)
+
+            adSetIdDurationMap.forEach { k, v ->
+                val adImg = adImageFileDao.findOne(k)
+                adImg.duration = v
+                adImageFileDao.save(adImg)
+            }
+
             return true
         }
     }

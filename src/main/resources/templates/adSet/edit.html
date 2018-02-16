@@ -32,19 +32,20 @@
 
     <script type="text/javascript">
 		$(document).ready(function() {
-			$('#editDialog').modal('show');
+			$('#editAdSetDialog').modal('show');
 		});
 	</script>
 </head>
 <body>
-<div class="modal fade" role="dialog" id="editDialog">
+<div class="modal fade" role="dialog" id="editAdSetDialog">
     <div class="modal-dialog" role="document">
         <div class="modal-content" th:fragment="content">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
                 <h4 class="modal-title" th:text="${create ? '新建' : '修改'}"></h4>
+                <iframe name="target_iframe" src="about:blank" th:src="@{/empty}" style="display:none"/>
             </div>
-            <form id="editAdSetForm" target="_blank" th:action="@{/adSet/edit}" method="post" enctype="multipart/form-data">
+            <form id="editAdSetForm" target="target_iframe" th:action="@{/adSet/edit}" method="post" enctype="multipart/form-data">
                 <input type="hidden" name="id" th:value="${adSet.id}" />
                 <div class="modal-body">
                     <div class="form-group">
