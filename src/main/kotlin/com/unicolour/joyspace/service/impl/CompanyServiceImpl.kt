@@ -130,6 +130,7 @@ open class CompanyServiceImpl : CompanyService {
 
     @Transactional
     override fun addCompanyWxAccount(code: String, realname: String, phoneNumber: String, verifyCode: String) {
+        val loginManager = managerService.loginManager
         val account = companyWxAccountDao.findByVerifyCode(verifyCode.toUpperCase())
         if (account == null) {
             throw ProcessException(ResultCode.INVALID_VERIFY_CODE)
@@ -156,6 +157,8 @@ open class CompanyServiceImpl : CompanyService {
             if (result.errcode == 0) {
                 if (companyWxAccountDao.existsByCompanyIdAndOpenId(account.companyId, result.openid)) {
                     throw ProcessException(ResultCode.COMPANY_WX_ACCOUNT_EXISTS)
+                } else if (companyWxAccountDao.countByCompanyIdAndEnabledIsTrue(loginManager!!.companyId) >= 10) {
+                    throw ProcessException(ResultCode.EXCEED_MAX_WX_ACCOUNT_NUMBER)
                 }
 
                 val userInfo = getUserInfo(result.access_token, result.openid)

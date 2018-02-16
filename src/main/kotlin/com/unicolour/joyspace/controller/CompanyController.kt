@@ -140,17 +140,25 @@ class CompanyController {
 
     @RequestMapping("/company/startAddWxAccount", method = arrayOf(RequestMethod.GET))
     fun startAddWxAccount(modelAndView: ModelAndView): ModelAndView {
+        val loginManager = managerService.loginManager
         val verifyCode = companyService.startAddCompanyWxAccount()
 
-        modelAndView.model["wxmpQrCode"] = wxmpQrCode
-        modelAndView.model["qrcode"] = "https://open.weixin.qq.com/connect/oauth2/authorize" +
-            "?appid=$wxmpAppId" +
-            "&redirect_uri=$baseUrl/company/wxAccountAddConfirm" +
-            "&response_type=code" +
-            "&scope=snsapi_userinfo"
-        modelAndView.model["verifyCode"] = verifyCode
+        if (companyWxAccountDao.countByCompanyIdAndEnabledIsTrue(loginManager!!.companyId) >= 10) {
+            modelAndView.model["title"] = "提示"
+            modelAndView.model["message"] = "最多只能添加10个微信收款账户"
+            modelAndView.viewName = "/messageDialog :: content"
+        }
+        else {
+            modelAndView.model["wxmpQrCode"] = wxmpQrCode
+            modelAndView.model["qrcode"] = "https://open.weixin.qq.com/connect/oauth2/authorize" +
+                    "?appid=$wxmpAppId" +
+                    "&redirect_uri=$baseUrl/company/wxAccountAddConfirm" +
+                    "&response_type=code" +
+                    "&scope=snsapi_userinfo"
+            modelAndView.model["verifyCode"] = verifyCode
 
-        modelAndView.viewName = "/company/wxAccountAdd :: content"
+            modelAndView.viewName = "/company/wxAccountAdd :: content"
+        }
 
         return modelAndView
     }

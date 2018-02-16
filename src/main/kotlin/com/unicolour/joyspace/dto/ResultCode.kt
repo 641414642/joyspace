@@ -24,6 +24,7 @@ enum class ResultCode(val value:Int, val desc:String, val descEn: String) {
     COMPANY_ALREADY_EXISTS(20, "同名投放商已存在", "Company with same name already exists"),
     MANAGER_ALREADY_EXISTS(21, "同名管理员已存在", "Manager with same name already exists"),
     COMPANY_WX_ACCOUNT_NOT_EXISTS(22, "指定的帐户不存在", ""),
+    EXCEED_MAX_WX_ACCOUNT_NUMBER(23, "最多只能添加10个微信收款账户", ""),
 
     SERVER_ERROR(100, "服务器错误", "Server error"),
 

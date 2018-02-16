@@ -7,4 +7,5 @@ interface CompanyWxAccountDao : CrudRepository<CompanyWxAccount, Int> {
     fun findByCompanyId(companyId: Int): List<CompanyWxAccount>
     fun findByVerifyCode(verifyCode: String): CompanyWxAccount?
     fun existsByCompanyIdAndOpenId(companyId: Int, openid: String): Boolean
+    fun countByCompanyIdAndEnabledIsTrue(companyId: Int): Int
 }
