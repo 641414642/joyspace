@@ -49,6 +49,9 @@ open class PrintOrderServiceImpl : PrintOrderService {
     @Value("\${com.unicolour.joyspace.baseUrl}")
     lateinit var baseUrl: String
 
+    @Value("\${com.unicolour.joyspace.wxPayTransferCharge}")
+    var wxPayTransferCharge: Double = 0.0
+
     @Autowired
     lateinit var printStationDao: PrintStationDao
 
@@ -435,15 +438,17 @@ open class PrintOrderServiceImpl : PrintOrderService {
     }
 
     private fun calcTransferAmount(order: PrintOrder): Int {
-        var amount = order.totalFee - order.discount
+        var amount:Double = (order.totalFee - order.discount).toDouble()
+        amount *= (1 - wxPayTransferCharge)   //扣除微信支付手续费
+
         val proportion = order.transferProportion / 1000.0
-        if (proportion > 0.5) {
-            amount = (amount * proportion + 0.5).toInt()
+        val ret = if (proportion > 0.5) {
+            (amount * proportion + 0.5).toInt()
         }
         else {
-            amount = amount - (amount * (1.0 - proportion) + 0.5).toInt()
+            (amount - amount * (1.0 - proportion) + 0.5).toInt()
         }
-        return amount
+        return ret
     }
 
     private fun createTradeNo(): String {
