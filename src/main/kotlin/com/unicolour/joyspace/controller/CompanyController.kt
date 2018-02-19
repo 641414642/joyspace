@@ -190,6 +190,7 @@ class CompanyController {
             return CommonRequestResult(e.errcode, e.message)
         }
         catch (e: Exception) {
+            e.printStackTrace()
             return CommonRequestResult(ResultCode.OTHER_ERROR.value, "添加微信收款账号失败")
         }
     }
