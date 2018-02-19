@@ -66,6 +66,10 @@ function startAddCompanyWxAccount(event) {
            quiet: 2,
            mode: 'plain',
         }));
+
+        $('#modalTemplate').on('hidden.bs.modal', function () {
+            window.location.reload();
+        });
     });
 }
 

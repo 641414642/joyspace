@@ -26,9 +26,41 @@
     <!-- AdminLTE App -->
     <script src="../../static/thirdparty/adminlte/js/app.min.js" th:src="@{/thirdparty/adminlte/js/app.min.js}"></script>
 
+    <script src="../../static/js/kjua.min.js" th:src="@{/js/kjua.min.js}"></script>
+
+    <script src="../../static/js/company.js" th:src="@{/js/company.js}"></script>
+
     <script type="text/javascript">
-		$(document).ready(function() {
+        $(document).ready(function() {
+            $('#wxmpQrCodeDiv').append(kjua({
+               render: 'image',
+               crisp: true,
+               size: 200,
+               fill: '#000',
+               back: '#fff',
+               text: $("#wxmpQrCodeDiv").data("qrcode"),
+               rounded: 0,
+               quiet: 2,
+               mode: 'plain',
+            }));
+
+            $('#qrCodeDiv').append(kjua({
+               render: 'image',
+               crisp: true,
+               size: 200,
+               fill: '#000',
+               back: '#fff',
+               text: $("#qrCodeDiv").data("qrcode"),
+               rounded: 0,
+               quiet: 2,
+               mode: 'plain',
+            }));
+
 			$('#wxAccountAddDialog').modal('show');
+
+			$('#wxAccountAddDialog').on('hidden.bs.modal', function () {
+                window.location.reload();
+            });
 		});
 	</script>
 </head>
@@ -40,16 +72,16 @@
                 <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
                 <h4 class="modal-title">添加微信收款账号</h4>
             </div>
-            <div class="modal-body">
-                <div class="form-group">
+            <div class="modal-body" style="height:350px">
+                <div class="form-group col-md-6">
                     <label class="control-label">第一步: 扫码关注优利绚彩微信公众号</label>
-                    <div id="wxmpQrCodeDiv" th:attr="data-qrcode=${wxmpQrCode}"></div>
+                    <div id="wxmpQrCodeDiv" data-qrcode="https://joyspace.uni-colour.com" th:attr="data-qrcode=${wxmpQrCode}"></div>
                 </div>
-                <div class="form-group">
+                <div class="form-group col-md-6">
                     <label class="control-label">第二步: 扫码打开添加账户页面</label>
-                    <div id="qrCodeDiv" th:attr="data-qrcode=${qrcode}"></div>
+                    <div id="qrCodeDiv" data-qrcode="https://joyspace.uni-colour.com" th:attr="data-qrcode=${qrcode}"></div>
                 </div>
-                <div class="form-group">
+                <div class="form-group col-md-12">
                     <label for="verifyCode" class="control-label">第三步: 输入用户信息和以下验证码，并点击确认按钮</label>
                     <input type="text" id="verifyCode" class="form-control" readonly="readonly" value="VERIFYCODE" th:value="${verifyCode}" />
                 </div>
