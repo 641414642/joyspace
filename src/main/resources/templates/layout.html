@@ -140,7 +140,7 @@
 						<li th:class="${viewContent=='company_wx_account' ? 'active' : ''}"><a href="#" th:href="@{/company/wxAccountList}"><i class="fa fa-circle-o"></i>微信收款账户</a></li>
 					</ul>
 				</li>
-				<li sec:authorize="hasRole('ROLE_SUPERADMIN')" th:class="${viewCat=='pay_mgr' ? 'treeview active' : 'treeview'}" class="treeview">
+<!--				<li sec:authorize="hasRole('ROLE_SUPERADMIN')" th:class="${viewCat=='pay_mgr' ? 'treeview active' : 'treeview'}" class="treeview">
 					<a href="../widgets.html">
 						<i class="fa fa-th"></i> <span>支付管理</span>
 						<span class="pull-right-container">
@@ -149,12 +149,10 @@
 					</a>
 					<ul class="treeview-menu">
 						<li th:class="${viewContent=='wxpay_list' ? 'active' : ''}"><a href="#" th:href="@{/wx_pay/list}"><i class="fa fa-circle-o"></i>微信支付列表</a></li>
-<!--
 						<li th:class="${viewContent=='alipay_list' ? 'active' : ''}"><a href="#" th:href="@{/ali_pay/list}"><i class="fa fa-circle-o"></i>支付宝支付列表</a></li>
 						<li><a href="#"><i class="fa fa-circle-o"></i>店铺支付方式列表</a></li>
--->
 					</ul>
-				</li>
+				</li>-->
 				<li th:class="${viewCat=='product_mgr' ? 'treeview active' : 'treeview'}" class="treeview">
 					<a href="#">
 						<i class="fa fa-pie-chart"></i>
