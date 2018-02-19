@@ -27,24 +27,31 @@
     <script src="../../static/thirdparty/adminlte/js/app.min.js" th:src="@{/thirdparty/adminlte/js/app.min.js}"></script>
 
     <script type="text/javascript">
-		$(document).ready(function() {
+		function showCreateDialog() {
+			$('#createDialog').modal('show');
+		}
+		function showEditDialog() {
 			$('#editDialog').modal('show');
-		});
+		}
 	</script>
 </head>
 <body>
+<div>
+    <button onclick="showCreateDialog()">新建</button>
+    <button onclick="showEditDialog()">编辑</button>
+</div>
 <div class="modal fade" role="dialog" id="createDialog">
     <div class="modal-dialog" role="document">
         <div class="modal-content" th:fragment="content_create">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
-                <h4 class="modal-title" th:text="新建"></h4>
+                <h4 class="modal-title">新建</h4>
             </div>
             <form id="createCompanyForm" th:action="@{/company/edit}" method="post">
                 <input type="hidden" name="id" th:value="${company.id}" />
                 <div class="modal-body">
                     <div class="form-group">
-                        <label for="name" class="control-label">名称:</label>
+                        <label for="name" class="control-label">投放商名称:</label>
                         <input type="text" name="name" class="form-control" id="name" th:value="${company.name}" />
                         <span class="help-block"></span>
                     </div>
@@ -54,22 +61,22 @@
                         <span class="help-block"></span>
                     </div>
                     <div class="form-group">
-                        <label for="full_name" class="control-label">姓名:</label>
+                        <label for="full_name" class="control-label">管理员姓名:</label>
                         <input type="text" name="fullname" class="form-control" id="full_name" />
                         <span class="help-block"></span>
                     </div>
                     <div class="form-group">
-                        <label for="password" class="control-label">密码:</label>
+                        <label for="password" class="control-label">管理员密码:</label>
                         <input type="password" name="password" class="form-control" id="password" />
                         <span class="help-block"></span>
                     </div>
                     <div class="form-group">
-                        <label for="phone" class="control-label">电话:</label>
+                        <label for="phone" class="control-label">联系电话:</label>
                         <input type="text" name="phone" class="form-control" id="phone" />
                         <span class="help-block"></span>
                     </div>
                     <div class="form-group">
-                        <label for="email" class="control-label">邮件:</label>
+                        <label for="email" class="control-label">电子邮件地址:</label>
                         <input type="text" name="email" class="form-control" id="email" />
                         <span class="help-block"></span>
                     </div>
@@ -87,20 +94,41 @@
         <div class="modal-content" th:fragment="content_edit">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
-                <h4 class="modal-title" th:text="编辑"></h4>
+                <h4 class="modal-title">编辑</h4>
             </div>
             <form id="editCompanyForm" th:action="@{/company/edit}" method="post">
                 <input type="hidden" name="id" th:value="${company.id}" />
-                <input type="hidden" name="username" />
-                <input type="hidden" name="fullname" />
-                <input type="hidden" name="password" />
-                <input type="hidden" name="phone" />
-                <input type="hidden" name="email" />
+                <input type="hidden" name="managerId" th:value="${manager.id}" />
 
                 <div class="modal-body">
                     <div class="form-group">
-                        <label for="nameEdit" class="control-label">名称:</label>
+                        <label for="nameEdit" class="control-label">投放商名称:</label>
                         <input type="text" name="name" class="form-control" id="nameEdit" th:value="${company.name}" />
+                        <span class="help-block"></span>
+                    </div>
+                    <div class="form-group">
+                        <label for="userNameEdit" class="control-label">管理员登录帐号:</label>
+                        <input type="text" name="username" readonly="readonly" class="form-control" id="userNameEdit" th:value="${manager.userName}" />
+                        <span class="help-block"></span>
+                    </div>
+                    <div class="form-group">
+                        <label for="fullnameEdit" class="control-label">管理员姓名:</label>
+                        <input type="text" name="fullname" class="form-control" id="fullnameEdit" th:value="${manager.fullName}" />
+                        <span class="help-block"></span>
+                    </div>
+                    <div class="form-group">
+                        <label for="passwordEdit" class="control-label">管理员密码(留空保持不变):</label>
+                        <input type="password" name="password" class="form-control" id="passwordEdit" />
+                        <span class="help-block"></span>
+                    </div>
+                    <div class="form-group">
+                        <label for="phoneEdit" class="control-label">联系电话:</label>
+                        <input type="text" name="phone" class="form-control" id="phoneEdit" th:value="${manager.phone}" />
+                        <span class="help-block"></span>
+                    </div>
+                    <div class="form-group">
+                        <label for="emailEdit" class="control-label">电子邮件地址:</label>
+                        <input type="text" name="email" class="form-control" id="emailEdit" th:value="${manager.email}"/>
                         <span class="help-block"></span>
                     </div>
                 </div>

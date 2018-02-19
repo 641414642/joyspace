@@ -6,6 +6,7 @@ import com.unicolour.joyspace.dto.CommonRequestResult
 import com.unicolour.joyspace.dto.ResultCode
 import com.unicolour.joyspace.exception.ProcessException
 import com.unicolour.joyspace.model.Company
+import com.unicolour.joyspace.model.Manager
 import com.unicolour.joyspace.service.CompanyService
 import com.unicolour.joyspace.service.ManagerService
 import com.unicolour.joyspace.util.Pager
@@ -76,8 +77,10 @@ class CompanyController {
             modelAndView: ModelAndView,
             @RequestParam(name = "id", required = true) id: Int): ModelAndView {
         var company: Company? = null
+        var manager: Manager? = null
         if (id > 0) {
             company = companyDao.findOne(id)
+            manager = managerService.getCompanyManager(id)
         }
 
         if (company == null) {
@@ -86,6 +89,7 @@ class CompanyController {
 
         modelAndView.model["create"] = id <= 0
         modelAndView.model["company"] = company
+        modelAndView.model["manager"] = manager
         if (id > 0) {
             modelAndView.viewName = "/company/edit :: content_edit"
         }
@@ -100,6 +104,7 @@ class CompanyController {
     @ResponseBody
     fun editCompany(
             @RequestParam(name = "id", required = true) id: Int,
+            @RequestParam(name = "managerId", required = false) managerId: Int,
             @RequestParam(name = "name", required = true) name: String,
             @RequestParam(name = "username", required = true) username: String,
             @RequestParam(name = "fullname", required = true) fullname: String,
@@ -112,7 +117,7 @@ class CompanyController {
             if (id <= 0) {
                 companyService.createCompany(name.trim(), null, username.trim(), fullname, phone, email, password)
             } else {
-                companyService.updateCompany(id, name.trim())
+                companyService.updateCompany(id, name.trim(), managerId, fullname, phone, email, password)
             }
             return CommonRequestResult()
         }catch(e: ProcessException) {

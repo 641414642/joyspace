@@ -3,6 +3,7 @@ package com.unicolour.joyspace.service.impl
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.unicolour.joyspace.dao.CompanyDao
 import com.unicolour.joyspace.dao.CompanyWxAccountDao
+import com.unicolour.joyspace.dao.ManagerDao
 import com.unicolour.joyspace.dao.WxEntTransferRecordDao
 import com.unicolour.joyspace.dto.WxGetAccessTokenResult
 import com.unicolour.joyspace.dto.WxGetUserInfoResult
@@ -40,6 +41,9 @@ open class CompanyServiceImpl : CompanyService {
 
     @Autowired
     lateinit var companyDao: CompanyDao
+
+    @Autowired
+    lateinit var managerDao: ManagerDao
 
     @Autowired
     lateinit var companyWxAccountDao: CompanyWxAccountDao
@@ -89,11 +93,24 @@ open class CompanyServiceImpl : CompanyService {
         return company
     }
 
-    override fun updateCompany(companyId: Int, name: String): Boolean {
+    @Transactional
+    override fun updateCompany(companyId: Int, name: String, managerId: Int, fullname: String, phone: String, email: String, password: String): Boolean {
         val company = companyDao.findOne(companyId)
         if (company != null) {
             company.name = name
             companyDao.save(company)
+
+            val manager = managerService.getCompanyManager(companyId)
+            if (manager != null && manager.id == managerId) {
+                manager.fullName = fullname
+                manager.phone = phone
+                manager.email = email
+                managerDao.save(manager)
+
+                if (password.isNotBlank()) {
+                    managerService.resetPassword(managerId, password)
+                }
+            }
 
             return true
         }

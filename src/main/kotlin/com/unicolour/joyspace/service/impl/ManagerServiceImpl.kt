@@ -54,6 +54,10 @@ open class ManagerServiceImpl : ManagerService {
 
     private val managerIdBindKeyMap: MutableMap<Int, String> = Collections.synchronizedMap(HashMap())
 
+    override fun getCompanyManager(companyId: Int): Manager? {
+        return managerDao.findByCompanyId(companyId).minBy { it.id }
+    }
+
     override fun createManagerBindKey(): String {
         val manager = loginManager
 

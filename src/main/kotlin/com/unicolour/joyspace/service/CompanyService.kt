@@ -12,7 +12,7 @@ interface CompanyService {
                       email: String,
                       password: String) : Company
 
-    fun updateCompany(companyId: Int, name: String): Boolean
+    fun updateCompany(companyId: Int, name: String, managerId: Int, fullname: String, phone: String, email: String, password: String): Boolean
 
     /** 返回可用的微信收款账户 */
     fun getAvailableWxAccount(companyId: Int): CompanyWxAccount?

@@ -15,4 +15,6 @@ interface ManagerService : UserDetailsService {
     fun loginManagerHasRole(role: String): Boolean
     fun createManagerBindKey(): String
     fun managerWeiXinLogin(bindKey: String?, code: String): WxLoginResult
+
+    fun getCompanyManager(companyId: Int): Manager?
 }
