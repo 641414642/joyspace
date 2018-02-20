@@ -17,11 +17,11 @@ function processCompanyResult(data) {
     }
 }
 
-function validateCompanyInput() {
-    clearFormGroupErrMsg("#createCompanyForm");
+function validateCompanyInput(formId) {
+    clearFormGroupErrMsg("#" + formId);
 
-    var name = $("#createCompanyForm [name='name']").val();
-    var username = $("#createCompanyForm [name='username']").val();
+    var name = $("#" + formId + " [name='name']").val();
+    var username = $("#" + formId + " [name='username']").val();
 
     if (name.length === 0 || !name.trim()) {
         showFormGroupErrMsg("name", "投放商名称不能为空!");
@@ -37,7 +37,12 @@ function validateCompanyInput() {
 
 //添加编辑店面
 function createOrEditCompany(event, create) {
-    return showPostFormModal(event, create ? 'createCompanyForm' : 'editCompanyForm', null, true, validateCompanyInput, processCompanyResult);
+    var formId = create ? 'createCompanyForm' : 'editCompanyForm';
+    return showPostFormModal(event, formId, null, true,
+        function() {
+            return validateCompanyInput(formId);
+        },
+        processCompanyResult);
 }
 
 //添加微信收款账户
