@@ -142,7 +142,7 @@ open class ManagerServiceImpl : ManagerService {
 
     @Throws(UsernameNotFoundException::class)
     override fun loadUserByUsername(username: String): UserDetails {
-        val manager = managerDao.findByUserNameOrFullName(username, username)
+        val manager = managerDao.findByUserName(username)
         return if (manager != null) {
             LoginManagerDetail(
                     manager.id,
