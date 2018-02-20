@@ -12,7 +12,7 @@ interface PrintStationService {
     fun createPrintStation(companyId: Int, password: String, positionId: Int, transferProportion:Int, printerType:String, adSetId: Int, selectedProductIds: Set<Int>): PrintStation?
     fun updatePrintStation(id: Int, companyId: Int, password: String, positionId: Int, transferProportion:Int, printerType:String, adSetId: Int, selectedProductIds: Set<Int>): Boolean
 
-    fun activatePrintStation(code: String, password: String, positionId: Int, selectedProductIds: Set<Int>)
+    fun activatePrintStation(code: String, name:String, password: String, positionId: Int, selectedProductIds: Set<Int>)
 
     val loginDataFetcher: DataFetcher<PrintStationLoginResult>
     val printStationDataFetcher: DataFetcher<PrintStation>

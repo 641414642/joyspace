@@ -14,6 +14,11 @@ class PrintStation {
     @Id
     var id: Int = 0
 
+    /** 名称 */
+    @Column(length = 50)
+    @NotNull
+    var name: String = ""
+
     /** 微信二维码 */
     @Column(length = 255)
     @NotNull

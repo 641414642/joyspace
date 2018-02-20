@@ -97,15 +97,13 @@ open class PrintStationServiceImpl : PrintStationService {
         return DataFetcher<Any> { env ->
             val printStation = env.getSource<PrintStation>()
             when (fieldName) {
-                "name" -> "自助机${printStation.id}"
+                "name" -> if (printStation.name.isBlank()) "自助机${printStation.id}" else printStation.name
                 "address" -> printStation.position.address
                 "latitude" -> printStation.position.latitude
                 "longitude" -> printStation.position.longitude
                 "transportation" -> printStation.position.transportation
                 "images" -> {
-                    val context = env.getContext<HashMap<String, Any>>()
-                    printStation.position.imageFiles
-                            .map { "${baseUrl}/assets/position/images/${it.id}.${it.fileType}" }
+                    printStation.position.imageFiles.map { "${baseUrl}/assets/position/images/${it.id}.${it.fileType}" }
                 }
                 "products" -> {
                     productService.getProductsOfPrintStation(printStation.id)
@@ -281,7 +279,7 @@ open class PrintStationServiceImpl : PrintStationService {
     }
 
     @Transactional
-    override fun activatePrintStation(code: String, password: String, positionId: Int, selectedProductIds: Set<Int>) {
+    override fun activatePrintStation(code: String, name: String, password: String, positionId: Int, selectedProductIds: Set<Int>) {
         val loginManager = managerService.loginManager
         if (loginManager == null) {
             throw ProcessException(1, "")
@@ -297,6 +295,7 @@ open class PrintStationServiceImpl : PrintStationService {
 
         val printStation = PrintStation()
         printStation.id = activationCode.printStationId
+        printStation.name = name
         printStation.company = companyDao.findOne(loginManager.companyId)
         printStation.position = positionDao.findOne(positionId)
         printStation.transferProportion =  activationCode.transferProportion

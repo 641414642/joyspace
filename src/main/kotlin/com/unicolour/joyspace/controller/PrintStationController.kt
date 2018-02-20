@@ -210,6 +210,7 @@ class PrintStationController {
     fun activatePrintStation(
             request: HttpServletRequest,
             @RequestParam(name = "code", required = true) code: String,
+            @RequestParam(name = "name", required = true) name: String,
             @RequestParam(name = "printStationPassword", required = true) password: String,
             @RequestParam(name = "positionId", required = true) positionId: Int,
             @RequestParam(name = "productIds", required = true) productIds: String
@@ -221,11 +222,12 @@ class PrintStationController {
                     .filter { !request.getParameter("product_${it}").isNullOrBlank() }
                     .map { it.toInt() }
                     .toSet()
-            printStationService.activatePrintStation(code, password, positionId, selectedProductIds)
+            printStationService.activatePrintStation(code, name, password, positionId, selectedProductIds)
             return CommonRequestResult()
         } catch (e: ProcessException) {
             return CommonRequestResult(e.errcode, e.message)
         } catch (e: Exception) {
+            e.printStackTrace()
             return CommonRequestResult(ResultCode.OTHER_ERROR.value, "创建自助机失败")
         }
     }

@@ -32,3 +32,7 @@ alter table print_station add column address_city varchar(100);
 alter table print_station add column address_district varchar(100);
 alter table print_station add column address_street varchar(100);
 update print_station set address_nation='中国',address_province='北京',address_city='北京',address_district='海淀区',address_street='';
+
+alter table print_station add column name varchar(50);
+update print_station set name='';
+alter table print_station alter column name set not null;

@@ -49,6 +49,11 @@
                         <span class="help-block"></span>
                     </div>
                     <div class="form-group">
+                        <label for="name" class="control-label">名称:</label>
+                        <input class="form-control" id="name" name="name" type="text" />
+                        <span class="help-block"></span>
+                    </div>
+                    <div class="form-group">
                         <label for="printStationPassword" class="control-label">密码:</label>
                         <input class="form-control" id="printStationPassword" name="printStationPassword" type="password" />
                         <span class="help-block"></span>
@@ -69,7 +74,7 @@
                         <div class="nav-tabs-custom" style="border:none;box-shadow:none;">
                             <ul class="nav nav-tabs">
                                 <li class="active"><a href="#photo" data-toggle="tab">普通照片</a></li>
-                                <li><a href="#template" data-toggle="tab">模板拼图</a></li>
+                                <!--<li><a href="#template" data-toggle="tab">模板拼图</a></li>-->
                                 <li><a href="#id_photo" data-toggle="tab">证件照</a></li>
                             </ul>
                             <div class="tab-content">
@@ -84,7 +89,7 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="tab-pane container-fluid" id="template">
+                          <!--      <div class="tab-pane container-fluid" id="template">
                                     <div class="row">
                                         <div class="col-md-6 checkbox" style="margin:5px 0" th:each="product : ${template_products}">
                                             <label>
@@ -94,7 +99,7 @@
                                             </label>
                                         </div>
                                     </div>
-                                </div>
+                                </div>-->
                                 <div class="tab-pane container-fluid" id="id_photo">
                                     <div class="row">
                                         <div class="col-md-6 checkbox" style="margin:5px 0" th:each="product : ${id_photo_products}">
