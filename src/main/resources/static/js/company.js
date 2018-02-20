@@ -22,6 +22,10 @@ function validateCompanyInput(formId) {
 
     var name = $("#" + formId + " [name='name']").val();
     var username = $("#" + formId + " [name='username']").val();
+    var password = $("#" + formId + " [name='password']").val();
+    var fullname = $("#" + formId + " [name='fullname']").val();
+    var phone = $("#" + formId + " [name='phone']").val();
+    var email = $("#" + formId + " [name='email']").val();
 
     if (name.length === 0 || !name.trim()) {
         showFormGroupErrMsg("name", "投放商名称不能为空!");
@@ -29,6 +33,26 @@ function validateCompanyInput(formId) {
     }
     else if (username.length === 0 || !username.trim()) {
         showFormGroupErrMsg("username", "管理员登录帐号不能为空!");
+        return false;
+    }
+    else if (formId == "createCompanyForm" && (password.length === 0 || !password.trim())) {
+        showFormGroupErrMsg("password", "管理员登录密码不能为空!");
+        return false;
+    }
+    else if (fullname.length === 0 || !fullname.trim()) {
+        showFormGroupErrMsg("fullname", "管理员姓名不能为空!");
+        return false;
+    }
+    else if (phone.length === 0 || !phone.trim()) {
+        showFormGroupErrMsg("phone", "管理员手机号码不能为空!");
+        return false;
+    }
+    else if (phone.trim().length != 11) {
+        showFormGroupErrMsg("phone", "管理员手机号码格式错误!");
+        return false;
+    }
+    else if (email.length === 0 || !email.trim()) {
+        showFormGroupErrMsg("email", "电子邮件地址不能为空!");
         return false;
     }
 
