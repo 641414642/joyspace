@@ -291,6 +291,24 @@ open class PrintOrderServiceImpl : PrintOrderService {
             order.imageFileUploaded = true
             order.updateTime = Calendar.getInstance()
             printOrderDao.save(order)
+
+            //XXX temp
+            order.downloadedToPrintStation = true
+            order.printedOnPrintStation = true
+            printOrderDao.save(order)
+
+            val transferAmount = calcTransferAmount(order)
+            if (!order.transfered && transferAmount > 100) {
+                startWxEntTransfer(Collections.singletonList(order))
+            }
+            else {
+                val notTransferedOrders = printOrderDao.findByCompanyIdAndPrintedOnPrintStationIsTrueAndTransferedIsFalse(order.companyId)
+                if (notTransferedOrders.sumBy { calcTransferAmount(it) } > 100) {
+                    startWxEntTransfer(notTransferedOrders)
+                }
+            }
+            //XXX temp
+
             return true
         }
         else {
