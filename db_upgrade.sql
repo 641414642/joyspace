@@ -36,3 +36,11 @@ update print_station set address_nation='中国',address_province='北京',addre
 alter table print_station add column name varchar(50);
 update print_station set name='';
 alter table print_station alter column name set not null;
+
+alter table company_wx_account add column sequence integer;
+update company_wx_account set sequence=0;
+alter table company_wx_account alter column sequence set not null;
+
+alter table ad_set add column public_resource boolean;
+update ad_set set public_resource=true, company_id=1;
+alter table ad_set alter column public_resource set not null;

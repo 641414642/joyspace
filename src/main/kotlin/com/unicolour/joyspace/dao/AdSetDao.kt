@@ -13,6 +13,5 @@ interface AdSetDao : PagingAndSortingRepository<AdSet, Int> {
     fun findByNameIgnoreCaseAndCompanyId(name: String, companyId: Int, pageable: Pageable): Page<AdSet>
 
     /** 返回公用的或指定投放商的广告 */
-    @Query("SELECT a FROM AdSet a WHERE a.companyId=0 OR a.companyId=:companyId")
-    fun findUsableAdSets(@Param("companyId") companyId: Int): List<AdSet>
+    fun findByCompanyIdOrPublicResourceIsTrue(companyId: Int): List<AdSet>
 }

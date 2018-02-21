@@ -136,7 +136,7 @@ class PrintStationController {
         modelAndView.model["printStation"] = printStation
         modelAndView.model["positions"] = positionDao.findByCompanyId(loginManager!!.companyId)
         modelAndView.model["companies"] = companyDao.findAll()
-        modelAndView.model["adSets"] = adSetDao.findByCompanyId(loginManager.companyId)
+        modelAndView.model["adSets"] = adSetDao.findByCompanyIdOrPublicResourceIsTrue(loginManager.companyId)
         modelAndView.model["photo_products"] = allProducts.filter { it.productType == ProductType.PHOTO.value }
         modelAndView.model["template_products"] = allProducts.filter { it.productType == ProductType.TEMPLATE.value }
         modelAndView.model["id_photo_products"] = allProducts.filter { it.productType == ProductType.ID_PHOTO.value }

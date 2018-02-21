@@ -104,7 +104,7 @@ class CompanyController {
     @ResponseBody
     fun editCompany(
             @RequestParam(name = "id", required = true) id: Int,
-            @RequestParam(name = "managerId", required = false) managerId: Int,
+            @RequestParam(name = "managerId", required = false, defaultValue = "0") managerId: Int,
             @RequestParam(name = "name", required = true) name: String,
             @RequestParam(name = "username", required = true) username: String,
             @RequestParam(name = "fullname", required = true) fullname: String,
@@ -132,7 +132,7 @@ class CompanyController {
     fun companyWxAccountList(modelAndView: ModelAndView): ModelAndView {
         val loginManager = managerService.loginManager
 
-        val accounts = companyWxAccountDao.findByCompanyId(loginManager!!.companyId).filter { it.enabled }
+        val accounts = companyWxAccountDao.findByCompanyIdOrderBySequenceAsc(loginManager!!.companyId).filter { it.enabled }
 
         modelAndView.model["accounts"] = accounts
 

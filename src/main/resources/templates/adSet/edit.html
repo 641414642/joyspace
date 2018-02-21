@@ -54,6 +54,14 @@
                         <span class="help-block"></span>
                     </div>
                     <div class="form-group">
+                        <div style="display:inline-block;" class="checkbox">
+                            <label>
+                                <input type="checkbox" th:checked="${adSet.publicResource==true}" name="publicResource"/>
+                                公用
+                            </label>
+                        </div>
+                    </div>
+                    <div class="form-group">
                         <label class="control-label">图片列表:</label>
                         <table id="adImageTable" class="table table-bordered table-striped">
                             <tr>

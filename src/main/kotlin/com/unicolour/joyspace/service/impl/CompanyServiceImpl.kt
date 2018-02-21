@@ -130,7 +130,7 @@ open class CompanyServiceImpl : CompanyService {
     }
 
     override fun getAvailableWxAccount(companyId: Int): CompanyWxAccount? {
-        val accounts = companyWxAccountDao.findByCompanyId(companyId)
+        val accounts = companyWxAccountDao.findByCompanyIdOrderBySequenceAsc(companyId)
         if (!accounts.isEmpty()) {
             for (account in accounts) {
                 if (account.enabled) {
@@ -188,6 +188,7 @@ open class CompanyServiceImpl : CompanyService {
                     account.nickName = userInfo.nickname
                     account.phoneNumber = phoneNumber
                     account.verifyCode = ""
+                    account.sequence = companyWxAccountDao.getMaxAccountSequence(account.companyId) + 1
 
                     companyWxAccountDao.save(account)
                     return

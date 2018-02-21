@@ -78,7 +78,9 @@ class PrintStationActivationCodeController {
 
     @RequestMapping(path = arrayOf("/activationCode/create"), method = arrayOf(RequestMethod.GET))
     fun createActivationCode(modelAndView: ModelAndView): ModelAndView {
-        val adSets = adSetDao.findByCompanyId(0)  //公用广告
+        val loginManager = managerService.loginManager
+
+        val adSets = adSetDao.findByCompanyIdOrPublicResourceIsTrue(loginManager!!.companyId)  //公用广告
         modelAndView.model["adSets"] = adSets
         modelAndView.model["defAdSetId"] = adSets.firstOrNull()?.id ?: 0
 
@@ -90,11 +92,12 @@ class PrintStationActivationCodeController {
     @RequestMapping(path = arrayOf("/activationCode/edit"), method = arrayOf(RequestMethod.GET))
     fun editActivationCode(modelAndView: ModelAndView,
                              @RequestParam(name = "id", required = true) id: Int
-     ): ModelAndView {
+    ): ModelAndView {
 
+        val loginManager = managerService.loginManager
         modelAndView.model["code"] = printStationActivationCodeDao.findOne(id)
 
-        val adSets = adSetDao.findByCompanyId(0)  //公用广告
+        val adSets = adSetDao.findByCompanyIdOrPublicResourceIsTrue(loginManager!!.companyId)  //公用广告
         modelAndView.model["adSets"] = adSets
         modelAndView.model["defAdSetId"] = adSets.firstOrNull()?.id ?: 0
 

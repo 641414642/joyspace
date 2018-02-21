@@ -101,6 +101,7 @@ class AdSetController {
             adSet.updateTime = now
             adSet.imageFiles = emptyList()
             adSet.companyId = loginManager!!.companyId
+            adSet.publicResource = true
         }
 
         modelAndView.model.put("create", id <= 0)
@@ -117,6 +118,7 @@ class AdSetController {
             modelAndView: ModelAndView,
             request: HttpServletRequest,
             @RequestParam(name = "id", required = true) id: Int,
+            @RequestParam(name = "publicResource", required = false, defaultValue = "false") publicResource: Boolean,
             @RequestParam(name = "name", required = true) name: String): ModelAndView {
 
         val adImageFiles = ArrayList<Pair<Part, Int>>()
@@ -134,7 +136,7 @@ class AdSetController {
         }
 
         if (id <= 0) {
-            adSetService.createAdSet(name, adImageFiles)
+            adSetService.createAdSet(name, publicResource, adImageFiles)
         } else {
             val adSetIdDurationMap = HashMap<Int, Int>()
             val adSet = adSetDao.findOne(id)
@@ -148,7 +150,7 @@ class AdSetController {
                 }
             }
 
-            adSetService.updateAdSet(id, name, adImageFiles, adSetIdDurationMap)
+            adSetService.updateAdSet(id, name, publicResource, adImageFiles, adSetIdDurationMap)
         }
 
         modelAndView.viewName = "adSet/adSetEditCompleted"

@@ -45,7 +45,10 @@
 					</tr>
 					<tr th:each="ad : ${adSets}">
 						<td th:text="${ad.adSet.id}" valign="middle" style="vertical-align:middle"></td>
-						<td th:text="${ad.adSet.name}" valign="middle" style="vertical-align:middle"></td>
+						<td valign="middle" style="vertical-align:middle">
+							<span th:text="${ad.adSet.name}"></span>
+							<span th:if="${ad.adSet.publicResource}" class="label label-success">公用</span>
+						</td>
 						<td style="font-size:0">
 							<div class="ad_img_block" th:each="adImageFile : ${ad.adImageFiles}" style="margin-right:5px">
 								<a th:href="${adImageFile.url}" target="_blank" th:title="'播放时间 ' + ${adImageFile.duration} + ' 秒'">

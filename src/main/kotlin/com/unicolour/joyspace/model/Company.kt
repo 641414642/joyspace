@@ -90,4 +90,8 @@ class CompanyWxAccount {
     @Column
     @NotNull
     var enabled: Boolean = false   //是否可用
+
+    @Column
+    @NotNull
+    var sequence: Int = 0
 }

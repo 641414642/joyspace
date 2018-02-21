@@ -96,7 +96,7 @@ open class AdSetServiceImpl : AdSetService {
     }
 
     @Transactional
-    override fun createAdSet(name: String, imgFiles: List<Pair<Part, Int>>) {
+    override fun createAdSet(name: String, publicResource: Boolean, imgFiles: List<Pair<Part, Int>>) {
         val loginManager = managerService.loginManager
         val now = Calendar.getInstance()
 
@@ -105,6 +105,7 @@ open class AdSetServiceImpl : AdSetService {
         adSet.createTime = now
         adSet.updateTime = now
         adSet.companyId = loginManager!!.companyId
+        adSet.publicResource = publicResource
 
         adSetDao.save(adSet)
 
@@ -112,7 +113,7 @@ open class AdSetServiceImpl : AdSetService {
     }
 
     @Transactional
-    override fun updateAdSet(id: Int, name: String, imgFiles: List<Pair<Part, Int>>, adSetIdDurationMap: HashMap<Int, Int>): Boolean {
+    override fun updateAdSet(id: Int, name: String, publicResource: Boolean, imgFiles: List<Pair<Part, Int>>, adSetIdDurationMap: HashMap<Int, Int>): Boolean {
         val adSet = adSetDao.findOne(id)
         if (adSet == null) {
             return false
@@ -120,6 +121,7 @@ open class AdSetServiceImpl : AdSetService {
         else {
             adSet.name = name
             adSet.updateTime = Calendar.getInstance()
+            adSet.publicResource = publicResource
 
             adSetDao.save(adSet)
 

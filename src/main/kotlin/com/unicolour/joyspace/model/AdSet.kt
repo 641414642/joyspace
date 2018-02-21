@@ -30,6 +30,10 @@ class AdSet {
 
     @OneToMany(mappedBy = "adSet")
     lateinit var imageFiles: List<AdImageFile>
+
+    @NotNull
+    @Column
+    var publicResource: Boolean = false
 }
 
 /** 广告图片 */
