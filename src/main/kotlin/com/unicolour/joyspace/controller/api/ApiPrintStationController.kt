@@ -6,6 +6,7 @@ import com.unicolour.joyspace.service.GraphQLService
 import graphql.GraphQL
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.*
+import java.util.HashMap
 import javax.servlet.http.HttpServletRequest
 
 
@@ -70,7 +71,9 @@ query {
 	}
 }
 """
-        val queryResult = graphQL.execute(query, null, null, emptyMap())
+        val context = HashMap<String, Any>()
+
+        val queryResult = graphQL.execute(query, null, context, emptyMap())
         val data:Map<String, Any> = queryResult.getData()
         return data["printStation"]
     }

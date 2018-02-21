@@ -128,7 +128,9 @@ query {
 	}
 }
 """
-        val queryResult = graphQL.execute(query, null, null, emptyMap())
+        val context = HashMap<String, Any>()
+
+        val queryResult = graphQL.execute(query, null, context, emptyMap())
         val data:Map<String, Any> = queryResult.getData()
         val printStation = data["printStation"] as? Map<*, *>?
         return printStation?.get("products")

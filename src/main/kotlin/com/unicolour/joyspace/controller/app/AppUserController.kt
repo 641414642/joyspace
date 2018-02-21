@@ -27,7 +27,9 @@ mutation {
 	}
 }
 """
-        val queryResult = graphQL.execute(query, null, null, emptyMap())
+        val context = HashMap<String, Any>()
+
+        val queryResult = graphQL.execute(query, null, context, emptyMap())
         val data:Map<String, Any> = queryResult.getData()
         return data["sendVerifyCode"]
     }
@@ -59,7 +61,9 @@ mutation {
 	}
 }
 """
-        val queryResult = graphQL.execute(query, null, null, emptyMap())
+        val context = HashMap<String, Any>()
+
+        val queryResult = graphQL.execute(query, null, context, emptyMap())
         val data:Map<String, Any> = queryResult.getData()
         return data["userRegister"]
     }
@@ -87,7 +91,9 @@ mutation {
 	}
 }
 """
-        val queryResult = graphQL.execute(query, null, null, emptyMap())
+        val context = HashMap<String, Any>()
+
+        val queryResult = graphQL.execute(query, null, context, emptyMap())
         val data:Map<String, Any> = queryResult.getData()
         return data["resetPassword"]
     }
@@ -126,7 +132,9 @@ mutation {
 	}
 }
 """
-        val queryResult = graphQL.execute(query, null, null, emptyMap())
+        val context = HashMap<String, Any>()
+
+        val queryResult = graphQL.execute(query, null, context, emptyMap())
         val data:Map<String, Any> = queryResult.getData()
         return data["login"]
     }

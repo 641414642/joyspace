@@ -42,7 +42,8 @@ class GraphQLController {
             arguments = objectMapper.readValue(variables, typeRef)
         }
 
-        val result = graphQL.execute(query, operationName, null, arguments)
+        val context = HashMap<String, Any>()
+        val result = graphQL.execute(query, operationName, context, arguments)
         return result
     }
 
@@ -81,7 +82,8 @@ class GraphQLController {
 
         val arguments: Map<String, Any>? = if (graphQLRequest == null) emptyMap() else graphQLRequest.variables
 
-        val result = graphQL.execute(query, operationName, null, arguments)
+        val context = HashMap<String, Any>()
+        val result = graphQL.execute(query, operationName, context, arguments)
 
         return result
     }
