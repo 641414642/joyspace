@@ -178,8 +178,6 @@ class PrintStationController {
     fun activatePrintStation(modelAndView: ModelAndView): ModelAndView {
         val loginManager = managerService.loginManager
 
-        val supportedProductIdSet: Set<Int> = emptySet<Int>()
-
         val printStation = PrintStation()
 
         //val allProducts = productDao.findByCompanyIdOrderBySequenceAsc(loginManager!!.companyId)
@@ -191,7 +189,10 @@ class PrintStationController {
                             productType = it.template.type,
                             productName = it.name,
                             templateName = it.template.name,
-                            selected = supportedProductIdSet.contains(it.id))
+                            selected = it.template.type == ProductType.ID_PHOTO.value ||
+                                            (it.template.type == ProductType.PHOTO.value && it.name.contains("6寸")) ||
+                                            (it.template.type == ProductType.PHOTO.value && it.name.contains("六寸"))
+                    )
                 }
 
         modelAndView.model["printStation"] = printStation
