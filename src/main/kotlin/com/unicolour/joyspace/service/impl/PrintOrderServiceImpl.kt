@@ -504,7 +504,7 @@ open class PrintOrderServiceImpl : PrintOrderService {
                 if (transferRecordItem == null) {
                     val recordItem = WxEntTransferRecordItem()
                     recordItem.amount = calcTransferAmount(order)
-                    recordItem.charge = order.totalFee - order.discount - record.amount
+                    recordItem.charge = order.totalFee - order.discount - recordItem.amount
                     recordItem.printOrderId = order.id
                     recordItem.recordId = record.id
 
