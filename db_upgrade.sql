@@ -44,3 +44,7 @@ alter table company_wx_account alter column sequence set not null;
 alter table ad_set add column public_resource boolean;
 update ad_set set public_resource=true, company_id=1;
 alter table ad_set alter column public_resource set not null;
+
+alter table wx_ent_transfer_record_item add column charge integer;
+update wx_ent_transfer_record_item set charge=0;
+alter table wx_ent_transfer_record_item alter column charge set not null;

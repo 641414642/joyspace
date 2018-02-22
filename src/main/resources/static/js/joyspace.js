@@ -63,7 +63,7 @@ function showModal(event, onloadfunc) {
     var source = event.target || event.srcElement;
     $('#modalTemplate .modal-dialog').load($(source).data('url'), function() {
         $('#modalTemplate').modal('show');
-        if (onloadfunc) {
+        if (typeof onloadfunc === "function") {
             onloadfunc();
         }
     });

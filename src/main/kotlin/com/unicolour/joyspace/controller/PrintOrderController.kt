@@ -1,8 +1,12 @@
 package com.unicolour.joyspace.controller
 
 import com.unicolour.joyspace.dao.*
+import com.unicolour.joyspace.dto.ResultCode
+import com.unicolour.joyspace.exception.ProcessException
 import com.unicolour.joyspace.model.Position
 import com.unicolour.joyspace.model.PrintOrder
+import com.unicolour.joyspace.model.WxEntTransferRecord
+import com.unicolour.joyspace.model.WxEntTransferRecordItem
 import com.unicolour.joyspace.service.ManagerService
 import com.unicolour.joyspace.util.Pager
 import org.springframework.beans.factory.annotation.Autowired
@@ -40,6 +44,12 @@ class PrintOrderController {
 
     @Autowired
     lateinit var managerService: ManagerService
+
+    @Autowired
+    lateinit var wxEntTransferRecordDao: WxEntTransferRecordDao
+
+    @Autowired
+    lateinit var wxEntTransferRecordItemDao: WxEntTransferRecordItemDao
 
     @RequestMapping("/printOrder/list")
     fun printOrderList(
@@ -90,7 +100,6 @@ class PrintOrderController {
         return modelAndView
     }
 
-
     @RequestMapping(path = arrayOf("/printOrder/detail"), method = arrayOf(RequestMethod.GET))
     fun printOrderDetail(modelAndView: ModelAndView, @RequestParam(name = "id", required = true) id: Int): ModelAndView {
         val printOrder = printOrderDao.findOne(id)
@@ -102,6 +111,26 @@ class PrintOrderController {
         modelAndView.model.put("baseUrl", baseUrl)
         modelAndView.model.put("orderItems", printOrderItems.map { Pair(it, idProductMap[it.productId]) })
         modelAndView.viewName = "/printOrder/detail :: content"
+
+        return modelAndView
+    }
+
+    @RequestMapping(path = arrayOf("/printOrder/transferDetail"), method = arrayOf(RequestMethod.GET))
+    fun printOrderTransferDetail(modelAndView: ModelAndView, @RequestParam(name = "id", required = true) id: Int): ModelAndView {
+        val loginManager = managerService.loginManager
+
+        val printOrder = printOrderDao.findOne(id)
+        val recordItem = wxEntTransferRecordItemDao.findByPrintOrderId(id)
+        val record = wxEntTransferRecordDao.findOne(recordItem!!.recordId)
+
+        if (loginManager!!.companyId != record.companyId) {
+            throw ProcessException(ResultCode.OTHER_ERROR)
+        }
+
+        modelAndView.model["order"] = printOrder
+        modelAndView.model["record"] = record
+        modelAndView.model["recordItem"] = recordItem
+        modelAndView.viewName = "/printOrder/transferDetail :: content"
 
         return modelAndView
     }

@@ -113,3 +113,16 @@
     overflow: hidden;
     text-overflow: ellipsis;
 }
+
+.transfer_detail_table {
+    border: none;
+}
+
+.transfer_detail_table th {
+    padding-bottom: 5px;
+    padding-right: 15px;
+}
+
+.transfer_detail_table td {
+    padding-right: 15px;
+}

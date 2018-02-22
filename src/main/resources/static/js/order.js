@@ -2,6 +2,10 @@
 function viewPrintOrderDetail(event) {
     return showPostFormModal(event, 'printOrderDetail', 'modal-info', true);
 }
+//订单转账详情
+function viewPrintOrderTransferDetail(event) {
+    return showModal(event);
+}
 
 function refreshPrintOrderList(url ,pageNo) {
     if (document.getElementById("autoRefresh").checked) {

@@ -58,6 +58,12 @@ class WxEntTransferRecordItem {
     @NotNull
     var printOrderId: Int = 0
 
+    //手续费
+    @Column
+    @NotNull
+    var charge: Int = 0
+
+    //实际转账金额
     @Column
     @NotNull
     var amount: Int = 0
