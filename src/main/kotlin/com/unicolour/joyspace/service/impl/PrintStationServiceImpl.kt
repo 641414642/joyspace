@@ -191,7 +191,7 @@ open class PrintStationServiceImpl : PrintStationService {
     }
 
     @Transactional
-    override fun createPrintStation(companyId: Int, password: String, positionId: Int, transferProportion:Int, printerType: String, adSetId: Int, selectedProductIds: Set<Int>): PrintStation? {
+    override fun createPrintStation(companyId: Int, printStationName: String, printStationPassword: String, positionId: Int, transferProportion:Int, printerType: String, adSetId: Int, selectedProductIds: Set<Int>): PrintStation? {
         val loginManager = managerService.loginManager
         if (loginManager == null) {
             return null
@@ -204,6 +204,7 @@ open class PrintStationServiceImpl : PrintStationService {
         val manager = managerDao.findOne(loginManager.managerId)
 
         val printStation = PrintStation()
+        printStation.name = printStationName
         printStation.company = companyDao.findOne(companyId)
         printStation.position = positionDao.findOne(positionId)
         printStation.transferProportion =  transferProportion
@@ -214,7 +215,7 @@ open class PrintStationServiceImpl : PrintStationService {
         printStation.addressCity = printStation.position.addressCity
         printStation.addressDistrict = printStation.position.addressDistrict
         printStation.addressStreet = printStation.position.addressStreet
-        printStation.password = passwordEncoder.encode(password)
+        printStation.password = passwordEncoder.encode(printStationPassword)
         printStation.status = PrintStationStatus.NORMAL.value
 
         printStationDao.save(printStation)
@@ -238,10 +239,11 @@ open class PrintStationServiceImpl : PrintStationService {
     }
 
     @Transactional
-    override fun updatePrintStation(id: Int, companyId: Int, password: String, positionId: Int, transferProportion:Int, printerType: String, adSetId: Int, selectedProductIds: Set<Int>): Boolean {
+    override fun updatePrintStation(id: Int, companyId: Int, printStationName: String, printStationPassword: String, positionId: Int, transferProportion:Int, printerType: String, adSetId: Int, selectedProductIds: Set<Int>): Boolean {
         val printStation = printStationDao.findOne(id)
 
         if (printStation != null) {
+            printStation.name = printStationName
             printStation.wxQrCode = "$baseUrl/printStation/${printStation.id}"
             printStation.position = positionDao.findOne(positionId)
             printStation.addressNation = printStation.position.addressNation
@@ -249,8 +251,8 @@ open class PrintStationServiceImpl : PrintStationService {
             printStation.addressCity = printStation.position.addressCity
             printStation.addressDistrict = printStation.position.addressDistrict
             printStation.addressStreet = printStation.position.addressStreet
-            if (!password.isNullOrBlank()) {
-                printStation.password = passwordEncoder.encode(password)
+            if (!printStationPassword.isNullOrBlank()) {
+                printStation.password = passwordEncoder.encode(printStationPassword)
             }
 
             if (managerService.loginManagerHasRole("ROLE_SUPERADMIN")) {

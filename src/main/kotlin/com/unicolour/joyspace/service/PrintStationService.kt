@@ -9,8 +9,8 @@ import javax.transaction.Transactional
 
 interface PrintStationService {
     fun getPriceMap(printStation: PrintStation): Map<Int, Int>
-    fun createPrintStation(companyId: Int, password: String, positionId: Int, transferProportion:Int, printerType:String, adSetId: Int, selectedProductIds: Set<Int>): PrintStation?
-    fun updatePrintStation(id: Int, companyId: Int, password: String, positionId: Int, transferProportion:Int, printerType:String, adSetId: Int, selectedProductIds: Set<Int>): Boolean
+    fun createPrintStation(companyId: Int, printStationName: String, printStationPassword: String, positionId: Int, transferProportion:Int, printerType:String, adSetId: Int, selectedProductIds: Set<Int>): PrintStation?
+    fun updatePrintStation(id: Int, companyId: Int, printStationName: String, printStationPassword: String, positionId: Int, transferProportion:Int, printerType:String, adSetId: Int, selectedProductIds: Set<Int>): Boolean
 
     fun activatePrintStation(code: String, name:String, password: String, positionId: Int, selectedProductIds: Set<Int>)
 

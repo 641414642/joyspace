@@ -152,7 +152,8 @@ class PrintStationController {
             request: HttpServletRequest,
             @RequestParam(name = "id", required = true) id: Int,
             @RequestParam(name = "companyId", required = false, defaultValue = "-1") companyId: Int,
-            @RequestParam(name = "password", required = true) password: String,
+            @RequestParam(name = "printStationName", required = true) printStationName: String,
+            @RequestParam(name = "printStationPassword", required = true) printStationPassword: String,
             @RequestParam(name = "positionId", required = true) positionId: Int,
             @RequestParam(name = "proportion", required = false, defaultValue = "0") proportion: Double,
             @RequestParam(name = "printerType", required = true, defaultValue = "") printerType: String,
@@ -167,10 +168,10 @@ class PrintStationController {
                 .toSet()
 
         if (id <= 0) {
-            printStationService.createPrintStation(companyId, password, positionId, (proportion * 10).toInt(), printerType, adSetId, selectedProductIds)
+            printStationService.createPrintStation(companyId, printStationName, printStationPassword, positionId, (proportion * 10).toInt(), printerType, adSetId, selectedProductIds)
             return true
         } else {
-            return printStationService.updatePrintStation(id, companyId, password, positionId, (proportion * 10).toInt(), printerType, adSetId, selectedProductIds)
+            return printStationService.updatePrintStation(id, companyId, printStationName, printStationPassword, positionId, (proportion * 10).toInt(), printerType, adSetId, selectedProductIds)
         }
     }
 
@@ -211,8 +212,8 @@ class PrintStationController {
     fun activatePrintStation(
             request: HttpServletRequest,
             @RequestParam(name = "code", required = true) code: String,
-            @RequestParam(name = "name", required = true) name: String,
-            @RequestParam(name = "printStationPassword", required = true) password: String,
+            @RequestParam(name = "printStationName", required = true) printStationName: String,
+            @RequestParam(name = "printStationPassword", required = true) printStationPassword: String,
             @RequestParam(name = "positionId", required = true) positionId: Int,
             @RequestParam(name = "productIds", required = true) productIds: String
     ): CommonRequestResult {
@@ -223,7 +224,7 @@ class PrintStationController {
                     .filter { !request.getParameter("product_${it}").isNullOrBlank() }
                     .map { it.toInt() }
                     .toSet()
-            printStationService.activatePrintStation(code, name, password, positionId, selectedProductIds)
+            printStationService.activatePrintStation(code, printStationName, printStationPassword, positionId, selectedProductIds)
             return CommonRequestResult()
         } catch (e: ProcessException) {
             return CommonRequestResult(e.errcode, e.message)
