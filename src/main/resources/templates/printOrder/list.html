@@ -80,7 +80,7 @@
 							<div th:if="${orderWrapper.order.transfered}" class="order_status transfered" title="已转账"></div>
 						</td>
 						<td>
-							<a href="#">
+							<a href="#" style="margin-right:5px">
 								<i class="fa fa-fw fa-eye"
 								   th:attr="data-url=@{/printOrder/detail(id=${orderWrapper.order.id})}"
 								   onclick="return viewPrintOrderDetail(event)"
@@ -88,7 +88,7 @@
 								</i>
 							</a>
 							<a href="#" th:if="${orderWrapper.order.transfered}">
-								<i class="fa fa-fw fa-eye"
+								<i class="fa fa-jpy"
 								   th:attr="data-url=@{/printOrder/transferDetail(id=${orderWrapper.order.id})}"
 								   onclick="return viewPrintOrderTransferDetail(event)"
 								   title="转账详情">
