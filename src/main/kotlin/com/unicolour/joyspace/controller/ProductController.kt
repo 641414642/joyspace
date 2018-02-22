@@ -101,7 +101,6 @@ class ProductController {
     @RequestMapping(path = arrayOf("/product/move"), method = arrayOf(RequestMethod.POST))
     @ResponseBody
     fun moveProduct(
-            modelAndView: ModelAndView,
             @RequestParam(name = "id", required = true) id: Int,
             @RequestParam(name = "up", required = true) up: Boolean): Boolean {
         return productService.moveProduct(id, up)

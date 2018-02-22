@@ -47,6 +47,20 @@
 								   title="删除">
 								</i>
 							</a>
+							<a href="#" style="margin-right:5px">
+								<i class="fa fa-fw fa-arrow-up"
+								   th:attr="data-url=@{/company/moveWxAccount(id=${account.id},up='true')}"
+								   onclick="return moveWxAccount(event)"
+								   title="上移">
+								</i>
+							</a>
+							<a href="#">
+								<i class="fa fa-fw fa-arrow-down"
+								   th:attr="data-url=@{/company/moveWxAccount(id=${account.id},up='false')}"
+								   onclick="return moveWxAccount(event)"
+								   title="下移">
+								</i>
+							</a>
 						</td>
 					</tr>
 				</table>

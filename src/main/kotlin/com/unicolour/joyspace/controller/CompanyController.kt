@@ -215,4 +215,13 @@ class CompanyController {
             return CommonRequestResult(ResultCode.OTHER_ERROR.value, "删除微信收款账号失败")
         }
     }
+
+    @RequestMapping(path = arrayOf("/company/moveWxAccount"), method = arrayOf(RequestMethod.POST))
+    @ResponseBody
+    fun moveWxAccount(
+            @RequestParam(name = "id", required = true) id: Int,
+            @RequestParam(name = "up", required = true) up: Boolean): Boolean {
+        return companyService.moveCompanyWxAccount(id, up)
+    }
+
 }

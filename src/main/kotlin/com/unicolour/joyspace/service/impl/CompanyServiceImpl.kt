@@ -12,6 +12,7 @@ import com.unicolour.joyspace.exception.ProcessException
 import com.unicolour.joyspace.model.Company
 import com.unicolour.joyspace.model.CompanyWxAccount
 import com.unicolour.joyspace.model.PriceList
+import com.unicolour.joyspace.model.Product
 import com.unicolour.joyspace.service.CompanyService
 import com.unicolour.joyspace.service.ManagerService
 import org.slf4j.LoggerFactory
@@ -261,6 +262,38 @@ open class CompanyServiceImpl : CompanyService {
 
         companyWxAccountDao.delete(accountId)
         return true
+    }
+
+
+    @Transactional
+    override fun moveCompanyWxAccount(id: Int, up: Boolean): Boolean {
+        val account = companyWxAccountDao.findOne(id)
+        if (account != null) {
+            var otherAccount: CompanyWxAccount? = null
+            if (up) {
+                otherAccount = companyWxAccountDao.findFirstByCompanyIdAndEnabledIsTrueAndSequenceLessThanOrderBySequenceDesc(account.companyId, account.sequence)
+            }
+            else {
+                otherAccount = companyWxAccountDao.findFirstByCompanyIdAndEnabledIsTrueAndSequenceGreaterThanOrderBySequence(account.companyId, account.sequence)
+            }
+
+            if (otherAccount == null) {
+                return false
+            }
+            else {
+                val t = account.sequence
+                account.sequence = otherAccount.sequence
+                otherAccount.sequence = t
+
+                companyWxAccountDao.save(account)
+                companyWxAccountDao.save(otherAccount)
+
+                return true
+            }
+        }
+        else {
+            return false
+        }
     }
 }
 

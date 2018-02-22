@@ -13,4 +13,7 @@ interface CompanyWxAccountDao : CrudRepository<CompanyWxAccount, Int> {
 
     @Query("SELECT coalesce(max(a.sequence), 0) FROM CompanyWxAccount a WHERE a.companyId=:companyId AND a.enabled=TRUE")
     fun getMaxAccountSequence(@Param("companyId") companyId: Int): Int
+
+    fun findFirstByCompanyIdAndEnabledIsTrueAndSequenceLessThanOrderBySequenceDesc(companyId: Int, sequence: Int): CompanyWxAccount?
+    fun findFirstByCompanyIdAndEnabledIsTrueAndSequenceGreaterThanOrderBySequence(companyId: Int, sequence: Int): CompanyWxAccount?
 }
