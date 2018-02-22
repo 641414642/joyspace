@@ -151,12 +151,12 @@ class PrintStationController {
     fun editPrintStation(
             request: HttpServletRequest,
             @RequestParam(name = "id", required = true) id: Int,
-            @RequestParam(name = "companyId", required = false, defaultValue = "0") companyId: Int,
+            @RequestParam(name = "companyId", required = false, defaultValue = "-1") companyId: Int,
             @RequestParam(name = "password", required = true) password: String,
             @RequestParam(name = "positionId", required = true) positionId: Int,
             @RequestParam(name = "proportion", required = false, defaultValue = "0") proportion: Double,
             @RequestParam(name = "printerType", required = true, defaultValue = "") printerType: String,
-            @RequestParam(name = "adSetId", required = true) adSetId: Int,
+            @RequestParam(name = "adSetId", required = false, defaultValue = "-1") adSetId: Int,
             @RequestParam(name = "productIds", required = true) productIds: String
     ): Boolean {
 

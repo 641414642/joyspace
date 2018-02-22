@@ -244,20 +244,25 @@ open class PrintStationServiceImpl : PrintStationService {
         if (printStation != null) {
             printStation.wxQrCode = "$baseUrl/printStation/${printStation.id}"
             printStation.position = positionDao.findOne(positionId)
-            printStation.adSet = adSetDao.findOne(adSetId)
             printStation.addressNation = printStation.position.addressNation
             printStation.addressProvince = printStation.position.addressProvince
             printStation.addressCity = printStation.position.addressCity
             printStation.addressDistrict = printStation.position.addressDistrict
             printStation.addressStreet = printStation.position.addressStreet
-            if (!password.isNullOrEmpty()) {
+            if (!password.isNullOrBlank()) {
                 printStation.password = passwordEncoder.encode(password)
             }
 
-            if (!managerService.loginManagerHasRole("ROLE_SUPERADMIN")) {
+            if (managerService.loginManagerHasRole("ROLE_SUPERADMIN")) {
                 printStation.company = companyDao.findOne(companyId)
                 printStation.transferProportion = transferProportion
                 printStation.printerType = printerType
+                if (adSetId > 0) {
+                    printStation.adSet = adSetDao.findOne(adSetId)
+                }
+                else if (adSetId == 0) {
+                    printStation.adSet = null
+                }
             }
 
             printStationDao.save(printStation)
