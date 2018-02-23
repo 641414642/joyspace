@@ -47,7 +47,7 @@ open class WebSecurityConfig : WebSecurityConfigurerAdapter() {
                 .loginPage("/login")
                 .usernameParameter("username")
                 .passwordParameter("password")
-                .defaultSuccessUrl("/printOrder/list")
+                .defaultSuccessUrl("/printOrder/list?autoRefresh=true")
                 .permitAll()
                 .and()
             .logout()

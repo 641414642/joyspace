@@ -55,6 +55,7 @@ class PrintOrderController {
     fun printOrderList(
             modelAndView: ModelAndView,
             @RequestParam(name = "orderNo", required = false, defaultValue = "") orderNo: String?,
+            @RequestParam(name = "autoRefresh", required = false, defaultValue = "false") autoRefresh: Boolean,
             @RequestParam(name = "partial", required = false, defaultValue = "false") partial: Boolean?,
             @RequestParam(name = "pageno", required = false, defaultValue = "1") pageno: Int): ModelAndView {
 
@@ -70,14 +71,14 @@ class PrintOrderController {
         val idPrintStationMap = printStationDao.findByIdIn(printOrders.content.map { it.printStationId }).map { Pair(it.id, it) }.toMap()
         val idPositionMap = positionDao.findByIdIn(idPrintStationMap.values.map { it.positionId }).map { Pair(it.id, it) }.toMap()
 
-        modelAndView.model.put("inputOrderNo", orderNo)
+        modelAndView.model["inputOrderNo"] = orderNo
 
         val pager = Pager(printOrders.totalPages, 7, pageno - 1)
-        modelAndView.model.put("pager", pager)
+        modelAndView.model["pager"] = pager
 
         class PrintOrderWrapper(val order: PrintOrder, val position: Position, val userName: String)
 
-        modelAndView.model.put("printOrders", printOrders.content.map {
+        modelAndView.model["printOrders"] = printOrders.content.map {
             val printStation = idPrintStationMap[it.printStationId]!!
             val position = idPositionMap[printStation.positionId]!!
             val user = idUserMap[it.userId]!!
@@ -86,14 +87,16 @@ class PrintOrderController {
                 userName = " / " + userName
             }
             PrintOrderWrapper(it, position, "ID:${user.id}" + userName)
-        })
+        }
+
+        modelAndView.model["autoRefresh"] = autoRefresh
 
         if (partial == true) {
             modelAndView.viewName = "/printOrder/list :: order_list_content"
         }
         else {
-            modelAndView.model.put("viewCat", "business_mgr")
-            modelAndView.model.put("viewContent", "printOrder_list")
+            modelAndView.model["viewCat"] = "business_mgr"
+            modelAndView.model["viewContent"] = "printOrder_list"
             modelAndView.viewName = "layout"
         }
 
