@@ -132,8 +132,7 @@ class CompanyController {
     fun companyWxAccountList(modelAndView: ModelAndView): ModelAndView {
         val loginManager = managerService.loginManager
 
-        val accounts = companyWxAccountDao.findByCompanyIdOrderBySequenceAsc(loginManager!!.companyId).filter { it.enabled }
-
+        val accounts = companyWxAccountDao.getCompanyWxAccounts(loginManager!!.companyId)
         modelAndView.model["accounts"] = accounts
 
         modelAndView.model["viewCat"] = "system_mgr"
@@ -148,7 +147,7 @@ class CompanyController {
         val loginManager = managerService.loginManager
         val verifyCode = companyService.startAddCompanyWxAccount()
 
-        if (companyWxAccountDao.countByCompanyIdAndEnabledIsTrue(loginManager!!.companyId) >= 10) {
+        if (companyWxAccountDao.countCompanyWxAccounts(loginManager!!.companyId) >= 10) {
             modelAndView.model["title"] = "提示"
             modelAndView.model["message"] = "最多只能添加10个微信收款账户"
             modelAndView.viewName = "/messageDialog :: content"
@@ -222,6 +221,12 @@ class CompanyController {
             @RequestParam(name = "id", required = true) id: Int,
             @RequestParam(name = "up", required = true) up: Boolean): Boolean {
         return companyService.moveCompanyWxAccount(id, up)
+    }
+
+    @RequestMapping(path = arrayOf("/company/toggleWxAccount"), method = arrayOf(RequestMethod.POST))
+    @ResponseBody
+    fun toggleWxAccount(@RequestParam(name = "id", required = true) id: Int): Boolean {
+        return companyService.toggleCompanyWxAccount(id)
     }
 
 }

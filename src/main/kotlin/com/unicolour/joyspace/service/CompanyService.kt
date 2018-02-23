@@ -25,6 +25,8 @@ interface CompanyService {
     fun addCompanyWxAccount(code: String, realname: String, phoneNumber: String, verifyCode: String)
 
     fun deleteCompanyWxAccount(accountId: Int): Boolean
-    @Transactional
+
     fun moveCompanyWxAccount(id: Int, up: Boolean): Boolean
+
+    fun toggleCompanyWxAccount(id: Int): Boolean
 }

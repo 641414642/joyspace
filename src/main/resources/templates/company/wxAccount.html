@@ -32,6 +32,7 @@
 						<th>电话</th>
 						<th>微信昵称</th>
 						<th>创建时间</th>
+						<th>状态</th>
 						<th>操作</th>
 					</tr>
 					<tr th:each="account : ${accounts}">
@@ -39,6 +40,8 @@
 						<td th:text="${account.phoneNumber}"></td>
 						<td th:text="${account.nickName}"></td>
 						<td th:text="${account.createTime == null ? '' : #calendars.format(account.createTime, 'yyyy-MM-dd HH:mm')}"></td>
+						<td th:if="${account.enabled}"><span class="label label-success">启用</span></td>
+						<td th:unless="${account.enabled}"><span class="label label-danger">禁用</span></td>
 						<td valign="middle" style="vertical-align:middle">
 							<a href="#" style="margin-right:5px">
 								<i class="fa fa-trash-o"
@@ -54,11 +57,18 @@
 								   title="上移">
 								</i>
 							</a>
-							<a href="#">
+							<a href="#" style="margin-right:5px">
 								<i class="fa fa-fw fa-arrow-down"
 								   th:attr="data-url=@{/company/moveWxAccount(id=${account.id},up='false')}"
 								   onclick="return moveWxAccount(event)"
 								   title="下移">
+								</i>
+							</a>
+							<a href="#">
+								<i class="fa fa-toggle-on" th:class="${account.enabled ? 'fa fa-toggle-off' : 'fa fa-toggle-on'}"
+								   th:attr="data-url=@{/company/toggleWxAccount(id=${account.id})}"
+								   onclick="return toggleWxAccount(event)"
+								   title="切换启用状态">
 								</i>
 							</a>
 						</td>

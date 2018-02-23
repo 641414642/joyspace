@@ -145,3 +145,17 @@ function moveWxAccount(event, up) {
         }
     });
 }
+function toggleWxAccount(event, up) {
+    var source = event.target || event.srcElement;
+    var actionUrl = $(source).data('url');
+
+    $.ajax({
+        type: 'post',
+        url: actionUrl,
+        success: function (data) {
+            if (data) {
+                window.location.reload();
+            }
+        }
+    });
+}

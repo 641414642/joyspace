@@ -12,7 +12,6 @@ import com.unicolour.joyspace.exception.ProcessException
 import com.unicolour.joyspace.model.Company
 import com.unicolour.joyspace.model.CompanyWxAccount
 import com.unicolour.joyspace.model.PriceList
-import com.unicolour.joyspace.model.Product
 import com.unicolour.joyspace.service.CompanyService
 import com.unicolour.joyspace.service.ManagerService
 import org.slf4j.LoggerFactory
@@ -131,7 +130,7 @@ open class CompanyServiceImpl : CompanyService {
     }
 
     override fun getAvailableWxAccount(companyId: Int): CompanyWxAccount? {
-        val accounts = companyWxAccountDao.findByCompanyIdOrderBySequenceAsc(companyId)
+        val accounts = companyWxAccountDao.getCompanyWxAccounts(companyId)
         if (!accounts.isEmpty()) {
             for (account in accounts) {
                 if (account.enabled) {
@@ -174,7 +173,7 @@ open class CompanyServiceImpl : CompanyService {
             if (result.errcode == 0) {
                 if (companyWxAccountDao.existsByCompanyIdAndOpenId(account.companyId, result.openid)) {
                     throw ProcessException(ResultCode.COMPANY_WX_ACCOUNT_EXISTS)
-                } else if (companyWxAccountDao.countByCompanyIdAndEnabledIsTrue(account.companyId) >= 10) {
+                } else if (companyWxAccountDao.countCompanyWxAccounts(account.companyId) >= 10) {
                     throw ProcessException(ResultCode.EXCEED_MAX_WX_ACCOUNT_NUMBER)
                 }
 
@@ -264,17 +263,18 @@ open class CompanyServiceImpl : CompanyService {
         return true
     }
 
-
     @Transactional
     override fun moveCompanyWxAccount(id: Int, up: Boolean): Boolean {
+        val loginManager = managerService.loginManager
         val account = companyWxAccountDao.findOne(id)
-        if (account != null) {
+        if (account != null && account.companyId == loginManager!!.companyId) {
+            val allAccounts = companyWxAccountDao.getCompanyWxAccounts(account.companyId)
             var otherAccount: CompanyWxAccount? = null
             if (up) {
-                otherAccount = companyWxAccountDao.findFirstByCompanyIdAndEnabledIsTrueAndSequenceLessThanOrderBySequenceDesc(account.companyId, account.sequence)
+                otherAccount = allAccounts.filter { it.sequence < account.sequence }.sortedByDescending { it.sequence }.firstOrNull()
             }
             else {
-                otherAccount = companyWxAccountDao.findFirstByCompanyIdAndEnabledIsTrueAndSequenceGreaterThanOrderBySequence(account.companyId, account.sequence)
+                otherAccount = allAccounts.filter { it.sequence > account.sequence }.sortedBy { it.sequence }.firstOrNull()
             }
 
             if (otherAccount == null) {
@@ -290,6 +290,19 @@ open class CompanyServiceImpl : CompanyService {
 
                 return true
             }
+        }
+        else {
+            return false
+        }
+    }
+
+    @Transactional
+    override fun toggleCompanyWxAccount(id: Int): Boolean {
+        val account = companyWxAccountDao.findOne(id)
+        val loginManager = managerService.loginManager
+        if (account != null && account.companyId == loginManager!!.companyId) {
+            account.enabled = !account.enabled
+            return true
         }
         else {
             return false

@@ -6,14 +6,17 @@ import org.springframework.data.repository.CrudRepository
 import org.springframework.data.repository.query.Param
 
 interface CompanyWxAccountDao : CrudRepository<CompanyWxAccount, Int> {
-    fun findByCompanyIdOrderBySequenceAsc(companyId: Int): List<CompanyWxAccount>
+    @Query("SELECT a FROM CompanyWxAccount a WHERE a.companyId=:companyId AND a.openId<>'' ORDER BY a.sequence")
+    fun getCompanyWxAccounts(@Param("companyId") companyId: Int): List<CompanyWxAccount>
+
     fun findByVerifyCode(verifyCode: String): CompanyWxAccount?
+    fun existsByVerifyCode(verifyCode: String): Boolean
+
     fun existsByCompanyIdAndOpenId(companyId: Int, openid: String): Boolean
-    fun countByCompanyIdAndEnabledIsTrue(companyId: Int): Int
 
-    @Query("SELECT coalesce(max(a.sequence), 0) FROM CompanyWxAccount a WHERE a.companyId=:companyId AND a.enabled=TRUE")
+    @Query("SELECT count(a) FROM CompanyWxAccount a WHERE a.companyId=:companyId AND a.openId<>''")
+    fun countCompanyWxAccounts(@Param("companyId") companyId: Int): Int
+
+    @Query("SELECT coalesce(max(a.sequence), 0) FROM CompanyWxAccount a WHERE a.companyId=:companyId AND a.openId<>''")
     fun getMaxAccountSequence(@Param("companyId") companyId: Int): Int
-
-    fun findFirstByCompanyIdAndEnabledIsTrueAndSequenceLessThanOrderBySequenceDesc(companyId: Int, sequence: Int): CompanyWxAccount?
-    fun findFirstByCompanyIdAndEnabledIsTrueAndSequenceGreaterThanOrderBySequence(companyId: Int, sequence: Int): CompanyWxAccount?
 }
