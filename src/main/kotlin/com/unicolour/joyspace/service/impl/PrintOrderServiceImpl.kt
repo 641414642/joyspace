@@ -239,11 +239,12 @@ open class PrintOrderServiceImpl : PrintOrderService {
     }
 
     private fun createOrderNo(): String {
-        val dateTime = SimpleDateFormat("yyyyMMdd").format(Date())
+        val dateTime = SimpleDateFormat("yyyyMMdd-HHmmss").format(Date())
+        var i = 0
         var orderNo:String
         do {
-            val randomStr = BigInteger(4 * 8, secureRandom).toString(36).toUpperCase()
-            orderNo = "$dateTime-$randomStr"
+            orderNo = if (i == 0) dateTime else "$dateTime-$i"
+            i++
         } while (printOrderDao.existsByOrderNo(orderNo))
 
         return orderNo
