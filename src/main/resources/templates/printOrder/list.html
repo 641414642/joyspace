@@ -45,25 +45,39 @@
 				<table class="table table-bordered table-striped">
 					<tr>
 						<th style="width:50px">ID</th>
-						<th style="width:200px">编号</th>
-						<th style="width:150px">创建时间</th>
+						<th style="width:120px">编号</th>
+						<th style="width:120px">创建时间</th>
 						<th style="width:80px">自助机</th>
-						<th style="width:150px">店面</th>
+						<th style="width:80px">店面</th>
 						<th style="width:100px">用户</th>
-						<th style="width:100px">总价(元)</th>
-						<th style="width:100px">折扣(元)</th>
+						<th style="width:100px">总价-折扣(元)</th>
+						<th style="width:120px">转账时间</th>
+						<th style="width:100px">转账金额/手续费(元)</th>
+						<th style="width:50px">收款人</th>
 						<th style="width:120px">状态</th>
 						<th style="width:50px">操作</th>
 					</tr>
 					<tr th:each="orderWrapper : ${printOrders}">
 						<td th:text="${orderWrapper.order.id}"></td>
 						<td th:text="${orderWrapper.order.orderNo}"></td>
-						<td th:text="${orderWrapper.order.createTime == null ? '' : #calendars.format(orderWrapper.order.createTime, 'yyyy-MM-dd HH:mm')}"></td>
+						<td th:text="${orderWrapper.order.createTime == null ? '' : #calendars.format(orderWrapper.order.createTime, 'yyyy-MM-dd HH:mm:ss')}"></td>
 						<td th:text="${orderWrapper.order.printStationId}"></td>
 						<td th:text="${orderWrapper.position.name}"></td>
 						<td th:text="${orderWrapper.userName}"></td>
-						<td th:text="${#numbers.formatDecimal(orderWrapper.order.totalFee / 100.0, 1, 'DEFAULT', 2, 'DEFAULT')}"></td>
-						<td th:text="${#numbers.formatDecimal(orderWrapper.order.discount / 100.0, 1, 'DEFAULT', 2, 'DEFAULT')}"></td>
+						<td>
+                            <span th:text="${#numbers.formatDecimal(orderWrapper.order.totalFee / 100.0, 1, 'DEFAULT', 2, 'DEFAULT')}"></span>
+                            <span th:if="${orderWrapper.order.discount != 0}">-</span>
+                            <span th:if="${orderWrapper.order.discount != 0}" th:text="${#numbers.formatDecimal(orderWrapper.order.discount / 100.0, 1, 'DEFAULT', 2, 'DEFAULT')}"></span>
+                        </td>
+                        <td th:text="${orderWrapper.transferRecord == null ? '' : #calendars.format(orderWrapper.transferRecord.transferTime, 'yyyy-MM-dd HH:mm:ss')}"></td>
+						<td>
+							<th:block th:if="${orderWrapper.transferRecordItem != null}">
+							<span th:text="${#numbers.formatDecimal(orderWrapper.transferRecordItem.amount / 100.0, 1, 'DEFAULT', 2, 'DEFAULT')}"></span>
+							<span th:if="${orderWrapper.transferRecordItem.charge != 0}">/</span>
+							<span th:if="${orderWrapper.transferRecordItem.charge != 0}" th:text="${#numbers.formatDecimal(orderWrapper.transferRecordItem.charge / 100.0, 1, 'DEFAULT', 2, 'DEFAULT')}"></span>
+							</th:block>
+						</td>
+						<td th:text="${orderWrapper.transferRecord?.receiverName}"></td>
 						<td style="font-size:0">
 							<div th:unless="${orderWrapper.order.payed}" class="order_status un_payed" title="未支付"></div>
 							<div th:if="${orderWrapper.order.payed}" class="order_status payed" title="已支付"></div>

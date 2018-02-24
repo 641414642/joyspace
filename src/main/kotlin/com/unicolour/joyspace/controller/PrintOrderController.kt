@@ -76,7 +76,13 @@ class PrintOrderController {
         val pager = Pager(printOrders.totalPages, 7, pageno - 1)
         modelAndView.model["pager"] = pager
 
-        class PrintOrderWrapper(val order: PrintOrder, val position: Position, val userName: String)
+        class PrintOrderWrapper(
+                val order: PrintOrder,
+                val position: Position,
+                val userName: String,
+                val transferRecord: WxEntTransferRecord?,
+                val transferRecordItem: WxEntTransferRecordItem?
+        )
 
         modelAndView.model["printOrders"] = printOrders.content.map {
             val printStation = idPrintStationMap[it.printStationId]!!
@@ -86,7 +92,16 @@ class PrintOrderController {
             if (userName != "") {
                 userName = " / " + userName
             }
-            PrintOrderWrapper(it, position, "ID:${user.id}" + userName)
+            var tri: WxEntTransferRecordItem? = null
+            var tr: WxEntTransferRecord? = null
+            if (it.transfered) {
+                tri = wxEntTransferRecordItemDao.findByPrintOrderId(it.id)
+                if (tri != null) {
+                    tr = wxEntTransferRecordDao.findOne(tri.recordId)
+                }
+            }
+
+            PrintOrderWrapper(it, position, "ID:${user.id}" + userName, tr, tri)
         }
 
         modelAndView.model["autoRefresh"] = autoRefresh
@@ -110,9 +125,9 @@ class PrintOrderController {
 
         val idProductMap = productDao.findByIdIn(printOrderItems.map { it.productId }).map { Pair(it.id, it) }.toMap()
 
-        modelAndView.model.put("printOrder", printOrder)
-        modelAndView.model.put("baseUrl", baseUrl)
-        modelAndView.model.put("orderItems", printOrderItems.map { Pair(it, idProductMap[it.productId]) })
+        modelAndView.model["printOrder"] = printOrder
+        modelAndView.model["baseUrl"] = baseUrl
+        modelAndView.model["orderItems"] = printOrderItems.map { Pair(it, idProductMap[it.productId]) }
         modelAndView.viewName = "/printOrder/detail :: content"
 
         return modelAndView
