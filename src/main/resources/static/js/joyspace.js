@@ -7,17 +7,55 @@ function goto_page(event, page) {
     var totalPageCount = pager.data('total_page_count');
 
     var targetPageNo = 1;
-    if (page == 'first') {
+    if (page === 'first') {
         targetPageNo = 1;
     }
-    else if (page == 'prev') {
+    else if (page === 'prev') {
         targetPageNo = curPageNo-1;
     }
-    else if (page == 'next') {
+    else if (page === 'next') {
         targetPageNo = curPageNo+1;
     }
-    else if (page == 'last') {
+    else if (page === 'last') {
         targetPageNo = totalPageCount;
+    }
+    else if (page === 'input') {
+        var content =
+            '<div class="modal fade" id="pager_goto_page_input_modal" tabindex="-1" role="dialog">'+
+                '<div class="modal-dialog" role="document">'+
+                     '<div class="modal-content">' +
+                         '<div class="modal-header">' +
+                             '<button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>' +
+                             '<h4 class="modal-title">转到</h4>' +
+                         '</div>' +
+                         '<div class="modal-body">' +
+                            '<p">' +
+                                '<span>第</span>' +
+                                '<input type="text" style="width:50px;margin:0 10px" id="pager_goto_page_input" />' +
+                                '<span>页</span>' +
+                            '</p>' +
+                         '</div>' +
+                         '<div class="modal-footer">' +
+                            '<button type="submit" id="pager_goto_page_ok_btn" class="btn btn-primary">确定</button>' +
+                            '<button type="button" class="btn btn-default" data-dismiss="modal">取消</button>' +
+                         '</div>' +
+                     '</div>'+
+                '</div>'+
+            '</div>';
+
+        $('#pager_goto_page_input_modal').remove();
+        $("body").append(content)
+
+        $('#pager_goto_page_input_modal').on('shown.bs.modal', function() {
+            $("#pager_goto_page_input").focus();
+        })
+        $('#pager_goto_page_input_modal').modal('show');
+
+        $('#pager_goto_page_ok_btn').on('click', function(e) {
+            goto_page(event, parseInt($("#pager_goto_page_input").val()));
+        });
+
+        return false;
     }
     else {
         targetPageNo = page;
@@ -166,7 +204,7 @@ function showQrCode(event) {
        rounded: 0,
        quiet: 2,
        mode: 'plain',
-   }));
+    }));
 
     $('#modalTemplate').modal('show');
 
