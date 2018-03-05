@@ -37,6 +37,7 @@ import javax.transaction.Transactional
 import javax.xml.bind.JAXBContext
 import javax.xml.bind.Unmarshaller
 import kotlin.collections.ArrayList
+import kotlin.collections.HashMap
 import kotlin.experimental.and
 
 
@@ -437,14 +438,16 @@ open class PrintOrderServiceImpl : PrintOrderService {
                     }
 
                     printOrderDao.save(order)
-                    val transferAmount = calcTransferAmount(order)
-                    if (!order.transfered && transferAmount > 100) {
-                        startWxEntTransfer(Collections.singletonList(order))
+                    val orderAmountAndFee = calcOrdersAmountAndTransferFee(Collections.singletonList(order))
+                    if (!order.transfered && orderAmountAndFee.totalTransferAmount > 100) {
+                        startWxEntTransfer(Collections.singletonList(order), orderAmountAndFee)
                     }
                     else {
                         val notTransferedOrders = printOrderDao.findByCompanyIdAndPrintedOnPrintStationIsTrueAndTransferedIsFalse(order.companyId)
-                        if (notTransferedOrders.sumBy { calcTransferAmount(it) } > 100) {
-                            startWxEntTransfer(notTransferedOrders)
+                        val ordersAmountAndFee = calcOrdersAmountAndTransferFee(notTransferedOrders)
+
+                        if (ordersAmountAndFee.totalTransferAmount > 100) {
+                            startWxEntTransfer(notTransferedOrders, orderAmountAndFee)
                         }
                     }
 
@@ -456,18 +459,57 @@ open class PrintOrderServiceImpl : PrintOrderService {
         }
     }
 
-    private fun calcTransferAmount(order: PrintOrder): Int {
-        var amount:Double = (order.totalFee - order.discount).toDouble()
-        amount *= (1 - wxPayTransferCharge)   //扣除微信支付手续费
+//    private fun calcTransferAmount(order: PrintOrder): Int {
+//        var amount:Double = (order.totalFee - order.discount).toDouble()
+//        amount *= (1 - wxPayTransferCharge)   //扣除微信支付手续费
+//
+//        val proportion = order.transferProportion / 1000.0
+//        val ret = if (proportion > 0.5) {
+//            (amount * proportion + 0.5).toInt()
+//        }
+//        else {
+//            (amount - amount * (1.0 - proportion) + 0.5).toInt()
+//        }
+//        return ret
+//    }
 
-        val proportion = order.transferProportion / 1000.0
-        val ret = if (proportion > 0.5) {
-            (amount * proportion + 0.5).toInt()
+    //订单金额和手续费计算结果 (各变量单位都是分)
+    private class OrdersAmountAndTransferFeeCalcResult(
+            val totalAmount: Int,                        //总金额(扣除手续费之前的)
+            val totalTransferFee: Int,                   //总手续费
+            val orderIdToTransferFeeMap: Map<Int, Int>)   //订单id -> 订单手续费
+    {
+        //总的转账金额
+        val totalTransferAmount: Int
+            get() = totalAmount - totalTransferFee
+    }
+
+    //计算多个订单的转账金额，手续费以及其中每个订单的手续费
+    private fun calcOrdersAmountAndTransferFee(orders: List<PrintOrder>) : OrdersAmountAndTransferFeeCalcResult{
+        val orderIdToTransferFeeMap = HashMap<Int, Int>()
+        var totalAmount = 0   //总金额
+
+        var orderTransferFeeAddUp = 0   //每个订单单独计算的手续费的累加结果
+        for (order in orders) {
+            val orderAmount = order.totalFee - order.discount
+            totalAmount += orderAmount
+
+            val orderTransferFee = (orderAmount.toDouble() * wxPayTransferCharge + 0.5).toInt()
+            orderIdToTransferFeeMap[order.id] = orderTransferFee
+
+            orderTransferFeeAddUp += orderTransferFee
         }
-        else {
-            (amount - amount * (1.0 - proportion) + 0.5).toInt()
+
+        val totalTransferFee:Int = maxOf(1, (totalAmount.toDouble() * wxPayTransferCharge + 0.5).toInt())  //根据订单总金额计算的手续费
+        if (totalTransferFee != orderTransferFeeAddUp) {
+            val maxAmountOrder = orders.maxBy { it.totalFee - it.discount }
+            if (maxAmountOrder != null && orderIdToTransferFeeMap.containsKey(maxAmountOrder.id)) {
+                orderIdToTransferFeeMap[maxAmountOrder.id] =
+                        totalTransferFee - (orderTransferFeeAddUp - orderIdToTransferFeeMap[maxAmountOrder.id]!!)
+            }
         }
-        return ret
+
+        return OrdersAmountAndTransferFeeCalcResult(totalAmount, totalTransferFee, orderIdToTransferFeeMap)
     }
 
     private fun createTradeNo(): String {
@@ -481,17 +523,15 @@ open class PrintOrderServiceImpl : PrintOrderService {
         return tradeNo
     }
 
-    private fun startWxEntTransfer(orders: List<PrintOrder>) {
+    private fun startWxEntTransfer(orders: List<PrintOrder>, orderAmountAndFee: OrdersAmountAndTransferFeeCalcResult) {
         val account = companyService.getAvailableWxAccount(orders[0].companyId)
         if (account == null) {
             return
         }
 
         synchronized(this, {
-            val transferAmount = orders.sumBy { calcTransferAmount(it) }
-
             val record = WxEntTransferRecord()
-            record.amount = transferAmount
+            record.amount = orderAmountAndFee.totalTransferAmount
             record.companyId = account.companyId
             record.transferTime = Calendar.getInstance()
             record.tradeNo = createTradeNo()
@@ -504,7 +544,7 @@ open class PrintOrderServiceImpl : PrintOrderService {
                 val transferRecordItem = wxEntTransferRecordItemDao.findByPrintOrderId(order.id)
                 if (transferRecordItem == null) {
                     val recordItem = WxEntTransferRecordItem()
-                    recordItem.amount = calcTransferAmount(order)
+                    recordItem.amount = orderAmountAndFee.orderIdToTransferFeeMap[order.id]!!
                     recordItem.charge = order.totalFee - order.discount - recordItem.amount
                     recordItem.printOrderId = order.id
                     recordItem.recordId = record.id
@@ -528,8 +568,10 @@ open class PrintOrderServiceImpl : PrintOrderService {
         val companies = companyDao.findAll()
         companies.forEach{ company ->
             val notTransferedOrders = printOrderDao.findByCompanyIdAndPrintedOnPrintStationIsTrueAndTransferedIsFalse(company.id)
-            if (notTransferedOrders.sumBy { calcTransferAmount(it) } > 100) {
-                startWxEntTransfer(notTransferedOrders)
+            val ordersAmountAndFee = calcOrdersAmountAndTransferFee(notTransferedOrders)
+
+            if (ordersAmountAndFee.totalTransferAmount > 100) {
+                startWxEntTransfer(notTransferedOrders, ordersAmountAndFee)
                 Thread.sleep(5000)
             }
         }
