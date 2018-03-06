@@ -55,7 +55,6 @@ class PrintOrderController {
     fun printOrderList(
             modelAndView: ModelAndView,
             @RequestParam(name = "orderNo", required = false, defaultValue = "") orderNo: String?,
-            @RequestParam(name = "autoRefresh", required = false, defaultValue = "false") autoRefresh: Boolean,
             @RequestParam(name = "partial", required = false, defaultValue = "false") partial: Boolean?,
             @RequestParam(name = "pageno", required = false, defaultValue = "1") pageno: Int): ModelAndView {
 
@@ -103,8 +102,6 @@ class PrintOrderController {
 
             PrintOrderWrapper(it, position, "ID:${user.id}" + userName, tr, tri)
         }
-
-        modelAndView.model["autoRefresh"] = autoRefresh
 
         if (partial == true) {
             modelAndView.viewName = "/printOrder/list :: order_list_content"

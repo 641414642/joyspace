@@ -37,3 +37,12 @@ function startRefresh(url, pageNo) {
         refreshPrintOrderList(url, pageNo);
     }, 5000)
 }
+
+$(function() {
+    $("#autoRefresh").change(function() {
+        localStorage.setItem("autoRefreshOrderList", this.checked ? "true" : "false");
+    });
+
+    var autoRefresh = localStorage.getItem("autoRefreshOrderList");
+    $("#autoRefresh").prop('checked', autoRefresh != "false");
+})
