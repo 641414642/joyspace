@@ -556,9 +556,9 @@ open class PrintOrderServiceImpl : PrintOrderService {
                 } else {
                     logger.info("No available WxAccount for companyId=${order.companyId}")
                 }
-
-                doWxEntTransfer(record)
             }
+
+            doWxEntTransfer(record, orders)
         })
     }
 
@@ -773,7 +773,7 @@ open class PrintOrderServiceImpl : PrintOrderService {
         return buf.toString()
     }
 
-    private fun doWxEntTransfer(record: WxEntTransferRecord) {
+    private fun doWxEntTransfer(record: WxEntTransferRecord, orders: List<PrintOrder>) {
         logger.info("Start WxEntTransfer for companyId=${record.companyId}, receiverOpenId=${record.receiverOpenId}, amount=${record.amount}")
 
         var nonceStr: String = BigInteger(32 * 8, secureRandom).toString(36).toUpperCase()
@@ -792,7 +792,7 @@ open class PrintOrderServiceImpl : PrintOrderService {
                 "check_name" to "FORCE_CHECK",
                 "re_user_name" to record.receiverName,
                 "amount" to record.amount.toString(),
-                "desc" to "悦印订单款",
+                "desc" to "悦印订单款_" + orders.joinToString("_") { it.orderNo },
                 "spbill_create_ip" to ipAddress
         ))
 
