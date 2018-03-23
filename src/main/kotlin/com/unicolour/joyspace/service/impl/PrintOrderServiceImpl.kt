@@ -544,8 +544,8 @@ open class PrintOrderServiceImpl : PrintOrderService {
                 val transferRecordItem = wxEntTransferRecordItemDao.findByPrintOrderId(order.id)
                 if (transferRecordItem == null) {
                     val recordItem = WxEntTransferRecordItem()
-                    recordItem.amount = orderAmountAndFee.orderIdToTransferFeeMap[order.id]!!
-                    recordItem.charge = order.totalFee - order.discount - recordItem.amount
+                    recordItem.charge = orderAmountAndFee.orderIdToTransferFeeMap[order.id]!!
+                    recordItem.amount = order.totalFee - order.discount - recordItem.charge
                     recordItem.printOrderId = order.id
                     recordItem.recordId = record.id
 
