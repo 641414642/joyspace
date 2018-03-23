@@ -438,19 +438,6 @@ open class PrintOrderServiceImpl : PrintOrderService {
                     }
 
                     printOrderDao.save(order)
-                    val orderAmountAndFee = calcOrdersAmountAndTransferFee(Collections.singletonList(order))
-                    if (!order.transfered && orderAmountAndFee.totalTransferAmount > 100) {
-                        startWxEntTransfer(Collections.singletonList(order), orderAmountAndFee)
-                    }
-                    else {
-                        val notTransferedOrders = printOrderDao.findByCompanyIdAndPrintedOnPrintStationIsTrueAndTransferedIsFalse(order.companyId)
-                        val ordersAmountAndFee = calcOrdersAmountAndTransferFee(notTransferedOrders)
-
-                        if (ordersAmountAndFee.totalTransferAmount > 100) {
-                            startWxEntTransfer(notTransferedOrders, orderAmountAndFee)
-                        }
-                    }
-
                     GraphQLRequestResult(ResultCode.SUCCESS)
                 }
             } else {
@@ -737,7 +724,23 @@ open class PrintOrderServiceImpl : PrintOrderService {
                 printOrder.updateTime = Calendar.getInstance()
                 printOrderDao.save(printOrder)
 
+                checkStartWxEntTransfer(printOrder)
                 return null
+            }
+        }
+    }
+
+    /** 检查是否可以开始微信转账给投放商, 如果金额不够，检查是否可以和之前未转账的订单一起批量转，如果可以的话开始转账 */
+    private fun checkStartWxEntTransfer(printOrder: PrintOrder) {
+        val orderAmountAndFee = calcOrdersAmountAndTransferFee(Collections.singletonList(printOrder))
+        if (!printOrder.transfered && orderAmountAndFee.totalTransferAmount > 100) {
+            startWxEntTransfer(Collections.singletonList(printOrder), orderAmountAndFee)
+        } else {
+            val notTransferedOrders = printOrderDao.findByCompanyIdAndPrintedOnPrintStationIsTrueAndTransferedIsFalse(printOrder.companyId)
+            val ordersAmountAndFee = calcOrdersAmountAndTransferFee(notTransferedOrders)
+
+            if (ordersAmountAndFee.totalTransferAmount > 100) {
+                startWxEntTransfer(notTransferedOrders, orderAmountAndFee)
             }
         }
     }
