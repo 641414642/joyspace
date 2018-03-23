@@ -87,14 +87,13 @@ class TemplateController {
             @RequestParam(name = "id", required = true) id: Int,
             @RequestParam(name = "name", required = true) name: String,
             @RequestParam(name = "type", required = true) type: Int,
-            @RequestParam(name = "public", required = true) publicTemplate: Boolean,
             @RequestParam("templateFile") templateFile: MultipartFile?
     ): ModelAndView {
 
         val productType = ProductType.values().find{ it.value == type }
         val success: Boolean
         if (id <= 0) {
-            templateService.createTemplate(publicTemplate, name, productType!!, templateFile!!)
+            templateService.createTemplate(name, productType!!, templateFile!!)
             success = true
         } else {
             success = templateService.updateTemplate(id, name, productType!!, templateFile)

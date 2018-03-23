@@ -106,14 +106,11 @@ open class TemplateServiceImpl : TemplateService {
     }
 
     @Transactional
-    override fun createTemplate(publicTemplate: Boolean, name: String, type: ProductType, templateFile: MultipartFile) {
+    override fun createTemplate(name: String, type: ProductType, templateFile: MultipartFile) {
         val loginManager = managerService.loginManager
-        val isSuperAdmin = managerService.loginManagerHasRole("ROLE_SUPERADMIN")
+        //val isSuperAdmin = managerService.loginManagerHasRole("ROLE_SUPERADMIN")
 
         if (loginManager != null) {
-            if (!isSuperAdmin && publicTemplate) {
-                throw NoPermissionException("Create public template not allowed for this manager")
-            }
 
 //            val manager = managerDao.findOne(loginManager.managerId)
 

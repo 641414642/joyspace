@@ -9,7 +9,7 @@ import org.springframework.web.multipart.MultipartFile
 
 interface TemplateService {
     fun createPreview(previewParam: PreviewParam): TemplatePreviewResult
-    fun createTemplate(publicTemplate: Boolean, name: String, type: ProductType, templateFile: MultipartFile)
+    fun createTemplate(name: String, type: ProductType, templateFile: MultipartFile)
     fun updateTemplate(id: Int, name: String, type: ProductType, templateFile: MultipartFile?): Boolean
     fun getTemplateImageDataFetcher(fieldName:String): DataFetcher<Any>
 
