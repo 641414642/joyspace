@@ -304,7 +304,7 @@ open class PrintOrderServiceImpl : PrintOrderService {
 //                startWxEntTransfer(Collections.singletonList(order))
 //            }
 //            else {
-//                val notTransferedOrders = printOrderDao.findByCompanyIdAndPrintedOnPrintStationIsTrueAndTransferedIsFalse(order.companyId)
+//                val notTransferedOrders = printOrderDao.findByCompanyIdAndPayedIsTrueAndTransferedIsFalse(order.companyId)
 //                if (notTransferedOrders.sumBy { calcTransferAmount(it) } > 100) {
 //                    startWxEntTransfer(notTransferedOrders)
 //                }
@@ -554,7 +554,7 @@ open class PrintOrderServiceImpl : PrintOrderService {
     fun doBatchTransfer() {
         val companies = companyDao.findAll()
         companies.forEach{ company ->
-            val notTransferedOrders = printOrderDao.findByCompanyIdAndPrintedOnPrintStationIsTrueAndTransferedIsFalse(company.id)
+            val notTransferedOrders = printOrderDao.findByCompanyIdAndPayedIsTrueAndTransferedIsFalse(company.id)
             val ordersAmountAndFee = calcOrdersAmountAndTransferFee(notTransferedOrders)
 
             if (ordersAmountAndFee.totalTransferAmount > 100) {
@@ -736,7 +736,7 @@ open class PrintOrderServiceImpl : PrintOrderService {
         if (!printOrder.transfered && orderAmountAndFee.totalTransferAmount > 100) {
             startWxEntTransfer(Collections.singletonList(printOrder), orderAmountAndFee)
         } else {
-            val notTransferedOrders = printOrderDao.findByCompanyIdAndPrintedOnPrintStationIsTrueAndTransferedIsFalse(printOrder.companyId)
+            val notTransferedOrders = printOrderDao.findByCompanyIdAndPayedIsTrueAndTransferedIsFalse(printOrder.companyId)
             val batchOrdersAmountAndFee = calcOrdersAmountAndTransferFee(notTransferedOrders)
 
             if (batchOrdersAmountAndFee.totalTransferAmount > 100) {
