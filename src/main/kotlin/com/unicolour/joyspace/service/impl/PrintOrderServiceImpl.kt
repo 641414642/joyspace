@@ -786,6 +786,11 @@ open class PrintOrderServiceImpl : PrintOrderService {
 
         val ipAddress: String = java.net.InetAddress.getByName(URL(baseUrl).host).hostAddress
 
+        var desc = "悦印订单款_" + orders.joinToString("_") { it.orderNo }
+        if (desc.length > 85) {
+            desc = desc.substring(0, 82) + "..."
+        }
+
         val params = TreeMap(hashMapOf(
                 "mch_appid" to wxmpAppId,
                 "mchid" to wxMchId,
@@ -795,7 +800,7 @@ open class PrintOrderServiceImpl : PrintOrderService {
                 "check_name" to "FORCE_CHECK",
                 "re_user_name" to record.receiverName,
                 "amount" to record.amount.toString(),
-                "desc" to "悦印订单款_" + orders.joinToString("_") { it.orderNo },
+                "desc" to desc,
                 "spbill_create_ip" to ipAddress
         ))
 
