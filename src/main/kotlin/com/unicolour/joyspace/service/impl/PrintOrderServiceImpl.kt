@@ -737,10 +737,10 @@ open class PrintOrderServiceImpl : PrintOrderService {
             startWxEntTransfer(Collections.singletonList(printOrder), orderAmountAndFee)
         } else {
             val notTransferedOrders = printOrderDao.findByCompanyIdAndPrintedOnPrintStationIsTrueAndTransferedIsFalse(printOrder.companyId)
-            val ordersAmountAndFee = calcOrdersAmountAndTransferFee(notTransferedOrders)
+            val batchOrdersAmountAndFee = calcOrdersAmountAndTransferFee(notTransferedOrders)
 
-            if (ordersAmountAndFee.totalTransferAmount > 100) {
-                startWxEntTransfer(notTransferedOrders, orderAmountAndFee)
+            if (batchOrdersAmountAndFee.totalTransferAmount > 100) {
+                startWxEntTransfer(notTransferedOrders, batchOrdersAmountAndFee)
             }
         }
     }
