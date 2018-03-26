@@ -44,6 +44,9 @@ open class PrintStationServiceImpl : PrintStationService {
     lateinit var adSetDao : AdSetDao
 
     @Autowired
+    lateinit var printStationTaskDao: PrintStationTaskDao
+
+    @Autowired
     lateinit var printStationDao: PrintStationDao
 
     @Autowired
@@ -469,6 +472,44 @@ open class PrintStationServiceImpl : PrintStationService {
         val c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
 
         return AVERAGE_RADIUS_OF_EARTH_M * c
+    }
+
+    @Transactional
+    override fun createPrintStationTask(printStationId: Int, type: PrintStationTaskType, param: String) {
+        val task = PrintStationTask()
+        task.createTime = Calendar.getInstance()
+        task.fetched = false
+        task.printStationId = printStationId
+        task.type = type.value
+        task.param = param
+
+        printStationTaskDao.save(task)
+    }
+
+    override fun getUnFetchedPrintStationTasks(printStationSessionId: String, taskIdAfter: Int): List<PrintStationTask> {
+        val session = getPrintStationLoginSession(printStationSessionId)
+        return if (session != null) {
+            printStationTaskDao.findByPrintStationIdAndIdGreaterThanAndFetchedIsFalse(session.printStationId,taskIdAfter)
+        }
+        else {
+            emptyList()
+        }
+    }
+
+    @Transactional
+    override fun printStationTaskFetched(printStationSessionId: String, taskId: Int): Boolean {
+        val session = getPrintStationLoginSession(printStationSessionId)
+        if (session != null) {
+            val task = printStationTaskDao.findOne(taskId)
+            if (task != null && task.printStationId == session.printStationId) {
+                task.fetched = true
+                printStationTaskDao.save(task)
+
+                return true
+            }
+        }
+
+        return false
     }
 }
 

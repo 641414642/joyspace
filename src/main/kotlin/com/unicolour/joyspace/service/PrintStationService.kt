@@ -1,9 +1,7 @@
 package com.unicolour.joyspace.service
 
 import com.unicolour.joyspace.dto.*
-import com.unicolour.joyspace.model.AdSet
-import com.unicolour.joyspace.model.PrintStation
-import com.unicolour.joyspace.model.PrintStationLoginSession
+import com.unicolour.joyspace.model.*
 import graphql.schema.DataFetcher
 import javax.transaction.Transactional
 
@@ -27,4 +25,8 @@ interface PrintStationService {
     fun getPrintStationLoginSession(sessionId: String): PrintStationLoginSession?
 
     fun getPrintStationUrl(printStationId: Int): String
+
+    fun createPrintStationTask(printStationId: Int, type: PrintStationTaskType, param: String)
+    fun getUnFetchedPrintStationTasks(printStationSessionId: String, taskIdAfter: Int): List<PrintStationTask>
+    fun printStationTaskFetched(printStationSessionId: String, taskId: Int): Boolean
 }

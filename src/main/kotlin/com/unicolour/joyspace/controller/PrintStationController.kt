@@ -2,6 +2,7 @@ package com.unicolour.joyspace.controller
 
 import com.unicolour.joyspace.dao.*
 import com.unicolour.joyspace.dto.CommonRequestResult
+import com.unicolour.joyspace.dto.PrintStationTaskDTO
 import com.unicolour.joyspace.dto.ProductItem
 import com.unicolour.joyspace.dto.ResultCode
 import com.unicolour.joyspace.exception.ProcessException
@@ -249,5 +250,22 @@ class PrintStationController {
         }
 
         return modelAndView
+    }
+
+    @RequestMapping("/printStation/tasks", method = arrayOf(RequestMethod.GET))
+    @ResponseBody
+    fun fetchedPrintStationTasks(@RequestParam("sessionId") sessionId: String,
+                    @RequestParam("taskIdAfter") taskIdAfter: Int) : List<PrintStationTaskDTO> {
+        val tasks = printStationService.getUnFetchedPrintStationTasks(sessionId, taskIdAfter)
+        return tasks.map {
+            PrintStationTaskDTO(it.id, it.type, it.param)
+        }
+    }
+
+    @RequestMapping("/printStation/taskFetched", method = arrayOf(RequestMethod.POST))
+    @ResponseBody
+    fun taskFetched(@RequestParam("sessionId") sessionId: String,
+                    @RequestParam("taskId") taskId: Int): Boolean {
+        return printStationService.printStationTaskFetched(sessionId, taskId)
     }
 }

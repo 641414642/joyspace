@@ -289,33 +289,55 @@ open class PrintOrderServiceImpl : PrintOrderService {
     private fun checkOrderImageUploaded(orderId: Int) : Boolean {
         val missingImageCount = printOrderImageDao.countByOrderIdAndUserImageFileIdIsNull(orderId)  //userImageFileId is null 表示此订单图片还没有上传
         if (missingImageCount == 0L) {
-            val order= printOrderDao.findOne(orderId)
+            val order = printOrderDao.findOne(orderId)
             order.imageFileUploaded = true
             order.updateTime = Calendar.getInstance()
             printOrderDao.save(order)
 
-//            //测试代码
-//            order.downloadedToPrintStation = true
-//            order.printedOnPrintStation = true
-//            printOrderDao.save(order)
-//
-//            val transferAmount = calcTransferAmount(order)
-//            if (!order.transfered && transferAmount > 100) {
-//                startWxEntTransfer(Collections.singletonList(order))
-//            }
-//            else {
-//                val notTransferedOrders = printOrderDao.findByCompanyIdAndPayedIsTrueAndTransferedIsFalse(order.companyId)
-//                if (notTransferedOrders.sumBy { calcTransferAmount(it) } > 100) {
-//                    startWxEntTransfer(notTransferedOrders)
-//                }
-//            }
-//            //
+            printStationService.createPrintStationTask(
+                    order.printStationId, PrintStationTaskType.PROCESS_PRINT_ORDER, objectMapper.writeValueAsString(orderToDTO(order)))
 
             return true
         }
         else {
             return false
         }
+    }
+
+    fun orderToDTO(order: PrintOrder): PrintOrderDTO {
+        val orderItemDTOs = ArrayList<PrintOrderItemDTO>()
+
+        order.printOrderItems.forEach {
+            val imageDTOs = ArrayList<PrintOrderImageDTO>()
+            it.orderImages.forEach { img ->
+                val userImgFile = img.userImageFile!!
+
+                imageDTOs += PrintOrderImageDTO(
+                        id = img.id,
+                        name = img.name,
+                        processParams = img.processParams,
+                        userImageFile = UserImageFileDTO(
+                                type = userImgFile.type,
+                                width = userImgFile.width,
+                                height = userImgFile.height,
+                                url = "${baseUrl}/assets/user/${userImgFile.userId}/${userImgFile.sessionId}/${userImgFile.fileName}.${userImgFile.type}",
+                                fileName = userImgFile.fileName
+                        )
+                )
+            }
+
+            orderItemDTOs += PrintOrderItemDTO(
+                    id = it.id,
+                    copies = it.copies,
+                    productId = it.productId,
+                    productType = it.productType,
+                    productVersion = it.productVersion,
+                    orderImages = imageDTOs)
+        }
+
+        val user = userDao.findOne(order.userId)
+
+        return PrintOrderDTO(order.id, user?.nickName, orderItemDTOs)
     }
 
     override val printStationPrintOrdersDataFetcher: DataFetcher<List<PrintOrder>>
