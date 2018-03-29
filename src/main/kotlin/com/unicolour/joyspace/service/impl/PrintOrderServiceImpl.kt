@@ -294,8 +294,7 @@ open class PrintOrderServiceImpl : PrintOrderService {
             order.updateTime = Calendar.getInstance()
             printOrderDao.save(order)
 
-            printStationService.createPrintStationTask(
-                    order.printStationId, PrintStationTaskType.PROCESS_PRINT_ORDER, objectMapper.writeValueAsString(orderToDTO(order)))
+            printStationService.createPrintStationTask(order.printStationId, PrintStationTaskType.PROCESS_PRINT_ORDER, order.id.toString())
 
             return true
         }
@@ -304,7 +303,7 @@ open class PrintOrderServiceImpl : PrintOrderService {
         }
     }
 
-    fun orderToDTO(order: PrintOrder): PrintOrderDTO {
+    private fun orderToDTO(order: PrintOrder): PrintOrderDTO {
         val orderItemDTOs = ArrayList<PrintOrderItemDTO>()
 
         order.printOrderItems.forEach {
@@ -338,6 +337,11 @@ open class PrintOrderServiceImpl : PrintOrderService {
         val user = userDao.findOne(order.userId)
 
         return PrintOrderDTO(order.id, user?.nickName, orderItemDTOs)
+    }
+
+    override fun getPrintOrderDTO(printOrderId: Int): PrintOrderDTO? {
+        val printOrder = printOrderDao.findOne(printOrderId)
+        return if (printOrder == null) null else orderToDTO(printOrder)
     }
 
     override val printStationPrintOrdersDataFetcher: DataFetcher<List<PrintOrder>>

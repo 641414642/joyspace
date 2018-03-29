@@ -1,5 +1,6 @@
 package com.unicolour.joyspace.controller
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.unicolour.joyspace.dao.*
 import com.unicolour.joyspace.dto.CommonRequestResult
 import com.unicolour.joyspace.dto.PrintStationTaskDTO
@@ -7,9 +8,10 @@ import com.unicolour.joyspace.dto.ProductItem
 import com.unicolour.joyspace.dto.ResultCode
 import com.unicolour.joyspace.exception.ProcessException
 import com.unicolour.joyspace.model.PrintStation
-import com.unicolour.joyspace.model.PrintStationLoginSession
+import com.unicolour.joyspace.model.PrintStationTaskType
 import com.unicolour.joyspace.model.ProductType
 import com.unicolour.joyspace.service.ManagerService
+import com.unicolour.joyspace.service.PrintOrderService
 import com.unicolour.joyspace.service.PrintStationService
 import com.unicolour.joyspace.util.Pager
 import org.springframework.beans.factory.annotation.Autowired
@@ -20,6 +22,7 @@ import org.springframework.web.bind.annotation.*
 import org.springframework.web.servlet.ModelAndView
 import java.util.*
 import javax.servlet.http.HttpServletRequest
+import kotlin.collections.ArrayList
 
 @Controller
 class PrintStationController {
@@ -49,7 +52,13 @@ class PrintStationController {
     lateinit var managerService: ManagerService
 
     @Autowired
+    lateinit var printOrderService: PrintOrderService
+
+    @Autowired
     lateinit var printStationLoginSessionDao: PrintStationLoginSessionDao
+
+    @Autowired
+    lateinit var objectMapper: ObjectMapper
 
     @RequestMapping("/printStation/list")
     fun printStationList(
@@ -257,9 +266,24 @@ class PrintStationController {
     fun fetchedPrintStationTasks(@RequestParam("sessionId") sessionId: String,
                     @RequestParam("taskIdAfter") taskIdAfter: Int) : List<PrintStationTaskDTO> {
         val tasks = printStationService.getUnFetchedPrintStationTasks(sessionId, taskIdAfter)
-        return tasks.map {
-            PrintStationTaskDTO(it.id, it.type, it.param)
+        val taskDTOs = ArrayList<PrintStationTaskDTO>()
+
+        for (task in tasks) {
+            var param = task.param
+            if (task.type == PrintStationTaskType.PROCESS_PRINT_ORDER.value) {
+                val orderId = param.toIntOrNull()
+                val printOrderDTO = if (orderId == null) null else printOrderService.getPrintOrderDTO(orderId)
+                if (printOrderDTO != null) {
+                    param = objectMapper.writeValueAsString(printOrderDTO)
+                } else {
+                    continue
+                }
+            }
+
+            taskDTOs += PrintStationTaskDTO(task.id, task.type, param)
         }
+
+        return taskDTOs
     }
 
     @RequestMapping("/printStation/taskFetched", method = arrayOf(RequestMethod.POST))

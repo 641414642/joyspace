@@ -26,4 +26,6 @@ interface PrintOrderService {
 
     //计算订单价格
     fun calculateOrderFee(orderInput: OrderInput): Pair<Int, Int>
+
+    fun getPrintOrderDTO(printOrderId: Int): PrintOrderDTO?
 }

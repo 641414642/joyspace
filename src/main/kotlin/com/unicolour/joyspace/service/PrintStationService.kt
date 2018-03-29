@@ -1,9 +1,10 @@
 package com.unicolour.joyspace.service
 
-import com.unicolour.joyspace.dto.*
+import com.unicolour.joyspace.dto.PrintStationFindResult
+import com.unicolour.joyspace.dto.PrintStationFindResultSingle
+import com.unicolour.joyspace.dto.PrintStationLoginResult
 import com.unicolour.joyspace.model.*
 import graphql.schema.DataFetcher
-import javax.transaction.Transactional
 
 interface PrintStationService {
     fun getPriceMap(printStation: PrintStation): Map<Int, Int>
