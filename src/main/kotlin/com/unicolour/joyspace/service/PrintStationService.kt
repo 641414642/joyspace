@@ -30,4 +30,5 @@ interface PrintStationService {
     fun createPrintStationTask(printStationId: Int, type: PrintStationTaskType, param: String)
     fun getUnFetchedPrintStationTasks(printStationSessionId: String, taskIdAfter: Int): List<PrintStationTask>
     fun printStationTaskFetched(printStationSessionId: String, taskId: Int): Boolean
+    fun uploadLog(printStationSessionId: String, fileName: String, logText: String): Boolean
 }

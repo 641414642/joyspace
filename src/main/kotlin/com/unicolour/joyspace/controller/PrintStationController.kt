@@ -17,6 +17,7 @@ import com.unicolour.joyspace.util.Pager
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
+import org.springframework.http.MediaType
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.servlet.ModelAndView
@@ -291,5 +292,14 @@ class PrintStationController {
     fun taskFetched(@RequestParam("sessionId") sessionId: String,
                     @RequestParam("taskId") taskId: Int): Boolean {
         return printStationService.printStationTaskFetched(sessionId, taskId)
+    }
+
+    @RequestMapping("/printStation/log", method = arrayOf(RequestMethod.POST), consumes = arrayOf(MediaType.TEXT_PLAIN_VALUE))
+    fun uploadPrintStationLog(
+            @RequestParam("sessionId") sessionId: String,
+            @RequestParam(name = "fileName", required = true) fileName: String,
+            @RequestBody logText: String
+    ): Boolean {
+        return printStationService.uploadLog(sessionId, fileName, logText)
     }
 }

@@ -511,5 +511,26 @@ open class PrintStationServiceImpl : PrintStationService {
 
         return false
     }
+
+    override fun uploadLog(printStationSessionId: String, fileName: String, logText: String): Boolean {
+        if (fileName == "" ||
+                fileName.contains('/') ||
+                fileName.contains('\\') ||
+                fileName.contains("..")) {
+            return false
+        }
+
+        val session = getPrintStationLoginSession(printStationSessionId)
+        if (session == null) {
+            return false
+        }
+
+        val logDir = File(assetsDir, "printStation/log/${session.printStationId}")
+        logDir.mkdirs()
+
+        File(logDir, fileName).writeText(logText)
+
+        return true
+    }
 }
 
