@@ -38,31 +38,20 @@
         <div class="modal-content" th:fragment="content">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
-                <h4 class="modal-title" th:text="${create ? '新建' : '修改'}"></h4>
+                <h4 class="modal-title">修改</h4>
             </div>
             <form id="editPrintStationForm" th:action="@{/printStation/edit}" method="post">
                 <input type="hidden" name="id" th:value="${printStation.id}" />
                 <input type="hidden" name="productIds" th:value="${productIds}" />
                 <div class="modal-body">
-                    <div class="form-group" sec:authorize="hasRole('ROLE_SUPERADMIN')">
-                        <label for="company" class="control-label">投放商:</label>
-                        <select name="companyId" class="form-control" id="company">
-                            <option th:each="company : ${companies}"
-                                    th:value="${company.id}"
-                                    th:text="${company.name}"
-                                    th:selected="${printStation.companyId == company.id}">
-                            </option>
-                        </select>
-                        <span class="help-block"></span>
-                    </div>
                     <div class="form-group">
                         <label for="printStationName" class="control-label">自助机名称:</label>
-                        <input class="form-control" id="printStationName" name="printStationName" type="text" />
+                        <input class="form-control" id="printStationName" name="printStationName" type="text" th:value="${printStation.name}" />
                         <span class="help-block"></span>
                     </div>
                     <div class="form-group">
                         <label for="printStationPassword" class="control-label">自助机密码:</label>
-                        <input class="form-control" id="printStationPassword" name="printStationPassword" type="password" />
+                        <input class="form-control" id="printStationPassword" name="printStationPassword" type="password" autocomplete="new-password" />
                         <span class="help-block"></span>
                     </div>
                     <div class="form-group">
@@ -124,7 +113,7 @@
                                         </div>
                                     </div>
                                 </div>
-<!--                                <div class="tab-pane container-fluid" id="template">
+<!--/*                                <div class="tab-pane container-fluid" id="template">
                                     <div class="row">
                                         <div class="col-md-6 checkbox" style="margin:5px 0" th:each="product : ${template_products}">
                                             <label>
@@ -134,7 +123,7 @@
                                             </label>
                                         </div>
                                     </div>
-                                </div>-->
+                                </div>*/-->
                                 <div class="tab-pane container-fluid" id="id_photo">
                                     <div class="row">
                                         <div class="col-md-6 checkbox" style="margin:5px 0" th:each="product : ${id_photo_products}">

@@ -193,56 +193,12 @@ open class PrintStationServiceImpl : PrintStationService {
         return priceMap;
     }
 
-    @Transactional
-    override fun createPrintStation(companyId: Int, printStationName: String, printStationPassword: String, positionId: Int, transferProportion:Int, printerType: String, adSetId: Int, selectedProductIds: Set<Int>): PrintStation? {
-        val loginManager = managerService.loginManager
-        if (loginManager == null) {
-            return null
-        }
-
-        if (!managerService.loginManagerHasRole("ROLE_SUPERADMIN")) {
-            return null
-        }
-
-        val manager = managerDao.findOne(loginManager.managerId)
-
-        val printStation = PrintStation()
-        printStation.name = printStationName
-        printStation.company = companyDao.findOne(companyId)
-        printStation.position = positionDao.findOne(positionId)
-        printStation.transferProportion =  transferProportion
-        printStation.printerType = printerType
-        printStation.adSet = adSetDao.findOne(adSetId)
-        printStation.addressNation = printStation.position.addressNation
-        printStation.addressProvince = printStation.position.addressProvince
-        printStation.addressCity = printStation.position.addressCity
-        printStation.addressDistrict = printStation.position.addressDistrict
-        printStation.addressStreet = printStation.position.addressStreet
-        printStation.password = passwordEncoder.encode(printStationPassword)
-        printStation.status = PrintStationStatus.NORMAL.value
-
-        printStationDao.save(printStation)
-
-        printStation.wxQrCode = "$baseUrl/printStation/${printStation.id}"
-        printStationDao.save(printStation)
-
-        for (productId in selectedProductIds) {
-            val printStationProduct = PrintStationProduct()
-            printStationProduct.product = productDao.findOne(productId)
-            printStationProduct.printStation = printStation
-
-            printStationProductDao.save(printStationProduct);
-        }
-
-        return printStation
-    }
-
     override fun getPrintStationUrl(printStationId: Int): String {
         return "$baseUrl/printStation/$printStationId"
     }
 
     @Transactional
-    override fun updatePrintStation(id: Int, companyId: Int, printStationName: String, printStationPassword: String, positionId: Int, transferProportion:Int, printerType: String, adSetId: Int, selectedProductIds: Set<Int>): Boolean {
+    override fun updatePrintStation(id: Int, printStationName: String, printStationPassword: String, positionId: Int, transferProportion:Int, printerType: String, adSetId: Int, selectedProductIds: Set<Int>): Boolean {
         val printStation = printStationDao.findOne(id)
 
         if (printStation != null) {
@@ -259,7 +215,6 @@ open class PrintStationServiceImpl : PrintStationService {
             }
 
             if (managerService.loginManagerHasRole("ROLE_SUPERADMIN")) {
-                printStation.company = companyDao.findOne(companyId)
                 printStation.transferProportion = transferProportion
                 printStation.printerType = printerType
                 if (adSetId > 0) {
@@ -303,11 +258,13 @@ open class PrintStationServiceImpl : PrintStationService {
             throw ProcessException(ResultCode.ACTIVATION_CODE_USED)
         }
 
+        val position = positionDao.findOne(positionId)
+
         val printStation = PrintStation()
         printStation.id = activationCode.printStationId
         printStation.name = name
-        printStation.company = companyDao.findOne(loginManager.companyId)
-        printStation.position = positionDao.findOne(positionId)
+        printStation.company = position.company
+        printStation.position = position
         printStation.transferProportion =  activationCode.transferProportion
         printStation.printerType = activationCode.printerType
         printStation.adSet = if (activationCode.adSetId == null) null else adSetDao.findOne(activationCode.adSetId)
@@ -335,6 +292,20 @@ open class PrintStationServiceImpl : PrintStationService {
         activationCode.useTime = Calendar.getInstance()
         activationCode.used = true
         printStationActivationCodeDao.save(activationCode)
+    }
+
+    @Transactional
+    override fun addUploadLogFileTask(printStationId: Int, filterStr: String): Boolean {
+        val task = PrintStationTask()
+
+        task.param = filterStr
+        task.printStationId = printStationId
+        task.createTime = Calendar.getInstance()
+        task.type = PrintStationTaskType.UPLOAD_LOG.value
+
+        printStationTaskDao.save(task)
+
+        return true
     }
 
     override val printStationDataFetcher: DataFetcher<PrintStation>

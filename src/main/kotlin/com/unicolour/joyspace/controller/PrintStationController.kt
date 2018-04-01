@@ -111,25 +111,57 @@ class PrintStationController {
         return modelAndView
     }
 
+    @RequestMapping("/printStation/allList")
+    fun allPrintStationList(
+            modelAndView: ModelAndView,
+            @RequestParam(name = "pageno", required = false, defaultValue = "1") pageno: Int,
+            @RequestParam(name = "inputCompanyId", required = false, defaultValue = "0") inputCompanyId: Int
+    ): ModelAndView {
+
+        val pageable = PageRequest(pageno - 1, 20, Sort.Direction.ASC, "id")
+        val printStations = if (inputCompanyId > 0)
+                printStationDao.findByCompanyId(inputCompanyId, pageable)
+            else
+                printStationDao.findAll(pageable)
+
+        val pager = Pager(printStations.totalPages, 7, pageno - 1)
+        modelAndView.model["pager"] = pager
+
+        class PrintStationInfo(val printStation: PrintStation, val online: Boolean, val version: String)
+
+        val time = Calendar.getInstance()
+        time.add(Calendar.SECOND, 3600 - 30)
+
+        modelAndView.model["companies"] = companyDao.findAll()
+        modelAndView.model["printStations"] = printStations.content.map {
+            val session = printStationLoginSessionDao.findByPrintStationId(it.id)
+            var online = false
+            var version = ""
+
+            if (session != null && session.expireTime.timeInMillis > time.timeInMillis) {    //自助机30秒之内访问过后台
+                online = true
+                version = if (session.version <= 0) "" else session.version.toString()
+            }
+
+            PrintStationInfo(it, online, version)
+        }
+
+        modelAndView.model["inputCompanyId"] = inputCompanyId
+        modelAndView.model["viewCat"] = "system_mgr"
+        modelAndView.model["viewContent"] = "printStation_allList"
+        modelAndView.viewName = "layout"
+
+        return modelAndView
+    }
+
     @RequestMapping(path = arrayOf("/printStation/edit"), method = arrayOf(RequestMethod.GET))
     fun editPrintStation(
             modelAndView: ModelAndView,
             @RequestParam(name = "id", required = true) id: Int
     ): ModelAndView {
-        val loginManager = managerService.loginManager
-
-        var supportedProductIdSet: Set<Int> = emptySet<Int>()
-
-        var printStation: PrintStation? = null
-        if (id > 0) {
-            printStation = printStationDao.findOne(id)
-            supportedProductIdSet = printStationProductDao.findByPrintStationId(id).map { it.productId }.toHashSet()
-        }
-
-        if (printStation == null) {
-            printStation = PrintStation()
-            printStation.printerType = "CY"
-        }
+        val printStation: PrintStation = printStationDao.findOne(id)
+        val supportedProductIdSet = printStationProductDao.findByPrintStationId(id).map { it.productId }.toHashSet()
+        val companyId = printStation.companyId
 
         //val allProducts = productDao.findByCompanyIdOrderBySequenceAsc(loginManager!!.companyId)
         val allProducts = productDao.findAll()
@@ -143,11 +175,9 @@ class PrintStationController {
                             selected = supportedProductIdSet.contains(it.id))
                 }
 
-        modelAndView.model["create"] = id <= 0
         modelAndView.model["printStation"] = printStation
-        modelAndView.model["positions"] = positionDao.findByCompanyId(loginManager!!.companyId)
-        modelAndView.model["companies"] = companyDao.findAll()
-        modelAndView.model["adSets"] = adSetDao.findByCompanyIdOrPublicResourceIsTrue(loginManager.companyId)
+        modelAndView.model["positions"] = positionDao.findByCompanyId(companyId)
+        modelAndView.model["adSets"] = adSetDao.findByCompanyIdOrPublicResourceIsTrue(companyId)
         modelAndView.model["photo_products"] = allProducts.filter { it.productType == ProductType.PHOTO.value }
         modelAndView.model["template_products"] = allProducts.filter { it.productType == ProductType.TEMPLATE.value }
         modelAndView.model["id_photo_products"] = allProducts.filter { it.productType == ProductType.ID_PHOTO.value }
@@ -162,7 +192,6 @@ class PrintStationController {
     fun editPrintStation(
             request: HttpServletRequest,
             @RequestParam(name = "id", required = true) id: Int,
-            @RequestParam(name = "companyId", required = false, defaultValue = "-1") companyId: Int,
             @RequestParam(name = "printStationName", required = true) printStationName: String,
             @RequestParam(name = "printStationPassword", required = true) printStationPassword: String,
             @RequestParam(name = "positionId", required = true) positionId: Int,
@@ -174,22 +203,18 @@ class PrintStationController {
 
         val selectedProductIds = productIds
                 .split(',')
-                .filter { !request.getParameter("product_${it}").isNullOrBlank() }
+                .filter { !request.getParameter("product_$it").isNullOrBlank() }
                 .map { it.toInt() }
                 .toSet()
 
-        if (id <= 0) {
-            printStationService.createPrintStation(companyId, printStationName, printStationPassword, positionId, (proportion * 10).toInt(), printerType, adSetId, selectedProductIds)
-            return true
-        } else {
-            return printStationService.updatePrintStation(id, companyId, printStationName, printStationPassword, positionId, (proportion * 10).toInt(), printerType, adSetId, selectedProductIds)
-        }
+        return printStationService.updatePrintStation(id, printStationName, printStationPassword,
+                positionId, (proportion * 10).toInt(), printerType, adSetId, selectedProductIds)
     }
 
     @RequestMapping(path = arrayOf("/printStation/activate"), method = arrayOf(RequestMethod.GET))
-    fun activatePrintStation(modelAndView: ModelAndView): ModelAndView {
-        val loginManager = managerService.loginManager
-
+    fun activatePrintStation(
+            @RequestParam(name = "allCompany", required = false, defaultValue = "false") allCompany: Boolean,
+            modelAndView: ModelAndView): ModelAndView {
         val printStation = PrintStation()
 
         //val allProducts = productDao.findByCompanyIdOrderBySequenceAsc(loginManager!!.companyId)
@@ -207,8 +232,19 @@ class PrintStationController {
                     )
                 }
 
+        val superAdmin = managerService.loginManagerHasRole("ROLE_SUPERADMIN")
+
+        if (superAdmin && allCompany) {
+            modelAndView.model["companies"] = companyDao.findAll()
+            modelAndView.model["positions"] = positionDao.findAll()
+        }
+        else {
+            val loginManager = managerService.loginManager
+            modelAndView.model["positions"] = positionDao.findByCompanyId(loginManager!!.companyId)
+        }
+
         modelAndView.model["printStation"] = printStation
-        modelAndView.model["positions"] = positionDao.findByCompanyId(loginManager!!.companyId)
+        modelAndView.model["allCompany"] = allCompany
         modelAndView.model["photo_products"] = allProducts.filter { it.productType == ProductType.PHOTO.value }
         modelAndView.model["template_products"] = allProducts.filter { it.productType == ProductType.TEMPLATE.value }
         modelAndView.model["id_photo_products"] = allProducts.filter { it.productType == ProductType.ID_PHOTO.value }
@@ -301,5 +337,24 @@ class PrintStationController {
             @RequestBody logText: String
     ): Boolean {
         return printStationService.uploadLog(sessionId, fileName, logText)
+    }
+
+    @GetMapping("/printStation/uploadLogFile")
+    fun uploadLogFileConfirm(
+            @RequestParam(name = "printStationId", required = true) printStationId: Int,
+            modelAndView: ModelAndView
+    ): ModelAndView {
+        modelAndView.model["printStationId"] = printStationId
+        modelAndView.viewName = "/printStation/uploadLogFile :: content"
+        return modelAndView
+    }
+
+    @PostMapping("/printStation/uploadLogFile")
+    @ResponseBody
+    fun uploadLogFile(
+            @RequestParam(name = "printStationId", required = true) printStationId: Int,
+            @RequestParam(name = "logFileDate", required = true) logFileDate: String
+    ): Boolean {
+        return printStationService.addUploadLogFileTask(printStationId, logFileDate)
     }
 }

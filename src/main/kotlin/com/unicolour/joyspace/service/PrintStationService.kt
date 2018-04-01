@@ -8,8 +8,7 @@ import graphql.schema.DataFetcher
 
 interface PrintStationService {
     fun getPriceMap(printStation: PrintStation): Map<Int, Int>
-    fun createPrintStation(companyId: Int, printStationName: String, printStationPassword: String, positionId: Int, transferProportion:Int, printerType:String, adSetId: Int, selectedProductIds: Set<Int>): PrintStation?
-    fun updatePrintStation(id: Int, companyId: Int, printStationName: String, printStationPassword: String, positionId: Int, transferProportion:Int, printerType:String, adSetId: Int, selectedProductIds: Set<Int>): Boolean
+    fun updatePrintStation(id: Int, printStationName: String, printStationPassword: String, positionId: Int, transferProportion:Int, printerType:String, adSetId: Int, selectedProductIds: Set<Int>): Boolean
 
     fun activatePrintStation(code: String, name:String, password: String, positionId: Int, selectedProductIds: Set<Int>)
 
@@ -31,4 +30,6 @@ interface PrintStationService {
     fun getUnFetchedPrintStationTasks(printStationSessionId: String, taskIdAfter: Int): List<PrintStationTask>
     fun printStationTaskFetched(printStationSessionId: String, taskId: Int): Boolean
     fun uploadLog(printStationSessionId: String, fileName: String, logText: String): Boolean
+
+    fun addUploadLogFileTask(printStationId: Int, filterStr: String): Boolean
 }

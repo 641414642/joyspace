@@ -41,6 +41,8 @@ open class WebSecurityConfig : WebSecurityConfigurerAdapter() {
                 .antMatchers(*permitAllPatterns).permitAll()
                 .antMatchers("/company/list").hasRole("SUPERADMIN")
                 .antMatchers("/company/edit").hasRole("SUPERADMIN")
+                .antMatchers("/printStation/allList").hasRole("SUPERADMIN")
+                .antMatchers("/printStation/uploadLogFile").hasRole("SUPERADMIN")
                 .anyRequest().authenticated()
                 .and()
             .formLogin()

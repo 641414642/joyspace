@@ -11,6 +11,8 @@
 
 	<!-- Bootstrap 3.3.6 -->
 	<link rel="stylesheet" href="../static/thirdparty/bootstrap/css/bootstrap.min.css" th:href="@{/thirdparty/bootstrap/css/bootstrap.min.css}" />
+	<!-- bootstrap datepicker -->
+	<link rel="stylesheet" href="../static/css/bootstrap-datepicker.min.css" th:href="@{/css/bootstrap-datepicker.min.css}" />
 	<!-- Font Awesome -->
 	<link rel="stylesheet" href="../static/thirdparty/fontawesome/css/font-awesome.min.css" th:href="@{/thirdparty/fontawesome/css/font-awesome.min.css}" />
 	<!-- Ionicons -->
@@ -138,9 +140,10 @@
 						<li th:class="${viewContent=='company_list' ? 'active' : ''}" sec:authorize="hasRole('ROLE_SUPERADMIN')"><a href="#" th:href="@{/company/list}"><i class="fa fa-circle-o"></i>投放商列表</a></li>
 						<li th:class="${viewContent=='activation_code_list' ? 'active' : ''}" sec:authorize="hasRole('ROLE_SUPERADMIN')"><a href="#" th:href="@{/activationCode/list}"><i class="fa fa-circle-o"></i>自助机激活码</a></li>
 						<li th:class="${viewContent=='company_wx_account' ? 'active' : ''}"><a href="#" th:href="@{/company/wxAccountList}"><i class="fa fa-circle-o"></i>微信收款账户</a></li>
+						<li th:class="${viewContent=='printStation_allList' ? 'active' : ''}" sec:authorize="hasRole('ROLE_SUPERADMIN')"><a href="#" th:href="@{/printStation/allList}"><i class="fa fa-circle-o"></i>自助机</a></li>
 					</ul>
 				</li>
-<!--				<li sec:authorize="hasRole('ROLE_SUPERADMIN')" th:class="${viewCat=='pay_mgr' ? 'treeview active' : 'treeview'}" class="treeview">
+<!--/*				<li sec:authorize="hasRole('ROLE_SUPERADMIN')" th:class="${viewCat=='pay_mgr' ? 'treeview active' : 'treeview'}" class="treeview">
 					<a href="../widgets.html">
 						<i class="fa fa-th"></i> <span>支付管理</span>
 						<span class="pull-right-container">
@@ -152,7 +155,7 @@
 						<li th:class="${viewContent=='alipay_list' ? 'active' : ''}"><a href="#" th:href="@{/ali_pay/list}"><i class="fa fa-circle-o"></i>支付宝支付列表</a></li>
 						<li><a href="#"><i class="fa fa-circle-o"></i>店铺支付方式列表</a></li>
 					</ul>
-				</li>-->
+				</li>*/-->
 				<li th:class="${viewCat=='product_mgr' ? 'treeview active' : 'treeview'}" class="treeview">
 					<a href="#">
 						<i class="fa fa-pie-chart"></i>
@@ -212,6 +215,7 @@
 		<div th:case="'product_list'" th:include="product/list :: content"></div>
 		<div th:case="'position_list'" th:include="position/list :: content"></div>
 		<div th:case="'printStation_list'" th:include="printStation/list :: content"></div>
+		<div th:case="'printStation_allList'" th:include="printStation/allList :: content"></div>
 		<div th:case="'coupon_list'" th:include="coupon/list :: content"></div>
 		<div th:case="'printOrder_list'" th:include="printOrder/list :: content"></div>
 		<div th:case="'adSet_list'" th:include="adSet/list :: content"></div>

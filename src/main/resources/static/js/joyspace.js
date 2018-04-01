@@ -108,7 +108,7 @@ function showModal(event, onloadfunc) {
     return false;
 }
 
-function showPostFormModal(event, formId, modalStyleClass, reload, validateFunc, resultProcessFunc) {
+function showPostFormModal(event, formId, modalStyleClass, reload, validateFunc, resultProcessFunc, onloadFunc) {
     $('#modalTemplate').removeClass().addClass("modal fade");
 
     if (modalStyleClass) {
@@ -144,6 +144,10 @@ function showPostFormModal(event, formId, modalStyleClass, reload, validateFunc,
 
             ev.preventDefault();
         });
+
+        if (typeof onloadFunc === "function") {
+            onloadFunc();
+        }
     });
 
     return false;

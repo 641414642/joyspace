@@ -1,5 +1,5 @@
-//添加编辑自助机
-function createOrEditPrintStation(event) {
+//编辑自助机
+function editPrintStation(event) {
     return showPostFormModal(event, 'editPrintStationForm', null, true);
 }
 
@@ -33,11 +33,39 @@ function validateActivationInput() {
         showFormGroupErrMsg("printStationPassword", "自助机密码不能为空!");
         return false;
     }
+    else if ($("#positionId option:selected").length == 0) {
+        showFormGroupErrMsg("positionId", "请选择店面!");
+        return false;
+    }
 
     return true;
 }
 
+function updatePositionSelectOptions() {
+    var companyId = $("#companyId option:selected").val();
+    if (companyId) {
+        $("#positionId option").appendTo($("#positionCache"));
+        $("#positionCache option[data-company-id=" + companyId + "]").appendTo($("#positionId"));
+    }
+}
+
 //激活自助机
 function activatePrintStation(event) {
-    return showPostFormModal(event, 'activatePrintStationForm', null, true, validateActivationInput, processActivationResult);
+    return showPostFormModal(event, 'activatePrintStationForm', null, true,
+        validateActivationInput, processActivationResult, function() {
+            $("#companyId").on("change", function() {
+                updatePositionSelectOptions();
+            });
+
+            updatePositionSelectOptions();
+        });
+}
+
+//上传日志文件
+function confirmUploadLogFile(event) {
+    return showPostFormModal(event, 'uploadLogFileForm', null, false, null, null, function() {
+        $("#logFileDate")
+            .datepicker({ autoclose: true, format: 'yyyy-mm-dd' })
+            .datepicker("setDate", new Date());
+    });
 }
