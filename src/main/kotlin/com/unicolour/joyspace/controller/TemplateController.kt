@@ -1,6 +1,8 @@
 package com.unicolour.joyspace.controller
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.unicolour.joyspace.dao.TemplateDao
+import com.unicolour.joyspace.dto.IDPhotoParam
 import com.unicolour.joyspace.model.ProductType
 import com.unicolour.joyspace.model.Template
 import com.unicolour.joyspace.service.TemplateService
@@ -23,6 +25,9 @@ class TemplateController {
 
     @Autowired
     lateinit var templateDao: TemplateDao
+
+    @Autowired
+    lateinit var objectMapper: ObjectMapper
 
     @RequestMapping("/template/list")
     fun templateList(
@@ -61,7 +66,8 @@ class TemplateController {
     @RequestMapping(path = arrayOf("/template/edit"), method = arrayOf(RequestMethod.GET))
     fun editTemplate(
             modelAndView: ModelAndView,
-            @RequestParam(name = "id", required = true) id: Int): ModelAndView {
+            @RequestParam(name = "id", required = true) id: Int,
+            @RequestParam(name = "type", required = true) type: Int): ModelAndView {
         var template: Template? = null
         if (id > 0) {
             template = templateDao.findOne(id)
@@ -69,14 +75,35 @@ class TemplateController {
 
         if (template == null) {
             template = Template()
+            template.width = 101.60
+            template.height = 152.40
         }
 
         modelAndView.model["templates"] = templateDao.findAll()
         modelAndView.model["types"] = ProductType.values()
 
-        modelAndView.model.put("create", id <= 0)
-        modelAndView.model.put("template", template)
-        modelAndView.viewName = "/template/edit :: content"
+        modelAndView.model["create"] = id <= 0
+        modelAndView.model["template"] = template
+
+        if (type == ProductType.ID_PHOTO.value) {
+            val idPhotoParam =
+                    if (id > 0 && !template.tplParam.isNullOrBlank()) {
+                        try {
+                            objectMapper.readValue(template.tplParam, IDPhotoParam::class.java)
+                        } catch (e: Exception) {
+                            templateService.createDefaultIDPhotoParam()
+                        }
+                    }
+                    else {
+                        templateService.createDefaultIDPhotoParam()
+                    }
+
+            modelAndView.model["idPhotoParam"] = idPhotoParam
+            modelAndView.viewName = "/template/idPhotoEdit :: content"
+        }
+        else {
+            modelAndView.viewName = "/template/edit :: content"
+        }
 
         return modelAndView
     }
@@ -91,6 +118,38 @@ class TemplateController {
     ): ModelAndView {
 
         val productType = ProductType.values().find{ it.value == type }
+        val success: Boolean
+        if (id <= 0) {
+            templateService.createTemplate(name, productType!!, templateFile!!)
+            success = true
+        } else {
+            success = templateService.updateTemplate(id, name, productType!!, templateFile)
+        }
+
+        modelAndView.model["success"] = success
+        modelAndView.viewName = "/template/templateFileUploaded"
+
+        return modelAndView
+    }
+
+    @RequestMapping(path = arrayOf("/template/editIdPhoto"), method = arrayOf(RequestMethod.POST))
+    fun editIdPhotoTemplate(
+            modelAndView: ModelAndView,
+            @RequestParam(name = "id", required = true) id: Int,
+            @RequestParam(name = "name", required = true) name: String,
+            @RequestParam(name = "tplWidth", required = true) tplWidth: Double,
+            @RequestParam(name = "tplHeight", required = true) tplHeight: Double,
+            @RequestParam(name = "elementWidth", required = true) elementWidth: Double,
+            @RequestParam(name = "elementHeight", required = true) elementHeight: Double,
+            @RequestParam(name = "rowCount", required = true) rowCount: Int,
+            @RequestParam(name = "columnCount", required = true) columnCount: Int,
+            @RequestParam(name = "horGap", required = true) horGap: Double,
+            @RequestParam(name = "verGap", required = true) verGap: Double,
+            @RequestParam(name = "gridLineWidth", required = true) gridLineWidth: Double,
+            @RequestParam("maskImageFile") maskImageFile: MultipartFile?
+    ): ModelAndView {
+
+        val productType = ProductType.ID_PHOTO
         val success: Boolean
         if (id <= 0) {
             templateService.createTemplate(name, productType!!, templateFile!!)

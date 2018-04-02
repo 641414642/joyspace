@@ -38,7 +38,17 @@
 						<a href="#" th:href="@{/template/list}" class="btn btn-default btn-sm">重置</a>
 
 						<div class="pull-right" sec:authorize="hasRole('ROLE_SUPERADMIN')">
-							<a href="#" th:attr="data-url=@{/template/edit(id=0)}" class="btn btn-primary btn-sm" onclick="return createOrEditTemplate(event, true)">新建</a>
+							<div class="dropdown">
+								<button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+									新建
+									<span class="caret"></span>
+								</button>
+								<ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
+									<li><a href="#" th:attr="data-url=@{/template/edit(id=0,type=0)}" onclick="return createOrEditTemplate(event, true)">普通照片</a></li>
+									<li><a href="#" th:attr="data-url=@{/template/edit(id=0,type=1)}" onclick="return createOrEditTemplate(event, true)">证件照</a></li>
+									<li><a href="#" th:attr="data-url=@{/template/edit(id=0,type=2)}" onclick="return createOrEditTemplate(event, true)">模板拼图</a></li>
+								</ul>
+							</div>
 						</div>
 					</div>
 				</form>

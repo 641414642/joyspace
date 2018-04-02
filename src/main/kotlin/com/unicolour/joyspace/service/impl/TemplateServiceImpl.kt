@@ -1,6 +1,7 @@
 package com.unicolour.joyspace.service.impl
 
 import com.unicolour.joyspace.dao.*
+import com.unicolour.joyspace.dto.IDPhotoParam
 import com.unicolour.joyspace.dto.ImageParam
 import com.unicolour.joyspace.dto.PreviewParam
 import com.unicolour.joyspace.dto.TemplatePreviewResult
@@ -103,6 +104,19 @@ open class TemplateServiceImpl : TemplateService {
         else {  //缺省作为mm处理
             return value.substring(0, value.length).toDouble()
         }
+    }
+
+    override fun createDefaultIDPhotoParam(): IDPhotoParam {
+        val param = IDPhotoParam()
+        param.columnCount = 2
+        param.rowCount = 2
+        param.elementWidth = 35.0
+        param.elementHeight = 53.0
+        param.gridLineWidth = 0.1
+        param.horGap = 5.0
+        param.verGap = 5.0
+
+        return param
     }
 
     @Transactional

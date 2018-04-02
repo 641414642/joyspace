@@ -1,5 +1,6 @@
 package com.unicolour.joyspace.service
 
+import com.unicolour.joyspace.dto.IDPhotoParam
 import com.unicolour.joyspace.dto.PreviewParam
 import com.unicolour.joyspace.dto.TemplatePreviewResult
 import com.unicolour.joyspace.model.ProductType
@@ -12,6 +13,7 @@ interface TemplateService {
     fun createTemplate(name: String, type: ProductType, templateFile: MultipartFile)
     fun updateTemplate(id: Int, name: String, type: ProductType, templateFile: MultipartFile?): Boolean
     fun getTemplateImageDataFetcher(fieldName:String): DataFetcher<Any>
+    fun createDefaultIDPhotoParam(): IDPhotoParam
 
     val templateFileUrlDataFetcher: DataFetcher<String?>
     val templatesDataFetcher: DataFetcher<List<Template>>
