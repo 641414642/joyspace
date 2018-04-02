@@ -5,4 +5,5 @@ import org.springframework.data.repository.CrudRepository
 
 interface PrintStationTaskDao : CrudRepository<PrintStationTask, Int> {
     fun findByPrintStationIdAndIdGreaterThanAndFetchedIsFalse(printStationId: Int, taskIdAfter: Int) : List<PrintStationTask>
+    fun existsByPrintStationIdAndParamAndFetchedIsFalse(printStationId: Int, param: String): Boolean
 }

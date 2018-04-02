@@ -34,29 +34,35 @@
 
     <script type="text/javascript">
 		$(document).ready(function() {
-			$('#uploadLogFileConfirmDialog').modal('show');
+			$('#reprintOrderDialog').modal('show');
 		});
 	</script>
 </head>
 <body>
-<div class="modal fade" role="dialog" id="uploadLogFileConfirmDialog">
+<div class="modal fade" role="dialog" id="reprintOrderDialog">
     <div class="modal-dialog" role="document">
         <div class="modal-content" th:fragment="content">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
-                <h4 class="modal-title">上传日志文件</h4>
+                <h4 class="modal-title">重新打印订单</h4>
             </div>
-            <form id="uploadLogFileForm" th:action="@{/printStation/uploadLogFile}" method="post">
-                <input type="hidden" name="printStationId" th:value="${printStationId}" />
+            <form id="reprintOrderForm" th:action="@{/printOrder/reprint}" method="post">
+                <input type="hidden" name="printOrderId" th:value="${printOrderId}" />
                 <div class="modal-body">
                     <div class="form-group">
-                        <label for="logFileDate" class="control-label">日期:</label>
-                        <div class="input-group date">
-                            <div class="input-group-addon">
-                                <i class="fa fa-calendar"></i>
-                            </div>
-                            <input class="form-control pull-right" id="logFileDate" name="logFileDate" type="text" />
-                        </div>
+                        <label for="orderNo" class="control-label">订单编号:</label>
+                        <input type="text" th:readonly="true" class="form-control" id="orderNo" th:value="${printOrderNo}" />
+                    </div>
+                    <div class="form-group">
+                        <label for="printStationId" class="control-label">自助机:</label>
+                        <select name="printStationId" class="form-control" id="printStationId">
+                            <option th:each="printStation : ${printStations}"
+                                    th:value="${printStation.id}"
+                                    th:text="${printStation.name == '' ? '自助机' + printStation.id : printStation.name}"
+                                    th:selected="${printStation.id == curPrintStationId}">
+                            </option>
+                        </select>
+                        <span class="help-block"></span>
                     </div>
                 </div>
                 <div class="modal-footer">

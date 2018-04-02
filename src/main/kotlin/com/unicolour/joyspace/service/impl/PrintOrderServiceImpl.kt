@@ -5,10 +5,7 @@ import com.unicolour.joyspace.dao.*
 import com.unicolour.joyspace.dto.*
 import com.unicolour.joyspace.exception.ProcessException
 import com.unicolour.joyspace.model.*
-import com.unicolour.joyspace.service.CompanyService
-import com.unicolour.joyspace.service.ImageService
-import com.unicolour.joyspace.service.PrintOrderService
-import com.unicolour.joyspace.service.PrintStationService
+import com.unicolour.joyspace.service.*
 import graphql.schema.DataFetcher
 import graphql.schema.DataFetchingEnvironment
 import org.slf4j.LoggerFactory
@@ -58,6 +55,9 @@ open class PrintOrderServiceImpl : PrintOrderService {
 
     @Autowired
     lateinit var companyService: CompanyService
+
+    @Autowired
+    lateinit var managerService: ManagerService
 
     @Autowired
     lateinit var printStationService: PrintStationService
@@ -344,6 +344,37 @@ open class PrintOrderServiceImpl : PrintOrderService {
         return if (printOrder == null) null else orderToDTO(printOrder)
     }
 
+    override fun addReprintOrderTask(printOrderId: Int, printStationId: Int) {
+        val loginManager = managerService.loginManager
+        val order = printOrderDao.findOne(printOrderId)
+        val printStation = printStationDao.findOne(printStationId)
+
+        if (loginManager == null) {
+            throw ProcessException(ResultCode.MANAGER_NOT_LOG_IN)
+        }
+
+        if (order == null) {
+            throw ProcessException(ResultCode.PRINT_ORDER_NOT_FOUND)
+        }
+        else if (order.companyId != loginManager.companyId) {
+            throw ProcessException(ResultCode.PRINT_ORDER_NOT_BELONG_TO_COMPANY)
+        }
+
+        if (printStation == null) {
+            throw ProcessException(ResultCode.PRINT_STATION_NOT_FOUND)
+        }
+        else if (printStation.companyId != loginManager.companyId) {
+            throw ProcessException(ResultCode.PRINT_STATION_NOT_BELONG_TO_COMPANY)
+        }
+
+        if (!printStationService.orderReprintTaskExists(printStationId, order.id)) {
+            printStationService.createPrintStationTask(printStationId, PrintStationTaskType.PROCESS_PRINT_ORDER, order.id.toString())
+        }
+        else {
+            throw ProcessException(ResultCode.REPRINT_TASK_EXISTS)
+        }
+    }
+
     override val printStationPrintOrdersDataFetcher: DataFetcher<List<PrintOrder>>
         get() {
             return DataFetcher { env ->
@@ -451,9 +482,9 @@ open class PrintOrderServiceImpl : PrintOrderService {
         } else {
             val order = printOrderDao.findOne(printOrderId)
             if (order != null) {
-                if (order.printStationId != loginSession.printStationId) {
-                    GraphQLRequestResult(ResultCode.NOT_IN_THIS_PRINT_STATION)
-                } else {
+//                if (order.printStationId != loginSession.printStationId) {
+//                    GraphQLRequestResult(ResultCode.NOT_IN_THIS_PRINT_STATION)
+//                } else {
                     if (state == "downloaded") {
                         order.downloadedToPrintStation = true
                         order.updateTime = Calendar.getInstance()
@@ -465,7 +496,7 @@ open class PrintOrderServiceImpl : PrintOrderService {
 
                     printOrderDao.save(order)
                     GraphQLRequestResult(ResultCode.SUCCESS)
-                }
+//                }
             } else {
                 GraphQLRequestResult(ResultCode.PRINT_ORDER_NOT_FOUND)
             }

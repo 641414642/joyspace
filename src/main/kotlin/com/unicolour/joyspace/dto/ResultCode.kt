@@ -25,6 +25,10 @@ enum class ResultCode(val value:Int, val desc:String, val descEn: String) {
     MANAGER_ALREADY_EXISTS(21, "同名管理员已存在", "Manager with same name already exists"),
     COMPANY_WX_ACCOUNT_NOT_EXISTS(22, "指定的帐户不存在", ""),
     EXCEED_MAX_WX_ACCOUNT_NUMBER(23, "最多只能添加10个微信收款账户", ""),
+    PRINT_ORDER_NOT_BELONG_TO_COMPANY(24, "订单不属于此投放商", "Print order not belong to this company"),
+    PRINT_STATION_NOT_BELONG_TO_COMPANY(25, "自助机不属于此投放商", "Print station not belong to this company"),
+    MANAGER_NOT_LOG_IN(26, "管理员未登录", "Manager not login"),
+    REPRINT_TASK_EXISTS(27, "重新打印任务已存在", "Reprint task already exists"),
 
     SERVER_ERROR(100, "服务器错误", "Server error"),
 

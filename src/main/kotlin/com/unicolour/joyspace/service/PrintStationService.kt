@@ -32,4 +32,5 @@ interface PrintStationService {
     fun uploadLog(printStationSessionId: String, fileName: String, logText: String): Boolean
 
     fun addUploadLogFileTask(printStationId: Int, filterStr: String): Boolean
+    fun orderReprintTaskExists(printStationId: Int, orderId: Int): Boolean
 }

@@ -1,6 +1,7 @@
 package com.unicolour.joyspace.controller
 
 import com.unicolour.joyspace.dao.*
+import com.unicolour.joyspace.dto.CommonRequestResult
 import com.unicolour.joyspace.dto.ResultCode
 import com.unicolour.joyspace.exception.ProcessException
 import com.unicolour.joyspace.model.Position
@@ -8,15 +9,14 @@ import com.unicolour.joyspace.model.PrintOrder
 import com.unicolour.joyspace.model.WxEntTransferRecord
 import com.unicolour.joyspace.model.WxEntTransferRecordItem
 import com.unicolour.joyspace.service.ManagerService
+import com.unicolour.joyspace.service.PrintOrderService
 import com.unicolour.joyspace.util.Pager
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Controller
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RequestMethod
-import org.springframework.web.bind.annotation.RequestParam
+import org.springframework.web.bind.annotation.*
 import org.springframework.web.servlet.ModelAndView
 
 @Controller
@@ -44,6 +44,9 @@ class PrintOrderController {
 
     @Autowired
     lateinit var managerService: ManagerService
+
+    @Autowired
+    lateinit var printOrderService: PrintOrderService
 
     @Autowired
     lateinit var wxEntTransferRecordDao: WxEntTransferRecordDao
@@ -150,4 +153,34 @@ class PrintOrderController {
         return modelAndView
     }
 
+    @GetMapping("/printOrder/reprint")
+    fun reprintOrder(
+            @RequestParam(name = "printOrderId", required = true) printOrderId: Int,
+            modelAndView: ModelAndView
+    ): ModelAndView {
+        val printOrder = printOrderDao.findOne(printOrderId)
+        val printStation = printStationDao.findOne(printOrder.printStationId)
+
+        modelAndView.model["printOrderId"] = printOrderId
+        modelAndView.model["printOrderNo"] = printOrder.orderNo
+        modelAndView.model["curPrintStationId"] = printOrder.printStationId
+        modelAndView.model["printStations"] = printStationDao.findByPositionId(printStation.positionId)
+
+        modelAndView.viewName = "/printOrder/reprint :: content"
+        return modelAndView
+    }
+
+    @PostMapping("/printOrder/reprint")
+    @ResponseBody
+    fun reprintOrder(
+            @RequestParam(name = "printOrderId", required = true) printOrderId: Int,
+            @RequestParam(name = "printStationId", required = true) printStationId: Int
+    ): CommonRequestResult {
+        try {
+            printOrderService.addReprintOrderTask(printOrderId, printStationId)
+            return CommonRequestResult()
+        } catch (e: ProcessException) {
+            return CommonRequestResult(e.errcode, e.message)
+        }
+    }
 }

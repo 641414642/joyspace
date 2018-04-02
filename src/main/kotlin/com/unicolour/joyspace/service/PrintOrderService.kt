@@ -28,4 +28,6 @@ interface PrintOrderService {
     fun calculateOrderFee(orderInput: OrderInput): Pair<Int, Int>
 
     fun getPrintOrderDTO(printOrderId: Int): PrintOrderDTO?
+
+    fun addReprintOrderTask(printOrderId: Int, printStationId: Int)
 }

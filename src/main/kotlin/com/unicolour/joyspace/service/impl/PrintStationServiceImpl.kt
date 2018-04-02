@@ -457,6 +457,10 @@ open class PrintStationServiceImpl : PrintStationService {
         printStationTaskDao.save(task)
     }
 
+    override fun orderReprintTaskExists(printStationId: Int, orderId: Int): Boolean {
+        return printStationTaskDao.existsByPrintStationIdAndParamAndFetchedIsFalse(printStationId, orderId.toString())
+    }
+
     override fun getUnFetchedPrintStationTasks(printStationSessionId: String, taskIdAfter: Int): List<PrintStationTask> {
         val session = getPrintStationLoginSession(printStationSessionId)
         return if (session != null) {
