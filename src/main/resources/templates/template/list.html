@@ -62,24 +62,26 @@
 						<th>类型</th>
 						<th>版本号</th>
 						<th>尺寸(毫米)</th>
+						<th>头像尺寸(毫米)</th>
 						<th>最小图片数量</th>
 						<th sec:authorize="hasRole('ROLE_SUPERADMIN')">操作</th>
 					</tr>
-					<tr th:each="template : ${templates}">
-						<td th:text="${template.id}"></td>
-						<td th:text="${template.name}"></td>
-						<th:block th:switch="${template.type}">
+					<tr th:each="tplWrapper : ${templates}">
+						<td th:text="${tplWrapper.template.id}"></td>
+						<td th:text="${tplWrapper.template.name}"></td>
+						<th:block th:switch="${tplWrapper.template.type}">
 							<td th:case="0">普通照片</td>
 							<td th:case="1">证件照</td>
 							<td th:case="2">模板拼图</td>
 						</th:block>
-						<td th:text="${template.currentVersion}"></td>
-						<td th:text="${#numbers.formatDecimal(template.width, 1, 'DEFAULT', 2, 'DEFAULT') + ' x ' + #numbers.formatDecimal(template.height, 1, 'NONE', 2, 'POINT')}"></td>
-						<td th:text="${template.minImageCount}"></td>
+						<td th:text="${tplWrapper.template.currentVersion}"></td>
+						<td th:text="${#numbers.formatDecimal(tplWrapper.template.width, 1, 'DEFAULT', 2, 'DEFAULT') + ' x ' + #numbers.formatDecimal(tplWrapper.template.height, 1, 'NONE', 2, 'POINT')}"></td>
+						<td th:text="${tplWrapper.idPhotoSize}"></td>
+						<td th:text="${tplWrapper.template.minImageCount}"></td>
 						<td sec:authorize="hasRole('ROLE_SUPERADMIN')">
 							<a href="#">
 								<i class="fa fa-fw fa-pencil"
-								   th:attr="data-url=@{/template/edit(id=${template.id},mode='edit')}"
+								   th:attr="data-url=@{/template/edit(id=${tplWrapper.template.id},type=${tplWrapper.template.type})}"
 								   onclick="return createOrEditTemplate(event, true)"
 								   title="编辑">
 								</i>

@@ -114,7 +114,7 @@
                         <span class="help-block"></span>
                     </div>
                     <div class="form-group">
-                        <label for="gridLineWidth" class="control-label">网格线宽度:</label>
+                        <label for="gridLineWidth" class="control-label">网格线宽度 (填0不生成网格线):</label>
                         <div class="input-group">
                             <input class="form-control" type="text" id="gridLineWidth" name="gridLineWidth"
                                    th:value="${#numbers.formatDecimal(idPhotoParam.gridLineWidth, 1, 'DEFAULT', 2, 'DEFAULT')}"/>
@@ -123,8 +123,8 @@
                         <span class="help-block"></span>
                     </div>
                     <div class="form-group">
-                        <label for="maskImageFile" class="control-label">头像蒙版图片:</label>
-                        <input type="file" name="templateFile" class="form-control" id="maskImageFile" />
+                        <label for="maskImageFile" class="control-label" th:text="${create ? '头像蒙版图片:' : '头像蒙版图片 (如果为空, 使用旧版本的蒙版图片):'}"></label>
+                        <input type="file" name="maskImageFile" class="form-control" id="maskImageFile" />
                         <span class="help-block"></span>
                     </div>
                 </div>

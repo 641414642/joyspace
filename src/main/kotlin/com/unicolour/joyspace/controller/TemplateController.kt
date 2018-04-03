@@ -48,13 +48,28 @@ class TemplateController {
                 else
                     templateDao.findByName(name!!, pageable)
 
+        class TemplateWrapper(val template: Template, val idPhotoSize: String)
+
+        val templateWrappers = templates.content.map {
+            var idPhotoSize = ""
+            if (it.type == ProductType.ID_PHOTO.value && !it.tplParam.isNullOrBlank()) {
+                try {
+                    val idPhotoParam = objectMapper.readValue(it.tplParam, IDPhotoParam::class.java)
+                    idPhotoSize = String.format("%.2f", idPhotoParam.elementWidth) + " x " + String.format("%.2f", idPhotoParam.elementHeight)
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+            }
+            TemplateWrapper(it, idPhotoSize)
+        }
+
         modelAndView.model.put("inputTemplateName", name)
         modelAndView.model.put("inputTemplateType", type)
 
         val pager = Pager(templates.totalPages, 7, pageno - 1)
         modelAndView.model.put("pager", pager)
 
-        modelAndView.model.put("templates", templates.content)
+        modelAndView.model.put("templates", templateWrappers)
 
         modelAndView.model.put("viewCat", "product_mgr")
         modelAndView.model.put("viewContent", "template_list")
@@ -149,13 +164,21 @@ class TemplateController {
             @RequestParam("maskImageFile") maskImageFile: MultipartFile?
     ): ModelAndView {
 
-        val productType = ProductType.ID_PHOTO
+        val idPhotoParam = IDPhotoParam()
+        idPhotoParam.elementWidth = elementWidth
+        idPhotoParam.elementHeight = elementHeight
+        idPhotoParam.rowCount = rowCount
+        idPhotoParam.columnCount = columnCount
+        idPhotoParam.horGap = horGap
+        idPhotoParam.verGap = verGap
+        idPhotoParam.gridLineWidth = gridLineWidth
+
         val success: Boolean
         if (id <= 0) {
-            templateService.createTemplate(name, productType!!, templateFile!!)
+            templateService.createIDPhotoTemplate(name, tplWidth, tplHeight,idPhotoParam, maskImageFile)
             success = true
         } else {
-            success = templateService.updateTemplate(id, name, productType!!, templateFile)
+            success = templateService.updateIDPhotoTemplate(id, name, tplWidth, tplHeight,idPhotoParam, maskImageFile)
         }
 
         modelAndView.model["success"] = success

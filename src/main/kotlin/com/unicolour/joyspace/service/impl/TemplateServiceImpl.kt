@@ -1,5 +1,6 @@
 package com.unicolour.joyspace.service.impl
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.unicolour.joyspace.dao.*
 import com.unicolour.joyspace.dto.IDPhotoParam
 import com.unicolour.joyspace.dto.ImageParam
@@ -29,15 +30,21 @@ import org.w3c.dom.Document
 import org.w3c.dom.Element
 import java.awt.Color
 import java.awt.geom.AffineTransform
+import java.awt.image.BufferedImage
 import java.io.File
 import java.io.IOException
 import java.math.BigDecimal
 import java.math.RoundingMode
 import java.nio.file.Files
+import java.nio.file.Paths
 import java.nio.file.StandardCopyOption
+import java.nio.file.StandardOpenOption
 import java.util.*
 import java.util.zip.ZipEntry
+import java.util.zip.ZipFile
 import java.util.zip.ZipInputStream
+import java.util.zip.ZipOutputStream
+import javax.imageio.ImageIO
 import javax.transaction.Transactional
 import javax.xml.parsers.DocumentBuilderFactory
 import javax.xml.transform.TransformerFactory
@@ -85,6 +92,9 @@ open class TemplateServiceImpl : TemplateService {
     @Autowired
     lateinit var printStationService: PrintStationService
 
+    @Autowired
+    lateinit var objectMapper: ObjectMapper
+
     private fun toMM(value:String) : Double {
         if (value.endsWith("mm")) {
             return value.substring(0, value.length-2).toDouble()
@@ -117,6 +127,175 @@ open class TemplateServiceImpl : TemplateService {
         param.verGap = 5.0
 
         return param
+    }
+
+    @Transactional
+    override fun createIDPhotoTemplate(name: String, tplWidth: Double, tplHeight: Double, idPhotoParam: IDPhotoParam, maskImageFile: MultipartFile?) {
+        val tpl = Template()
+        tpl.currentVersion = 1
+        tpl.minImageCount = 1
+        tpl.name = name
+        tpl.type = ProductType.ID_PHOTO.value
+        tpl.width = tplWidth
+        tpl.height = tplHeight
+        tpl.uuid = UUID.randomUUID().toString().replace("-", "")
+        tpl.tplParam = objectMapper.writeValueAsString(idPhotoParam)
+
+        templateDao.save(tpl)
+
+        saveIDPhotoTemplate(tplWidth, tplHeight, idPhotoParam, tpl, maskImageFile, null)
+    }
+
+    override fun updateIDPhotoTemplate(id: Int, name: String, tplWidth: Double, tplHeight: Double, idPhotoParam: IDPhotoParam, maskImageFile: MultipartFile?): Boolean {
+        val tpl = templateDao.findOne(id)
+
+        if (tpl != null) {
+            val oldPreviewTplDir = File(assetsDir, "template/preview/${tpl.id}_v${tpl.currentVersion}")
+
+            tpl.currentVersion++
+            tpl.name = name
+            tpl.width = tplWidth
+            tpl.height = tplHeight
+            tpl.tplParam = objectMapper.writeValueAsString(idPhotoParam)
+
+            templateDao.save(tpl)
+
+            var oldMaskImgFile: File? = null
+            if (maskImageFile == null || maskImageFile.isEmpty) {
+                oldMaskImgFile = File(oldPreviewTplDir, "mask.png")
+                if (!oldMaskImgFile.exists()) {
+                    oldMaskImgFile = null
+                }
+            }
+
+            saveIDPhotoTemplate(tplWidth, tplHeight, idPhotoParam, tpl, maskImageFile, oldMaskImgFile)
+            return true
+        } else {
+            return false
+        }
+    }
+
+    private fun saveIDPhotoTemplate(tplWidth: Double, tplHeight: Double, idPhotoParam: IDPhotoParam, tpl: Template, maskImageFile: MultipartFile?, oldMaskImgFile: File?) {
+        val tplSvg = createIDPhotoTemplateSVG(tplWidth, tplHeight, idPhotoParam)
+
+        //preview files
+        val previewTplDir = File(assetsDir, "template/preview/${tpl.id}_v${tpl.currentVersion}")
+        previewTplDir.mkdirs()
+
+        val previewTplFile = File(previewTplDir, "template.svg")
+        previewTplFile.writeText(tplSvg)
+
+        val previewImgDir = File(previewTplDir, "images")
+        previewImgDir.mkdirs()
+        val placeHolderImgFile = File(previewImgDir, "UserImagePlaceHolder.png")
+        TemplateServiceImpl::class.java.getResourceAsStream("/UserImagePlaceHolder.png").use {
+            placeHolderImgFile.outputStream().use { out ->
+                it.copyTo(out)
+            }
+        }
+
+        val maskFile = File(previewTplDir, "mask.png")
+        if (maskImageFile != null && !maskImageFile.isEmpty) {
+            maskImageFile.transferTo(maskFile)
+        }
+        else if (oldMaskImgFile != null) {
+            oldMaskImgFile.copyTo(maskFile)
+        }
+
+        //production zip file
+        val productionTplPackFile = File(assetsDir, "template/production/${tpl.id}_v${tpl.currentVersion}_${tpl.uuid}.zip")
+        productionTplPackFile.parentFile.mkdirs()
+
+        ZipOutputStream(productionTplPackFile.outputStream()).use {
+            it.putNextEntry(ZipEntry("template.svg"))
+            it.write(tplSvg.toByteArray())
+            it.closeEntry()
+
+            it.putNextEntry(ZipEntry("images/UserImagePlaceHolder.png"))
+            TemplateServiceImpl::class.java.getResourceAsStream("/UserImagePlaceHolder.png").use { input ->
+                input.copyTo(it)
+            }
+            it.closeEntry()
+
+            if (maskImageFile != null && !maskImageFile.isEmpty) {
+                it.putNextEntry(ZipEntry("mask.png"))
+                placeHolderImgFile.inputStream().use { input -> input.copyTo(it) }
+                it.closeEntry()
+            }
+            else if (oldMaskImgFile != null) {
+                it.putNextEntry(ZipEntry("mask.png"))
+                oldMaskImgFile.inputStream().use { input -> input.copyTo(it) }
+                it.closeEntry()
+            }
+        }
+    }
+
+    fun createIDPhotoTemplateSVG(tplW: Double, tplH: Double, param: IDPhotoParam): String {
+        val w = param.elementWidth  //照片宽度
+        val h = param.elementHeight //照片高度
+
+        val row = param.rowCount //照片行数
+        val col = param.columnCount //照片列数
+
+        val hGap = param.horGap
+        val vGap = param.verGap
+
+        val offsetX = (tplW - col * w - (col - 1) * hGap) / 2.0
+        val offsetY = (tplH - row * h - (row - 1) * vGap) / 2.0
+
+        var tpl =
+"""<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   version="1.1"
+   viewBox="0 0 ${tplW} ${tplH}"
+   height="${tplH}mm"
+   width="${tplW}mm">
+"""
+        var r = 0
+        while (r < row) {
+            var c = 0
+            while (c < col) {
+                val x = offsetX + (w + hGap) * c
+                val y = offsetY + (h + vGap) * r
+
+                tpl +=
+"""<image
+     x="$x"
+     y="$y"
+     id="image_${r}_${c}"
+     xlink:href="images/UserImagePlaceHolder.png"
+     preserveAspectRatio="none"
+     height="$h"
+     width="$w">
+    <desc>UserImage</desc>
+    <title>照片</title>
+  </image>
+"""
+                c++
+            }
+            r++
+        }
+
+        val lineWidth = param.gridLineWidth
+        if (lineWidth > 0) {
+            for (rIndex in 0 until row) {
+                val y = offsetY + (h + vGap) * rIndex
+                tpl += """<line x1="0" y1="${y - lineWidth / 2}" x2="$tplW" y2="${y - lineWidth / 2}" style="stroke:rgb(0,0,0);stroke-width:0.1mm" />"""
+                tpl += """<line x1="0" y1="${y + h + lineWidth / 2}" x2="$tplW" y2="${y + h + lineWidth / 2}" style="stroke:rgb(0,0,0);stroke-width:0.1mm" />"""
+            }
+            for (cIndex in 0 until col) {
+                val x = offsetX + (w + hGap) * cIndex
+                tpl += """<line x1="${x - lineWidth / 2}" y1="0" x2="${x - lineWidth / 2}" y2="$tplH" style="stroke:rgb(0,0,0);stroke-width:0.1mm" />"""
+                tpl += """<line x1="${x + w + lineWidth / 2}" y1="0" x2="${x + w + lineWidth / 2}" y2="$tplH" style="stroke:rgb(0,0,0);stroke-width:0.1mm" />"""
+            }
+        }
+
+        tpl += "</svg>"
+
+        return tpl
     }
 
     @Transactional
