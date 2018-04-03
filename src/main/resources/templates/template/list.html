@@ -44,9 +44,9 @@
 									<span class="caret"></span>
 								</button>
 								<ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
-									<li><a href="#" th:attr="data-url=@{/template/edit(id=0,type=0)}" onclick="return createOrEditTemplate(event, true)">普通照片</a></li>
-									<li><a href="#" th:attr="data-url=@{/template/edit(id=0,type=1)}" onclick="return createOrEditTemplate(event, true)">证件照</a></li>
-									<li><a href="#" th:attr="data-url=@{/template/edit(id=0,type=2)}" onclick="return createOrEditTemplate(event, true)">模板拼图</a></li>
+									<li><a href="#" th:attr="data-url=@{/template/edit(id=0,type=0)}" onclick="return createOrEditTemplate(event)">普通照片</a></li>
+									<li><a href="#" th:attr="data-url=@{/template/edit(id=0,type=1)}" onclick="return createOrEditTemplate(event)">证件照</a></li>
+									<li><a href="#" th:attr="data-url=@{/template/edit(id=0,type=2)}" onclick="return createOrEditTemplate(event)">模板拼图</a></li>
 								</ul>
 							</div>
 						</div>
@@ -81,8 +81,8 @@
 						<td sec:authorize="hasRole('ROLE_SUPERADMIN')">
 							<a href="#">
 								<i class="fa fa-fw fa-pencil"
-								   th:attr="data-url=@{/template/edit(id=${tplWrapper.template.id},type=${tplWrapper.template.type})}"
-								   onclick="return createOrEditTemplate(event, true)"
+								   th:attr="data-url=@{/template/edit(id=${tplWrapper.template.id},type=${tplWrapper.template.type})},data-tpl-type=${tplWrapper.template.type}"
+								   onclick="return createOrEditTemplate(event)"
 								   title="编辑">
 								</i>
 							</a>
@@ -96,7 +96,7 @@
 		</div>
 	</section>
 
-	<script src="../../static/js/product.js" th:src="@{/js/product.js}"></script>
+	<script src="../../static/js/template.js" th:src="@{/js/template.js}"></script>
 </div>
 </body>
 </html>

@@ -3,13 +3,7 @@ function createOrEditProduct(event) {
     return showPostFormModal(event, 'editProductForm', null, true);
 }
 
-//添加编辑模板
-function createOrEditTemplate(event) {
-    $('#modalTemplate').removeClass().addClass("modal fade");
-    showModal(event);
-    return false;
-}
-
+//预览广告图片
 function previewImage(input) {
   if (input.files && input.files[0]) {
     var reader = new FileReader();

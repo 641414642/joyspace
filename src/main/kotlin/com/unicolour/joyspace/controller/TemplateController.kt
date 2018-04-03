@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Controller
+import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestMethod
 import org.springframework.web.bind.annotation.RequestParam
@@ -63,16 +64,16 @@ class TemplateController {
             TemplateWrapper(it, idPhotoSize)
         }
 
-        modelAndView.model.put("inputTemplateName", name)
-        modelAndView.model.put("inputTemplateType", type)
+        modelAndView.model["inputTemplateName"] = name
+        modelAndView.model["inputTemplateType"] = type
 
         val pager = Pager(templates.totalPages, 7, pageno - 1)
-        modelAndView.model.put("pager", pager)
+        modelAndView.model["pager"] = pager
 
-        modelAndView.model.put("templates", templateWrappers)
+        modelAndView.model["templates"] = templateWrappers
 
-        modelAndView.model.put("viewCat", "product_mgr")
-        modelAndView.model.put("viewContent", "template_list")
+        modelAndView.model["viewCat"] = "product_mgr"
+        modelAndView.model["viewContent"] = "template_list"
         modelAndView.viewName = "layout"
 
         return modelAndView
@@ -150,6 +151,7 @@ class TemplateController {
     @RequestMapping(path = arrayOf("/template/editIdPhoto"), method = arrayOf(RequestMethod.POST))
     fun editIdPhotoTemplate(
             modelAndView: ModelAndView,
+            @RequestParam(name = "preview", required = true) preview: Boolean,
             @RequestParam(name = "id", required = true) id: Int,
             @RequestParam(name = "name", required = true) name: String,
             @RequestParam(name = "tplWidth", required = true) tplWidth: Double,
@@ -173,16 +175,24 @@ class TemplateController {
         idPhotoParam.verGap = verGap
         idPhotoParam.gridLineWidth = gridLineWidth
 
-        val success: Boolean
-        if (id <= 0) {
-            templateService.createIDPhotoTemplate(name, tplWidth, tplHeight,idPhotoParam, maskImageFile)
-            success = true
-        } else {
-            success = templateService.updateIDPhotoTemplate(id, name, tplWidth, tplHeight,idPhotoParam, maskImageFile)
-        }
+        if (preview) {
+            val svg = templateService.previewIDPhotoTemplate(tplWidth, tplHeight,idPhotoParam, maskImageFile)
 
-        modelAndView.model["success"] = success
-        modelAndView.viewName = "/template/templateFileUploaded"
+            modelAndView.model["svg"] = svg
+            modelAndView.viewName = "/template/preview"
+        }
+        else {
+            val success: Boolean
+            if (id <= 0) {
+                templateService.createIDPhotoTemplate(name, tplWidth, tplHeight, idPhotoParam, maskImageFile)
+                success = true
+            } else {
+                success = templateService.updateIDPhotoTemplate(id, name, tplWidth, tplHeight, idPhotoParam, maskImageFile)
+            }
+
+            modelAndView.model["success"] = success
+            modelAndView.viewName = "/template/templateFileUploaded"
+        }
 
         return modelAndView
     }

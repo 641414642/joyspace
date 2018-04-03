@@ -17,6 +17,7 @@ interface TemplateService {
 
     fun createIDPhotoTemplate(name: String, tplWidth: Double, tplHeight: Double, idPhotoParam: IDPhotoParam, maskImageFile: MultipartFile?)
     fun updateIDPhotoTemplate(id: Int, name: String, tplWidth: Double, tplHeight: Double, idPhotoParam: IDPhotoParam, maskImageFile: MultipartFile?): Boolean
+    fun previewIDPhotoTemplate(tplWidth: Double, tplHeight: Double, idPhotoParam: IDPhotoParam, maskImageFile: MultipartFile?): String
 
     val templateFileUrlDataFetcher: DataFetcher<String?>
     val templatesDataFetcher: DataFetcher<List<Template>>

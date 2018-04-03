@@ -30,21 +30,16 @@ import org.w3c.dom.Document
 import org.w3c.dom.Element
 import java.awt.Color
 import java.awt.geom.AffineTransform
-import java.awt.image.BufferedImage
 import java.io.File
 import java.io.IOException
 import java.math.BigDecimal
 import java.math.RoundingMode
 import java.nio.file.Files
-import java.nio.file.Paths
 import java.nio.file.StandardCopyOption
-import java.nio.file.StandardOpenOption
 import java.util.*
 import java.util.zip.ZipEntry
-import java.util.zip.ZipFile
 import java.util.zip.ZipInputStream
 import java.util.zip.ZipOutputStream
-import javax.imageio.ImageIO
 import javax.transaction.Transactional
 import javax.xml.parsers.DocumentBuilderFactory
 import javax.xml.transform.TransformerFactory
@@ -175,8 +170,21 @@ open class TemplateServiceImpl : TemplateService {
         }
     }
 
+    override fun previewIDPhotoTemplate(tplWidth: Double, tplHeight: Double, idPhotoParam: IDPhotoParam, maskImageFile: MultipartFile?): String
+    {
+        val placeHolderImg =
+                if (maskImageFile == null || maskImageFile.isEmpty) {
+                    "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAFElEQVR42mNoaGj4TwxmGFVIX4UApMX5nRlpusUAAAAASUVORK5CYII="
+                }
+                else {
+                    "data:image/png;base64,${Base64.getEncoder().encode(maskImageFile.bytes)}"
+                }
+
+        return createIDPhotoTemplateSVG(tplWidth, tplHeight, idPhotoParam, placeHolderImg)
+    }
+
     private fun saveIDPhotoTemplate(tplWidth: Double, tplHeight: Double, idPhotoParam: IDPhotoParam, tpl: Template, maskImageFile: MultipartFile?, oldMaskImgFile: File?) {
-        val tplSvg = createIDPhotoTemplateSVG(tplWidth, tplHeight, idPhotoParam)
+        val tplSvg = createIDPhotoTemplateSVG(tplWidth, tplHeight, idPhotoParam, "images/UserImagePlaceHolder.png")
 
         //preview files
         val previewTplDir = File(assetsDir, "template/preview/${tpl.id}_v${tpl.currentVersion}")
@@ -230,7 +238,7 @@ open class TemplateServiceImpl : TemplateService {
         }
     }
 
-    fun createIDPhotoTemplateSVG(tplW: Double, tplH: Double, param: IDPhotoParam): String {
+    fun createIDPhotoTemplateSVG(tplW: Double, tplH: Double, param: IDPhotoParam, placeHolderImg: String): String {
         val w = param.elementWidth  //照片宽度
         val h = param.elementHeight //照片高度
 
@@ -266,7 +274,7 @@ open class TemplateServiceImpl : TemplateService {
      x="$x"
      y="$y"
      id="image_${r}_${c}"
-     xlink:href="images/UserImagePlaceHolder.png"
+     xlink:href="$placeHolderImg"
      preserveAspectRatio="none"
      height="$h"
      width="$w">
