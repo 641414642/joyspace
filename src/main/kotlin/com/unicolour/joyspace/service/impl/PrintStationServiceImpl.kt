@@ -487,6 +487,17 @@ open class PrintStationServiceImpl : PrintStationService {
         return false
     }
 
+    @Transactional
+    override fun printStationTaskFetched(printStationId: Int, printOrderId: Int) {
+        val tasks = printStationTaskDao.findByPrintStationIdAndParam(printStationId, printOrderId.toString())
+        tasks.forEach {
+            if (!it.fetched) {
+                it.fetched = true
+                printStationTaskDao.save(tasks)
+            }
+        }
+    }
+
     override fun uploadLog(printStationSessionId: String, fileName: String, logText: String): Boolean {
         if (fileName == "" ||
                 fileName.contains('/') ||

@@ -492,6 +492,8 @@ open class PrintOrderServiceImpl : PrintOrderService {
                     else if (state == "printed") {
                         order.printedOnPrintStation = true
                         order.updateTime = Calendar.getInstance()
+
+                        printStationService.printStationTaskFetched(order.printStationId, order.id)
                     }
 
                     printOrderDao.save(order)
