@@ -93,7 +93,6 @@ class TemplateController {
         }
 
         modelAndView.model["templates"] = templateDao.findAll()
-        modelAndView.model["types"] = ProductType.values()
 
         modelAndView.model["create"] = id <= 0
         modelAndView.model["template"] = template
@@ -129,17 +128,15 @@ class TemplateController {
             modelAndView: ModelAndView,
             @RequestParam(name = "id", required = true) id: Int,
             @RequestParam(name = "name", required = true) name: String,
-            @RequestParam(name = "type", required = true) type: Int,
             @RequestParam("templateFile") templateFile: MultipartFile?
     ): ModelAndView {
 
-        val productType = ProductType.values().find{ it.value == type }
         val success: Boolean
         if (id <= 0) {
-            templateService.createTemplate(name, productType!!, templateFile!!)
+            templateService.createTemplate(name, ProductType.TEMPLATE, templateFile!!)
             success = true
         } else {
-            success = templateService.updateTemplate(id, name, productType!!, templateFile)
+            success = templateService.updateTemplate(id, name, ProductType.TEMPLATE, templateFile)
         }
 
         modelAndView.model["success"] = success
@@ -162,7 +159,7 @@ class TemplateController {
             @RequestParam(name = "columnCount", required = true) columnCount: Int,
             @RequestParam(name = "horGap", required = true) horGap: Double,
             @RequestParam(name = "verGap", required = true) verGap: Double,
-            @RequestParam(name = "gridLineWidth", required = true) gridLineWidth: Double,
+            @RequestParam(name = "gridLineWidth", required = true) gridLineWidth: Double?,
             @RequestParam("maskImageFile") maskImageFile: MultipartFile?
     ): ModelAndView {
 
@@ -173,7 +170,7 @@ class TemplateController {
         idPhotoParam.columnCount = columnCount
         idPhotoParam.horGap = horGap
         idPhotoParam.verGap = verGap
-        idPhotoParam.gridLineWidth = gridLineWidth
+        idPhotoParam.gridLineWidth = gridLineWidth ?: 0.0
 
         if (preview) {
             val svg = templateService.previewIDPhotoTemplate(tplWidth, tplHeight,idPhotoParam, maskImageFile)
