@@ -5,7 +5,9 @@ import com.unicolour.joyspace.dto.*
 import com.unicolour.joyspace.exception.ProcessException
 import com.unicolour.joyspace.model.*
 import com.unicolour.joyspace.service.*
+import com.unicolour.joyspace.util.format
 import graphql.schema.DataFetcher
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.security.crypto.password.PasswordEncoder
@@ -19,6 +21,10 @@ import kotlin.collections.HashMap
 
 @Service
 open class PrintStationServiceImpl : PrintStationService {
+    companion object {
+        val logger = LoggerFactory.getLogger(PrintStationServiceImpl::class.java)
+    }
+
     @Value("\${com.unicolour.joyspace.assetsDir}")
     lateinit var assetsDir: String
 
@@ -461,10 +467,22 @@ open class PrintStationServiceImpl : PrintStationService {
         return printStationTaskDao.existsByPrintStationIdAndParamAndFetchedIsFalse(printStationId, orderId.toString())
     }
 
+    @Transactional
     override fun getUnFetchedPrintStationTasks(printStationSessionId: String, taskIdAfter: Int): List<PrintStationTask> {
         val session = getPrintStationLoginSession(printStationSessionId)
         return if (session != null) {
-            printStationTaskDao.findByPrintStationIdAndIdGreaterThanAndFetchedIsFalse(session.printStationId,taskIdAfter)
+            val curTime = System.currentTimeMillis()
+            val tasks = printStationTaskDao.findByPrintStationIdAndIdGreaterThanAndFetchedIsFalse(session.printStationId,taskIdAfter)
+            for (task in tasks) {
+                if (task.createTime.timeInMillis < curTime - 48L * 60 * 60 * 1000) {  //超过48小时
+                    logger.info("PrintStationTask expired, task id=${task.id}, printSatationId=${task.printStationId}, type=${task.type}, param=${task.param}, createTime=${task.createTime.format()}")
+
+                    task.fetched = true
+                    printStationTaskDao.save(task)
+                }
+            }
+
+            tasks.filter { !it.fetched }
         }
         else {
             emptyList()
