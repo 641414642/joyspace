@@ -843,7 +843,7 @@ open class PrintOrderServiceImpl : PrintOrderService {
 
         val ipAddress: String = java.net.InetAddress.getByName(URL(baseUrl).host).hostAddress
 
-        var desc = "悦印订单款_" + orders.joinToString("_") { it.orderNo }
+        var desc = "悦印订单款_" + orders.joinToString("_") { it.id.toString() }
         if (desc.length > 85) {
             desc = desc.substring(0, 82) + "..."
         }
