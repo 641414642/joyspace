@@ -224,6 +224,9 @@ open class TemplateServiceImpl : TemplateService {
                 it.closeEntry()
             }
         }
+
+        //模板图片信息
+        updateTemplateInfo(tpl, previewTplFile)
     }
 
     private fun createIDPhotoTemplateSVG(tplW: Double, tplH: Double, param: IDPhotoParam, placeHolderImg: String): String {
@@ -995,6 +998,9 @@ open class TemplateServiceImpl : TemplateService {
             }
             it.closeEntry()
         }
+
+        //模板图片信息
+        updateTemplateInfo(tpl, previewTplFile)
     }
 
     private fun createPhotoTemplateSVG(tplW: Double, tplH: Double): String =
