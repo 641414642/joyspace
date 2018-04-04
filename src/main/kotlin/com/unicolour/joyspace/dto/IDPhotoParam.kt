@@ -7,5 +7,5 @@ class IDPhotoParam(
         var rowCount: Int = 0,
         var horGap: Double = 0.0,
         var verGap: Double = 0.0,
-        var gridLineWidth: Double = 0.0
+        var gridLineWidth: Double = -1.0
 )

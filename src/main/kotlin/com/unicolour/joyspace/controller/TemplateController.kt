@@ -11,10 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Controller
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RequestMethod
-import org.springframework.web.bind.annotation.RequestParam
+import org.springframework.web.bind.annotation.*
 import org.springframework.web.multipart.MultipartFile
 import org.springframework.web.servlet.ModelAndView
 
@@ -91,8 +88,8 @@ class TemplateController {
 
         if (template == null) {
             template = Template()
-            template.width = 101.60
-            template.height = 152.40
+            template.width = 0.0
+            template.height = 0.0
         }
 
         modelAndView.model["templates"] = templateDao.findAll()
@@ -107,15 +104,18 @@ class TemplateController {
                         try {
                             objectMapper.readValue(template.tplParam, IDPhotoParam::class.java)
                         } catch (e: Exception) {
-                            templateService.createDefaultIDPhotoParam()
+                            IDPhotoParam()
                         }
                     }
                     else {
-                        templateService.createDefaultIDPhotoParam()
+                        IDPhotoParam()
                     }
 
             modelAndView.model["idPhotoParam"] = idPhotoParam
             modelAndView.viewName = "/template/idPhotoEdit :: content"
+        }
+        else if (type == ProductType.PHOTO.value) {
+            modelAndView.viewName = "/template/photoEdit :: content"
         }
         else {
             modelAndView.viewName = "/template/edit :: content"
@@ -193,6 +193,29 @@ class TemplateController {
             modelAndView.model["success"] = success
             modelAndView.viewName = "/template/templateFileUploaded"
         }
+
+        return modelAndView
+    }
+
+    @PostMapping("/template/editPhoto")
+    fun editPhotoTemplate(
+            modelAndView: ModelAndView,
+            @RequestParam(name = "id", required = true) id: Int,
+            @RequestParam(name = "name", required = true) name: String,
+            @RequestParam(name = "tplWidth", required = true) tplWidth: Double,
+            @RequestParam(name = "tplHeight", required = true) tplHeight: Double
+    ): ModelAndView {
+
+        val success: Boolean
+        if (id <= 0) {
+            templateService.createPhotoTemplate(name, tplWidth, tplHeight)
+            success = true
+        } else {
+            success = templateService.updatePhotoTemplate(id, name, tplWidth, tplHeight)
+        }
+
+        modelAndView.model["success"] = success
+        modelAndView.viewName = "/template/templateFileUploaded"
 
         return modelAndView
     }
