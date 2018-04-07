@@ -1,0 +1,214 @@
+=== 主页数据:
+- URL:  v2/app/homepage
+- Method: GET
+- 返回值:
+
+----
+{
+        "msg" : "OK",
+        "state" : 0,
+        "result" : {
+                "adverts" : [
+                        {
+                                "name" : "广告1",
+                                "describe" : "广告描述1",
+                                "contentUrl" : "https://test.uni-colour.com/assets/app/images/ad1.jpg"
+                        },
+                        {
+                                "name" : "广告2",
+                                "describe" : "广告描述2",
+                                "contentUrl" : "https://test.uni-colour.com/assets/app/images/ad2.jpg"
+                        }
+                ],
+                "productTypes" : [
+                        {
+                                "id" : 0,
+                                "name" : "普通照片",
+                                "describe" : "首次冲印免费",
+                                "iconUrl" : "https://test.uni-colour.com/assets/app/images/photo.jpg",
+                        },
+                        {
+                                "id" : 1,
+                                "name" : "证件照",
+                                "describe" : "首次冲印免费",
+                                "iconUrl" : "https://test.uni-colour.com/assets/app/images/id_photo.jpg",
+                        },
+                        {
+                                "id" : 2,
+                                "name" : "模板拼图",
+                                "describe" : "免费模板随便用",
+                                "iconUrl" : "https://test.uni-colour.com/assets/app/images/template_photo.jpg",
+                        }
+                ]
+        }
+}
+
+----
+
+=== 获取某个类型的全部产品（规格／模版）信息
+- URL:  /v2/product/{type}
+- Method: GET
+- 参数:
+|==========================================================
+|参数名           |描述
+|type   |PHOTO 普通照片：0,  ID_PHOTO 证件照：1,   TEMPLATE 模板拼图：2,   ALBUM 相册：3
+|==========================================================
+
+- 返回值:
+----
+[
+    {
+        "id": 1,
+        "name": "1寸证件照",
+        "type": "0",     //PHOTO 普通照片：0,  ID_PHOTO 证件照：1,   TEMPLATE 模板拼图：2,   ALBUM 相册：3
+        "width": 100,           //产品尺寸，宽度 (单位毫米)
+        "height": 80,           //产品尺寸，高度 (单位毫米)
+        "imageRequired": 1,        //需要用户上传的图片张数
+        "remark": "",           //产品描述
+        "price": 2,             //默认价格(单位分)
+        "thumbnailImageUrl": "http://localhost:6600/assets/product/images/1.png",    //缩略图url
+        "previewImageUrls": [                                                        //预览图url列表
+            "http://localhost:6600/assets/product/images/2.jpg",
+            "http://localhost:6600/assets/product/images/3.jpg",
+            "http://localhost:6600/assets/product/images/4.jpg",
+            "http://localhost:6600/assets/product/images/5.jpg"
+        ],
+        "templateUrl": "http://xxx.xxxxx/xxxx/xxx.svg"     //预览用的模板文件的url (svg?? png??文件)
+        "templateImages": [                                                          //模板中包含的图片列表
+            {
+                "name": "照片",                                                      //图片名称， 名称相同的图片用户图片只需要用户上传同一张图
+                "x": 233.8582763671875,                                              //图片框位置和尺寸(单位毫米)
+                "y": 150.59054565429688,
+                "width": 77.9527587890625,
+                "height": 113.38583374023438,
+                "url": "http://localhost:6600/assets/template/preview/1_v5/images/UserImagePlaceHolder.png"
+            },
+            {
+                "name": "照片",
+                "x": 138.18896484375,
+                "y": 150.59054565429688,
+                "width": 77.9527587890625,
+                "height": 113.38583374023438,
+                "url": "http://localhost:6600/assets/template/preview/1_v5/images/UserImagePlaceHolder.png"
+            },
+            {
+                "name": "照片",
+                "x": 42.51968002319336,
+                "y": 150.59054565429688,
+                "width": 77.9527587890625,
+                "height": 113.38583374023438,
+                "url": "http://localhost:6600/assets/template/preview/1_v5/images/UserImagePlaceHolder.png"
+            },
+            {
+                "name": "照片",
+                "x": 233.8582763671875,
+                "y": 19.48818016052246,
+                "width": 77.9527587890625,
+                "height": 113.38583374023438,
+                "url": "http://localhost:6600/assets/template/preview/1_v5/images/UserImagePlaceHolder.png"
+            },
+            {
+                "name": "照片",
+                "x": 138.18896484375,
+                "y": 19.48818016052246,
+                "width": 77.9527587890625,
+                "height": 113.38583374023438,
+                "url": "http://localhost:6600/assets/template/preview/1_v5/images/UserImagePlaceHolder.png"
+            },
+            {
+                "name": "照片",
+                "x": 42.51968002319336,
+                "y": 19.48818016052246,
+                "width": 77.9527587890625,
+                "height": 113.38583374023438,
+                "url": "http://localhost:6600/assets/template/preview/1_v5/images/UserImagePlaceHolder.png"
+            }
+        ]
+    },
+    ...
+    ...
+    ...
+]
+
+----
+
+=== 根据二维码查找自助机
+
+返回的自助机信息中包含支持的产品列表
+
+- URL: /api/printStation/findByQrCode
+- Method: GET
+- 参数:
+|==========================================================
+|参数名       |描述
+|qrCode      |小程序扫到的自助机二维码
+|==========================================================
+
+- 返回值:
+
+----
+{
+    "id": 1,
+    "address": "北京市海淀区大柳树路17号富海中心2号富海大厦509",
+    "wxQrCode": "https://test.uni-colour.com/printStation/1",
+    "longitude": 116.33511,         //自助机位置经度
+    "latitude": 39.95392,           //自助机位置维度
+    "positionId": xx,               //店面id
+    "companyId": xx,                //投放商id
+    "status": x,                    //状态 (0: 正常, 1: 离线, 2: 故障, 3: 打印耗材用完)
+    "products": [
+        {
+            "id": 1,                //产品ID
+            "name": "1寸照片",
+            "type": 1,              //产品类型 0: 普通照片, 1: 证件照, 2: 模板拼图
+            "templateWidth": 101.6,         //模板宽度 (毫米)
+            "templateHeight": 152.39999,    //模板高度 (毫米)
+            "width": xx,  //证件照返回头像宽度,其他类型的产品返回模板宽度（毫米）
+            "height": xx,  //证件照返回头像高度,其他类型的产品返回模板高度（毫米）
+            "displaySize" : "25 x 35 mm",   //显示用的尺寸 (证件照这个尺寸是头像图片框的尺寸， 其他类型的产品是模板的尺寸)
+            "idPhotoMaskImageUrl": "https://xxx.xxxxxxx.xxx/xxxxx.png",       //证件照头像轮廓图片url(其他类型产品此项为null)
+            "imageRequired": 1,     //需要上传的图片数量
+            "remark": "",
+            "price": 1,             //价格 (分)
+            "version": "3.11",           //版本号
+            "thumbnailImageUrl": "http://xxxxxxxxxxxxx",               //缩略图url
+            "previewImageUrls": [                   //预览图url列表
+                "http://xxxxxxxxxxxxx",
+                "http://xxxxxxxxxxxxx",
+                "http://xxxxxxxxxxxxx"
+            ],
+            "templateImages": [
+                {
+                    "name": "照片",                                                      //图片名称， 名称相同的图片用户图片只需要用户上传同一张图
+                    "x": 11.300000190734863,                                              //图片框位置和尺寸(单位毫米)
+                    "y": 3.1999969482421875,
+                    "width": 25,
+                    "height": 35,
+                    "isUserImage": true,                                                 //是否是需要用户上传的图片
+                    "url": "http://localhost:6060/assets/template/preview/3_v11/images/UserImagePlaceHolder.png"
+                },
+                {
+                    "name": "照片",
+                    "x": 65.29999542236328,
+                    "y": 3.1999969482421875,
+                    "width": 25,
+                    "height": 35,
+                    "isUserImage": true,
+                    "url": "http://localhost:6060/assets/template/preview/3_v11/images/UserImagePlaceHolder.png"
+                },
+                ...
+                {
+                    "name": "照片",
+                    "x": 65.29999542236328,
+                    "y": 114.19999694824219,
+                    "width": 25,
+                    "height": 35,
+                    "isUserImage": true,
+                    "url": "http://localhost:6060/assets/template/preview/3_v11/images/UserImagePlaceHolder.png"
+                }
+            ]
+        }
+        ...
+    ]
+}
+----
