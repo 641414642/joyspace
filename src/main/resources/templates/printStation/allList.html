@@ -93,6 +93,13 @@
 								   title="编辑">
 								</i>
 							</a>
+							<a href="#" style="margin-right:5px">
+								<i class="fa fa-key"
+								   th:attr="data-url=@{/printStation/editPassword(id=${ps.printStation.id})}"
+								   onclick="return editPrintStationPassword(event)"
+								   title="修改密码">
+								</i>
+							</a>
 							<a href="#">
 								<i class="fa fa-upload"
 								   th:attr="data-url=@{/printStation/uploadLogFile(printStationId=${ps.printStation.id})}"

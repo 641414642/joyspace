@@ -1,3 +1,7 @@
+//修改自助机密码
+function editPrintStationPassword(event) {
+    return showPostFormModal(event, 'editPrintStationPasswordForm', null, false);
+}
 //编辑自助机
 function editPrintStation(event) {
     return showPostFormModal(event, 'editPrintStationForm', null, true);

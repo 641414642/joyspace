@@ -86,11 +86,18 @@
 								   title="二维码">
 								</i>
 							</a>
-							<a href="#">
+							<a href="#" style="margin-right:5px">
 								<i class="fa fa-fw fa-pencil"
 								   th:attr="data-url=@{/printStation/edit(id=${ps.printStation.id})}"
 								   onclick="return editPrintStation(event)"
 								   title="编辑">
+								</i>
+							</a>
+							<a href="#">
+								<i class="fa fa-key"
+								   th:attr="data-url=@{/printStation/editPassword(id=${ps.printStation.id})}"
+								   onclick="return editPrintStationPassword(event)"
+								   title="修改密码">
 								</i>
 							</a>
 						</td>

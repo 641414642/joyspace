@@ -8,7 +8,8 @@ import graphql.schema.DataFetcher
 
 interface PrintStationService {
     fun getPriceMap(printStation: PrintStation): Map<Int, Int>
-    fun updatePrintStation(id: Int, printStationName: String, printStationPassword: String, positionId: Int, transferProportion:Int, printerType:String, adSetId: Int, selectedProductIds: Set<Int>): Boolean
+    fun updatePrintStation(id: Int, printStationName: String, positionId: Int, transferProportion:Int, printerType:String, adSetId: Int, selectedProductIds: Set<Int>): Boolean
+    fun updatePrintStationPassword(id: Int, printStationPassword: String): Boolean
 
     fun activatePrintStation(code: String, name:String, password: String, positionId: Int, selectedProductIds: Set<Int>)
 

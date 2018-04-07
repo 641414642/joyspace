@@ -193,7 +193,6 @@ class PrintStationController {
             request: HttpServletRequest,
             @RequestParam(name = "id", required = true) id: Int,
             @RequestParam(name = "printStationName", required = true) printStationName: String,
-            @RequestParam(name = "printStationPassword", required = true) printStationPassword: String,
             @RequestParam(name = "positionId", required = true) positionId: Int,
             @RequestParam(name = "proportion", required = false, defaultValue = "0") proportion: Double,
             @RequestParam(name = "printerType", required = true, defaultValue = "") printerType: String,
@@ -207,8 +206,30 @@ class PrintStationController {
                 .map { it.toInt() }
                 .toSet()
 
-        return printStationService.updatePrintStation(id, printStationName, printStationPassword,
+        return printStationService.updatePrintStation(id, printStationName,
                 positionId, (proportion * 10).toInt(), printerType, adSetId, selectedProductIds)
+    }
+
+    @GetMapping("/printStation/editPassword")
+    fun editPrintStationPassword(
+            modelAndView: ModelAndView,
+            @RequestParam(name = "id", required = true) id: Int
+    ): ModelAndView {
+        val printStation: PrintStation = printStationDao.findOne(id)
+
+        modelAndView.model["printStation"] = printStation
+        modelAndView.viewName = "/printStation/editPassword :: content"
+
+        return modelAndView
+    }
+
+    @PostMapping("/printStation/editPassword")
+    @ResponseBody
+    fun editPrintStationPassword(
+            @RequestParam(name = "id", required = true) id: Int,
+            @RequestParam(name = "printStationPassword", required = true) printStationPassword: String
+    ): Boolean {
+        return printStationService.updatePrintStationPassword(id, printStationPassword)
     }
 
     @RequestMapping(path = arrayOf("/printStation/activate"), method = arrayOf(RequestMethod.GET))

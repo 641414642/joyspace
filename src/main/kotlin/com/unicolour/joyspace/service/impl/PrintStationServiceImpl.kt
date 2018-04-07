@@ -204,7 +204,7 @@ open class PrintStationServiceImpl : PrintStationService {
     }
 
     @Transactional
-    override fun updatePrintStation(id: Int, printStationName: String, printStationPassword: String, positionId: Int, transferProportion:Int, printerType: String, adSetId: Int, selectedProductIds: Set<Int>): Boolean {
+    override fun updatePrintStation(id: Int, printStationName: String, positionId: Int, transferProportion:Int, printerType: String, adSetId: Int, selectedProductIds: Set<Int>): Boolean {
         val printStation = printStationDao.findOne(id)
 
         if (printStation != null) {
@@ -216,9 +216,6 @@ open class PrintStationServiceImpl : PrintStationService {
             printStation.addressCity = printStation.position.addressCity
             printStation.addressDistrict = printStation.position.addressDistrict
             printStation.addressStreet = printStation.position.addressStreet
-            if (!printStationPassword.isNullOrBlank()) {
-                printStation.password = passwordEncoder.encode(printStationPassword)
-            }
 
             if (managerService.loginManagerHasRole("ROLE_SUPERADMIN")) {
                 printStation.transferProportion = transferProportion
@@ -242,6 +239,26 @@ open class PrintStationServiceImpl : PrintStationService {
 
                 printStationProductDao.save(printStationProduct);
             }
+            return true
+        }
+        else {
+            return false
+        }
+    }
+
+    @Transactional
+    override fun updatePrintStationPassword(id: Int, printStationPassword: String): Boolean {
+        val printStation = printStationDao.findOne(id)
+
+        if (printStation != null) {
+            val loginManager = managerService.loginManager
+            if (loginManager == null ||
+                    printStation.companyId != loginManager.companyId && !managerService.loginManagerHasRole("ROLE_SUPERADMIN")) {
+                return false
+            }
+
+            printStation.password = passwordEncoder.encode(printStationPassword)
+            printStationDao.save(printStation)
             return true
         }
         else {
