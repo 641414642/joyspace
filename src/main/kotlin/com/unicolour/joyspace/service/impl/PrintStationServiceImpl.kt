@@ -196,7 +196,7 @@ open class PrintStationServiceImpl : PrintStationService {
             priceMap[priceListItem.productId] = priceListItem.price
         }
 
-        return priceMap;
+        return priceMap
     }
 
     override fun getPrintStationUrl(printStationId: Int): String {
@@ -237,7 +237,7 @@ open class PrintStationServiceImpl : PrintStationService {
                 printStationProduct.product = productDao.findOne(productId)
                 printStationProduct.printStation = printStation
 
-                printStationProductDao.save(printStationProduct);
+                printStationProductDao.save(printStationProduct)
             }
             return true
         }
@@ -491,7 +491,7 @@ open class PrintStationServiceImpl : PrintStationService {
             val curTime = System.currentTimeMillis()
             val tasks = printStationTaskDao.findByPrintStationIdAndIdGreaterThanAndFetchedIsFalse(session.printStationId,taskIdAfter)
             for (task in tasks) {
-                if (task.createTime.timeInMillis < curTime - 48L * 60 * 60 * 1000) {  //超过48小时
+                if (task.createTime.timeInMillis < curTime - 10 * 60 * 1000) {  //超过10分钟
                     logger.info("PrintStationTask expired, task id=${task.id}, printSatationId=${task.printStationId}, type=${task.type}, param=${task.param}, createTime=${task.createTime.format()}")
 
                     task.fetched = true
