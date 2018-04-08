@@ -134,9 +134,8 @@
 
 === 根据二维码查找自助机
 
-返回的自助机信息中包含支持的产品列表
 
-- URL: /api/printStation/findByQrCode
+- URL: /v2/printStation/findByQrCode
 - Method: GET
 - 参数:
 |==========================================================
@@ -147,68 +146,370 @@
 - 返回值:
 
 ----
-{
-    "id": 1,
-    "address": "北京市海淀区大柳树路17号富海中心2号富海大厦509",
-    "wxQrCode": "https://test.uni-colour.com/printStation/1",
-    "longitude": 116.33511,         //自助机位置经度
-    "latitude": 39.95392,           //自助机位置维度
-    "positionId": xx,               //店面id
-    "companyId": xx,                //投放商id
-    "status": x,                    //状态 (0: 正常, 1: 离线, 2: 故障, 3: 打印耗材用完)
-    "products": [
+
         {
-            "id": 1,                //产品ID
-            "name": "1寸照片",
-            "type": 1,              //产品类型 0: 普通照片, 1: 证件照, 2: 模板拼图
-            "templateWidth": 101.6,         //模板宽度 (毫米)
-            "templateHeight": 152.39999,    //模板高度 (毫米)
-            "width": xx,  //证件照返回头像宽度,其他类型的产品返回模板宽度（毫米）
-            "height": xx,  //证件照返回头像高度,其他类型的产品返回模板高度（毫米）
-            "displaySize" : "25 x 35 mm",   //显示用的尺寸 (证件照这个尺寸是头像图片框的尺寸， 其他类型的产品是模板的尺寸)
-            "idPhotoMaskImageUrl": "https://xxx.xxxxxxx.xxx/xxxxx.png",       //证件照头像轮廓图片url(其他类型产品此项为null)
-            "imageRequired": 1,     //需要上传的图片数量
-            "remark": "",
-            "price": 1,             //价格 (分)
-            "version": "3.11",           //版本号
-            "thumbnailImageUrl": "http://xxxxxxxxxxxxx",               //缩略图url
-            "previewImageUrls": [                   //预览图url列表
-                "http://xxxxxxxxxxxxx",
-                "http://xxxxxxxxxxxxx",
-                "http://xxxxxxxxxxxxx"
-            ],
-            "templateImages": [
+				"state" : 0,
+				"msg" : null,
+                "result": {
+                      "id": 1,
+                      "address": "北京市海淀区大柳树路17号富海中心2号富海大厦509",
+                      "wxQrCode": "https://test.uni-colour.com/printStation/1",
+                      "longitude": 116.33511,         //自助机位置经度
+                      "latitude": 39.95392,           //自助机位置维度
+                      "positionId": xx,               //店面id
+                      "companyId": xx,                //投放商id
+                      "status": x,                    //状态 (0: 正常, 1: 离线, 2: 故障, 3: 打印耗材用完)
+                }
+        }
+
+----
+
+
+=== 获取最近的自助机
+- URL:  /v2/printStation/nearest
+- Method: GET
+- 参数:
+|==========================================================
+|参数名      |描述
+|longitude  |位置精度(double)
+|latitude   |位置纬度(double)
+|==========================================================
+
+- 返回值:
+----
+        {
+				"state" : 0,
+				"msg" : null,
+                "result": {
+                    "id": x,
+                    "name": "xxx",
+                    "address": "xxxxx",
+                    "longitude": xxxxx,
+                    "latitude": xxxx,
+                    "positionId": xx,               //店面id
+                    "companyId": xx,                //投放商id
+                    "transportation": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",  //交通信息
+                    "distance": xxx,              //距离指定经纬度的距离，单位米
+                    "images" : [
+                        "https://xxx.xxxxxxxxxxxxxxxx",
+                        "https://xxx.xxxxxxxxxxxxxxxx",
+                        "https://xxx.xxxxxxxxxxxxxxxx"
+                    ]
+                }
+        }
+----
+
+==== 返回用户优惠券列表
+- URL: /v2/coupons
+- Method: Get
+- 参数:
+|==========================================================
+|参数名         |描述
+|sessionId      |登录返回的sessionId
+|==========================================================
+
+- 返回值:
+
+----
+           {
+                "state" : 0,
+                "msg" : null,
+                "result": [
+                    {
+                        "id": 1,                 //优惠券id
+                        "name": "xxxxxxxxxx",    //名称
+                        "code": "xxxxxxx"        //编码
+                        "begin": "yyyy-MM-dd HH",  //生效日期时间，精确到小时
+                        "expire": "yyyy-MM-dd HH", //失效日期时间，精确到小时
+                        "minExpense": 1000,             //使用优惠券所需要的最小金额（分）
+                        "discount": 200,                 //折扣金额（分）
+                        "printStationIdList": [xx,xx,xx,xx],        //可以使用的自助机id列表, 为null表示无限制
+                        "positionIdList": [xx,xx,xx,xx],            //可以使用的店面id列表, 为null表示无限制
+                        "companyIdList": [xx,xx,xx,xx],            //可以使用的投放商id列表, 为null表示无限制
+                        "productIdList": [xx,xx,xx,xx],            //可以使用的产品id列表, 为null表示无限制
+                        "productTypeList": [xx,xx,xx]            //可以使用的产品类型, 为null表示无限制 (产品类型 0: 普通照片, 1: 证件照, 2: 模板拼图)
+                    },
+                    ...
+               ]
+           }
+----
+
+==== 返回用户该比订单可用优惠券列表
+- URL: /v2/coupons/order
+- Method: GET
+- 参数:
+|==========================================================
+|参数名         |描述
+|sessionId      |登录返回的sessionId
+|printStationId |自助机id
+|productId |产品id
+|totalFee |订单金额
+|==========================================================
+
+- 返回值:
+
+----
+           {
+                "state" : 0,
+                "msg" : null,
+                "result": [
+                    {
+                        "id": 1,                 //优惠券id
+                        "name": "xxxxxxxxxx",    //名称
+                        "code": "xxxxxxx"        //编码
+                        "begin": "yyyy-MM-dd HH",  //生效日期时间，精确到小时
+                        "expire": "yyyy-MM-dd HH", //失效日期时间，精确到小时
+                        "minExpense": 1000,             //使用优惠券所需要的最小金额（分）
+                        "discount": 200,                 //折扣金额（分）
+                        "printStationIdList": [xx,xx,xx,xx],        //可以使用的自助机id列表, 为null表示无限制
+                        "positionIdList": [xx,xx,xx,xx],            //可以使用的店面id列表, 为null表示无限制
+                        "companyIdList": [xx,xx,xx,xx],            //可以使用的投放商id列表, 为null表示无限制
+                        "productIdList": [xx,xx,xx,xx],            //可以使用的产品id列表, 为null表示无限制
+                        "productTypeList": [xx,xx,xx]            //可以使用的产品类型, 为null表示无限制 (产品类型 0: 普通照片, 1: 证件照, 2: 模板拼图)
+                    },
+                    ...
+               ]
+           }
+----
+
+
+==== 用户领取优惠券
+- URL: /v2/user/claimCoupon
+- Method: POST
+- 参数:
+|==========================================================
+|参数名         |描述
+|sessionId      |登录返回的sessionId
+|couponCode     |优惠券代码
+|==========================================================
+
+- 返回值:
+
+----
+           {
+                "state" : 0,
+                "msg" : null,
+                "result": {
+                    "id": 1,                 //优惠券id
+                    "name": "xxxxxxxxxx",    //名称
+                    "code": "xxxxxxx"        //编码
+                    "begin": "yyyy-MM-dd HH",  //生效日期时间，精确到小时
+                    "expire": "yyyy-MM-dd HH", //失效日期时间，精确到小时
+                    "minExpense": 1000,             //使用优惠券所需要的最小金额（分）
+                    "discount": 200,                 //折扣金额（分）
+                    "printStationIdList": [xx,xx,xx,xx],        //可以使用的自助机id列表, 为null表示无限制
+                    "positionIdList": [xx,xx,xx,xx],            //可以使用的店面id列表, 为null表示无限制
+                    "companyIdList": [xx,xx,xx,xx],            //可以使用的投放商id列表, 为null表示无限制
+                    "productIdList": [xx,xx,xx,xx],            //可以使用的产品id列表, 为null表示无限制
+                    "productTypeList": [xx,xx,xx]            //可以使用的产品类型, 为null表示无限制 (产品类型 0: 普通照片, 1: 证件照, 2: 模板拼图)
+                }
+           }
+----
+
+
+==== 创建订单:
+- URL: /v2/order/create
+- Method: POST
+- RequestBody:
+
+----
+		{
+		  "sessionId" : "xxxxxxxxx",
+		  "printStationId" : xx,        //自助机id
+		  "orderItems" : [
+			{
+				"productId" : xx,       //产品id
+				"productVersion" : "xx.xx",  //产品版本号
+				"copies": xx            //打印份数 (>=1)
+			},
+			{
+			    "productId" : xx,
+			    "productVersion" : "xx.xx",
+			    "copies": xx
+			},
+			{
+			    "productId" : xx,
+			    "productVersion" : "xx.xx",
+			    "copies": xx
+			}
+			...
+		  ],
+		  "couponId": 0,              //优惠券id (0表示不使用优惠券)
+		  "province":"",              //省
+		  "city":"",                  //市
+		  "area":"",                  //区
+		  "address":"",               //详细地址
+		  "phoneNum":""               //联系电话
+		  "name":""                   //联系人姓名
+		}
+----
+
+- 返回:
+
+----
+	{
+        "state" : 0,
+        "msg" : null,
+		"result":{
+		    "orderId": x,         //订单id
+            "orderNo": "xxxxxxxxx",    //订单编号
+            "wxPayParams": {
+                "timeStamp" : "1499865120",
+                "nonceStr": "asdfasdfasdfas",
+                "pkg": "prepay_id=wx23423452345dfgl",
+                "paySign" : "6354ldgsgadfas"
+            },
+            "totalFee": xxx,     //总价, 单位为分
+            "discount": xxx,      //折扣, 单位为分,  总价-折扣+邮费 为用户应支付的价格
+            "postage": xxx,       //邮费, 单位为分
+            "orderItems" {                 //和请求中的 orderItems 对应
                 {
-                    "name": "照片",                                                      //图片名称， 名称相同的图片用户图片只需要用户上传同一张图
-                    "x": 11.300000190734863,                                              //图片框位置和尺寸(单位毫米)
-                    "y": 3.1999969482421875,
-                    "width": 25,
-                    "height": 35,
-                    "isUserImage": true,                                                 //是否是需要用户上传的图片
-                    "url": "http://localhost:6060/assets/template/preview/3_v11/images/UserImagePlaceHolder.png"
+                    "id": xx,              //订单项id
+                    "productId" : xx       //产品id
                 },
                 {
-                    "name": "照片",
-                    "x": 65.29999542236328,
-                    "y": 3.1999969482421875,
-                    "width": 25,
-                    "height": 35,
-                    "isUserImage": true,
-                    "url": "http://localhost:6060/assets/template/preview/3_v11/images/UserImagePlaceHolder.png"
+                    "id": xx,
+                    "productId" : xx
                 },
                 ...
-                {
-                    "name": "照片",
-                    "x": 65.29999542236328,
-                    "y": 114.19999694824219,
-                    "width": 25,
-                    "height": 35,
-                    "isUserImage": true,
-                    "url": "http://localhost:6060/assets/template/preview/3_v11/images/UserImagePlaceHolder.png"
-                }
-            ]
-        }
-        ...
-    ]
-}
+            }
+		}
+	}
+----
+
+==== 取消订单:
+- URL: /v2/order/cancel
+- Method: POST
+- 参数:
+|==========================================================
+|参数名         |描述
+|sessionId      |登录返回的sessionId
+|orderId   |创建订单接口返回的订单id
+|==========================================================
+
+- 返回:
+
+----
+        {
+            "state" : 0,
+            "msg" : null
+    	}
+----
+
+==== 上传订单图片文件:
+- URL: /v2/order/image
+- Method: POST
+- content-type:  multipart/form-data
+- 参数:
+|==========================================================
+|参数名         |描述
+|sessionId     |登录返回的sessionId
+|orderItemId   |创建订单接口返回的订单项id
+|name          |图片名称
+|image         |图片文件内容
+|==========================================================
+
+- 返回值:
+
+----
+           {
+                "state" : 0,
+                "msg" : null,
+                "allImagesUploaded": true    //true表示整个订单所有的用户图片都已经上传完成, false 表示还有未上传的用户图片文件
+           }
+----
+
+==== 查询订单图片状态:
+- URL: /v2/order/status
+- Method: GET
+- 参数:
+|==========================================================
+|参数名         |描述
+|sessionId      |登录返回的sessionId
+|orderId   |创建订单接口返回的订单id
+|==========================================================
+
+- 返回:
+
+----
+        {
+            "state" : 0,
+            "msg" : null,
+            "result"{
+                "orderItems": [
+                    {
+                        "images": [
+                            { "status": 1 }    //图片状态,  1: 已上传,   2: 已下载到自助机,   3: 已处理,   4: 已打印
+                        ]
+                    },
+                    {
+                        "images": [
+                            { "status": 2 }
+                        ]
+                    }
+                    ...
+                ]
+            }
+    	}
+----
+
+
+==== 获取个人中心信息:
+- URL: /v2/user/info
+- Method: GET
+- 参数:
+|==========================================================
+|参数名         |描述
+|sessionId      |登录返回的sessionId
+|==========================================================
+
+- 返回:
+
+----
+        {
+            "state" : 0,
+            "msg" : null,
+            "result"{
+                "nickName":"",
+                "imageUrl":"",
+                "unPayCount":12,
+                "handlingCount":3
+            }
+    	}
+----
+
+
+==== 获取订单列表:
+- URL: /v2/order/list
+- Method: GET
+- 参数:
+|==========================================================
+|参数名         |描述
+|sessionId      |登录返回的sessionId
+|==========================================================
+
+- 返回:
+
+----
+        {
+            "state" : 0,
+            "msg" : null,
+            "result"{
+                 "orderList": [
+                        {
+                           "orderId":321,
+                           "orderNo":"",
+                            "companyId":xx,
+                            "printStationId":xx,
+                            "createTime":"",
+                            "payTime":"",
+                            "totalFee":xx
+                            .
+                            .
+                            .
+                        }
+                        ...
+                                ]
+            }
+    	}
 ----

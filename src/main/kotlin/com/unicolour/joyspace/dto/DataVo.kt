@@ -43,3 +43,32 @@ data class PrintStationVo(var id: Int? = null,
                           var positionId: String? = null,
                           var companyId: String? = null,
                           var status: Int? = null)
+
+data class CouponVo(var id: Int? = null,
+                    var name: String? = null,
+                    var code: String? = null,
+                    var begin: String? = null,
+                    var expire: String? = null,
+                    var minExpense: Int? = null,
+                    var discount: Int? = null,
+                    var printStationIdList: List<Int>? = null,
+                    var positionIdList: List<Int>? = null,
+                    var companyIdList: List<Int>? = null,
+                    var productIdList: List<String>? = null,
+                    var productTypeList: List<String>? = null)
+
+data class OrderVo(var orderId: Int? = null,
+                   var orderNo: String? = null,
+                   var wxPayParams: WxPayParam? = null,
+                   var totalFee: Int? = null,
+                   var discount: Int? = null,
+                   var postage: Int? = null,
+                   var orderItems: List<OrderItem>? = null)
+
+data class WxPayParam(var timeStamp: String? = null,
+                      var nonceStr: String? = null,
+                      var pkg: String? = null,
+                      var paySign: String? = null)
+
+data class OrderItem(var id: Int? = null,
+                     var productId: Int? = null)
