@@ -13,11 +13,13 @@
                                 "name" : "广告1",
                                 "describe" : "广告描述1",
                                 "contentUrl" : "https://test.uni-colour.com/assets/app/images/ad1.jpg"
+                                "href":"www.baidu.com"
                         },
                         {
                                 "name" : "广告2",
                                 "describe" : "广告描述2",
                                 "contentUrl" : "https://test.uni-colour.com/assets/app/images/ad2.jpg"
+                                "href":"www.baidu.com"
                         }
                 ],
                 "productTypes" : [
@@ -335,12 +337,7 @@
 			...
 		  ],
 		  "couponId": 0,              //优惠券id (0表示不使用优惠券)
-		  "province":"",              //省
-		  "city":"",                  //市
-		  "area":"",                  //区
-		  "address":"",               //详细地址
-		  "phoneNum":""               //联系电话
-		  "name":""                   //联系人姓名
+		  "addressId":823
 		}
 ----
 
@@ -507,6 +504,65 @@
                             .
                             .
                             .
+                        }
+                        ...
+                                ]
+            }
+    	}
+----
+
+
+
+==== 新增地址:
+- URL: /v2/user/address
+- Method: POST
+- 参数:
+|==========================================================
+|参数名         |描述
+|sessionId      |登录返回的sessionId
+|province       |省
+|city           |市
+|area           |地区
+|address        |详细地址
+|phoneNum       |联系人电话
+|name           |联系人姓名
+|==========================================================
+
+- 返回:
+
+----
+        {
+            "state" : 0,
+            "msg" : null,
+    	}
+----
+
+==== 获取用户地址列表:
+- URL: /v2/user/address
+- Method: GET
+- 参数:
+|==========================================================
+|参数名         |描述
+|sessionId      |登录返回的sessionId
+|==========================================================
+
+- 返回:
+
+----
+        {
+            "state" : 0,
+            "msg" : null,
+            "result"{
+                 "addressList": [
+                        {
+                            "id":321,
+                            "default":true,
+                            "province":"",              //省
+                            "city":"",                  //市
+                            "area":"",                  //区
+                            "address":"",               //详细地址
+                            "phoneNum":""               //联系电话
+                            "name":""                   //联系人姓名
                         }
                         ...
                                 ]
