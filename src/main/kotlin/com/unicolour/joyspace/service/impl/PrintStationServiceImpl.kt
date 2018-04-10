@@ -491,7 +491,7 @@ open class PrintStationServiceImpl : PrintStationService {
             val curTime = System.currentTimeMillis()
             val tasks = printStationTaskDao.findByPrintStationIdAndIdGreaterThanAndFetchedIsFalse(session.printStationId,taskIdAfter)
             for (task in tasks) {
-                if (task.createTime.timeInMillis < curTime - 10 * 60 * 1000) {  //超过10分钟
+                if (task.createTime.timeInMillis < curTime - 30 * 60 * 1000) {  //超过30分钟
                     logger.info("PrintStationTask expired, task id=${task.id}, printSatationId=${task.printStationId}, type=${task.type}, param=${task.param}, createTime=${task.createTime.format()}")
 
                     task.fetched = true
