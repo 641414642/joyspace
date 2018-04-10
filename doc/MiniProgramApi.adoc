@@ -75,56 +75,41 @@
             "http://localhost:6600/assets/product/images/4.jpg",
             "http://localhost:6600/assets/product/images/5.jpg"
         ],
-        "templateUrl": "http://xxx.xxxxx/xxxx/xxx.svg"     //预览用的模板文件的url (svg?? png??文件)
-        "templateImages": [                                                          //模板中包含的图片列表
+        "sceneList": [
             {
-                "name": "照片",                                                      //图片名称， 名称相同的图片用户图片只需要用户上传同一张图
-                "x": 233.8582763671875,                                              //图片框位置和尺寸(单位毫米)
-                "y": 150.59054565429688,
-                "width": 77.9527587890625,
-                "height": 113.38583374023438,
-                "url": "http://localhost:6600/assets/template/preview/1_v5/images/UserImagePlaceHolder.png"
-            },
-            {
-                "name": "照片",
-                "x": 138.18896484375,
-                "y": 150.59054565429688,
-                "width": 77.9527587890625,
-                "height": 113.38583374023438,
-                "url": "http://localhost:6600/assets/template/preview/1_v5/images/UserImagePlaceHolder.png"
-            },
-            {
-                "name": "照片",
-                "x": 42.51968002319336,
-                "y": 150.59054565429688,
-                "width": 77.9527587890625,
-                "height": 113.38583374023438,
-                "url": "http://localhost:6600/assets/template/preview/1_v5/images/UserImagePlaceHolder.png"
-            },
-            {
-                "name": "照片",
-                "x": 233.8582763671875,
-                "y": 19.48818016052246,
-                "width": 77.9527587890625,
-                "height": 113.38583374023438,
-                "url": "http://localhost:6600/assets/template/preview/1_v5/images/UserImagePlaceHolder.png"
-            },
-            {
-                "name": "照片",
-                "x": 138.18896484375,
-                "y": 19.48818016052246,
-                "width": 77.9527587890625,
-                "height": 113.38583374023438,
-                "url": "http://localhost:6600/assets/template/preview/1_v5/images/UserImagePlaceHolder.png"
-            },
-            {
-                "name": "照片",
-                "x": 42.51968002319336,
-                "y": 19.48818016052246,
-                "width": 77.9527587890625,
-                "height": 113.38583374023438,
-                "url": "http://localhost:6600/assets/template/preview/1_v5/images/UserImagePlaceHolder.png"
+                "templateUrl": "http://xxx.xxxxx/xxxx/xxx.svg"     //预览用的模板文件的url (svg?? png??文件)
+                "templateImages": [                                                          //模板中包含的图片列表
+                    {
+                        "name": "照片",                                                      //图片名称， 名称相同的图片用户图片只需要用户上传同一张图
+                        "x": 233.8582763671875,                                              //图片框位置和尺寸(单位毫米)
+                        "y": 150.59054565429688,
+                        "width": 77.9527587890625,
+                        "height": 113.38583374023438,
+                        "angleClip": xxx                                    //角度
+                        "type"：xxx                                         //类型，用户填图、模板贴图、色块
+                        "bgcolor": xxx                                      //背景颜色
+                        "url": "http://localhost:6600/assets/template/preview/1_v5/images/UserImagePlaceHolder.png"
+                    },
+                    {
+                        "name": "照片",
+                        "x": 138.18896484375,
+                        "y": 150.59054565429688,
+                        "width": 77.9527587890625,
+                        "height": 113.38583374023438,
+                        "url": "http://localhost:6600/assets/template/preview/1_v5/images/UserImagePlaceHolder.png"
+                    },
+                    {
+                        "name": "照片",
+                        "x": 42.51968002319336,
+                        "y": 150.59054565429688,
+                        "width": 77.9527587890625,
+                        "height": 113.38583374023438,
+                        "url": "http://localhost:6600/assets/template/preview/1_v5/images/UserImagePlaceHolder.png"
+                    }
+                    ...
+                ]
             }
+        ...
         ]
     },
     ...
@@ -161,6 +146,15 @@
                       "positionId": xx,               //店面id
                       "companyId": xx,                //投放商id
                       "status": x,                    //状态 (0: 正常, 1: 离线, 2: 故障, 3: 打印耗材用完)
+                      "products": [
+                              {
+                                  "id": 1,                //产品ID
+                                  "name": "1寸照片",
+                                  "type": 1,              //产品类型 0: 普通照片, 1: 证件照, 2: 模板拼图
+                                  "price": 1,             //价格 (分)
+                              }
+                              ...
+                          ]
                 }
         }
 
