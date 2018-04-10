@@ -8,6 +8,7 @@ import com.unicolour.joyspace.dto.ProductItem
 import com.unicolour.joyspace.dto.ResultCode
 import com.unicolour.joyspace.exception.ProcessException
 import com.unicolour.joyspace.model.PrintStation
+import com.unicolour.joyspace.model.PrintStationStatus
 import com.unicolour.joyspace.model.PrintStationTaskType
 import com.unicolour.joyspace.model.ProductType
 import com.unicolour.joyspace.service.ManagerService
@@ -377,5 +378,20 @@ class PrintStationController {
             @RequestParam(name = "logFileDate", required = true) logFileDate: String
     ): Boolean {
         return printStationService.addUploadLogFileTask(printStationId, logFileDate)
+    }
+
+    @PostMapping("/printStation/updateStatus")
+    @ResponseBody
+    fun updatePrintStationStatus(
+            @RequestParam("sessionId") sessionId: String,
+            @RequestParam("status") status : Int
+    ): Boolean {
+        val statusEnum = PrintStationStatus.values().firstOrNull { it.value == status }
+        return if (statusEnum == null) {
+            false
+        }
+        else {
+            printStationService.updatePrintStationStatus(sessionId, statusEnum)
+        }
     }
 }

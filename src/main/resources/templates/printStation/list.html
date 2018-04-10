@@ -67,7 +67,7 @@
 						<td>
 							<th:block th:switch="${ps.printStation.status}">
 								<span th:case="0" class="label label-success">正常</span>
-								<span th:case="1" class="label label-danger">故障</span>
+								<span th:case="1" class="label label-default">离线</span>
 								<span th:case="2" class="label label-warning">耗材用完</span>
 							</th:block>
 						</td>

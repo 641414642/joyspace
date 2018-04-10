@@ -84,7 +84,7 @@ class PrintStation {
 
 enum class PrintStationStatus(val value:Int, val message:String) {
     NORMAL(0, "正常"),
-    MALFUNCTION(1, "故障"),
+    OFFLINE(1, "离线"),
     OUT_OF_PRINTING_SUPPLIES(2, "打印耗材用完")
 }
 
