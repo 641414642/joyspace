@@ -10,7 +10,7 @@ interface PrintStationService {
     fun getPriceMap(printStation: PrintStation): Map<Int, Int>
     fun updatePrintStation(id: Int, printStationName: String, positionId: Int, transferProportion:Int, printerType:String, adSetId: Int, selectedProductIds: Set<Int>): Boolean
     fun updatePrintStationPassword(id: Int, printStationPassword: String): Boolean
-    fun updatePrintStationStatus(printStationSessionId: String, status: PrintStationStatus): Boolean
+    fun updatePrintStationStatus(printStationSessionId: String, status: PrintStationStatus, additionalInfo: String): Boolean
 
     fun activatePrintStation(code: String, name:String, password: String, positionId: Int, selectedProductIds: Set<Int>)
 

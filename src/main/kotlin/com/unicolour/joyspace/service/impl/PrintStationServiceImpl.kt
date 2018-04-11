@@ -555,12 +555,14 @@ open class PrintStationServiceImpl : PrintStationService {
     }
 
     @Transactional
-    override fun updatePrintStationStatus(printStationSessionId: String, status: PrintStationStatus): Boolean {
+    override fun updatePrintStationStatus(printStationSessionId: String, status: PrintStationStatus, additionalInfo: String): Boolean {
         val session = getPrintStationLoginSession(printStationSessionId)
         return if (session != null) {
             val printStation = printStationDao.findOne(session.printStationId)
             printStation.status = status.value
             printStationDao.save(printStation)
+
+            logger.info("PrintStation id:${session.printStationId}, status updated to $status, additionalInfo: $additionalInfo")
             true
         }
         else {

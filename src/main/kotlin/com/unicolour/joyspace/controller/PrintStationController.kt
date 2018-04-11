@@ -384,14 +384,15 @@ class PrintStationController {
     @ResponseBody
     fun updatePrintStationStatus(
             @RequestParam("sessionId") sessionId: String,
-            @RequestParam("status") status : Int
+            @RequestParam("status") status : Int,
+            @RequestBody additionalInfo: String
     ): Boolean {
         val statusEnum = PrintStationStatus.values().firstOrNull { it.value == status }
         return if (statusEnum == null) {
             false
         }
         else {
-            printStationService.updatePrintStationStatus(sessionId, statusEnum)
+            printStationService.updatePrintStationStatus(sessionId, statusEnum, additionalInfo)
         }
     }
 }
