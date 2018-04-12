@@ -58,9 +58,6 @@ open class TemplateServiceImpl : TemplateService {
     lateinit var assetsDir: String
 
     @Autowired
-    lateinit var managerDao: ManagerDao
-
-    @Autowired
     lateinit var managerService: ManagerService
 
     @Autowired
@@ -282,13 +279,13 @@ open class TemplateServiceImpl : TemplateService {
         if (lineWidth > 0) {
             for (rIndex in 0 until row) {
                 val y = offsetY + (h + vGap) * rIndex
-                tpl += """<line x1="0" y1="${y - lineWidth / 2}" x2="$tplW" y2="${y - lineWidth / 2}" style="stroke:rgb(140,140,140);stroke-width:0.1mm" />"""
-                tpl += """<line x1="0" y1="${y + h + lineWidth / 2}" x2="$tplW" y2="${y + h + lineWidth / 2}" style="stroke:rgb(140,140,140);stroke-width:0.1mm" />"""
+                tpl += """<line x1="0" y1="${y - lineWidth / 2}" x2="$tplW" y2="${y - lineWidth / 2}" style="stroke:rgb(140,140,140);stroke-width:${lineWidth}mm" />"""
+                tpl += """<line x1="0" y1="${y + h + lineWidth / 2}" x2="$tplW" y2="${y + h + lineWidth / 2}" style="stroke:rgb(140,140,140);stroke-width:${lineWidth}mm" />"""
             }
             for (cIndex in 0 until col) {
                 val x = offsetX + (w + hGap) * cIndex
-                tpl += """<line x1="${x - lineWidth / 2}" y1="0" x2="${x - lineWidth / 2}" y2="$tplH" style="stroke:rgb(140,140,140);stroke-width:0.1mm" />"""
-                tpl += """<line x1="${x + w + lineWidth / 2}" y1="0" x2="${x + w + lineWidth / 2}" y2="$tplH" style="stroke:rgb(140,140,140);stroke-width:0.1mm" />"""
+                tpl += """<line x1="${x - lineWidth / 2}" y1="0" x2="${x - lineWidth / 2}" y2="$tplH" style="stroke:rgb(140,140,140);stroke-width:${lineWidth}mm" />"""
+                tpl += """<line x1="${x + w + lineWidth / 2}" y1="0" x2="${x + w + lineWidth / 2}" y2="$tplH" style="stroke:rgb(140,140,140);stroke-width:${lineWidth}mm" />"""
             }
         }
 
