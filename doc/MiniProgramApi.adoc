@@ -12,13 +12,13 @@
                         {
                                 "name" : "广告1",
                                 "describe" : "广告描述1",
-                                "contentUrl" : "https://test.uni-colour.com/assets/app/images/ad1.jpg"
+                                "contentUrl" : "https://test.uni-colour.com/assets/app/images/ad1.jpg",
                                 "href":"www.baidu.com"
                         },
                         {
                                 "name" : "广告2",
                                 "describe" : "广告描述2",
-                                "contentUrl" : "https://test.uni-colour.com/assets/app/images/ad2.jpg"
+                                "contentUrl" : "https://test.uni-colour.com/assets/app/images/ad2.jpg",
                                 "href":"www.baidu.com"
                         }
                 ],
@@ -77,7 +77,7 @@
         ],
         "sceneList": [
             {
-                "templateUrl": "http://xxx.xxxxx/xxxx/xxx.svg"     //预览用的模板文件的url (svg?? png??文件)
+                "templateUrl": "http://xxx.xxxxx/xxxx/xxx.svg",     //预览用的模板文件的url (svg?? png??文件)
                 "templateImages": [                                                          //模板中包含的图片列表
                     {
                         "name": "照片",                                                      //图片名称， 名称相同的图片用户图片只需要用户上传同一张图
@@ -151,7 +151,7 @@
                                   "id": 1,                //产品ID
                                   "name": "1寸照片",
                                   "type": 1,              //产品类型 0: 普通照片, 1: 证件照, 2: 模板拼图
-                                  "price": 1,             //价格 (分)
+                                  "price": 1            //价格 (分)
                               }
                               ...
                           ]
@@ -527,7 +527,7 @@
 ----
         {
             "state" : 0,
-            "msg" : null,
+            "msg" : null
     	}
 ----
 
@@ -555,7 +555,7 @@
                             "city":"",                  //市
                             "area":"",                  //区
                             "address":"",               //详细地址
-                            "phoneNum":""               //联系电话
+                            "phoneNum":"",               //联系电话
                             "name":""                   //联系人姓名
                         }
                         ...
