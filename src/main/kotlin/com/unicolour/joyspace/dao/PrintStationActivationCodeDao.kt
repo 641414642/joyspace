@@ -9,12 +9,20 @@ import org.springframework.data.repository.query.Param
 
 interface PrintStationActivationCodeDao : PagingAndSortingRepository<PrintStationActivationCode, Int> {
     fun existsByCode(code: String): Boolean
+
+    fun findByPrintStationId(printStationId: Int, pageable: Pageable): Page<PrintStationActivationCode>
+
     fun findByUsedIsTrue(pageable: Pageable): Page<PrintStationActivationCode>
+    fun findByPrintStationIdAndUsedIsTrue(printStationId: Int, pageable: Pageable): Page<PrintStationActivationCode>
+
     fun findByUsedIsFalse(pageable: Pageable): Page<PrintStationActivationCode>
+    fun findByPrintStationIdAndUsedIsFalse(printStationId: Int, pageable: Pageable): Page<PrintStationActivationCode>
+
     fun findByCode(code: String): PrintStationActivationCode?
 
     @Query("SELECT count(p) > 0 FROM PrintStationActivationCode p WHERE p.printStationId >= :minId AND p.printStationId <= :maxId")
     fun printStationIdExistsInRange(@Param("minId") minId: Int, @Param("maxId") maxId: Int): Boolean
 
     fun findByPrintStationIdBetweenOrderByPrintStationId(startId: Int, endId: Int): List<PrintStationActivationCode>
+
 }

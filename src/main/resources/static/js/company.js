@@ -71,6 +71,8 @@ function createOrEditCompany(event, create) {
 
 //添加微信收款账户
 function startAddCompanyWxAccount(event) {
+    IEObjectAssignPolyfill();
+
     return showModal(event, function() {
         $('#wxmpQrCodeDiv').append(kjua({
            render: 'image',

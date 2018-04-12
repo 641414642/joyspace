@@ -37,3 +37,24 @@ function startRefresh(url, pageNo) {
         refreshPrintOrderList(url, pageNo);
     }, 5000)
 }
+
+$(function() {
+    $("#autoRefresh").change(function() {
+        localStorage.setItem("autoRefreshOrderList", this.checked ? "true" : "false");
+    });
+
+    var autoRefresh = localStorage.getItem("autoRefreshOrderList");
+    $("#autoRefresh").prop('checked', autoRefresh != "false");
+})
+
+function reprintOrder(event) {
+    return showPostFormModal(event, 'reprintOrderForm', null, false, null, function(data) {
+        if (data.errcode == 0) {
+            return true;
+        }
+        else {
+            alert(data.errmsg);
+            return false;
+        }
+    });
+}

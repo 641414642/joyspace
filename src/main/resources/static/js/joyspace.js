@@ -108,7 +108,7 @@ function showModal(event, onloadfunc) {
     return false;
 }
 
-function showPostFormModal(event, formId, modalStyleClass, reload, validateFunc, resultProcessFunc) {
+function showPostFormModal(event, formId, modalStyleClass, reload, validateFunc, resultProcessFunc, onloadFunc) {
     $('#modalTemplate').removeClass().addClass("modal fade");
 
     if (modalStyleClass) {
@@ -144,6 +144,10 @@ function showPostFormModal(event, formId, modalStyleClass, reload, validateFunc,
 
             ev.preventDefault();
         });
+
+        if (typeof onloadFunc === "function") {
+            onloadFunc();
+        }
     });
 
     return false;
@@ -173,27 +177,7 @@ function changePassword(event) {
     });
 }
 
-//显示二维码
-function showQrCode(event) {
-    var source = event.target || event.srcElement;
-    var qrCode = $(source).data('qrcode');
-    var dialogTitle = $(source).data('dlgtitle');
-
-    var content =
-         '<div class="modal-content">' +
-             '<div class="modal-header">' +
-                 '<button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>' +
-                 '<h4 class="modal-title">' + dialogTitle + '</h4>' +
-             '</div>' +
-             '<div class="modal-body">' +
-                  '<div id="qrCodeDiv" style="text-align:center"></div>' +
-             '</div>' +
-             '<div class="modal-footer">' +
-                  '<button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>' +
-             '</div>' +
-         '</div>';
-    $('#modalTemplate .modal-dialog').empty().append(content)
-
+function IEObjectAssignPolyfill() {
     //IE Object.assign polyfill
     if (typeof Object.assign != 'function') {
         Object.assign = function(target, varArgs) { // .length of function is 2
@@ -219,6 +203,30 @@ function showQrCode(event) {
             return to;
         };
     }
+}
+
+//显示二维码
+function showQrCode(event) {
+    var source = event.target || event.srcElement;
+    var qrCode = $(source).data('qrcode');
+    var dialogTitle = $(source).data('dlgtitle');
+
+    var content =
+         '<div class="modal-content">' +
+             '<div class="modal-header">' +
+                 '<button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>' +
+                 '<h4 class="modal-title">' + dialogTitle + '</h4>' +
+             '</div>' +
+             '<div class="modal-body">' +
+                  '<div id="qrCodeDiv" style="text-align:center"></div>' +
+             '</div>' +
+             '<div class="modal-footer">' +
+                  '<button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>' +
+             '</div>' +
+         '</div>';
+    $('#modalTemplate .modal-dialog').empty().append(content)
+
+    IEObjectAssignPolyfill();
 
     $('#qrCodeDiv').append(kjua({
        render: 'image',

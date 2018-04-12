@@ -19,24 +19,24 @@
 	<section class="content">
 		<div class="box">
 			<div class="box-header with-border">
-				<form th:action="@{/printStation/list}" method="get" target="_self">
+				<form th:action="@{/printStation/allList}" method="get" target="_self">
 					<input type="hidden" id="pageNoField" name="pageno" />
 					<div class="form-inline">
-						<label class="form-label" for="inputPositionId">店面</label>
-						<select name="inputPositionId" class="form-control" id="inputPositionId">
-							<option value="0">所有店面</option>
-							<option th:each="position : ${positions}"
-									th:value="${position.id}"
-									th:text="${position.name}"
-									th:selected="${inputPositionId == position.id}">
+						<label class="form-label" for="inputCompanyId">投放商</label>
+						<select name="inputCompanyId" class="form-control" id="inputCompanyId">
+							<option value="0">所有投放商</option>
+							<option th:each="company : ${companies}"
+									th:value="${company.id}"
+									th:text="${company.name}"
+									th:selected="${inputCompanyId == company.id}">
 							</option>
 						</select>
 						&nbsp;&nbsp;
 						<button type="submit" class="btn btn-default btn-sm">查询</button>
-						<a href="#" th:href="@{/printStation/list}" class="btn btn-default btn-sm">重置</a>
+						<a href="#" th:href="@{/printStation/allList}" class="btn btn-default btn-sm">重置</a>
 
 						<div class="pull-right">
-							<a href="#" th:attr="data-url=@{/printStation/activate}" class="btn btn-primary btn-sm" onclick="return activatePrintStation(event)">新建</a>
+							<a href="#" th:attr="data-url=@{/printStation/activate(allCompany=true)}" class="btn btn-primary btn-sm" onclick="return activatePrintStation(event)">新建</a>
 						</div>
 					</div>
 				</form>
@@ -93,11 +93,18 @@
 								   title="编辑">
 								</i>
 							</a>
-							<a href="#">
+							<a href="#" style="margin-right:5px">
 								<i class="fa fa-key"
 								   th:attr="data-url=@{/printStation/editPassword(id=${ps.printStation.id})}"
 								   onclick="return editPrintStationPassword(event)"
 								   title="修改密码">
+								</i>
+							</a>
+							<a href="#">
+								<i class="fa fa-upload"
+								   th:attr="data-url=@{/printStation/uploadLogFile(printStationId=${ps.printStation.id})}"
+								   onclick="return confirmUploadLogFile(event)"
+								   title="上传日志文件">
 								</i>
 							</a>
 						</td>

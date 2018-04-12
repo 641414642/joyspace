@@ -1,16 +1,16 @@
 package com.unicolour.joyspace.service
 
-import com.unicolour.joyspace.dto.*
-import com.unicolour.joyspace.model.AdSet
-import com.unicolour.joyspace.model.PrintStation
-import com.unicolour.joyspace.model.PrintStationLoginSession
+import com.unicolour.joyspace.dto.PrintStationFindResult
+import com.unicolour.joyspace.dto.PrintStationFindResultSingle
+import com.unicolour.joyspace.dto.PrintStationLoginResult
+import com.unicolour.joyspace.model.*
 import graphql.schema.DataFetcher
-import javax.transaction.Transactional
 
 interface PrintStationService {
     fun getPriceMap(printStation: PrintStation): Map<Int, Int>
-    fun createPrintStation(companyId: Int, printStationName: String, printStationPassword: String, positionId: Int, transferProportion:Int, printerType:String, adSetId: Int, selectedProductIds: Set<Int>): PrintStation?
-    fun updatePrintStation(id: Int, companyId: Int, printStationName: String, printStationPassword: String, positionId: Int, transferProportion:Int, printerType:String, adSetId: Int, selectedProductIds: Set<Int>): Boolean
+    fun updatePrintStation(id: Int, printStationName: String, positionId: Int, transferProportion:Int, printerType:String, adSetId: Int, selectedProductIds: Set<Int>): Boolean
+    fun updatePrintStationPassword(id: Int, printStationPassword: String): Boolean
+    fun updatePrintStationStatus(printStationSessionId: String, status: PrintStationStatus, additionalInfo: String): Boolean
 
     fun activatePrintStation(code: String, name:String, password: String, positionId: Int, selectedProductIds: Set<Int>)
 
@@ -27,4 +27,13 @@ interface PrintStationService {
     fun getPrintStationLoginSession(sessionId: String): PrintStationLoginSession?
 
     fun getPrintStationUrl(printStationId: Int): String
+
+    fun createPrintStationTask(printStationId: Int, type: PrintStationTaskType, param: String)
+    fun getUnFetchedPrintStationTasks(printStationSessionId: String, taskIdAfter: Int): List<PrintStationTask>
+    fun printStationTaskFetched(printStationSessionId: String, taskId: Int): Boolean
+    fun printStationTaskFetched(printStationId: Int, printOrderId: Int)
+    fun uploadLog(printStationSessionId: String, fileName: String, logText: String): Boolean
+
+    fun addUploadLogFileTask(printStationId: Int, filterStr: String): Boolean
+    fun orderReprintTaskExists(printStationId: Int, orderId: Int): Boolean
 }

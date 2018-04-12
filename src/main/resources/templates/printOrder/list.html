@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 	<meta charset="utf-8" />
@@ -32,7 +32,7 @@
 
 						<div class="pull-right checkbox">
 							<label>
-								<input id="autoRefresh" name="autoRefresh" type="checkbox" th:checked="${autoRefresh}" />
+								<input id="autoRefresh" type="checkbox" />
 								自动刷新
 							</label>
 						</div>
@@ -55,7 +55,7 @@
 						<th style="width:100px">转账金额/手续费(元)</th>
 						<th style="width:50px">收款人</th>
 						<th style="width:120px">状态</th>
-						<th style="width:50px">操作</th>
+						<th style="width:80px">操作</th>
 					</tr>
 					<tr th:each="orderWrapper : ${printOrders}">
 						<td th:text="${orderWrapper.order.id}"></td>
@@ -102,11 +102,18 @@
 								   title="查看详情">
 								</i>
 							</a>
-							<a href="#" th:if="${orderWrapper.order.transfered}">
+							<a href="#" th:if="${orderWrapper.order.transfered}" style="margin-right:5px">
 								<i class="fa fa-jpy"
 								   th:attr="data-url=@{/printOrder/transferDetail(id=${orderWrapper.order.id})}"
 								   onclick="return viewPrintOrderTransferDetail(event)"
 								   title="转账详情">
+								</i>
+							</a>
+							<a href="#" th:if="${orderWrapper.order.imageFileUploaded}" sec:authorize="hasRole('ROLE_SUPERADMIN')">
+								<i class="fa fa-print"
+								   th:attr="data-url=@{/printOrder/reprint(printOrderId=${orderWrapper.order.id})}"
+								   onclick="return reprintOrder(event)"
+								   title="重新打印订单">
 								</i>
 							</a>
 						</td>

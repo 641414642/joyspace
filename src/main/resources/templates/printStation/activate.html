@@ -55,15 +55,27 @@
                     </div>
                     <div class="form-group">
                         <label for="printStationPassword" class="control-label">自助机密码:</label>
-                        <input class="form-control" id="printStationPassword" name="printStationPassword" type="password" />
+                        <input class="form-control" id="printStationPassword" name="printStationPassword" type="password" autocomplete="new-password" />
+                        <span class="help-block"></span>
+                    </div>
+                    <div class="form-group" sec:authorize="hasRole('ROLE_SUPERADMIN')" th:if="${allCompany}">
+                        <label for="companyId" class="control-label">投放商:</label>
+                        <select name="companyId" class="form-control" id="companyId">
+                            <option th:each="company : ${companies}"
+                                    th:value="${company.id}"
+                                    th:text="${company.name}">
+                            </option>
+                        </select>
                         <span class="help-block"></span>
                     </div>
                     <div class="form-group">
-                        <label for="position" class="control-label">店面:</label>
-                        <select name="positionId" class="form-control" id="position">
+                        <select id="positionCache" style="display:none"></select>
+                        <label for="positionId" class="control-label">店面:</label>
+                        <select name="positionId" class="form-control" id="positionId">
                             <option th:each="position : ${positions}"
                                     th:value="${position.id}"
                                     th:text="${position.name}"
+                                    th:attr="data-company-id=${position.companyId}"
                                     th:selected="${printStation.positionId == position.id}">
                             </option>
                         </select>
@@ -89,7 +101,7 @@
                                         </div>
                                     </div>
                                 </div>
-                          <!--      <div class="tab-pane container-fluid" id="template">
+                          <!--/*      <div class="tab-pane container-fluid" id="template">
                                     <div class="row">
                                         <div class="col-md-6 checkbox" style="margin:5px 0" th:each="product : ${template_products}">
                                             <label>
@@ -99,7 +111,7 @@
                                             </label>
                                         </div>
                                     </div>
-                                </div>-->
+                                </div>*/-->
                                 <div class="tab-pane container-fluid" id="id_photo">
                                     <div class="row">
                                         <div class="col-md-6 checkbox" style="margin:5px 0" th:each="product : ${id_photo_products}">

@@ -42,9 +42,10 @@ class PrintStationActivationCodeController {
     lateinit var baseUrl: String
 
     @RequestMapping("/activationCode/list")
-    fun activationCodeist(modelAndView: ModelAndView,
+    fun activationCodeList(modelAndView: ModelAndView,
             @RequestParam(name = "pageno", required = false, defaultValue = "1") pageno: Int,
-            @RequestParam(name = "statusInput", required = false, defaultValue = "-1") statusInput: Int
+            @RequestParam(name = "statusInput", required = false, defaultValue = "-1") status: Int,
+            @RequestParam(name = "printStationIdInput", required = false, defaultValue = "-1") printStationId: Int
     ): ModelAndView {
 
         //val loginManager = managerService.loginManager
@@ -53,18 +54,25 @@ class PrintStationActivationCodeController {
 
         val pageable = PageRequest(pageno - 1, 20, Sort.Direction.ASC, "id")
         val codes =
-                if (statusInput == -1) {
+                if (status == -1 && printStationId == -1) {
                     printStationActivationCodeDao.findAll(pageable)
-                } else if (statusInput == 0) {
+                } else if (status == -1 && printStationId != -1) {
+                    printStationActivationCodeDao.findByPrintStationId(printStationId, pageable)
+                } else if (status == 0 && printStationId == -1) {
                     printStationActivationCodeDao.findByUsedIsTrue(pageable)
-                } else {
+                } else if (status == 0 && printStationId != -1) {
+                    printStationActivationCodeDao.findByPrintStationIdAndUsedIsTrue(printStationId, pageable)
+                } else if (status == 1 && printStationId == -1) {
                     printStationActivationCodeDao.findByUsedIsFalse(pageable)
+                } else {  //status == 1 && printStationId != -1
+                    printStationActivationCodeDao.findByPrintStationIdAndUsedIsFalse(printStationId, pageable)
                 }
 
         val pager = Pager(codes.totalPages, 7, pageno - 1)
         modelAndView.model["pager"] = pager
 
-        modelAndView.model["statusInput"] = statusInput
+        modelAndView.model["statusInput"] = status
+        modelAndView.model["printStationIdInput"] = if (printStationId == -1) "" else printStationId.toString()
         modelAndView.model["codes"] = codes.content.map {
             Code(it, printStationService.getPrintStationUrl(it.printStationId))
         }

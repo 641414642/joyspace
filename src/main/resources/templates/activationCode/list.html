@@ -28,6 +28,11 @@
 							<option value="0" th:selected="${statusInput == 0}">已使用</option>
 							<option value="1" th:selected="${statusInput == 1}">未使用</option>
 						</select>
+						&nbsp;&nbsp;
+
+						<label for="printStationId" class="form-label">自助机ID</label>
+						<input class="form-control" type="text" id="printStationId" name="printStationIdInput" style="width:5em" th:value="${printStationIdInput}" />
+
 						<button type="submit" class="btn btn-default btn-sm">查询</button>
 						<a href="#" th:href="@{/activationCode/list}" class="btn btn-default btn-sm">重置</a>
 
