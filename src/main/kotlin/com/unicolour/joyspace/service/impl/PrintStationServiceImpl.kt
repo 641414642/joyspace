@@ -168,9 +168,13 @@ open class PrintStationServiceImpl : PrintStationService {
                 session.printStationId = printStation.id
                 session.expireTime = Calendar.getInstance()
                 session.expireTime.add(Calendar.SECOND, 3600)
-                session.version = version ?: 0
                 session.uuid = uuid
                 printStationLoginSessionDao.save(session)
+
+                if (printStation.lastLoginVersion != version) {
+                    printStation.lastLoginVersion = version
+                    printStationDao.save(printStation)
+                }
 
                 return PrintStationLoginResult(sessionId = session.id, printerType = printStation.printerType)
             }

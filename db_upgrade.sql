@@ -48,3 +48,5 @@ alter table ad_set alter column public_resource set not null;
 alter table wx_ent_transfer_record_item add column charge integer;
 update wx_ent_transfer_record_item set charge=0;
 alter table wx_ent_transfer_record_item alter column charge set not null;
+
+alter table print_station_login_session drop column version;

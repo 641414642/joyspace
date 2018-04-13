@@ -85,7 +85,7 @@ class PrintStationController {
         val pager = Pager(printStations.totalPages, 7, pageno - 1)
         modelAndView.model["pager"] = pager
 
-        class PrintStationInfo(val printStation: PrintStation, val online: Boolean, val version: String)
+        class PrintStationInfo(val printStation: PrintStation, val online: Boolean)
 
         val time = Calendar.getInstance()
         time.add(Calendar.SECOND, 3600 - 30)
@@ -94,14 +94,12 @@ class PrintStationController {
         modelAndView.model["printStations"] = printStations.content.map {
             val session = printStationLoginSessionDao.findByPrintStationId(it.id)
             var online = false
-            var version = ""
 
             if (session != null && session.expireTime.timeInMillis > time.timeInMillis) {    //自助机30秒之内访问过后台
                 online = true
-                version = if (session.version <= 0) "" else session.version.toString()
             }
 
-            PrintStationInfo(it, online, version)
+            PrintStationInfo(it, online)
         }
 
         modelAndView.model["inputPositionId"] = inputPositionId
@@ -128,7 +126,7 @@ class PrintStationController {
         val pager = Pager(printStations.totalPages, 7, pageno - 1)
         modelAndView.model["pager"] = pager
 
-        class PrintStationInfo(val printStation: PrintStation, val online: Boolean, val version: String)
+        class PrintStationInfo(val printStation: PrintStation, val online: Boolean)
 
         val time = Calendar.getInstance()
         time.add(Calendar.SECOND, 3600 - 30)
@@ -137,14 +135,12 @@ class PrintStationController {
         modelAndView.model["printStations"] = printStations.content.map {
             val session = printStationLoginSessionDao.findByPrintStationId(it.id)
             var online = false
-            var version = ""
 
             if (session != null && session.expireTime.timeInMillis > time.timeInMillis) {    //自助机30秒之内访问过后台
                 online = true
-                version = if (session.version <= 0) "" else session.version.toString()
             }
 
-            PrintStationInfo(it, online, version)
+            PrintStationInfo(it, online)
         }
 
         modelAndView.model["inputCompanyId"] = inputCompanyId
