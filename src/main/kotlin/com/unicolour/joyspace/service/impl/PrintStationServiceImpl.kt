@@ -490,8 +490,26 @@ open class PrintStationServiceImpl : PrintStationService {
         get() {
             return DataFetcher {
                 try {
-                    val versionFile = File(assetsDir, "home/current.txt")
-                    versionFile.reader().use { it.readText().trim(' ', '\r', '\n', '\t').toInt() }
+                    var version = 0
+                    val context = it.getContext<HashMap<String, Any>>()
+                    val sessionId = context["printStationLoginSessionId"] as? String?
+
+                    if (sessionId != null) {
+                        val loginSession = getPrintStationLoginSession(sessionId)
+                        if (loginSession != null) {
+                            val printStation = printStationDao.findOne(loginSession.printStationId)
+                            if (printStation?.updateToVersion != null) {
+                                version = printStation.updateToVersion!!
+                            }
+                        }
+                    }
+
+                    if (version == 0) {
+                        val versionFile = File(assetsDir, "home/current.txt")
+                        version = versionFile.reader().use { it.readText().trim(' ', '\r', '\n', '\t').toInt() }
+                    }
+
+                    version
                 } catch (e: Exception) {
                     e.printStackTrace()
                     0
