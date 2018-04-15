@@ -52,7 +52,7 @@ open class AdSetServiceImpl : AdSetService {
             AdSetDTO(
                     id = adSet.id,
                     name = adSet.name,
-                    updateTime = dateTimeFormat.get().format(adSet.updateTime),
+                    updateTime = dateTimeFormat.get().format(Date(adSet.updateTime.timeInMillis)),
                     imageFiles = adSet.imageFiles.map {
                         AdSetImageFileDTO(
                                 id = it.id,
