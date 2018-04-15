@@ -3,6 +3,7 @@ package com.unicolour.joyspace.service
 import com.unicolour.joyspace.dto.PrintStationFindResult
 import com.unicolour.joyspace.dto.PrintStationFindResultSingle
 import com.unicolour.joyspace.dto.PrintStationLoginResult
+import com.unicolour.joyspace.dto.UpdateAndAdSetDTO
 import com.unicolour.joyspace.model.*
 import graphql.schema.DataFetcher
 
@@ -22,6 +23,7 @@ interface PrintStationService {
     val byDistanceDataFetcher: DataFetcher<PrintStationFindResult>
     val newAdSetDataFetcher: DataFetcher<AdSet?>
 
+
     val currentSoftwareVersionDataFetcher: DataFetcher<Int>
     fun getDataFetcher(fieldName:String): DataFetcher<Any>
     fun getPrintStationLoginSession(sessionId: String): PrintStationLoginSession?
@@ -36,4 +38,5 @@ interface PrintStationService {
 
     fun addUploadLogFileTask(printStationId: Int, filterStr: String): Boolean
     fun orderReprintTaskExists(printStationId: Int, orderId: Int): Boolean
+    fun getPrintStationUpdateAndAdSet(sessionId: String, currentVersion: Int, currentAdSetId: Int, currentAdSetTimeStr: String): UpdateAndAdSetDTO
 }

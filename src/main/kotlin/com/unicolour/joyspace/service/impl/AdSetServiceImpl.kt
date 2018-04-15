@@ -2,6 +2,8 @@ package com.unicolour.joyspace.service.impl
 
 import com.unicolour.joyspace.dao.AdImageFileDao
 import com.unicolour.joyspace.dao.AdSetDao
+import com.unicolour.joyspace.dto.AdSetDTO
+import com.unicolour.joyspace.dto.AdSetImageFileDTO
 import com.unicolour.joyspace.model.AdImageFile
 import com.unicolour.joyspace.model.AdSet
 import com.unicolour.joyspace.service.AdSetService
@@ -13,6 +15,7 @@ import java.io.BufferedReader
 import java.io.File
 import java.io.IOException
 import java.io.InputStreamReader
+import java.text.SimpleDateFormat
 import java.util.*
 import java.util.regex.Pattern
 import javax.servlet.http.Part
@@ -36,8 +39,35 @@ open class AdSetServiceImpl : AdSetService {
     @Autowired
     lateinit var managerService : ManagerService
 
+    private val dateTimeFormat: ThreadLocal<SimpleDateFormat> = ThreadLocal.withInitial { SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS") }
+
     override fun getAdImageUrl(adImageFile: AdImageFile): String {
         return "$baseUrl/assets/ad/${adImageFile.adSet.id}/images/${adImageFile.fileName}.${adImageFile.fileType}"
+    }
+
+    override fun adSetToDTO(adSet: AdSet?): AdSetDTO? {
+        return if (adSet == null) {
+            null
+        } else {
+            AdSetDTO(
+                    id = adSet.id,
+                    name = adSet.name,
+                    updateTime = dateTimeFormat.get().format(adSet.updateTime),
+                    imageFiles = adSet.imageFiles.map {
+                        AdSetImageFileDTO(
+                                id = it.id,
+                                fileName = it.fileName,
+                                fileType = it.fileType,
+                                width = it.width,
+                                height = it.height,
+                                duration = it.duration,
+                                description = it.description,
+                                sequence = it.sequence,
+                                url = getAdImageUrl(it)
+                        )
+                    }
+            )
+        }
     }
 
     private fun saveAdImageFiles(imgFiles: List<Pair<Part, Int>>, adSet: AdSet, seq: Int) {

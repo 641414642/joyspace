@@ -2,10 +2,7 @@ package com.unicolour.joyspace.controller
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.unicolour.joyspace.dao.*
-import com.unicolour.joyspace.dto.CommonRequestResult
-import com.unicolour.joyspace.dto.PrintStationTaskDTO
-import com.unicolour.joyspace.dto.ProductItem
-import com.unicolour.joyspace.dto.ResultCode
+import com.unicolour.joyspace.dto.*
 import com.unicolour.joyspace.exception.ProcessException
 import com.unicolour.joyspace.model.PrintStation
 import com.unicolour.joyspace.model.PrintStationStatus
@@ -390,5 +387,16 @@ class PrintStationController {
         else {
             printStationService.updatePrintStationStatus(sessionId, statusEnum, additionalInfo)
         }
+    }
+
+    @GetMapping("/printStation/updateAndAdSet")
+    @ResponseBody
+    fun getPrintStationUpdateAndAdSet(
+            @RequestParam("sessionId") sessionId: String,
+            @RequestParam("currentVersion") currentVersion: Int,
+            @RequestParam("currentAdSetId") currentAdSetId: Int,
+            @RequestParam("currentAdSetTime") currentAdSetTime: String
+    ): UpdateAndAdSetDTO {
+        return printStationService.getPrintStationUpdateAndAdSet(sessionId, currentVersion, currentAdSetId, currentAdSetTime)
     }
 }

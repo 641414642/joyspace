@@ -79,6 +79,9 @@ open class PrintStationServiceImpl : PrintStationService {
     @Autowired
     lateinit var printStationLoginSessionDao: PrintStationLoginSessionDao
 
+    @Autowired
+    lateinit var adSetService: AdSetService
+
     private val dateTimeFormat: ThreadLocal<SimpleDateFormat> = ThreadLocal.withInitial { SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS") }
 
     @Transactional
@@ -185,6 +188,51 @@ open class PrintStationServiceImpl : PrintStationService {
         else {
             return PrintStationLoginResult(result = 1)  //没有找到指定的自助机
         }
+    }
+
+    override fun getPrintStationUpdateAndAdSet(
+            sessionId: String, currentVersion: Int,
+            currentAdSetId: Int, currentAdSetTimeStr: String): UpdateAndAdSetDTO {
+        val currentAdSetTime =
+                try {
+                    dateTimeFormat.get().parse(currentAdSetTimeStr)
+                }
+                catch (e: Exception) {
+                    null
+                }
+
+        var version = -1
+        var adSet: AdSet? = null
+
+        val loginSession = getPrintStationLoginSession(sessionId)
+        if (loginSession != null) {
+            val printStation = printStationDao.findOne(loginSession.printStationId)
+            if (printStation?.updateToVersion != null) {
+                version = printStation.updateToVersion!!
+            }
+
+            val ad = printStation?.adSet
+            if (currentAdSetTime != null && ad != null &&
+                    (ad.id != currentAdSetId || ad.updateTime.timeInMillis > currentAdSetTime.time)) {
+                adSet = ad
+            }
+        }
+
+        if (version == -1) {
+            version =
+                    try {
+                        val versionFile = File(assetsDir, "home/current.txt")
+                        versionFile.reader().use { it.readText().trim(' ', '\r', '\n', '\t').toInt() }
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                        0
+                    }
+        }
+
+        return UpdateAndAdSetDTO(
+                version = version,
+                adSet = adSetService.adSetToDTO(adSet)
+        )
     }
 
     override fun getPriceMap(printStation: PrintStation): Map<Int, Int> {
