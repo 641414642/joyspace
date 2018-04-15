@@ -1,5 +1,6 @@
 package com.unicolour.joyspace.model
 
+import java.util.*
 import javax.persistence.*
 import javax.validation.constraints.NotNull
 
@@ -34,6 +35,18 @@ class Address {
     //联系人
     @Column
     var name: String? = null
+
+    @Column
+    @NotNull
+    var defalut: Boolean = false   //是否为默认地址
+
+    @NotNull
+    @Column
+    lateinit var createTime: Calendar
+
+
+
+
 
 
 }
