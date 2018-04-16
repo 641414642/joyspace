@@ -12,6 +12,7 @@ import com.unicolour.joyspace.service.ManagerService
 import com.unicolour.joyspace.service.PrintOrderService
 import com.unicolour.joyspace.service.PrintStationService
 import com.unicolour.joyspace.util.Pager
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
@@ -25,6 +26,9 @@ import kotlin.collections.ArrayList
 
 @Controller
 class PrintStationController {
+    companion object {
+        val logger = LoggerFactory.getLogger(PrintStationController::class.java)
+    }
 
     @Autowired
     lateinit var printStationDao: PrintStationDao
@@ -55,6 +59,9 @@ class PrintStationController {
 
     @Autowired
     lateinit var printStationLoginSessionDao: PrintStationLoginSessionDao
+
+    @Autowired
+    lateinit var printerTypeDao: PrinterTypeDao
 
     @Autowired
     lateinit var objectMapper: ObjectMapper
@@ -176,6 +183,8 @@ class PrintStationController {
         modelAndView.model["template_products"] = allProducts.filter { it.productType == ProductType.TEMPLATE.value }
         modelAndView.model["id_photo_products"] = allProducts.filter { it.productType == ProductType.ID_PHOTO.value }
         modelAndView.model["productIds"] = allProducts.map { it.productId }.joinToString(separator = ",")
+        modelAndView.model["printerTypes"] = printerTypeDao.findAll()
+
         modelAndView.viewName = "/printStation/edit :: content"
 
         return modelAndView
@@ -398,5 +407,23 @@ class PrintStationController {
             @RequestParam("currentAdSetTime") currentAdSetTime: String
     ): UpdateAndAdSetDTO {
         return printStationService.getPrintStationUpdateAndAdSet(sessionId, currentVersion, currentAdSetId, currentAdSetTime)
+    }
+
+    @PostMapping("/printStation/login")
+    @ResponseBody
+    fun printStationLogin(
+            @RequestParam("printStationId") printStationId: Int,
+            @RequestParam("password") password: String,
+            @RequestParam("version") version: Int,
+            @RequestParam("uuid") uuid: String
+    ): PrintStationLoginResult {
+        logger.info("PrintStation login, id=$printStationId, version=$version, uuid=$uuid");
+        val result = printStationService.login(printStationId,
+                password,
+                if (version > 0) version else null,
+                uuid)
+
+        logger.info("PrintStation login result = $result")
+        return result
     }
 }

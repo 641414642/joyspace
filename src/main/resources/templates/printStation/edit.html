@@ -71,9 +71,11 @@
                     <div class="form-group" sec:authorize="hasRole('ROLE_SUPERADMIN')">
                         <label for="printerType" class="control-label">打印机型号:</label>
                         <select name="printerType" class="form-control" id="printerType">
-                            <option value="CY" th:selected="${printStation.printerType == 'CY'}">CY</option>
-                            <option value="EPSON SL-D700" th:selected="${printStation.printerType == 'EPSON SL-D700'}">EPSON SL-D700</option>
-                            <option value="Shinko CHC-S2145" th:selected="${printStation.printerType == 'Shinko CHC-S2145'}">Shinko CHC-S2145</option>
+                            <option th:each="printerType : ${printerTypes}"
+                                    th:value="${printerType.name}"
+                                    th:text="${printerType.name}"
+                                    th:selected="${printStation.printerType == printerType.name}">
+                            </option>
                         </select>
                         <span class="help-block"></span>
                     </div>

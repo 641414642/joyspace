@@ -71,6 +71,9 @@ open class PrintStationServiceImpl : PrintStationService {
     lateinit var printStationProductDao: PrintStationProductDao
 
     @Autowired
+    lateinit var printerTypeDao: PrinterTypeDao
+
+    @Autowired
     lateinit var passwordEncoder: PasswordEncoder
 
     @Autowired
@@ -148,7 +151,7 @@ open class PrintStationServiceImpl : PrintStationService {
             }
         }
 
-    private fun login(printStationId: Int, password: String, version: Int?, uuid: String?): PrintStationLoginResult {
+    override fun login(printStationId: Int, password: String, version: Int?, uuid: String?): PrintStationLoginResult {
         val printStation = printStationDao.findOne(printStationId)
 
         if (printStation != null) {
@@ -179,7 +182,14 @@ open class PrintStationServiceImpl : PrintStationService {
                     printStationDao.save(printStation)
                 }
 
-                return PrintStationLoginResult(sessionId = session.id, printerType = printStation.printerType)
+                val printerType = printerTypeDao.findOne(printStation.printerType)
+
+                if (printerType == null) {
+                    return PrintStationLoginResult(result = 3)  //未知的打印机类型
+                }
+                else {
+                    return PrintStationLoginResult(sessionId = session.id, printerType = printStation.printerType, resolution = printerType.resolution)
+                }
             }
             else {
                 return PrintStationLoginResult(result = 2)  //密码错误

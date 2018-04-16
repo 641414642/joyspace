@@ -36,6 +36,9 @@ class PrintStationActivationCodeController {
     lateinit var adSetDao: AdSetDao
 
     @Autowired
+    lateinit var printerTypeDao: PrinterTypeDao
+
+    @Autowired
     lateinit var printStationActivationCodeService: PrintStationActivationCodeService
 
     @Value("\${com.unicolour.joyspace.baseUrl}")
@@ -91,6 +94,7 @@ class PrintStationActivationCodeController {
         val adSets = adSetDao.findByCompanyIdOrPublicResourceIsTrue(loginManager!!.companyId)  //公用广告
         modelAndView.model["adSets"] = adSets
         modelAndView.model["defAdSetId"] = adSets.firstOrNull()?.id ?: 0
+        modelAndView.model["printerTypes"] = printerTypeDao.findAll()
 
         modelAndView.viewName = "/activationCode/create :: content"
 
@@ -108,6 +112,7 @@ class PrintStationActivationCodeController {
         val adSets = adSetDao.findByCompanyIdOrPublicResourceIsTrue(loginManager!!.companyId)  //公用广告
         modelAndView.model["adSets"] = adSets
         modelAndView.model["defAdSetId"] = adSets.firstOrNull()?.id ?: 0
+        modelAndView.model["printerTypes"] = printerTypeDao.findAll()
 
         modelAndView.viewName = "/activationCode/edit :: content"
 
