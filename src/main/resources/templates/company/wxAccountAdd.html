@@ -72,7 +72,7 @@
                 <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
                 <h4 class="modal-title">添加微信收款账号</h4>
             </div>
-            <div class="modal-body" style="height:350px">
+            <div class="modal-body" style="height:700px">
                 <div class="form-group col-md-6">
                     <label class="control-label">第一步: 扫码关注优利绚彩微信公众号</label>
                     <div id="wxmpQrCodeDiv" data-qrcode="https://joyspace.uni-colour.com" th:attr="data-qrcode=${wxmpQrCode}"></div>
@@ -80,6 +80,10 @@
                 <div class="form-group col-md-6">
                     <label class="control-label">第二步: 扫码打开添加账户页面</label>
                     <div id="qrCodeDiv" data-qrcode="https://joyspace.uni-colour.com" th:attr="data-qrcode=${qrcode}"></div>
+                </div>
+                <div class="form-group col-md-12">
+                    <label class="control-label">注意：在扫描完第二个二维码后，手机上会出现这个界面，要求填写个人信息。请一定填写真实的姓名和电话，否则转账会不成功。谢谢配合。</label>
+                    <div><img th:src="@{/img/wx_account_input_sample.jpg}" src="../../static/img/wx_account_input_sample.jpg" height="300"/></div>
                 </div>
                 <div class="form-group col-md-12">
                     <label for="verifyCode" class="control-label">第三步: 输入用户信息和以下验证码，并点击确认按钮</label>
