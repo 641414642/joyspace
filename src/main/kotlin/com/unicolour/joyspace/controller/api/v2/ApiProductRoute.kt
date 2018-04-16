@@ -22,7 +22,7 @@ class ApiProductRoute {
     /**
      * 主页数据
      */
-    @GetMapping(value = "/v2/homepage")
+    @GetMapping(value = "/v2/app/homepage")
     fun showHomePage(): RestResponse {
         val homePage = HomePageVo()
         return RestResponse.ok(homePage)

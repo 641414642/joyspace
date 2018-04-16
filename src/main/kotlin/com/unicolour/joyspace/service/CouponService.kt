@@ -109,4 +109,14 @@ interface CouponService {
                      selectedProductIds: Set<Int>,
                      selectedPositionIds: Set<Int>,
                      selectedPrintStationIds: Set<Int>): Boolean
+
+    /**
+     * @see userCouponListDataFetcher
+     */
+    fun summaryUserCouponId(session: UserLoginSession, printStationId: Int, user: User?): ArrayList<Int>
+
+    /**
+     * @see claimCouponDataFetcher
+     */
+    fun claimCouponResult(code: String, session: UserLoginSession, user: User?): ClaimCouponResult
 }
