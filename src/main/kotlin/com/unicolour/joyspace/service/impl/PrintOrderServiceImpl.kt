@@ -29,6 +29,8 @@ import java.security.MessageDigest
 import java.security.SecureRandom
 import java.text.SimpleDateFormat
 import java.util.*
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
 import javax.annotation.PostConstruct
 import javax.transaction.Transactional
 import javax.xml.bind.JAXBContext
@@ -43,6 +45,8 @@ open class PrintOrderServiceImpl : PrintOrderService {
     companion object {
         val logger = LoggerFactory.getLogger(PrintOrderServiceImpl::class.java)
     }
+
+    val wxEntTransferExecutor: ExecutorService = Executors.newFixedThreadPool(1)
 
     @Value("\${com.unicolour.joyspace.baseUrl}")
     lateinit var baseUrl: String
@@ -613,12 +617,18 @@ open class PrintOrderServiceImpl : PrintOrderService {
     fun doBatchTransfer() {
         val companies = companyDao.findAll()
         companies.forEach{ company ->
-            val notTransferedOrders = printOrderDao.findByCompanyIdAndPayedIsTrueAndTransferedIsFalse(company.id)
-            val ordersAmountAndFee = calcOrdersAmountAndTransferFee(notTransferedOrders)
+            wxEntTransferExecutor.submit {
+                try {
+                    val notTransferedOrders = printOrderDao.findByCompanyIdAndPayedIsTrueAndTransferedIsFalse(company.id)
+                    val ordersAmountAndFee = calcOrdersAmountAndTransferFee(notTransferedOrders)
 
-            if (ordersAmountAndFee.totalTransferAmount > 100) {
-                startWxEntTransfer(notTransferedOrders, ordersAmountAndFee)
-                Thread.sleep(5000)
+                    if (ordersAmountAndFee.totalTransferAmount > 100) {
+                        startWxEntTransfer(notTransferedOrders, ordersAmountAndFee)
+                        Thread.sleep(5000)
+                    }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
             }
         }
     }
@@ -783,7 +793,16 @@ open class PrintOrderServiceImpl : PrintOrderService {
                 printOrder.updateTime = Calendar.getInstance()
                 printOrderDao.save(printOrder)
 
-                checkStartWxEntTransfer(printOrder)
+                //转账
+                wxEntTransferExecutor.submit {
+                    transactionTemplate.execute {
+                        try {
+                            checkStartWxEntTransfer(printOrder)
+                        } catch (e: Exception) {
+                            e.printStackTrace()
+                        }
+                    }
+                }
                 return null
             }
         }
