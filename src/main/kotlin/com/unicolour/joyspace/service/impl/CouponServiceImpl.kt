@@ -19,6 +19,8 @@ import kotlin.collections.ArrayList
 
 @Component
 open class CouponServiceImpl : CouponService {
+
+
     @Autowired
     lateinit var managerService : ManagerService
 
@@ -60,7 +62,7 @@ open class CouponServiceImpl : CouponService {
 
                     synchronized(couponLock, {
                         transactionTemplate.execute {
-                            val retCouponIds = summaryUserCouponId(session, printStationId, user)
+                            val retCouponIds = summaryUserCouponId(session, printStationId, user, ArrayList())
 
                             UserCouponListResult(0, null,
                                     couponDao.findByIdInOrderByDiscountDesc(retCouponIds))
@@ -70,7 +72,43 @@ open class CouponServiceImpl : CouponService {
             }
         }
 
-    override fun summaryUserCouponId(session: UserLoginSession, printStationId: Int, user: User?): ArrayList<Int> {
+    override fun summaryCouponIdByOrder(session: UserLoginSession, printStationId: Int, user: User?, fee: Int, invalid: java.util.ArrayList<Int>): java.util.ArrayList<Int> {
+        val userCoupons = userCouponDao.findByUserId(session.userId)
+        val couponIds = userCoupons.map { it.couponId }
+        val retCouponIds = ArrayList<Int>(couponIds)
+
+        //删除已禁用、不存在、过期、超过最大使用次数的优惠券
+        for (userCoupon in userCoupons) {
+            val coupon = couponDao.findOne(userCoupon.couponId)
+            val context = CouponValidateContext(
+                    coupon = coupon,
+                    userCoupon = userCoupon)
+
+            val checkResult =
+                    if (coupon == null) {
+                        COUPON_NOT_EXIST
+                    } else {
+                        validateCoupon(context,
+                                this::validateCouponEnabled,
+                                this::validateCouponByTime,
+                                this::validateCouponByMaxUses,
+                                this::validateCouponByMaxUses)
+                    }
+
+            if (checkResult != VALID) {
+                //userCouponDao.delete(userCoupon)
+                invalid.add(userCoupon.couponId)
+                retCouponIds.remove(userCoupon.couponId)
+            }
+            if (fee < coupon.minExpense) {
+                invalid.add(userCoupon.couponId)
+                retCouponIds.remove(userCoupon.couponId)
+            }
+        }
+        return retCouponIds
+    }
+
+    override fun summaryUserCouponId(session: UserLoginSession, printStationId: Int, user: User?, invalid: ArrayList<Int>): ArrayList<Int> {
         val userCoupons = userCouponDao.findByUserId(session.userId)
         val couponIds = userCoupons.map { it.couponId }
         val retCouponIds = ArrayList<Int>(couponIds)
@@ -139,7 +177,8 @@ open class CouponServiceImpl : CouponService {
                     }
 
             if (checkResult != VALID) {
-                userCouponDao.delete(userCoupon)
+                //userCouponDao.delete(userCoupon)
+                invalid.add(userCoupon.couponId)
                 retCouponIds.remove(userCoupon.couponId)
             }
         }

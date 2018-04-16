@@ -44,14 +44,39 @@ class ApiCouponRoute {
                 ?: return RestResponse.error(ResultCode.INVALID_USER_LOGIN_SESSION)
         val user = userDao.findOne(session.userId)
         val printStation = printStationId ?: 0
-        var couponList = listOf<Coupon>()
+        var couponList: List<Coupon>
+        var invalidCouponList: List<Coupon>
+        val couponVoList = mutableListOf<CouponVo>()
+        val invalidCouponIdList = ArrayList<Int>()
         synchronized(couponLock, {
             transactionTemplate.execute {
-                val couponIdList = couponService.summaryUserCouponId(session, printStation, user)
+                val couponIdList = couponService.summaryUserCouponId(session, printStation, user, invalidCouponIdList)
                 couponList = couponDao.findByIdInOrderByDiscountDesc(couponIdList)
+                couponVoList.addAll(couponList.map {
+                    CouponVo(it.id,
+                            it.name,
+                            it.code,
+                            it.begin,
+                            it.expire,
+                            it.minExpense,
+                            it.discount,
+                            1)
+                })
+                invalidCouponList = couponDao.findByIdInOrderByDiscountDesc(invalidCouponIdList)
+                couponVoList.addAll(invalidCouponList.map {
+                    CouponVo(it.id,
+                            it.name,
+                            it.code,
+                            it.begin,
+                            it.expire,
+                            it.minExpense,
+                            it.discount,
+                            0)
+                })
+
             }
         })
-        return RestResponse.ok(couponList)
+        return RestResponse.ok(couponVoList)
     }
 
 
@@ -59,9 +84,47 @@ class ApiCouponRoute {
      * 返回用户该比订单可用优惠券列表
      */
     @GetMapping(value = "/v2/coupons/order")
-    fun getCouponsByOrder(): RestResponse {
-        val coupons = mutableListOf<CouponVo>()
-        return RestResponse.ok(coupons)
+    fun getCouponsByOrder(@RequestParam("sessionId") sessionId: String,
+                          @RequestParam("printStationId", required = false) printStationId: Int?,
+                          @RequestParam("productId", required = false) productId: Int?,
+                          @RequestParam("fee") fee: Int): RestResponse {
+        val session = userLoginSessionDao.findOne(sessionId)
+                ?: return RestResponse.error(ResultCode.INVALID_USER_LOGIN_SESSION)
+        val user = userDao.findOne(session.userId)
+        val printStation = printStationId ?: 0
+        var couponList: List<Coupon>
+        var invalidCouponList: List<Coupon>
+        val couponVoList = mutableListOf<CouponVo>()
+        val invalidCouponIdList = ArrayList<Int>()
+        synchronized(couponLock, {
+            transactionTemplate.execute {
+                val couponIdList = couponService.summaryCouponIdByOrder(session, printStation, user, fee, invalidCouponIdList)
+                couponList = couponDao.findByIdInOrderByDiscountDesc(couponIdList)
+                couponVoList.addAll(couponList.map {
+                    CouponVo(it.id,
+                            it.name,
+                            it.code,
+                            it.begin,
+                            it.expire,
+                            it.minExpense,
+                            it.discount,
+                            1)
+                })
+                invalidCouponList = couponDao.findByIdInOrderByDiscountDesc(invalidCouponIdList)
+                couponVoList.addAll(invalidCouponList.map {
+                    CouponVo(it.id,
+                            it.name,
+                            it.code,
+                            it.begin,
+                            it.expire,
+                            it.minExpense,
+                            it.discount,
+                            0)
+                })
+
+            }
+        })
+        return RestResponse.ok(couponVoList)
     }
 
 

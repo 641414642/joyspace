@@ -1,5 +1,7 @@
 package com.unicolour.joyspace.dto
 
+import java.util.*
+
 data class HomePageVo(var advert: List<Advert>? = null,
                       var productTypes: List<ProductType>? = null)
 
@@ -47,15 +49,11 @@ data class PrintStationVo(var id: Int? = null,
 data class CouponVo(var id: Int? = null,
                     var name: String? = null,
                     var code: String? = null,
-                    var begin: String? = null,
-                    var expire: String? = null,
+                    var begin: Date? = null,
+                    var expire: Date? = null,
                     var minExpense: Int? = null,
                     var discount: Int? = null,
-                    var printStationIdList: List<Int>? = null,
-                    var positionIdList: List<Int>? = null,
-                    var companyIdList: List<Int>? = null,
-                    var productIdList: List<String>? = null,
-                    var productTypeList: List<String>? = null)
+                    var isValid:Int? = null)
 
 data class OrderVo(var orderId: Int? = null,
                    var orderNo: String? = null,

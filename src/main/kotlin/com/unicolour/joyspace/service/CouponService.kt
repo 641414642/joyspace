@@ -113,10 +113,12 @@ interface CouponService {
     /**
      * @see userCouponListDataFetcher
      */
-    fun summaryUserCouponId(session: UserLoginSession, printStationId: Int, user: User?): ArrayList<Int>
+    fun summaryUserCouponId(session: UserLoginSession, printStationId: Int, user: User?, invalid: ArrayList<Int>): ArrayList<Int>
 
     /**
      * @see claimCouponDataFetcher
      */
     fun claimCouponResult(code: String, session: UserLoginSession, user: User?): ClaimCouponResult
+
+    fun summaryCouponIdByOrder(session: UserLoginSession, printStationId: Int, user: User?,fee:Int, invalid: ArrayList<Int>): ArrayList<Int>
 }
