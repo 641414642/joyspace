@@ -70,3 +70,14 @@ data class WxPayParam(var timeStamp: String? = null,
 
 data class OrderItem(var id: Int? = null,
                      var productId: Int? = null)
+
+
+data class NoticeVo(var title: String? = null,
+                    var context: String? = null,
+                    var sendTime: Date? = null,
+                    var imageUrl: String? = null)
+
+data class UserInfoVo(var nickName:String? = null,
+                    var imageUrl:String? = null,
+                    var unPayCount:Int? = null,
+                    var handlingCount:Int? = null)

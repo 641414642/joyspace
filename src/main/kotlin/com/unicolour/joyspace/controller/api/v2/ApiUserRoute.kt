@@ -1,9 +1,12 @@
 package com.unicolour.joyspace.controller.api.v2
 
+import com.unicolour.joyspace.dao.PrintOrderDao
 import com.unicolour.joyspace.dao.UserAddressDao
 import com.unicolour.joyspace.dao.UserDao
 import com.unicolour.joyspace.dao.UserLoginSessionDao
+import com.unicolour.joyspace.dto.NoticeVo
 import com.unicolour.joyspace.dto.ResultCode
+import com.unicolour.joyspace.dto.UserInfoVo
 import com.unicolour.joyspace.dto.common.RestResponse
 import com.unicolour.joyspace.model.Address
 import org.slf4j.LoggerFactory
@@ -24,9 +27,30 @@ class ApiUserRoute {
     private lateinit var userLoginSessionDao: UserLoginSessionDao
     @Autowired
     private lateinit var userDao: UserDao
+    @Autowired
+    private lateinit var printOrderDao: PrintOrderDao
 
     //获取个人信息
+    @GetMapping(value = "/v2/user/info")
+    fun getUserInfo(@RequestParam("sessionId") sessionId: String): RestResponse {
+        val session = userLoginSessionDao.findOne(sessionId)
+        val user = userDao.findOne(session.userId) ?: return RestResponse.error(ResultCode.INVALID_USER_LOGIN_SESSION)
+        val userInfo = UserInfoVo()
+        userInfo.nickName = user.nickName
+        userInfo.imageUrl = user.avatar
+        userInfo.unPayCount = printOrderDao.countByUserIdAndPayedIsFalse(user.id).toInt()
+        userInfo.handlingCount = printOrderDao.countByUserIdAndPayedIsTrueAndPrintedOnPrintStationIsFalse(user.id).toInt()
+        return RestResponse.ok(userInfo)
+    }
 
+    //消息中心list
+    @GetMapping(value = "/v2/user/notice")
+    fun getUserNotice(@RequestParam("sessionId") sessionId: String): RestResponse {
+        val session = userLoginSessionDao.findOne(sessionId)
+        userDao.findOne(session.userId) ?: return RestResponse.error(ResultCode.INVALID_USER_LOGIN_SESSION)
+        val noticeList = mutableListOf<NoticeVo>()
+        return RestResponse.ok()
+    }
 
     /**
      * 获取用户地址列表

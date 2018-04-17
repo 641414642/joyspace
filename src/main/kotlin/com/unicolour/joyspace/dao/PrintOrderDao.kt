@@ -21,4 +21,7 @@ interface PrintOrderDao : CrudRepository<PrintOrder, Int> {
     fun findByOrderNoIgnoreCaseAndCompanyId(orderNo: String, companyId: Int, pageable: Pageable): Page<PrintOrder>
     fun findByCompanyIdAndPayedIsTrueAndTransferedIsFalse(companyId: Int): List<PrintOrder>
     fun findByUserId(userId: Int): List<PrintOrder>
+    fun countByUserIdAndPayedIsFalse(userId: Int): Long
+    fun countByUserIdAndPayedIsTrueAndPrintedOnPrintStationIsFalse(userId: Int): Long
+    fun countByUserIdAndPrintedOnPrintStationIsTrue(userId: Int): Long
 }
