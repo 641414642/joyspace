@@ -18,6 +18,11 @@ import java.text.SimpleDateFormat
 import java.util.*
 import javax.transaction.Transactional
 import kotlin.collections.HashMap
+import java.security.PublicKey
+import java.security.KeyFactory
+import java.security.spec.X509EncodedKeySpec
+import java.security.Signature
+
 
 @Service
 open class PrintStationServiceImpl : PrintStationService {
@@ -145,58 +150,156 @@ open class PrintStationServiceImpl : PrintStationService {
             return DataFetcher<PrintStationLoginResult> { env ->
                 val printStationId = env.getArgument<Int>("printStationId")
                 val password = env.getArgument<String>("password")
-                val version =  env.getArgument<Int?>("version")
-                val uuid =  env.getArgument<String?>("uuid")
-                transactionTemplate.execute { login(printStationId, password, version, uuid) }
+                val version = env.getArgument<Int?>("version")
+                val uuid = env.getArgument<String?>("uuid") ?: ""
+                transactionTemplate.execute { login(printStationId, password, version, uuid, "","") }
             }
         }
 
-    override fun login(printStationId: Int, password: String, version: Int?, uuid: String?): PrintStationLoginResult {
-        val printStation = printStationDao.findOne(printStationId)
+    private fun loadPublicKey(printStationId: Int): PublicKey? {
+        try {
+            val pubKeyFile = File(assetsDir, "printStation/key/$printStationId.key")
+            if (!pubKeyFile.exists()) {
+                return null
+            }
 
-        if (printStation != null) {
-            if (passwordEncoder.matches(password, printStation.password)) {
-                var session = printStationLoginSessionDao.findByPrintStationId(printStation.id)
-                if (session != null) {
-                    val time = Calendar.getInstance()
-                    time.add(Calendar.SECOND, 3600 - 30)
+            val keyBytes = pubKeyFile.readBytes()
+            val ks = X509EncodedKeySpec(keyBytes)
+            val kf = KeyFactory.getInstance("RSA")
 
-                    if (session.expireTime.timeInMillis > time.timeInMillis) {    //自助机30秒之内访问过后台
-                        if (!session.uuid.isNullOrBlank() && session.uuid != uuid) {  //其他自助机已经登录
-                            return PrintStationLoginResult(result = 3)
-                        }
-                    }
-                    printStationLoginSessionDao.delete(session)
-                }
+            return kf.generatePublic(ks)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            return null
+        }
+    }
 
-                session = PrintStationLoginSession()
-                session.id = UUID.randomUUID().toString().replace("-", "")
-                session.printStationId = printStation.id
-                session.expireTime = Calendar.getInstance()
-                session.expireTime.add(Calendar.SECOND, 3600)
-                session.uuid = uuid
-                printStationLoginSessionDao.save(session)
+    private fun savePublicKey(printStationId: Int, pubKeyStr: String): Boolean {
+        return try {
+            val pubKeyFile = File(assetsDir, "printStation/key/$printStationId.key")
+            pubKeyFile.parentFile.mkdirs()
+            pubKeyFile.writeBytes(Base64.getDecoder().decode(pubKeyStr))
 
-                if (printStation.lastLoginVersion != version) {
-                    printStation.lastLoginVersion = version
-                    printStationDao.save(printStation)
-                }
+            loadPublicKey(printStationId) != null
+        } catch (e: Exception) {
+            e.printStackTrace()
+            false
+        }
+    }
 
-                val printerType = printerTypeDao.findOne(printStation.printerType)
+    private fun loginWithKey(printStation: PrintStation, signStr: String): Int {
+        if (printStation.uuid.isNullOrBlank()) {
+            return 4     //没有公钥
+        }
 
-                if (printerType == null) {
-                    return PrintStationLoginResult(result = 3)  //未知的打印机类型
-                }
-                else {
-                    return PrintStationLoginResult(sessionId = session.id, printerType = printStation.printerType, resolution = printerType.resolution)
+        val pubKey = loadPublicKey(printStation.id)
+        if (pubKey == null) {
+            return 4     //没有公钥
+        }
+
+        val signBytes = Base64.getDecoder().decode(signStr)
+
+        val currentSequence = printStation.loginSequence ?: 0
+        for (i in 1 .. 10) {
+            val sign = Signature.getInstance("SHA256withRSA")
+            sign.initVerify(pubKey)
+
+            val sequence = currentSequence + i
+            val strToSign = "printStationId: ${printStation.id}, uuid: ${printStation.uuid}, sequence: $sequence"
+            sign.update(strToSign.toByteArray())
+
+            if (sign.verify(signBytes)) {
+                printStation.loginSequence = sequence
+                printStationDao.save(printStation)
+
+                return 0
+            }
+        }
+
+        return 5   //验证失败
+    }
+
+    private fun loginWithPassword(printStation: PrintStation, password: String, uuid: String?): Int {
+        if (!passwordEncoder.matches(password, printStation.password)) {
+            return 2   //密码错误
+        }
+
+        val session = printStationLoginSessionDao.findByPrintStationId(printStation.id)
+        if (session != null) {
+            val time = Calendar.getInstance().apply { add(Calendar.SECOND, 3600 - 30) }
+
+            if (session.expireTime.timeInMillis > time.timeInMillis) {    //自助机30秒之内访问过后台
+                if (!printStation.uuid.isNullOrBlank() && printStation.uuid != uuid) {  //其他自助机已经登录
+                    return 3    //已经在其他机器上登录过
                 }
             }
-            else {
-                return PrintStationLoginResult(result = 2)  //密码错误
+        }
+
+        return 0
+    }
+
+    @Transactional
+    override fun login(printStationId: Int, password: String, version: Int?, uuid: String,
+                       pubKeyStr: String, signStr: String): PrintStationLoginResult {
+        val printStation = printStationDao.findOne(printStationId)
+
+        if (printStation == null) {
+            return PrintStationLoginResult(result = 1)  //没有找到指定的自助机
+        }
+
+        val loginWithPassword: Boolean
+        val loginResult: Int
+
+        if (password.isEmpty()) {
+            loginWithPassword = false
+            loginResult = loginWithKey(printStation, signStr)
+        }
+        else {
+            loginWithPassword = true
+            loginResult = loginWithPassword(printStation, password, uuid)
+        }
+
+        if (loginResult == 0) {
+            if (uuid.isNotEmpty()) {
+                printStation.uuid = uuid
+            }
+
+            if (loginWithPassword && pubKeyStr.isNotEmpty()) {
+                if (savePublicKey(printStation.id, pubKeyStr)) {
+                    printStation.password = passwordEncoder.encode(UUID.randomUUID().toString())
+                    printStationDao.save(printStation)
+                }
+                else {
+                    return PrintStationLoginResult(result = 7)  //保存公钥失败
+                }
+            }
+
+            var session = printStationLoginSessionDao.findByPrintStationId(printStationId)
+            if (session != null) {
+                printStationLoginSessionDao.delete(session)
+            }
+
+            session = PrintStationLoginSession()
+            session.id = UUID.randomUUID().toString().replace("-", "")
+            session.printStationId = printStation.id
+            session.expireTime = Calendar.getInstance().apply { add(Calendar.SECOND, 3600) }
+            printStationLoginSessionDao.save(session)
+
+            if (printStation.lastLoginVersion != version) {
+                printStation.lastLoginVersion = version
+                printStationDao.save(printStation)
+            }
+
+            val printerType = printerTypeDao.findOne(printStation.printerType)
+
+            return if (printerType == null) {
+                PrintStationLoginResult(result = 6)  //未知的打印机类型
+            } else {
+                PrintStationLoginResult(sessionId = session.id, printerType = printStation.printerType, resolution = printerType.resolution)
             }
         }
         else {
-            return PrintStationLoginResult(result = 1)  //没有找到指定的自助机
+            return PrintStationLoginResult(resolution = loginResult)
         }
     }
 

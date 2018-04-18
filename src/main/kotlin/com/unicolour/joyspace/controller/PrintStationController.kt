@@ -413,15 +413,19 @@ class PrintStationController {
     @ResponseBody
     fun printStationLogin(
             @RequestParam("printStationId") printStationId: Int,
-            @RequestParam("password") password: String,
-            @RequestParam("version") version: Int,
-            @RequestParam("uuid") uuid: String
+            @RequestParam("password", required = false, defaultValue = "") password: String,
+            @RequestParam("version", required = false, defaultValue = "-1") version: Int,
+            @RequestParam("uuid", required = false, defaultValue = "") uuid: String,
+            @RequestParam("sign", required = false, defaultValue = "") sign: String,
+            @RequestParam("pubKey", required = false, defaultValue = "") pubKey: String
     ): PrintStationLoginResult {
         logger.info("PrintStation login, id=$printStationId, version=$version, uuid=$uuid");
         val result = printStationService.login(printStationId,
                 password,
                 if (version > 0) version else null,
-                uuid)
+                uuid,
+                pubKey,
+                sign)
 
         logger.info("PrintStation login result = $result")
         return result

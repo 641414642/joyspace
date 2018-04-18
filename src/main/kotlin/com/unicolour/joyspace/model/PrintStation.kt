@@ -88,6 +88,12 @@ class PrintStation {
     //指定更新到的home版本号, 如果为null, 使用全局版本号设置
     @Column(name = "update_to_version")
     var updateToVersion: Int? = null
+
+    @Column(length = 32)
+    var uuid: String? = null
+
+    @Column
+    var loginSequence: Int? = 0
 }
 
 enum class PrintStationStatus(val value:Int, val message:String) {

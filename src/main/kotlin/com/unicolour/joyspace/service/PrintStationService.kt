@@ -8,7 +8,7 @@ import com.unicolour.joyspace.model.*
 import graphql.schema.DataFetcher
 
 interface PrintStationService {
-    fun login(printStationId: Int, password: String, version: Int?, uuid: String?): PrintStationLoginResult
+    fun login(printStationId: Int, password: String, version: Int?, uuid: String, pubKeyStr: String, signStr: String): PrintStationLoginResult
 
     fun getPriceMap(printStation: PrintStation): Map<Int, Int>
     fun updatePrintStation(id: Int, printStationName: String, positionId: Int, transferProportion:Int, printerType:String, adSetId: Int, selectedProductIds: Set<Int>): Boolean
