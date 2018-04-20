@@ -49,7 +49,7 @@ class ApiUserRoute {
         val session = userLoginSessionDao.findOne(sessionId)
         userDao.findOne(session.userId) ?: return RestResponse.error(ResultCode.INVALID_USER_LOGIN_SESSION)
         val noticeList = mutableListOf<NoticeVo>()
-        return RestResponse.ok()
+        return RestResponse.ok(noticeList)
     }
 
     /**

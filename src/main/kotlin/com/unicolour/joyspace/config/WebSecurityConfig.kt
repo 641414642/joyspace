@@ -34,7 +34,8 @@ open class WebSecurityConfig : WebSecurityConfigurerAdapter() {
                 "/wxpay/notify",
                 "/wxmp/notify",
                 "/company/wxAccountAddConfirm",
-                "/printStation/**")
+                "/printStation/**",
+                "/v2/**")
 
         http.csrf().disable()
                 .authorizeRequests()
