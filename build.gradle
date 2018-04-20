@@ -37,6 +37,7 @@ asciidoctor {
 	sources {
 		include 'AppAPI.adoc'
 		include 'WeChatAPI.adoc'
+		include 'PrintStationAPI.adoc'
 	}
 }
 

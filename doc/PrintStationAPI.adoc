@@ -1,0 +1,72 @@
+=== 获取订单打印和其他自助机任务:
+- URL:  /printStation/tasks
+- Method:  GET
+- 参数:
+|==========================================================
+|参数名       |描述
+|sessionId    |登录后台时返回的会话id
+|taskIdAfter  |获取此id之后的新任务
+|==========================================================
+
+- 返回值:
+----
+[
+    {
+        "id" : xxx,       //任务id
+        "type" : xxx,     //任务类型 (1代表打印订单)
+        "param" : ""      //任务参数 (type 为 1 时，这个参数是订单参数json字符串，格式见后面的说明)
+    },
+    {
+        "id" : xxx,       //任务id
+        "type" : xxx,     //任务类型 (1代表打印订单)
+        "param" : ""      //任务参数
+    }
+    ...
+]
+----
+
+- 订单参数json格式:
+----
+{
+    "id": xxx,                    //订单id
+    "wxUserNickName": "xxxxxx",   //下单用户微信昵称 （自助机上显示用）
+    "printOrderItems": [          //订单项列表
+        {
+            "id": xxx,            //订单项id
+            "copies": xxx,        //打印项份数
+            "productId": xxx，    //订单项产品id
+            "productType": xxx,   //产品类型  0: 普通照片,  1: 证件照,  2: 模板拼图
+            "productVersion": "xxx.xxx",    //产品版本号
+            "orderImages": [      //订单项中的用户图片列表
+                {
+                    "id": xxx,        //图片id
+                    "name": "xxxx",   //图片在模板中的名称
+                    "userImageFile": {   //用户图片
+                        "type": "xxx",   //图片类型  (jpg, png, ...)
+                        "width": xxx,    //图片像素宽度
+                        "height": xxx,   //图片像素高度度
+                        "url": "https://joyspace.uni-colour.com/xxxx/xxx",    //图片在服务器上的url
+                        "fileName": "xxxxx"    //图片文件的文件名
+                    }
+                },
+                "processParams": ""   //图片处理参数(json字符串), 格式见下面的说明
+          ]
+        },
+        ...
+    ]
+}
+----
+
+- 图片处理参数列表
+----
+{
+    "initialRotate" : 0,   //图片初始旋转角度，必须是 0, 90, 180, 270 中的某一个
+    "scale": 1.0,          //图片缩放比例
+    "rotate: 0.0,          //图片旋转角度
+    "horTranslate": 0.0,     //图片水平移动距离，单位mm
+    "verTranslate": 0.0,     //图片垂直移动距离，单位mm
+    "brightness": 1.0,       //亮度调整 (0~2), 数值为1时保持不变
+    "saturate": 1.0,         //饱和度调整 (0~2), 数值为1时保持不变
+    "effect": "none",        //图片效果, none: 没有,  grayscale: 黑白图片效果,  sepia: 怀旧效果
+}
+----
