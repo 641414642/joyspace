@@ -72,7 +72,7 @@ class ApiProductRoute {
                             "height": 1440,
                             "angleClip": 0,
                             "bgcolor": "",
-                            "resourceURL": "标准1寸照测试模板.png"
+                            "resourceURL": "http://47.52.238.144:6060/img/inch_1_test.png"
                         }
                     ]
                 },
@@ -202,7 +202,7 @@ class ApiProductRoute {
                             "height": 1440,
                             "angleClip": 0,
                             "bgcolor": "",
-                            "resourceURL": "background_layer.png"
+                            "resourceURL": "http://47.52.238.144:6060/img/background_layer.png"
                         }
                     ]
                 },
@@ -236,7 +236,7 @@ class ApiProductRoute {
                             "height": 1440,
                             "angleClip": 0,
                             "bgcolor": "",
-                            "resourceURL": "front_layer.png"
+                            "resourceURL": "http://47.52.238.144:6060/img/front_layer.png"
                         }
                     ]
                 }
