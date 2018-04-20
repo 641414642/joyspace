@@ -413,21 +413,46 @@ class PrintStationController {
     @ResponseBody
     fun printStationLogin(
             @RequestParam("printStationId") printStationId: Int,
-            @RequestParam("password", required = false, defaultValue = "") password: String,
+            @RequestParam("password") password: String,
             @RequestParam("version", required = false, defaultValue = "-1") version: Int,
-            @RequestParam("uuid", required = false, defaultValue = "") uuid: String,
-            @RequestParam("sign", required = false, defaultValue = "") sign: String,
-            @RequestParam("pubKey", required = false, defaultValue = "") pubKey: String
+            @RequestParam("uuid") uuid: String
     ): PrintStationLoginResult {
         logger.info("PrintStation login, id=$printStationId, version=$version, uuid=$uuid");
         val result = printStationService.login(printStationId,
                 password,
                 if (version > 0) version else null,
-                uuid,
-                pubKey,
-                sign)
+                uuid)
 
-        logger.info("PrintStation login result = $result")
+        logger.info("PrintStation login, result = $result")
+        return result
+    }
+
+    @PostMapping("/printStation/loginWithKey")
+    @ResponseBody
+    fun printStationLoginWithKey(
+            @RequestParam("printStationId") printStationId: Int,
+            @RequestParam("version", required = false, defaultValue = "-1") version: Int,
+            @RequestParam("sign") sign: String
+    ): PrintStationLoginResult {
+        logger.info("PrintStation login with key, id=$printStationId, version=$version, sign=$sign")
+        val versionValue = if (version > 0) version else null
+        val result = printStationService.loginWithKey(printStationId, sign, versionValue)
+
+        logger.info("PrintStation login with key, result = $result")
+        return result
+    }
+
+    @PostMapping("/printStation/initPubKey")
+    @ResponseBody
+    fun initPrintStationPublicKey(
+            @RequestParam("printStationId") printStationId: Int,
+            @RequestParam("uuid") uuid: String,
+            @RequestParam("pubKey") pubKey: String
+    ): Int {
+        logger.info("PrintStation init public key, id=$printStationId, uuid=$uuid")
+        val result = printStationService.initPublicKey(printStationId, uuid, pubKey)
+
+        logger.info("PrintStation init public key, result = $result")
         return result
     }
 }
