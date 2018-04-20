@@ -53,7 +53,7 @@ data class CouponVo(var id: Int? = null,
                     var expire: Date? = null,
                     var minExpense: Int? = null,
                     var discount: Int? = null,
-                    var isValid:Int? = null)
+                    var isValid: Int? = null)
 
 data class OrderVo(var orderId: Int? = null,
                    var orderNo: String? = null,
@@ -77,7 +77,34 @@ data class NoticeVo(var title: String? = null,
                     var sendTime: Date? = null,
                     var imageUrl: String? = null)
 
-data class UserInfoVo(var nickName:String? = null,
-                    var imageUrl:String? = null,
-                    var unPayCount:Int? = null,
-                    var handlingCount:Int? = null)
+data class UserInfoVo(var nickName: String? = null,
+                      var imageUrl: String? = null,
+                      var unPayCount: Int? = null,
+                      var handlingCount: Int? = null)
+
+data class TemplateVo(var id: Int? = null,
+                      var version: String? = null,
+                      var name: String? = null,
+                      var type: Int? = null,
+                      var scenes: List<Scene>? = null)
+
+data class Scene(var id: Int? = null,
+                 var name: String? = null,
+                 var type: String? = null,
+                 var width: Double? = null,
+                 var height: Double? = null,
+                 var layers: List<Layer>? = null)
+
+data class Layer(var id: Int? = null,
+                 var type: String? = null,
+                 var images: List<Img>? = null)
+
+data class Img(var id: Int? = null,
+               var type: String? = null,
+               var x: Double? = null,
+               var y: Double? = null,
+               var width: Double? = null,
+               var height: Double? = null,
+               var angleClip: Double? = null,
+               var bgcolor: String? = null,
+               var resourceURL: String? = null)
