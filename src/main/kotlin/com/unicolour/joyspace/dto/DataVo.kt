@@ -47,7 +47,7 @@ data class CouponVo(var id: Int? = null,
                     var expire: Date? = null,
                     var minExpense: Int? = null,
                     var discount: Int? = null,
-                    var isValid: Int? = null)
+                    var available: Int? = null)
 
 data class OrderVo(var orderId: Int? = null,
                    var orderNo: String? = null,
