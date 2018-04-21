@@ -1,10 +1,11 @@
 package com.unicolour.joyspace.controller.api.v2
 
 import com.google.gson.Gson
-import com.unicolour.joyspace.dto.HomePageVo
-import com.unicolour.joyspace.dto.ProductVo
-import com.unicolour.joyspace.dto.TemplateVo
+import com.unicolour.joyspace.dao.ProductDao
+import com.unicolour.joyspace.dao.TemplateDao
+import com.unicolour.joyspace.dto.*
 import com.unicolour.joyspace.dto.common.RestResponse
+import com.unicolour.joyspace.model.ProductImageFileType
 import com.unicolour.joyspace.service.AdSetService
 import com.unicolour.joyspace.service.ProductService
 import org.slf4j.LoggerFactory
@@ -20,13 +21,28 @@ class ApiProductRoute {
     private lateinit var adSetService: AdSetService
     @Autowired
     private lateinit var productService: ProductService
+    @Autowired
+    private lateinit var productDao: ProductDao
+    @Autowired
+    private lateinit var templateDao:TemplateDao
 
     /**
      * 主页数据
      */
     @GetMapping(value = "/v2/app/homepage")
     fun showHomePage(): RestResponse {
-        val homePage = HomePageVo()
+        val advers = mutableListOf<Advert>()
+        advers.add(Advert("ad_1", "轮播图", "http://47.52.238.144:6060/doc/home_page/home_1.jpg"))
+        advers.add(Advert("ad_2", "轮播图", "http://47.52.238.144:6060/doc/home_page/home_2.jpg"))
+        advers.add(Advert("ad_3", "轮播图", "http://47.52.238.144:6060/doc/home_page/home_3.jpg"))
+        advers.add(Advert("ad_4", "轮播图", "http://47.52.238.144:6060/doc/home_page/home_4.jpg"))
+        advers.add(Advert("ad_5", "轮播图", "http://47.52.238.144:6060/doc/home_page/home_5.jpg"))
+        val producTypes = mutableListOf<ProductType>()
+        producTypes.add(ProductType(0, "普通照片", "首次冲印免费"))
+        producTypes.add(ProductType(1, "证件照", "首次冲印免费"))
+        producTypes.add(ProductType(2, "模版拼图", "免费模板随便用"))
+        producTypes.add(ProductType(3, "相册", "打造属于你自己的回忆"))
+        val homePage = HomePageVo(advers, producTypes)
         return RestResponse.ok(homePage)
     }
 
@@ -36,8 +52,20 @@ class ApiProductRoute {
      */
     @GetMapping(value = "/v2/product/{type}")
     fun getProductsByType(@PathVariable("type") type: Int): RestResponse {
-        val productVo = ProductVo()
-        return RestResponse.ok(productVo)
+        val templateIds = templateDao.findByType(type).map { it.id }
+        val products = productDao.findByTemplateIdInAndEnabledOrderBySequence(templateIds, true)
+        val productVoList = products.map {
+            val tpl = it.template
+            val w = tpl.width
+            val h = tpl.height
+            val displaySize = String.format("%1$.0f x %2$.0f mm", w, h)
+            val thumbnailImageUrl = it.imageFiles
+                    .filter { it.type == ProductImageFileType.THUMB.value }
+                    .map { "/assets/product/images/${it.id}.${it.fileType}" }
+                    .firstOrNull()
+            ProductVo(it.id, it.name, it.template.width, it.template.height,displaySize,tpl.minImageCount,it.remark,it.defaultPrice,thumbnailImageUrl)
+        }
+        return RestResponse.ok(productVoList)
     }
 
     /**

@@ -145,7 +145,15 @@ class ApiCouponRoute {
         })
         return if (result.result == 0) {
             val coupon = couponDao.findOne(result.coupon!!.id)
-            RestResponse.ok(coupon)
+
+            RestResponse.ok(CouponVo(coupon.id,
+                    coupon.name,
+                    coupon.code,
+                    coupon.begin,
+                    coupon.expire,
+                    coupon.minExpense,
+                    coupon.discount,
+                    0))
         } else {
             RestResponse(result.result, null, result.description)
         }

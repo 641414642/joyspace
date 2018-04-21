@@ -49,6 +49,8 @@ class ApiUserRoute {
         val session = userLoginSessionDao.findOne(sessionId)
         userDao.findOne(session.userId) ?: return RestResponse.error(ResultCode.INVALID_USER_LOGIN_SESSION)
         val noticeList = mutableListOf<NoticeVo>()
+        noticeList.add(NoticeVo("通知","快来看看这些精美的手工日记吧，所有照片。。。",Date(),""))
+        noticeList.add(NoticeVo("活动消息","情人节，悦印送您优惠券啦，除了送花还可以。。。",Date(),""))
         return RestResponse.ok(noticeList)
     }
 
@@ -69,13 +71,13 @@ class ApiUserRoute {
      */
     @PostMapping(value = "/v2/user/address")
     fun add(@RequestParam("sessionId") sessionId: String,
-            @RequestParam("sessionId") province: String,
-            @RequestParam("sessionId") city: String,
-            @RequestParam("sessionId") area: String,
-            @RequestParam("sessionId") address: String,
-            @RequestParam("sessionId") phoneNum: String,
-            @RequestParam("sessionId") name: String,
-            @RequestParam("sessionId") default: Int?): RestResponse {
+            @RequestParam("province") province: String,
+            @RequestParam("city") city: String,
+            @RequestParam("area") area: String,
+            @RequestParam("address") address: String,
+            @RequestParam("phoneNum") phoneNum: String,
+            @RequestParam("name") name: String,
+            @RequestParam("default") default: Int?): RestResponse {
         val session = userLoginSessionDao.findOne(sessionId)
         val user = userDao.findOne(session.userId) ?: return RestResponse.error(ResultCode.INVALID_USER_LOGIN_SESSION)
         val addr = Address()

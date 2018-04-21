@@ -68,49 +68,8 @@
         "imageRequired": 1,        //需要用户上传的图片张数
         "remark": "",           //产品描述
         "price": 2,             //默认价格(单位分)
+        "displaySize": "12.0f x 44.0f mm"
         "thumbnailImageUrl": "http://localhost:6600/assets/product/images/1.png",    //缩略图url
-        "previewImageUrls": [                                                        //预览图url列表
-            "http://localhost:6600/assets/product/images/2.jpg",
-            "http://localhost:6600/assets/product/images/3.jpg",
-            "http://localhost:6600/assets/product/images/4.jpg",
-            "http://localhost:6600/assets/product/images/5.jpg"
-        ],
-        "sceneList": [
-            {
-                "templateUrl": "http://xxx.xxxxx/xxxx/xxx.svg",     //预览用的模板文件的url (svg?? png??文件)
-                "templateImages": [                                                          //模板中包含的图片列表
-                    {
-                        "name": "照片",                                                      //图片名称， 名称相同的图片用户图片只需要用户上传同一张图
-                        "x": 233.8582763671875,                                              //图片框位置和尺寸(单位毫米)
-                        "y": 150.59054565429688,
-                        "width": 77.9527587890625,
-                        "height": 113.38583374023438,
-                        "angleClip": xxx                                    //角度
-                        "type"：xxx                                         //类型，用户填图、模板贴图、色块
-                        "bgcolor": xxx                                      //背景颜色
-                        "url": "http://localhost:6600/assets/template/preview/1_v5/images/UserImagePlaceHolder.png"
-                    },
-                    {
-                        "name": "照片",
-                        "x": 138.18896484375,
-                        "y": 150.59054565429688,
-                        "width": 77.9527587890625,
-                        "height": 113.38583374023438,
-                        "url": "http://localhost:6600/assets/template/preview/1_v5/images/UserImagePlaceHolder.png"
-                    },
-                    {
-                        "name": "照片",
-                        "x": 42.51968002319336,
-                        "y": 150.59054565429688,
-                        "width": 77.9527587890625,
-                        "height": 113.38583374023438,
-                        "url": "http://localhost:6600/assets/template/preview/1_v5/images/UserImagePlaceHolder.png"
-                    }
-                    ...
-                ]
-            }
-        ...
-        ]
     },
     ...
     ...
@@ -118,6 +77,58 @@
 ]
 
 ----
+
+=== 获取某个产品（规格／模版）详情
+- URL:  /v2/product/detail/{id}
+- Method: GET
+- 参数:
+|==========================================================
+|参数名           |描述
+|id   |产品ID
+|==========================================================
+
+- 返回值:
+----
+{
+    "id": 9528,
+    "version": 1.0,
+    "name": "普通模板照片测试模板",
+    "type": 3,
+    "scenes": [
+        {
+            "id": 1,
+            "name": "",
+            "type": "page",
+            "width": 2160,
+            "height": 1440,
+            "layers": [
+                {
+                    "id": 1,
+                    "type": "background",
+                    "images": [
+                        {
+                            "id": 1,
+                            "type": "sticker",
+                            "x": 0,
+                            "y": 0,
+                            "width": 2160,
+                            "height": 1440,
+                            "angleClip": 0,
+                            "bgcolor": "",
+                            "resourceURL": "http://47.52.238.144:6060/img/background_layer.png"
+                        },
+                        ...
+                    ]
+                },
+                ...
+            ]
+        }
+    ]
+}
+
+----
+
+
 
 === 根据二维码查找自助机
 
@@ -219,11 +230,7 @@
                         "expire": "yyyy-MM-dd HH", //失效日期时间，精确到小时
                         "minExpense": 1000,             //使用优惠券所需要的最小金额（分）
                         "discount": 200,                 //折扣金额（分）
-                        "printStationIdList": [xx,xx,xx,xx],        //可以使用的自助机id列表, 为null表示无限制
-                        "positionIdList": [xx,xx,xx,xx],            //可以使用的店面id列表, 为null表示无限制
-                        "companyIdList": [xx,xx,xx,xx],            //可以使用的投放商id列表, 为null表示无限制
-                        "productIdList": [xx,xx,xx,xx],            //可以使用的产品id列表, 为null表示无限制
-                        "productTypeList": [xx,xx,xx]            //可以使用的产品类型, 为null表示无限制 (产品类型 0: 普通照片, 1: 证件照, 2: 模板拼图)
+                        "isValid": 1              //1:可用；2：不可用
                     },
                     ...
                ]
@@ -257,11 +264,7 @@
                         "expire": "yyyy-MM-dd HH", //失效日期时间，精确到小时
                         "minExpense": 1000,             //使用优惠券所需要的最小金额（分）
                         "discount": 200,                 //折扣金额（分）
-                        "printStationIdList": [xx,xx,xx,xx],        //可以使用的自助机id列表, 为null表示无限制
-                        "positionIdList": [xx,xx,xx,xx],            //可以使用的店面id列表, 为null表示无限制
-                        "companyIdList": [xx,xx,xx,xx],            //可以使用的投放商id列表, 为null表示无限制
-                        "productIdList": [xx,xx,xx,xx],            //可以使用的产品id列表, 为null表示无限制
-                        "productTypeList": [xx,xx,xx]            //可以使用的产品类型, 为null表示无限制 (产品类型 0: 普通照片, 1: 证件照, 2: 模板拼图)
+                        "isValid": 1              //1:可用；2：不可用
                     },
                     ...
                ]
@@ -293,11 +296,6 @@
                     "expire": "yyyy-MM-dd HH", //失效日期时间，精确到小时
                     "minExpense": 1000,             //使用优惠券所需要的最小金额（分）
                     "discount": 200,                 //折扣金额（分）
-                    "printStationIdList": [xx,xx,xx,xx],        //可以使用的自助机id列表, 为null表示无限制
-                    "positionIdList": [xx,xx,xx,xx],            //可以使用的店面id列表, 为null表示无限制
-                    "companyIdList": [xx,xx,xx,xx],            //可以使用的投放商id列表, 为null表示无限制
-                    "productIdList": [xx,xx,xx,xx],            //可以使用的产品id列表, 为null表示无限制
-                    "productTypeList": [xx,xx,xx]            //可以使用的产品类型, 为null表示无限制 (产品类型 0: 普通照片, 1: 证件照, 2: 模板拼图)
                 }
            }
 ----
@@ -444,6 +442,49 @@
     	}
 ----
 
+=== 微信用户登录:
+- URL: /api/user/login
+- Method: POST
+- 参数:
+|==========================================================
+|参数名       |描述
+|code         |小程序调用 wx.login 获得的登录凭证
+|==========================================================
+
+- 返回值:
+----
+    {
+        "errcode": 0,
+		"errmsg": null,
+		"sessionId": "c96aa7ff47c941b881ba068faf7b617c"
+	}
+----
+
+
+=== 微信用户信息注册:
+- URL: /api/user/reg
+- Method: POST
+- RequestBody:
+----
+		{
+		    "sessionId" : "xxxxxxxxxx",
+			"nickName" : "xxxx",
+			"avatarUrl" : "xxxx",
+			"language" : "zh_CN",
+			"gender" : x,
+			"province" : "xxxx",
+			"city" : "xxxx"
+			"country" : "xxxx"
+		}
+----
+
+- 返回值:
+----
+    {
+        "errcode" : 0,
+        "errmsg" : null
+    }
+----
 
 ==== 获取个人中心信息:
 - URL: /v2/user/info
@@ -451,7 +492,7 @@
 - 参数:
 |==========================================================
 |参数名         |描述
-|sessionId      |登录返回的sessionId
+|sessionId      |登录返回的sessionId eg:"966032e245c646b5a3899756473186bc"
 |==========================================================
 
 - 返回:
@@ -520,6 +561,7 @@
 |address        |详细地址
 |phoneNum       |联系人电话
 |name           |联系人姓名
+|default        |默认地址（是：1；不是：0）
 |==========================================================
 
 - 返回:
@@ -550,7 +592,7 @@
                  "addressList": [
                         {
                             "id":321,
-                            "default":true,
+                            "default":1,
                             "province":"",              //省
                             "city":"",                  //市
                             "area":"",                  //区
@@ -562,4 +604,40 @@
                                 ]
             }
     	}
+----
+
+
+
+==== 消息中心列表:
+- URL: /v2/user/notice
+- Method: GET
+- 参数:
+|==========================================================
+|参数名         |描述
+|sessionId      |登录返回的sessionId
+|==========================================================
+
+- 返回:
+
+----
+        {
+            "state": 0,
+            "msg": null,
+            "result": [
+                {
+                    "title": "通知",
+                    "id": 312,
+                    "context": "内容",
+                    "sendTime": xxx,
+                    "imageUrl": "",
+                },
+                {
+                    "title": 通知,
+                    "id": 315,
+                    "context": "内容",
+                    "sendTime": xxx,
+                    "imageUrl": "",
+                }
+            ]
+        }
 ----
