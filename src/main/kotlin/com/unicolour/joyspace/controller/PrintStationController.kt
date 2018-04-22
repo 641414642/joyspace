@@ -210,7 +210,7 @@ class PrintStationController {
                 .toSet()
 
         return printStationService.updatePrintStation(id, printStationName,
-                positionId, (proportion * 10).toInt(), printerType, adSetId, selectedProductIds)
+                positionId, (proportion * 10).toInt(), printerType, adSetId, selectedProductIds, "")
     }
 
     @GetMapping("/printStation/editPassword")
@@ -295,7 +295,7 @@ class PrintStationController {
                     .filter { !request.getParameter("product_${it}").isNullOrBlank() }
                     .map { it.toInt() }
                     .toSet()
-            printStationService.activatePrintStation(code, printStationName, printStationPassword, positionId, selectedProductIds)
+            printStationService.activatePrintStation(null, code, printStationName, printStationPassword, positionId, selectedProductIds, "")
             return CommonRequestResult()
         } catch (e: ProcessException) {
             return CommonRequestResult(e.errcode, e.message)
@@ -454,5 +454,22 @@ class PrintStationController {
 
         logger.info("PrintStation init public key, result = $result")
         return result
+    }
+
+    @PostMapping("/printStation/getHomeActivateInfo")
+    @ResponseBody
+    fun getHomeActivateInfo(
+            @RequestParam("username") userName: String,
+            @RequestParam("password") password: String,
+            @RequestParam("code", required = false, defaultValue = "") code: String,
+            @RequestParam("printStationId", required = false, defaultValue = "0") printStationId: Int
+    ): HomeActivateInfoDTO {
+        return printStationService.getHomeActivateInfo(userName, password, code, printStationId)
+    }
+
+    @PostMapping("/printStation/activateHome")
+    @ResponseBody
+    fun activateHome(@RequestBody input: HomeActivateInput): Int {
+        return printStationService.activateHome(input).value
     }
 }

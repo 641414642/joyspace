@@ -399,7 +399,8 @@ open class PrintStationServiceImpl : PrintStationService {
     }
 
     @Transactional
-    override fun updatePrintStation(id: Int, printStationName: String, positionId: Int, transferProportion:Int, printerType: String, adSetId: Int, selectedProductIds: Set<Int>): Boolean {
+    override fun updatePrintStation(id: Int, printStationName: String, positionId: Int, transferProportion:Int,
+                                    printerType: String, adSetId: Int, selectedProductIds: Set<Int>, uuid: String): Boolean {
         val printStation = printStationDao.findOne(id)
 
         if (printStation != null) {
@@ -411,6 +412,10 @@ open class PrintStationServiceImpl : PrintStationService {
             printStation.addressCity = printStation.position.addressCity
             printStation.addressDistrict = printStation.position.addressDistrict
             printStation.addressStreet = printStation.position.addressStreet
+
+            if (uuid.isNotEmpty()) {
+                printStation.uuid = uuid
+            }
 
             if (managerService.loginManagerHasRole("ROLE_SUPERADMIN")) {
                 printStation.transferProportion = transferProportion
@@ -462,8 +467,9 @@ open class PrintStationServiceImpl : PrintStationService {
     }
 
     @Transactional
-    override fun activatePrintStation(code: String, name: String, password: String, positionId: Int, selectedProductIds: Set<Int>) {
-        val loginManager = managerService.loginManager
+    override fun activatePrintStation(manager: Manager?, code: String, name: String, password: String,
+                                      positionId: Int, selectedProductIds: Set<Int>, uuid: String) {
+        val loginManager = manager ?: managerService.loginManager
         if (loginManager == null) {
             throw ProcessException(1, "")
         }
@@ -493,6 +499,10 @@ open class PrintStationServiceImpl : PrintStationService {
         printStation.addressStreet = printStation.position.addressStreet
         printStation.password = passwordEncoder.encode(password)
         printStation.status = PrintStationStatus.NORMAL.value
+
+        if (uuid.isNotEmpty()) {
+            printStation.uuid = uuid
+        }
 
         printStationDao.save(printStation)
 
@@ -780,6 +790,133 @@ open class PrintStationServiceImpl : PrintStationService {
         }
         else {
             false
+        }
+    }
+
+    override fun getHomeActivateInfo(userName: String, password: String, code: String, printStationId: Int): HomeActivateInfoDTO {
+        val manager = managerService.login(userName, password)
+        if (manager == null) {
+            return HomeActivateInfoDTO(result = ResultCode.MANAGER_NOT_LOG_IN.value)
+        }
+        else {
+            val printerType: String
+            val printStationName: String
+            val positionId: Int
+            val psId: Int
+            val supportedProductIdSet: Set<Int>
+
+            if (printStationId > 0) {
+                val printStation = printStationDao.findOne(printStationId)
+                if (printStation == null) {
+                    return HomeActivateInfoDTO(result = ResultCode.PRINT_STATION_NOT_FOUND.value)
+                }
+                else if (printStation.companyId != manager.companyId) {
+                    return HomeActivateInfoDTO(result = ResultCode.PRINT_STATION_NOT_BELONG_TO_COMPANY.value)
+                }
+
+                printerType = printStation.printerType
+                printStationName = printStation.name
+                positionId = printStation.positionId
+                psId = printStationId
+                supportedProductIdSet = printStationProductDao.findByPrintStationId(printStationId).map { it.productId }.toHashSet()
+            }
+            else {
+                val activationCode = printStationActivationCodeDao.findByCode(code)
+                if (activationCode == null) {
+                    return HomeActivateInfoDTO(result = ResultCode.INVALID_ACTIVATION_CODE.value)
+                }
+                else if (activationCode.used) {
+                    return HomeActivateInfoDTO(result = ResultCode.ACTIVATION_CODE_USED.value)
+                }
+
+                printerType = activationCode.printerType
+                printStationName = ""
+                positionId = 0
+                psId = activationCode.printStationId
+                supportedProductIdSet = emptySet()
+            }
+
+            val products = productDao.findAll()
+                    .sortedBy { it.sequence }
+                    .map {
+                        ProductIDNameAndType(
+                                id = it.id,
+                                type = it.template.type,
+                                name = it.name,
+                                selected = supportedProductIdSet.contains(it.id)
+                        )
+                    }
+            val poisitions = positionDao.findByCompanyId(manager.companyId)
+                    .map {
+                        PositionIDAndName(
+                                id = it.id,
+                                name = it.name,
+                                selected = positionId == it.id
+                        )
+                    }
+
+            return HomeActivateInfoDTO(
+                    result = ResultCode.SUCCESS.value,
+                    positions = poisitions,
+                    products = products,
+                    printerType = printerType,
+                    printStationName = printStationName,
+                    printStationId = psId
+            )
+        }
+    }
+
+    @Transactional
+    override fun activateHome(input: HomeActivateInput): ResultCode {
+        val manager = managerService.login(input.username, input.password)
+        if (manager == null) {
+            return ResultCode.MANAGER_NOT_LOG_IN
+        } else {
+            if (input.printStationId > 0) {
+                val printStation = printStationDao.findOne(input.printStationId)
+                if (printStation == null) {
+                    return ResultCode.PRINT_STATION_NOT_FOUND
+                } else if (printStation.companyId != manager.companyId) {
+                    return ResultCode.PRINT_STATION_NOT_BELONG_TO_COMPANY
+                }
+
+                val updateResult = updatePrintStation(
+                        id = input.printStationId,
+                        printStationName = input.printStationName,
+                        positionId = input.positionId,
+                        printerType = printStation.printerType,
+                        adSetId = printStation.adSetId ?: 0,
+                        transferProportion = printStation.transferProportion,
+                        selectedProductIds = input.productIds.toSet(),
+                        uuid = input.uuid)
+
+                return if (updateResult) {
+                    savePublicKey(input.printStationId, input.publicKey)
+                    ResultCode.SUCCESS
+                } else {
+                    ResultCode.OTHER_ERROR
+                }
+
+            } else {
+                val activationCode = printStationActivationCodeDao.findByCode(input.activateCode)
+                if (activationCode == null) {
+                    return ResultCode.INVALID_ACTIVATION_CODE
+                } else if (activationCode.used) {
+                    return ResultCode.ACTIVATION_CODE_USED
+                }
+
+                activatePrintStation(
+                        manager = manager,
+                        code = input.activateCode,
+                        name = input.printStationName,
+                        password = UUID.randomUUID().toString(),
+                        positionId = input.positionId,
+                        selectedProductIds = input.productIds.toSet(),
+                        uuid = input.uuid)
+
+                savePublicKey(activationCode.printStationId, input.publicKey)
+                return ResultCode.SUCCESS
+            }
         }
     }
 }
