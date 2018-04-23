@@ -32,11 +32,11 @@ class ApiProductRoute {
     @GetMapping(value = "/v2/app/homepage")
     fun showHomePage(): RestResponse {
         val advers = mutableListOf<Advert>()
-        advers.add(Advert("ad_1", "轮播图", "http://47.52.238.144:6060/doc/home_page/home_1.jpg"))
-        advers.add(Advert("ad_2", "轮播图", "http://47.52.238.144:6060/doc/home_page/home_2.jpg"))
-        advers.add(Advert("ad_3", "轮播图", "http://47.52.238.144:6060/doc/home_page/home_3.jpg"))
-        advers.add(Advert("ad_4", "轮播图", "http://47.52.238.144:6060/doc/home_page/home_4.jpg"))
-        advers.add(Advert("ad_5", "轮播图", "http://47.52.238.144:6060/doc/home_page/home_5.jpg"))
+        advers.add(Advert("ad_1", "轮播图", "www.baidu.com","http://47.52.238.144:6600/doc/home_page/home_1.jpg"))
+        advers.add(Advert("ad_2", "轮播图", "www.baidu.com","http://47.52.238.144:6600/doc/home_page/home_2.jpg"))
+        advers.add(Advert("ad_3", "轮播图", "www.baidu.com","http://47.52.238.144:6600/doc/home_page/home_3.jpg"))
+        advers.add(Advert("ad_4", "轮播图", "www.baidu.com","http://47.52.238.144:6600/doc/home_page/home_4.jpg"))
+        advers.add(Advert("ad_5", "轮播图", "www.baidu.com","http://47.52.238.144:6600/doc/home_page/home_5.jpg"))
         val producTypes = mutableListOf<ProductType>()
         producTypes.add(ProductType(0, "普通照片", "首次冲印免费"))
         producTypes.add(ProductType(1, "证件照", "首次冲印免费"))
@@ -100,7 +100,7 @@ class ApiProductRoute {
                             "height": 1440,
                             "angleClip": 0,
                             "bgcolor": "",
-                            "resourceURL": "http://47.52.238.144:6060/img/inch_1_test.png"
+                            "resourceURL": "http://47.52.238.144:6600/img/inch_1_test.png"
                         }
                     ]
                 },
@@ -230,7 +230,7 @@ class ApiProductRoute {
                             "height": 1440,
                             "angleClip": 0,
                             "bgcolor": "",
-                            "resourceURL": "http://47.52.238.144:6060/img/background_layer.png"
+                            "resourceURL": "http://47.52.238.144:6600/img/background_layer.png"
                         }
                     ]
                 },
@@ -264,7 +264,7 @@ class ApiProductRoute {
                             "height": 1440,
                             "angleClip": 0,
                             "bgcolor": "",
-                            "resourceURL": "http://47.52.238.144:6060/img/front_layer.png"
+                            "resourceURL": "http://47.52.238.144:6600/img/front_layer.png"
                         }
                     ]
                 }

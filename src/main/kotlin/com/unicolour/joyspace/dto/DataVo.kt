@@ -7,6 +7,7 @@ data class HomePageVo(var advert: List<Advert>? = null,
 
 data class Advert(var name: String? = null,
                   var describe: String? = null,
+                  var href:String? = null,
                   var contentUrl: String? = null)
 
 data class ProductType(var id: Int? = null,
