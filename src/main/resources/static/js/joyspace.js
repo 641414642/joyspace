@@ -97,7 +97,12 @@ function clearFormGroupErrMsg(ele) {
 }
 
 //显示对话框
-function showModal(event, onloadfunc) {
+function showModal(event, onloadfunc, options) {
+    var largeModal = false;
+    if (options && options.largeModal) {
+        largeModal = true;
+    }
+
     var source = event.target || event.srcElement;
     $('#modalTemplate .modal-dialog').load($(source).data('url'), function() {
         $('#modalTemplate').modal('show');
@@ -105,6 +110,14 @@ function showModal(event, onloadfunc) {
             onloadfunc();
         }
     });
+
+    if (largeModal) {
+        $('#modalTemplate .modal-dialog').addClass(" modal-lg");
+    }
+    else {
+        $('#modalTemplate .modal-dialog').removeClass(" modal-lg");
+    }
+
     return false;
 }
 
