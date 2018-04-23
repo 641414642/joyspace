@@ -6,7 +6,7 @@ import graphql.schema.DataFetcher
 
 interface PrintStationService {
     fun login(printStationId: Int, password: String, version: Int?, uuid: String): PrintStationLoginResult
-    fun loginWithKey(printStationId: Int, sign: String, version: Int?): PrintStationLoginResult
+    fun loginWithKey(printStationId: Int, signStr: String, version: Int?): PrintStationLoginResult
     fun initPublicKey(printStationId: Int, uuid: String, pubKeyStr: String): Int
 
     fun getPriceMap(printStation: PrintStation): Map<Int, Int>

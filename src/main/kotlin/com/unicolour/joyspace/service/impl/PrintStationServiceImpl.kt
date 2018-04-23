@@ -180,7 +180,15 @@ open class PrintStationServiceImpl : PrintStationService {
             pubKeyFile.parentFile.mkdirs()
             pubKeyFile.writeBytes(Base64.getDecoder().decode(pubKeyStr))
 
-            loadPublicKey(printStationId) != null
+            val newPubKey = loadPublicKey(printStationId)
+
+            if (newPubKey != null) {
+                val printStation = printStationDao.findOne(printStationId)
+                printStation.loginSequence = null
+                printStationDao.save(printStation)
+            }
+
+            newPubKey != null
         } catch (e: Exception) {
             e.printStackTrace()
             false
