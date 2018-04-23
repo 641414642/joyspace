@@ -614,7 +614,7 @@ open class PrintOrderServiceImpl : PrintOrderService {
 
     //每天结束前的批量转账
     @Scheduled(cron = "0 55 23 * * *")
-    fun doBatchTransfer() {
+    open fun doBatchTransfer() {
         val companies = companyDao.findAll()
         companies.forEach{ company ->
             wxEntTransferExecutor.submit {
