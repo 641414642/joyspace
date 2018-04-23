@@ -20,4 +20,6 @@ interface PrintOrderDao : CrudRepository<PrintOrder, Int> {
     fun findByCompanyIdOrderByIdDesc(companyId: Int, pageable: Pageable): Page<PrintOrder>
     fun findByOrderNoIgnoreCaseAndCompanyId(orderNo: String, companyId: Int, pageable: Pageable): Page<PrintOrder>
     fun findByCompanyIdAndPayedIsTrueAndTransferedIsFalse(companyId: Int): List<PrintOrder>
+
+    fun findByUpdateTimeGreaterThanEqualAndUpdateTimeBefore(startTime: Calendar, endTime: Calendar): Iterable<PrintOrder>
 }

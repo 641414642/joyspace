@@ -1,11 +1,11 @@
 package com.unicolour.joyspace.service
 
 import com.unicolour.joyspace.dto.*
-import com.unicolour.joyspace.model.AdSet
 import com.unicolour.joyspace.model.PrintOrder
 import com.unicolour.joyspace.model.UserImageFile
 import graphql.schema.DataFetcher
 import org.springframework.web.multipart.MultipartFile
+import java.util.*
 
 interface PrintOrderService {
     val imageFilesDataFetcher: DataFetcher<Array<UserImageFile>>
@@ -30,4 +30,7 @@ interface PrintOrderService {
     fun getPrintOrderDTO(printOrderId: Int): PrintOrderDTO?
 
     fun addReprintOrderTask(printOrderId: Int, printStationId: Int)
+
+    //订单统计
+    fun printOrderStat(startTime: Calendar, endTime: Calendar): PrintOrderStatDTO
 }

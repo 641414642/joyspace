@@ -913,6 +913,35 @@ open class PrintOrderServiceImpl : PrintOrderService {
 
         throw ProcessException(1, "Failed WxEntTransfer for companyId=${record.companyId}, receiverOpenId=${record.receiverOpenId}, amount=${record.amount}")
     }
+
+    override fun printOrderStat(startTime: Calendar, endTime: Calendar): PrintOrderStatDTO {
+        var payedOrderCount = 0
+        var printPageCount = 0
+        var totalAmount = 0
+        var totalDiscount = 0
+
+        val printOrders = printOrderDao.findByUpdateTimeGreaterThanEqualAndUpdateTimeBefore(startTime, endTime)
+        for (printOrder in printOrders) {
+            if (printOrder.payed) {
+                payedOrderCount ++
+                totalAmount += printOrder.totalFee
+                totalDiscount += printOrder.discount
+            }
+
+            if (printOrder.printedOnPrintStation) {
+                printOrder.printOrderItems.forEach {
+                    printPageCount += it.copies
+                }
+            }
+        }
+
+        return PrintOrderStatDTO(
+                payedOrderCount,
+                printPageCount,
+                totalAmount,
+                totalDiscount
+        )
+    }
 }
 
 

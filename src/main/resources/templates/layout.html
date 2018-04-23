@@ -182,7 +182,8 @@
 						<li th:class="${viewContent=='position_list' ? 'active' : ''}"><a href="#" th:href="@{/position/list}"><i class="fa fa-circle-o"></i>店面</a></li>
 						<li th:class="${viewContent=='printStation_list' ? 'active' : ''}"><a href="#" th:href="@{/printStation/list}"><i class="fa fa-circle-o"></i>自助机</a></li>
 						<li sec:authorize="hasRole('ROLE_SUPERADMIN')" th:class="${viewContent=='adSet_list' ? 'active' : ''}"><a href="#" th:href="@{/adSet/list}"><i class="fa fa-circle-o"></i>广告</a></li>
-						<li th:class="${viewContent=='printOrder_list' ? 'active' : ''}"><a href="#" th:href="@{/printOrder/list(autoRefresh=true)}"><i class="fa fa-circle-o"></i>订单</a></li>
+						<li th:class="${viewContent=='printOrder_list' ? 'active' : ''}"><a href="#" th:href="@{/printOrder/list}"><i class="fa fa-circle-o"></i>订单</a></li>
+						<li sec:authorize="hasRole('ROLE_SUPERADMIN')" th:class="${viewContent=='printOrder_stat' ? 'active' : ''}"><a href="#" th:href="@{/printOrder/stat}"><i class="fa fa-circle-o"></i>订单统计</a></li>
 					</ul>
 				</li>
 				<li th:class="${viewCat=='coupon_mgr' ? 'treeview active' : 'treeview'}" class="treeview">
@@ -218,6 +219,7 @@
 		<div th:case="'printStation_allList'" th:include="printStation/allList :: content"></div>
 		<div th:case="'coupon_list'" th:include="coupon/list :: content"></div>
 		<div th:case="'printOrder_list'" th:include="printOrder/list :: content"></div>
+		<div th:case="'printOrder_stat'" th:include="printOrder/stat :: content"></div>
 		<div th:case="'adSet_list'" th:include="adSet/list :: content"></div>
 		<div th:case="'activation_code_list'" th:include="activationCode/list :: content"></div>
 		<div th:case="'company_wx_account'" th:include="company/wxAccount :: content"></div>
