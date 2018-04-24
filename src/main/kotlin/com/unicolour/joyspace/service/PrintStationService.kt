@@ -11,8 +11,8 @@ interface PrintStationService {
 
     fun getPriceMap(printStation: PrintStation): Map<Int, Int>
 
-    fun updatePrintStation(id: Int, printStationName: String, positionId: Int, transferProportion:Int,
-                           printerType:String, adSetId: Int, selectedProductIds: Set<Int>, uuid: String): Boolean
+    fun updatePrintStation(id: Int, printStationName: String, positionId: Int, transferProportion: Int,
+                           printerType: String, adSetId: Int, selectedProductIds: Set<Int>): Boolean
 
     fun updatePrintStationPassword(id: Int, printStationPassword: String): Boolean
     fun updatePrintStationStatus(printStationSessionId: String, status: PrintStationStatus, additionalInfo: String): Boolean
@@ -42,6 +42,6 @@ interface PrintStationService {
     fun addUploadLogFileTask(printStationId: Int, filterStr: String): Boolean
     fun orderReprintTaskExists(printStationId: Int, orderId: Int): Boolean
     fun getPrintStationUpdateAndAdSet(sessionId: String, currentVersion: Int, currentAdSetId: Int, currentAdSetTimeStr: String): UpdateAndAdSetDTO
-    fun getHomeActivateInfo(userName: String, password: String, code: String, printStationId: Int): HomeActivateInfoDTO
-    fun activateHome(input: HomeActivateInput): ResultCode
+    fun getHomeInitInfo(userName: String, password: String, printStationId: Int): HomeInitInfoDTO
+    fun initHome(input: HomeInitInput): ResultCode
 }

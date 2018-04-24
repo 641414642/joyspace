@@ -210,7 +210,7 @@ class PrintStationController {
                 .toSet()
 
         return printStationService.updatePrintStation(id, printStationName,
-                positionId, (proportion * 10).toInt(), printerType, adSetId, selectedProductIds, "")
+                positionId, (proportion * 10).toInt(), printerType, adSetId, selectedProductIds)
     }
 
     @GetMapping("/printStation/editPassword")
@@ -456,20 +456,19 @@ class PrintStationController {
         return result
     }
 
-    @PostMapping("/printStation/getHomeActivateInfo")
+    @PostMapping("/printStation/getHomeInitInfo")
     @ResponseBody
-    fun getHomeActivateInfo(
+    fun getHomeInitInfo(
             @RequestParam("username") userName: String,
             @RequestParam("password") password: String,
-            @RequestParam("code", required = false, defaultValue = "") code: String,
             @RequestParam("printStationId", required = false, defaultValue = "0") printStationId: Int
-    ): HomeActivateInfoDTO {
-        return printStationService.getHomeActivateInfo(userName, password, code, printStationId)
+    ): HomeInitInfoDTO {
+        return printStationService.getHomeInitInfo(userName, password, printStationId)
     }
 
-    @PostMapping("/printStation/activateHome")
+    @PostMapping("/printStation/initHome")
     @ResponseBody
-    fun activateHome(@RequestBody input: HomeActivateInput): Int {
-        return printStationService.activateHome(input).value
+    fun initHome(@RequestBody input: HomeInitInput): Int {
+        return printStationService.initHome(input).value
     }
 }
