@@ -103,3 +103,7 @@ data class Img(var id: Int? = null,
                var angleClip: Double? = null,
                var bgcolor: String? = null,
                var resourceURL: String? = null)
+
+data class OrderStatusVo(var orderItems: List<OrderItemS>? = null)
+data class OrderItemS(var images: List<ImageS>? = null)
+data class ImageS(var status:Int? = null)

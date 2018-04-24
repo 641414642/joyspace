@@ -61,13 +61,27 @@ class ApiOrderRoute {
 
 
     //查看订单图片状态
-
+    @GetMapping("/api/order/status")
+    fun printOrderStatus(@RequestParam("sessionId") sessionId: String,
+                         @RequestParam("printOrderId") printOrderId: Int): RestResponse {
+        val session = userLoginSessionDao.findOne(sessionId)
+        userDao.findOne(session.userId) ?: return RestResponse.error(ResultCode.INVALID_USER_LOGIN_SESSION)
+        val printOrder = printOrderDao.findOne(printOrderId)
+        if (printOrder != null && printOrder.userId == session.userId) {
+            val orderItemVoList = printOrder.printOrderItems.map {
+                OrderItemS(listOf(ImageS(it.status)))
+            }
+            return RestResponse.ok(OrderStatusVo(orderItemVoList))
+        } else {
+            return RestResponse(1, null, "不是此用户的订单")
+        }
+    }
 
 
 
 
     //上传订单图片
-    @RequestMapping("/api/order/image", method = arrayOf(RequestMethod.POST))
+    @PostMapping("/api/order/image")
     fun uploadOrderItemImage(request: HttpServletRequest,
                              @RequestParam("sessionId") sessionId: String,
                              @RequestParam("orderItemId") orderItemId: Int,
