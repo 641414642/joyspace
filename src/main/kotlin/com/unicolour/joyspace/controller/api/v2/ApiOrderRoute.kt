@@ -3,16 +3,16 @@ package com.unicolour.joyspace.controller.api.v2
 import com.unicolour.joyspace.dao.PrintOrderDao
 import com.unicolour.joyspace.dao.UserDao
 import com.unicolour.joyspace.dao.UserLoginSessionDao
-import com.unicolour.joyspace.dto.OrderVo
-import com.unicolour.joyspace.dto.ResultCode
+import com.unicolour.joyspace.dto.*
 import com.unicolour.joyspace.dto.common.RestResponse
+import com.unicolour.joyspace.exception.ProcessException
 import com.unicolour.joyspace.service.PrintOrderService
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestParam
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.http.ResponseEntity
+import org.springframework.web.bind.annotation.*
+import org.springframework.web.multipart.MultipartFile
+import javax.servlet.http.HttpServletRequest
 
 
 @RestController
@@ -31,9 +31,20 @@ class ApiOrderRoute {
      * 创建订单
      */
     @PostMapping(value = "/v2/order/create")
-    fun createOrder(): RestResponse {
-        val order = OrderVo()
-        return RestResponse.ok(order)
+    fun createOrder(@RequestBody orderInput: OrderInput): RestResponse {
+        try {
+            val order = printOrderService.createOrder(orderInput)
+            val params = printOrderService.startPayment(order.id)
+            //val params: WxPayParams? = null
+            val orderItems = order.printOrderItems.map { OrderItemRet(it.id, it.productId) }
+            return RestResponse.ok(CreateOrderRequestResult(order.id, order.orderNo, params, orderItems, order.totalFee, order.discount))
+        } catch(e: ProcessException) {
+            e.printStackTrace()
+            return RestResponse(e.errcode,null,e.message)
+        }  catch (ex: Exception) {
+            ex.printStackTrace()
+            return RestResponse(1,null,ex.message)
+        }
     }
 
 
@@ -52,7 +63,22 @@ class ApiOrderRoute {
     //查看订单图片状态
 
 
+
+
+
     //上传订单图片
+    @RequestMapping("/api/order/image", method = arrayOf(RequestMethod.POST))
+    fun uploadOrderItemImage(request: HttpServletRequest,
+                             @RequestParam("sessionId") sessionId: String,
+                             @RequestParam("orderItemId") orderItemId: Int,
+                             @RequestParam("name") name: String,
+                             @RequestParam("image") imgFile: MultipartFile?) : ResponseEntity<UploadOrderImageResult> {
+
+        val allUploaded = printOrderService.uploadOrderImage(sessionId, orderItemId, imgFile)
+        return ResponseEntity.ok(UploadOrderImageResult(allUploaded))
+    }
+
+
 
 
     /**

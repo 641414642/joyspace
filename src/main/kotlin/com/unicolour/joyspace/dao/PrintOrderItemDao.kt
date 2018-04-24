@@ -5,4 +5,5 @@ import org.springframework.data.repository.CrudRepository
 
 interface PrintOrderItemDao : CrudRepository<PrintOrderItem, Int> {
     fun findByPrintOrderId(printOrderId: Int): List<PrintOrderItem>
+    fun countByPrintOrderIdAndUserImageFileIdIsNull(printOrderId: Int): Long
 }

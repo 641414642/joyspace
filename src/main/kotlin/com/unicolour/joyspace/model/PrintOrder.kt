@@ -122,4 +122,17 @@ class PrintOrderItem {
 
     @OneToMany(mappedBy = "orderItemId")
     lateinit var orderImages: List<PrintOrderImage>
+
+    //region 用户图片
+    @Column(name = "user_image_file_id", insertable = false, updatable = false)
+    var userImageFileId: Int? = null
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_image_file_id")
+    var userImageFile: UserImageFile? = null
+    //endregion
+
+    @Column
+    @NotNull
+    var status: Int = PrintOrderImageStatus.CREATED.value
 }

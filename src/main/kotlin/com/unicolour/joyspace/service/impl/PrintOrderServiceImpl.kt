@@ -197,43 +197,43 @@ open class PrintOrderServiceImpl : PrintOrderService {
 
             orderItems.add(newOrderItem)
 
-            val tplVerSplit = orderItemInput.productVersion.split('.')
-            val tplId = tplVerSplit[0].toInt()
-            val tplVer = tplVerSplit[1].toInt()
+//            val tplVerSplit = orderItemInput.productVersion.split('.')
+//            val tplId = tplVerSplit[0].toInt()
+//            val tplVer = tplVerSplit[1].toInt()
 
-            val tplImages = templateImageInfoDao.findByTemplateIdAndTemplateVersion(tplId, tplVer)
-            for (tplImg in tplImages.filter { it.userImage }.distinctBy { it.name }) {
-                var userImgId = 0
-                var processParams: String? = null
-                val orderItemImages = orderItemInput.images
-                if (orderItemImages != null) {
-                    val orderItemImg = orderItemImages.find { it.name == tplImg.name }
-                    if (orderItemImg != null) {
-                        userImgId = orderItemImg.imageId
-
-                        val userImgFile = userImageFileDao.findOne(userImgId)
-                        if (userImgFile != null) {
-                            if (userImgFile.userId != session.userId) {
-                                throw ProcessException(3, "图片不属于指定用户")
-                            }
-                        }
-
-                        processParams = objectMapper.writeValueAsString(ImageProcessParams(orderItemImg))
-                    }
-                }
-
-                val orderImg = PrintOrderImage()
-                orderImg.orderId = newOrder.id
-                orderImg.orderItemId = newOrderItem.id
-                orderImg.name = tplImg.name
-                orderImg.userImageFile = if (userImgId == 0) null else userImageFileDao.findOne(userImgId)
-                orderImg.processParams = processParams
-                orderImg.status = PrintOrderImageStatus.CREATED.value
-
-                printOrderImageDao.save(orderImg)
-
-                orderImages.add(orderImg)
-            }
+//            val tplImages = templateImageInfoDao.findByTemplateIdAndTemplateVersion(tplId, tplVer)
+//            for (tplImg in tplImages.filter { it.userImage }.distinctBy { it.name }) {
+//                var userImgId = 0
+//                var processParams: String? = null
+//                val orderItemImages = orderItemInput.images
+//                if (orderItemImages != null) {
+//                    val orderItemImg = orderItemImages.find { it.name == tplImg.name }
+//                    if (orderItemImg != null) {
+//                        userImgId = orderItemImg.imageId
+//
+//                        val userImgFile = userImageFileDao.findOne(userImgId)
+//                        if (userImgFile != null) {
+//                            if (userImgFile.userId != session.userId) {
+//                                throw ProcessException(3, "图片不属于指定用户")
+//                            }
+//                        }
+//
+//                        processParams = objectMapper.writeValueAsString(ImageProcessParams(orderItemImg))
+//                    }
+//                }
+//
+//                val orderImg = PrintOrderImage()
+//                orderImg.orderId = newOrder.id
+//                orderImg.orderItemId = newOrderItem.id
+//                orderImg.name = tplImg.name
+//                orderImg.userImageFile = if (userImgId == 0) null else userImageFileDao.findOne(userImgId)
+//                orderImg.processParams = processParams
+//                orderImg.status = PrintOrderImageStatus.CREATED.value
+//
+//                printOrderImageDao.save(orderImg)
+//
+//                orderImages.add(orderImg)
+//            }
         }
 
         return newOrder
@@ -261,6 +261,7 @@ open class PrintOrderServiceImpl : PrintOrderService {
             }
         }
 
+    @Deprecated("上传改为单张")
     @Transactional
     override fun uploadOrderItemImage(sessionId: String, orderItemId: Int, name:String, imageProcessParam: ImageProcessParams, imgFile: MultipartFile?): Boolean {
         val imgInfo = imageService.uploadImage(sessionId, imgFile)
@@ -283,11 +284,32 @@ open class PrintOrderServiceImpl : PrintOrderService {
             //XXX
         }
     }
+    @Transactional
+    override fun uploadOrderImage(sessionId: String, orderItemId: Int, imgFile: MultipartFile?): Boolean {
+        val imgInfo = imageService.uploadImage(sessionId, imgFile)
+        if (imgInfo.errcode == 0) {
+            val orderImg = printOrderItemDao.findOne(orderItemId)
+            if (orderImg == null) {
+                throw ProcessException(2, "没有此item图片")
+            }
+            else {
+                orderImg.userImageFile = userImageFileDao.findOne(imgInfo.imageId)
+                orderImg.status = PrintOrderImageStatus.UPLOADED.value
+
+                printOrderItemDao.save(orderImg)
+                return checkOrderImageUploaded(orderImg.printOrderId)
+            }
+        }
+        else {
+            throw ProcessException(1, "上传图片失败")
+            //XXX
+        }
+    }
 
     //检查是否所有订单图片都已上传，如果都上传了返回true并修改订单状态
     @Synchronized
     private fun checkOrderImageUploaded(orderId: Int) : Boolean {
-        val missingImageCount = printOrderImageDao.countByOrderIdAndUserImageFileIdIsNull(orderId)  //userImageFileId is null 表示此订单图片还没有上传
+        val missingImageCount = printOrderItemDao.countByPrintOrderIdAndUserImageFileIdIsNull(orderId)  //userImageFileId is null 表示此订单图片还没有上传
         if (missingImageCount == 0L) {
             val order = printOrderDao.findOne(orderId)
             order.imageFileUploaded = true
