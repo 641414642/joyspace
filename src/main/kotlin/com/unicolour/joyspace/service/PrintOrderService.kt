@@ -22,7 +22,7 @@ interface PrintOrderService {
     fun processWxPayNotify(requestBodyStr: String): String?
 
     //所有图片都上传完成后返回true
-    fun uploadOrderItemImage(sessionId: String, orderItemId: Int, name:String, imageProcessParam: ImageProcessParams, imgFile: MultipartFile?): Boolean
+    fun uploadOrderItemImage(sessionId: String, orderItemId: Int, name:String, imageProcessParam: ImageProcessParams?, imgFile: MultipartFile?): Boolean
 
     //计算订单价格
     fun calculateOrderFee(orderInput: OrderInput): Pair<Int, Int>

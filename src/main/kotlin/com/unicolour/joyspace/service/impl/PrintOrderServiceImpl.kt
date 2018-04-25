@@ -266,7 +266,7 @@ open class PrintOrderServiceImpl : PrintOrderService {
         }
 
     @Transactional
-    override fun uploadOrderItemImage(sessionId: String, orderItemId: Int, name:String, imageProcessParam: ImageProcessParams, imgFile: MultipartFile?): Boolean {
+    override fun uploadOrderItemImage(sessionId: String, orderItemId: Int, name:String, imageProcessParam: ImageProcessParams?, imgFile: MultipartFile?): Boolean {
         val imgInfo = imageService.uploadImage(sessionId, imgFile)
         if (imgInfo.errcode == 0) {
             val orderImg = printOrderImageDao.findByOrderItemIdAndName(orderItemId, name)
@@ -275,7 +275,7 @@ open class PrintOrderServiceImpl : PrintOrderService {
             }
             else {
                 orderImg.userImageFile = userImageFileDao.findOne(imgInfo.imageId)
-                orderImg.processParams = objectMapper.writeValueAsString(imageProcessParam)
+                orderImg.processParams = if (imageProcessParam == null) "" else objectMapper.writeValueAsString(imageProcessParam)
                 orderImg.status = PrintOrderImageStatus.UPLOADED.value
 
                 printOrderImageDao.save(orderImg)

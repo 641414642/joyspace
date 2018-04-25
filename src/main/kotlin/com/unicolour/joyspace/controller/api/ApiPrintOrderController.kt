@@ -7,12 +7,9 @@ import com.unicolour.joyspace.service.PrintOrderService
 import graphql.GraphQL
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.multipart.MultipartFile
-import java.io.InputStreamReader
-import java.nio.charset.StandardCharsets
 import javax.servlet.http.HttpServletRequest
 
 
@@ -69,25 +66,31 @@ class ApiPrintOrderController {
                     @RequestParam("sessionId") sessionId: String,
                     @RequestParam("orderItemId") orderItemId: Int,
                     @RequestParam("name") name: String,
-                    @RequestParam("initialRotate") initialRotate: Int,
-                    @RequestParam("scale") scale: Double,
-                    @RequestParam("rotate") rotate: Double,
-                    @RequestParam("horTranslate") horTranslate: String,
-                    @RequestParam("verTranslate") verTranslate: String,
-                    @RequestParam("brightness") brightness: Double,
-                    @RequestParam("saturate") saturate: Double,
-                    @RequestParam("effect") effect: String,
+                    @RequestParam("printReady", required = false, defaultValue = "false") printReady: Boolean,   //是否是可以直接打印的图片
+                    @RequestParam("initialRotate", required = false, defaultValue = "0") initialRotate: Int,
+                    @RequestParam("scale", required = false, defaultValue = "0") scale: Double,
+                    @RequestParam("rotate", required = false, defaultValue = "0") rotate: Double,
+                    @RequestParam("horTranslate", required = false, defaultValue = "0") horTranslate: String,
+                    @RequestParam("verTranslate", required = false, defaultValue = "0") verTranslate: String,
+                    @RequestParam("brightness", required = false, defaultValue = "1") brightness: Double,
+                    @RequestParam("saturate", required = false, defaultValue = "1") saturate: Double,
+                    @RequestParam("effect", required = false, defaultValue = "none") effect: String,
                     @RequestParam("image") imgFile: MultipartFile?) : ResponseEntity<UploadOrderImageResult> {
-        val imageProcessParam = ImageProcessParams(
-                initialRotate,
-                scale,
-                rotate,
-                horTranslate,
-                verTranslate,
-                brightness,
-                saturate,
-                effect
-        )
+        val imageProcessParam =
+                if (printReady) {
+                    null
+                } else {
+                    ImageProcessParams(
+                            initialRotate,
+                            scale,
+                            rotate,
+                            horTranslate,
+                            verTranslate,
+                            brightness,
+                            saturate,
+                            effect
+                    )
+                }
 
         val allUploaded = printOrderService.uploadOrderItemImage(sessionId, orderItemId, name, imageProcessParam, imgFile)
         return ResponseEntity.ok(UploadOrderImageResult(allUploaded))
