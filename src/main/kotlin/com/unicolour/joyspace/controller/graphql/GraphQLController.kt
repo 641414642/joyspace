@@ -43,6 +43,12 @@ class GraphQLController {
         }
 
         val context = HashMap<String, Any>()
+
+        //getNewAdSet(sessionId:"$sessionId",currentAdSetId:$curAdSetId,
+        if (query?.contains("getNewAdSet") == true) {
+            context["printStationLoginSessionId"] = query.substringAfter("sessionId:\"").substringBefore('"')
+        }
+
         val result = graphQL.execute(query, operationName, context, arguments)
         return result
     }

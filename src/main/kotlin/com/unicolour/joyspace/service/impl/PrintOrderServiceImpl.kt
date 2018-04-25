@@ -29,6 +29,8 @@ import java.security.MessageDigest
 import java.security.SecureRandom
 import java.text.SimpleDateFormat
 import java.util.*
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
 import javax.annotation.PostConstruct
 import javax.transaction.Transactional
 import javax.xml.bind.JAXBContext
@@ -43,6 +45,8 @@ open class PrintOrderServiceImpl : PrintOrderService {
     companion object {
         val logger = LoggerFactory.getLogger(PrintOrderServiceImpl::class.java)
     }
+
+    val wxEntTransferExecutor: ExecutorService = Executors.newFixedThreadPool(1)
 
     @Value("\${com.unicolour.joyspace.baseUrl}")
     lateinit var baseUrl: String
@@ -263,7 +267,7 @@ open class PrintOrderServiceImpl : PrintOrderService {
 
     @Deprecated("上传改为单张")
     @Transactional
-    override fun uploadOrderItemImage(sessionId: String, orderItemId: Int, name:String, imageProcessParam: ImageProcessParams, imgFile: MultipartFile?): Boolean {
+    override fun uploadOrderItemImage(sessionId: String, orderItemId: Int, name:String, imageProcessParam: ImageProcessParams?, imgFile: MultipartFile?): Boolean {
         val imgInfo = imageService.uploadImage(sessionId, imgFile)
         if (imgInfo.errcode == 0) {
             val orderImg = printOrderImageDao.findByOrderItemIdAndName(orderItemId, name)
@@ -272,7 +276,7 @@ open class PrintOrderServiceImpl : PrintOrderService {
             }
             else {
                 orderImg.userImageFile = userImageFileDao.findOne(imgInfo.imageId)
-                orderImg.processParams = objectMapper.writeValueAsString(imageProcessParam)
+                orderImg.processParams = if (imageProcessParam == null) "" else objectMapper.writeValueAsString(imageProcessParam)
                 orderImg.status = PrintOrderImageStatus.UPLOADED.value
 
                 printOrderImageDao.save(orderImg)
@@ -639,15 +643,21 @@ open class PrintOrderServiceImpl : PrintOrderService {
 
     //每天结束前的批量转账
     @Scheduled(cron = "0 55 23 * * *")
-    fun doBatchTransfer() {
+    open fun doBatchTransfer() {
         val companies = companyDao.findAll()
         companies.forEach{ company ->
-            val notTransferedOrders = printOrderDao.findByCompanyIdAndPayedIsTrueAndTransferedIsFalse(company.id)
-            val ordersAmountAndFee = calcOrdersAmountAndTransferFee(notTransferedOrders)
+            wxEntTransferExecutor.submit {
+                try {
+                    val notTransferedOrders = printOrderDao.findByCompanyIdAndPayedIsTrueAndTransferedIsFalse(company.id)
+                    val ordersAmountAndFee = calcOrdersAmountAndTransferFee(notTransferedOrders)
 
-            if (ordersAmountAndFee.totalTransferAmount > 100) {
-                startWxEntTransfer(notTransferedOrders, ordersAmountAndFee)
-                Thread.sleep(5000)
+                    if (ordersAmountAndFee.totalTransferAmount > 100) {
+                        startWxEntTransfer(notTransferedOrders, ordersAmountAndFee)
+                        Thread.sleep(5000)
+                    }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
             }
         }
     }
@@ -812,7 +822,16 @@ open class PrintOrderServiceImpl : PrintOrderService {
                 printOrder.updateTime = Calendar.getInstance()
                 printOrderDao.save(printOrder)
 
-                checkStartWxEntTransfer(printOrder)
+                //转账
+                wxEntTransferExecutor.submit {
+                    transactionTemplate.execute {
+                        try {
+                            checkStartWxEntTransfer(printOrder)
+                        } catch (e: Exception) {
+                            e.printStackTrace()
+                        }
+                    }
+                }
                 return null
             }
         }
@@ -922,6 +941,35 @@ open class PrintOrderServiceImpl : PrintOrderService {
         }
 
         throw ProcessException(1, "Failed WxEntTransfer for companyId=${record.companyId}, receiverOpenId=${record.receiverOpenId}, amount=${record.amount}")
+    }
+
+    override fun printOrderStat(startTime: Calendar, endTime: Calendar): PrintOrderStatDTO {
+        var payedOrderCount = 0
+        var printPageCount = 0
+        var totalAmount = 0
+        var totalDiscount = 0
+
+        val printOrders = printOrderDao.findByUpdateTimeGreaterThanEqualAndUpdateTimeBefore(startTime, endTime)
+        for (printOrder in printOrders) {
+            if (printOrder.payed) {
+                payedOrderCount ++
+                totalAmount += printOrder.totalFee
+                totalDiscount += printOrder.discount
+            }
+
+            if (printOrder.printedOnPrintStation) {
+                printOrder.printOrderItems.forEach {
+                    printPageCount += it.copies
+                }
+            }
+        }
+
+        return PrintOrderStatDTO(
+                payedOrderCount,
+                printPageCount,
+                totalAmount,
+                totalDiscount
+        )
     }
 }
 

@@ -48,3 +48,9 @@ alter table ad_set alter column public_resource set not null;
 alter table wx_ent_transfer_record_item add column charge integer;
 update wx_ent_transfer_record_item set charge=0;
 alter table wx_ent_transfer_record_item alter column charge set not null;
+
+alter table print_station_login_session drop column version;
+
+insert into printer_type (name,resolution) values ('CY', 300);
+insert into printer_type (name,resolution) values ('EPSON SL-D700', 360);
+insert into printer_type (name,resolution) values ('Shinko CHC-S2145', 300);

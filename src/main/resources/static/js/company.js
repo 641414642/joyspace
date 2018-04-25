@@ -101,6 +101,9 @@ function startAddCompanyWxAccount(event) {
         $('#modalTemplate').on('hidden.bs.modal', function () {
             window.location.reload();
         });
+    },
+    {
+        "largeModal" : true
     });
 }
 

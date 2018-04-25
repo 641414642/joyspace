@@ -51,7 +51,7 @@
 						<th>店面</th>
 						<th>分账比例</th>
 						<th>打印机型号</th>
-						<th>状态</th>
+						<th>打印机状态</th>
 						<th>在线状态</th>
 						<th>软件版本</th>
 						<th>广告</th>
@@ -67,7 +67,7 @@
 						<td>
 							<th:block th:switch="${ps.printStation.status}">
 								<span th:case="0" class="label label-success">正常</span>
-								<span th:case="1" class="label label-default">离线</span>
+								<span th:case="1" class="label label-default">打印机脱机</span>
 								<span th:case="2" class="label label-warning">耗材用完</span>
 							</th:block>
 						</td>
@@ -75,7 +75,7 @@
 							<span th:if="${ps.online}" class="label label-success">在线</span>
 							<span th:unless="${ps.online}" class="label label-default">离线</span>
 						</td>
-						<td th:text="${ps.version}"></td>
+						<td th:text="${ps.printStation.lastLoginVersion}"></td>
 						<td th:text="${ps.printStation.adSet?.name}"></td>
 						<td>
 							<a href="#" style="margin-right:5px">

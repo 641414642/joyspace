@@ -1,6 +1,6 @@
 package com.unicolour.joyspace.dto
 
-class PrintStationLoginResult(
+data class PrintStationLoginResult(
         //结果代码
         //0: 成功
         //1: 没有找到id对应的自助机
@@ -11,5 +11,8 @@ class PrintStationLoginResult(
         var sessionId: String? = null,
 
         //打印机型号
-        var printerType: String = ""
+        var printerType: String = "",
+
+        //打印分辨率
+        var resolution: Int = 0
 )

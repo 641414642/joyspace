@@ -18,6 +18,7 @@ import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.servlet.ModelAndView
+import java.util.*
 
 @Controller
 class PrintOrderController {
@@ -92,7 +93,7 @@ class PrintOrderController {
             val user = idUserMap[it.userId]!!
             var userName = user.nickName ?: user.fullName ?: ""
             if (userName != "") {
-                userName = " / " + userName
+                userName = " / $userName"
             }
             var tri: WxEntTransferRecordItem? = null
             var tr: WxEntTransferRecord? = null
@@ -182,5 +183,52 @@ class PrintOrderController {
         } catch (e: ProcessException) {
             return CommonRequestResult(e.errcode, e.message)
         }
+    }
+
+    private fun toStartOfTheDay(cal: Calendar) {
+        cal.set(Calendar.HOUR_OF_DAY, 0)
+        cal.set(Calendar.MINUTE, 0)
+        cal.set(Calendar.SECOND, 0)
+        cal.set(Calendar.MILLISECOND, 0)
+    }
+
+    @GetMapping("/printOrder/stat")
+    fun printOrderStat(modelAndView: ModelAndView): ModelAndView {
+        val startOfToday = Calendar.getInstance().apply { toStartOfTheDay(this) }
+        val startOfTomorrow = Calendar.getInstance().apply { add(Calendar.DAY_OF_MONTH, 1); toStartOfTheDay(this) }
+        val startOfTwoDaysAgo = Calendar.getInstance().apply { add(Calendar.DAY_OF_MONTH, -2); toStartOfTheDay(this) }
+
+        val startOfThisMonth = Calendar.getInstance().apply {
+            set(Calendar.DAY_OF_MONTH, 1)
+            toStartOfTheDay(this)
+        }
+
+        val startOfNextMonth = Calendar.getInstance().apply {
+            set(Calendar.DAY_OF_MONTH, 1)
+            toStartOfTheDay(this)
+            add(Calendar.MONTH, 1)
+        }
+
+        val todayStat = printOrderService.printOrderStat(startOfToday, startOfTomorrow)
+        val lastTwoDaysStat = printOrderService.printOrderStat(startOfTwoDaysAgo, startOfToday)
+        val monthStat = printOrderService.printOrderStat(startOfThisMonth, startOfNextMonth)
+
+        modelAndView.model["orderCount_today"] = todayStat.payedOrderCount
+        modelAndView.model["printPageCount_today"] = todayStat.printPageCount
+        modelAndView.model["income_today"] = todayStat.totalAmount - todayStat.totalDiscount
+
+        modelAndView.model["orderCount_lastThreeDays"] = todayStat.payedOrderCount + lastTwoDaysStat.payedOrderCount
+        modelAndView.model["printPageCount_lastThreeDays"] = todayStat.printPageCount + lastTwoDaysStat.printPageCount
+        modelAndView.model["income_lastThreeDays"] = todayStat.totalAmount - todayStat.totalDiscount + lastTwoDaysStat.totalAmount - lastTwoDaysStat.totalDiscount
+
+        modelAndView.model["orderCount_month"] = monthStat.payedOrderCount
+        modelAndView.model["printPageCount_month"] = monthStat.printPageCount
+        modelAndView.model["income_month"] = monthStat.totalAmount - monthStat.totalDiscount
+
+        modelAndView.model["viewCat"] = "business_mgr"
+        modelAndView.model["viewContent"] = "printOrder_stat"
+        modelAndView.viewName = "layout"
+
+        return modelAndView
     }
 }

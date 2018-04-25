@@ -24,4 +24,6 @@ interface PrintOrderDao : CrudRepository<PrintOrder, Int> {
     fun countByUserIdAndPayedIsFalse(userId: Int): Long
     fun countByUserIdAndPayedIsTrueAndPrintedOnPrintStationIsFalse(userId: Int): Long
     fun countByUserIdAndPrintedOnPrintStationIsTrue(userId: Int): Long
+
+    fun findByUpdateTimeGreaterThanEqualAndUpdateTimeBefore(startTime: Calendar, endTime: Calendar): Iterable<PrintOrder>
 }

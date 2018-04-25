@@ -2,10 +2,7 @@ package com.unicolour.joyspace.controller
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.unicolour.joyspace.dao.*
-import com.unicolour.joyspace.dto.CommonRequestResult
-import com.unicolour.joyspace.dto.PrintStationTaskDTO
-import com.unicolour.joyspace.dto.ProductItem
-import com.unicolour.joyspace.dto.ResultCode
+import com.unicolour.joyspace.dto.*
 import com.unicolour.joyspace.exception.ProcessException
 import com.unicolour.joyspace.model.PrintStation
 import com.unicolour.joyspace.model.PrintStationStatus
@@ -15,6 +12,7 @@ import com.unicolour.joyspace.service.ManagerService
 import com.unicolour.joyspace.service.PrintOrderService
 import com.unicolour.joyspace.service.PrintStationService
 import com.unicolour.joyspace.util.Pager
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
@@ -28,6 +26,9 @@ import kotlin.collections.ArrayList
 
 @Controller
 class PrintStationController {
+    companion object {
+        val logger = LoggerFactory.getLogger(PrintStationController::class.java)
+    }
 
     @Autowired
     lateinit var printStationDao: PrintStationDao
@@ -60,6 +61,9 @@ class PrintStationController {
     lateinit var printStationLoginSessionDao: PrintStationLoginSessionDao
 
     @Autowired
+    lateinit var printerTypeDao: PrinterTypeDao
+
+    @Autowired
     lateinit var objectMapper: ObjectMapper
 
     @RequestMapping("/printStation/list")
@@ -85,7 +89,7 @@ class PrintStationController {
         val pager = Pager(printStations.totalPages, 7, pageno - 1)
         modelAndView.model["pager"] = pager
 
-        class PrintStationInfo(val printStation: PrintStation, val online: Boolean, val version: String)
+        class PrintStationInfo(val printStation: PrintStation, val online: Boolean)
 
         val time = Calendar.getInstance()
         time.add(Calendar.SECOND, 3600 - 30)
@@ -94,14 +98,12 @@ class PrintStationController {
         modelAndView.model["printStations"] = printStations.content.map {
             val session = printStationLoginSessionDao.findByPrintStationId(it.id)
             var online = false
-            var version = ""
 
             if (session != null && session.expireTime.timeInMillis > time.timeInMillis) {    //自助机30秒之内访问过后台
                 online = true
-                version = if (session.version <= 0) "" else session.version.toString()
             }
 
-            PrintStationInfo(it, online, version)
+            PrintStationInfo(it, online)
         }
 
         modelAndView.model["inputPositionId"] = inputPositionId
@@ -128,7 +130,7 @@ class PrintStationController {
         val pager = Pager(printStations.totalPages, 7, pageno - 1)
         modelAndView.model["pager"] = pager
 
-        class PrintStationInfo(val printStation: PrintStation, val online: Boolean, val version: String)
+        class PrintStationInfo(val printStation: PrintStation, val online: Boolean)
 
         val time = Calendar.getInstance()
         time.add(Calendar.SECOND, 3600 - 30)
@@ -137,14 +139,12 @@ class PrintStationController {
         modelAndView.model["printStations"] = printStations.content.map {
             val session = printStationLoginSessionDao.findByPrintStationId(it.id)
             var online = false
-            var version = ""
 
             if (session != null && session.expireTime.timeInMillis > time.timeInMillis) {    //自助机30秒之内访问过后台
                 online = true
-                version = if (session.version <= 0) "" else session.version.toString()
             }
 
-            PrintStationInfo(it, online, version)
+            PrintStationInfo(it, online)
         }
 
         modelAndView.model["inputCompanyId"] = inputCompanyId
@@ -183,6 +183,8 @@ class PrintStationController {
         modelAndView.model["template_products"] = allProducts.filter { it.productType == ProductType.TEMPLATE.value }
         modelAndView.model["id_photo_products"] = allProducts.filter { it.productType == ProductType.ID_PHOTO.value }
         modelAndView.model["productIds"] = allProducts.map { it.productId }.joinToString(separator = ",")
+        modelAndView.model["printerTypes"] = printerTypeDao.findAll()
+
         modelAndView.viewName = "/printStation/edit :: content"
 
         return modelAndView
@@ -293,7 +295,7 @@ class PrintStationController {
                     .filter { !request.getParameter("product_${it}").isNullOrBlank() }
                     .map { it.toInt() }
                     .toSet()
-            printStationService.activatePrintStation(code, printStationName, printStationPassword, positionId, selectedProductIds)
+            printStationService.activatePrintStation(null, code, printStationName, printStationPassword, positionId, selectedProductIds, "")
             return CommonRequestResult()
         } catch (e: ProcessException) {
             return CommonRequestResult(e.errcode, e.message)
@@ -394,5 +396,79 @@ class PrintStationController {
         else {
             printStationService.updatePrintStationStatus(sessionId, statusEnum, additionalInfo)
         }
+    }
+
+    @GetMapping("/printStation/updateAndAdSet")
+    @ResponseBody
+    fun getPrintStationUpdateAndAdSet(
+            @RequestParam("sessionId") sessionId: String,
+            @RequestParam("currentVersion") currentVersion: Int,
+            @RequestParam("currentAdSetId") currentAdSetId: Int,
+            @RequestParam("currentAdSetTime") currentAdSetTime: String
+    ): UpdateAndAdSetDTO {
+        return printStationService.getPrintStationUpdateAndAdSet(sessionId, currentVersion, currentAdSetId, currentAdSetTime)
+    }
+
+    @PostMapping("/printStation/login")
+    @ResponseBody
+    fun printStationLogin(
+            @RequestParam("printStationId") printStationId: Int,
+            @RequestParam("password") password: String,
+            @RequestParam("version", required = false, defaultValue = "-1") version: Int,
+            @RequestParam("uuid") uuid: String
+    ): PrintStationLoginResult {
+        logger.info("PrintStation login, id=$printStationId, version=$version, uuid=$uuid");
+        val result = printStationService.login(printStationId,
+                password,
+                if (version > 0) version else null,
+                uuid)
+
+        logger.info("PrintStation login, result = $result")
+        return result
+    }
+
+    @PostMapping("/printStation/loginWithKey")
+    @ResponseBody
+    fun printStationLoginWithKey(
+            @RequestParam("printStationId") printStationId: Int,
+            @RequestParam("version", required = false, defaultValue = "-1") version: Int,
+            @RequestParam("sign") sign: String
+    ): PrintStationLoginResult {
+        logger.info("PrintStation login with key, id=$printStationId, version=$version, sign=$sign")
+        val versionValue = if (version > 0) version else null
+        val result = printStationService.loginWithKey(printStationId, sign, versionValue)
+
+        logger.info("PrintStation login with key, result = $result")
+        return result
+    }
+
+    @PostMapping("/printStation/initPubKey")
+    @ResponseBody
+    fun initPrintStationPublicKey(
+            @RequestParam("printStationId") printStationId: Int,
+            @RequestParam("uuid") uuid: String,
+            @RequestParam("pubKey") pubKey: String
+    ): Int {
+        logger.info("PrintStation init public key, id=$printStationId, uuid=$uuid")
+        val result = printStationService.initPublicKey(printStationId, uuid, pubKey)
+
+        logger.info("PrintStation init public key, result = $result")
+        return result
+    }
+
+    @PostMapping("/printStation/getHomeInitInfo")
+    @ResponseBody
+    fun getHomeInitInfo(
+            @RequestParam("username") userName: String,
+            @RequestParam("password") password: String,
+            @RequestParam("printStationId", required = false, defaultValue = "0") printStationId: Int
+    ): HomeInitInfoDTO {
+        return printStationService.getHomeInitInfo(userName, password, printStationId)
+    }
+
+    @PostMapping("/printStation/initHome")
+    @ResponseBody
+    fun initHome(@RequestBody input: HomeInitInput): Int {
+        return printStationService.initHome(input).value
     }
 }
