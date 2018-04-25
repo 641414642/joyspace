@@ -12,6 +12,8 @@ class PrintOrderItemDTO(
         var productId: Int = 0,
         var productType: Int = 0,
         var productVersion: String = "",
+        //用户图片
+        var userImageFile: UserImageFileDTO? = null,
         var orderImages: List<PrintOrderImageDTO> = emptyList()
 )
 

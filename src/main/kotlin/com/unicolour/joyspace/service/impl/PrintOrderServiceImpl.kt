@@ -346,14 +346,21 @@ open class PrintOrderServiceImpl : PrintOrderService {
                         )
                 )
             }
-
+            val userImgFile = it.userImageFile!!
             orderItemDTOs += PrintOrderItemDTO(
                     id = it.id,
                     copies = it.copies,
                     productId = it.productId,
                     productType = it.productType,
                     productVersion = it.productVersion,
-                    orderImages = imageDTOs)
+                    orderImages = imageDTOs,
+                    userImageFile = UserImageFileDTO(
+                            type = userImgFile.type,
+                            width = userImgFile.width,
+                            height = userImgFile.height,
+                            url = "${baseUrl}/assets/user/${userImgFile.userId}/${userImgFile.sessionId}/${userImgFile.fileName}.${userImgFile.type}",
+                            fileName = userImgFile.fileName
+                    ))
         }
 
         val user = userDao.findOne(order.userId)
