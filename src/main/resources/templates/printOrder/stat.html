@@ -40,129 +40,125 @@
 	</section>
 
 	<!-- Main content -->
-	<section class="content" style="padding: 50px">
+	<section class="content" style="padding: 20px">
 		<div class="row">
-			<div class="col-lg-3 col-xs-12">
+			<div class="order_stat_box">
 				<div class="small-box bg-aqua">
 					<div class="inner">
-						<h4>当天支付订单数量</h4>
+						<h4>当天</h4>
+						<h4>支付订单数量</h4>
 
-						<p style="font-size: 18px" th:text="${orderCount_today}"></p>
+						<p th:text="${orderCount_today}"></p>
 					</div>
 					<div class="icon">
 						<i class="ion ion-bag"></i>
 					</div>
-					<a href="#" class="small-box-footer">详情 <i class="fa fa-arrow-circle-right"></i></a>
 				</div>
 			</div>
-			<div class="col-lg-3 col-xs-12">
-				<div class="small-box bg-green">
+			<div class="order_stat_box">
+				<div class="small-box bg-aqua">
 					<div class="inner">
-						<h4>当天打印张数</h4>
+						<h4>当天</h4>
+						<h4>打印张数</h4>
 
-                        <p style="font-size: 18px" th:text="${printPageCount_today}"></p>
+                        <p th:text="${printPageCount_today}"></p>
 					</div>
 					<div class="icon">
 						<i class="ion ion-android-print"></i>
 					</div>
-					<a href="#" class="small-box-footer">详情 <i class="fa fa-arrow-circle-right"></i></a>
 				</div>
 			</div>
-			<div class="col-lg-3 col-xs-12">
-				<div class="small-box bg-yellow">
+			<div class="order_stat_box">
+				<div class="small-box bg-aqua">
 					<div class="inner">
-						<h4>当天收款金额</h4>
+						<h4>当天</h4>
+						<h4>收款金额</h4>
 
-                        <p style="font-size: 18px" th:text="${#numbers.formatDecimal(income_today / 100.0, 1, 'DEFAULT', 2, 'DEFAULT') + '元'}"></p>
+                        <p th:text="${#numbers.formatDecimal(income_today / 100.0, 1, 'DEFAULT', 2, 'DEFAULT') + '元'}"></p>
 					</div>
 					<div class="icon">
 						<i class="ion ion-cash"></i>
 					</div>
-					<a href="#" class="small-box-footer">详情 <i class="fa fa-arrow-circle-right"></i></a>
 				</div>
 			</div>
-		</div>
 
-		<div class="row">
-			<div class="col-lg-3 col-xs-12">
-				<div class="small-box bg-aqua">
+			<div class="order_stat_box">
+				<div class="small-box bg-green">
 					<div class="inner">
-						<h4>近三天支付订单数量</h4>
+						<h4>近三天</h4>
+						<h4>支付订单数量</h4>
 
-						<p style="font-size: 18px" th:text="${orderCount_lastThreeDays}"></p>
+						<p th:text="${orderCount_lastThreeDays}"></p>
 					</div>
 					<div class="icon">
 						<i class="ion ion-bag"></i>
 					</div>
-					<a href="#" class="small-box-footer">详情 <i class="fa fa-arrow-circle-right"></i></a>
 				</div>
 			</div>
-			<div class="col-lg-3 col-xs-12">
+			<div class="order_stat_box">
 				<div class="small-box bg-green">
 					<div class="inner">
-						<h4>近三天打印张数</h4>
+						<h4>近三天</h4>
+						<h4>打印张数</h4>
 
-						<p style="font-size: 18px" th:text="${printPageCount_lastThreeDays}"></p>
+						<p th:text="${printPageCount_lastThreeDays}"></p>
 					</div>
 					<div class="icon">
 						<i class="ion ion-android-print"></i>
 					</div>
-					<a href="#" class="small-box-footer">详情 <i class="fa fa-arrow-circle-right"></i></a>
 				</div>
 			</div>
-			<div class="col-lg-3 col-xs-12">
-				<div class="small-box bg-yellow">
+			<div class="order_stat_box">
+				<div class="small-box bg-green">
 					<div class="inner">
-						<h4>近三天收款金额</h4>
+						<h4>近三天</h4>
+						<h4>收款金额</h4>
 
-						<p style="font-size: 18px" th:text="${#numbers.formatDecimal(income_lastThreeDays / 100.0, 1, 'DEFAULT', 2, 'DEFAULT') + '元'}"></p>
+						<p th:text="${#numbers.formatDecimal(income_lastThreeDays / 100.0, 1, 'DEFAULT', 2, 'DEFAULT') + '元'}"></p>
 					</div>
 					<div class="icon">
 						<i class="ion ion-cash"></i>
 					</div>
-					<a href="#" class="small-box-footer">详情 <i class="fa fa-arrow-circle-right"></i></a>
 				</div>
 			</div>
-		</div>
 
-		<div class="row">
-			<div class="col-lg-3 col-xs-12">
-				<div class="small-box bg-aqua">
+			<div class="order_stat_box">
+				<div class="small-box bg-yellow">
 					<div class="inner">
-						<h4>当月支付订单数量</h4>
+						<h4>当月</h4>
+						<h4>支付订单数量</h4>
 
-						<p style="font-size: 18px" th:text="${orderCount_month}"></p>
+						<p th:text="${orderCount_month}"></p>
 					</div>
 					<div class="icon">
 						<i class="ion ion-bag"></i>
 					</div>
-					<a href="#" class="small-box-footer">详情 <i class="fa fa-arrow-circle-right"></i></a>
 				</div>
 			</div>
-			<div class="col-lg-3 col-xs-12">
-				<div class="small-box bg-green">
+			<div class="order_stat_box">
+				<div class="small-box bg-yellow">
 					<div class="inner">
-						<h4>当月打印张数</h4>
+						<h4>当月</h4>
+						<h4>打印张数</h4>
 
-						<p style="font-size: 18px" th:text="${printPageCount_month}"></p>
+						<p th:text="${printPageCount_month}"></p>
 					</div>
 					<div class="icon">
 						<i class="ion ion-android-print"></i>
 					</div>
-					<a href="#" class="small-box-footer">详情 <i class="fa fa-arrow-circle-right"></i></a>
 				</div>
 			</div>
-			<div class="col-lg-3 col-xs-12">
+			<div class="order_stat_box">
 				<div class="small-box bg-yellow">
 					<div class="inner">
-						<h4>当月收款金额</h4>
+						<h4>当月</h4>
+						<h4>收款金额</h4>
 
-						<p style="font-size: 18px" th:text="${#numbers.formatDecimal(income_month / 100.0, 1, 'DEFAULT', 2, 'DEFAULT') + '元'}"></p>
+						<p th:text="${#numbers.formatDecimal(income_month / 100.0, 1, 'DEFAULT', 2, 'DEFAULT') + '元'}"></p>
 					</div>
 					<div class="icon">
 						<i class="ion ion-cash"></i>
 					</div>
-					<a href="#" class="small-box-footer">详情 <i class="fa fa-arrow-circle-right"></i></a>
 				</div>
 			</div>
 		</div>
