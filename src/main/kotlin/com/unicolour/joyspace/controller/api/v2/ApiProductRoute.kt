@@ -68,7 +68,18 @@ class ApiProductRoute {
                     .filter { it.type == ProductImageFileType.THUMB.value }
                     .map { "/assets/product/images/${it.id}.${it.fileType}" }
                     .firstOrNull()
-            ProductVo(it.id, it.name, it.template.width, it.template.height, displaySize, tpl.minImageCount, it.remark, it.defaultPrice, thumbnailImageUrl)
+            ProductVo(it.id,
+                    it.name,
+                    it.template.width,
+                    it.template.height,
+                    it.template.type,
+                    com.unicolour.joyspace.model.ProductType.values().first { it.value == tpl.type }.dispName,
+                    tpl.currentVersion,
+                    displaySize,
+                    tpl.minImageCount,
+                    it.remark,
+                    it.defaultPrice,
+                    thumbnailImageUrl)
         }
         return RestResponse.ok(productVoList)
     }
@@ -82,7 +93,7 @@ class ApiProductRoute {
         val temp = product.template
         val layerBg = Layer(1, "background", images = mutableListOf())
         if (temp.type == com.unicolour.joyspace.model.ProductType.ID_PHOTO.value) {
-            layerBg.images!!.add(Img(1, "stricker", 0.0, 0.0, temp.width, temp.height, 0.0, "", "${baseUrl}/assets/template/preview/${temp.id}_v${temp.currentVersion}/mask.png"))
+            layerBg.images!!.add(Img(1, "sticker", 0.0, 0.0, temp.width, temp.height, 0.0, "", "${baseUrl}/assets/template/preview/${temp.id}_v${temp.currentVersion}/mask.png"))
         }
         val layerUser = Layer(2, "image", images = mutableListOf())
         val templateImages = templateImageInfoDao.findByTemplateIdAndTemplateVersion(temp.id, temp.currentVersion)
