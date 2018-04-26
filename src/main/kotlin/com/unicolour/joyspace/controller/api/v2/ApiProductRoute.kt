@@ -1,6 +1,5 @@
 package com.unicolour.joyspace.controller.api.v2
 
-import com.google.gson.Gson
 import com.unicolour.joyspace.dao.ProductDao
 import com.unicolour.joyspace.dao.TemplateDao
 import com.unicolour.joyspace.dao.TemplateImageInfoDao
@@ -15,7 +14,6 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RestController
-import sun.jvm.hotspot.debugger.cdbg.TemplateType
 
 @RestController
 class ApiProductRoute {

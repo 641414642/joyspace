@@ -2,7 +2,6 @@ package com.unicolour.joyspace.controller.api.v2
 
 import com.unicolour.joyspace.dao.PrintStationDao
 import com.unicolour.joyspace.dao.PrintStationProductDao
-import com.unicolour.joyspace.dao.ProductDao
 import com.unicolour.joyspace.dto.PrintStationProduct
 import com.unicolour.joyspace.dto.PrintStationVo
 import com.unicolour.joyspace.dto.ResultCode
