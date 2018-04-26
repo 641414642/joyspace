@@ -39,7 +39,13 @@ data class PrintStationVo(var id: Int? = null,
                           var wxQrCode: String? = null,
                           var positionId: String? = null,
                           var companyId: String? = null,
-                          var status: Int? = null)
+                          var status: Int? = null,
+                          var products: MutableList<PrintStationProduct>? = null)
+
+data class PrintStationProduct(var id: Int? = null,
+                               var name: String? = null,
+                               var type: String? = null,
+                               var price: Int? = null)
 
 data class CouponVo(var id: Int? = null,
                     var name: String? = null,
@@ -78,7 +84,7 @@ data class UserInfoVo(var nickName: String? = null,
                       var handlingCount: Int? = null)
 
 data class TemplateVo(var id: Int? = null,
-                      var version: String? = null,
+                      var version: Int? = null,
                       var name: String? = null,
                       var type: Int? = null,
                       var scenes: List<Scene>? = null)
@@ -88,11 +94,11 @@ data class Scene(var id: Int? = null,
                  var type: String? = null,
                  var width: Double? = null,
                  var height: Double? = null,
-                 var layers: List<Layer>? = null)
+                 var layers: MutableList<Layer>? = null)
 
 data class Layer(var id: Int? = null,
                  var type: String? = null,
-                 var images: List<Img>? = null)
+                 var images: MutableList<Img>? = null)
 
 data class Img(var id: Int? = null,
                var type: String? = null,
