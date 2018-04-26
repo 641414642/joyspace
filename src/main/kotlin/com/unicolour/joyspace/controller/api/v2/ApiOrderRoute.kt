@@ -93,8 +93,6 @@ class ApiOrderRoute {
     }
 
 
-
-
     /**
      * 获取用户全部订单
      */
@@ -103,7 +101,14 @@ class ApiOrderRoute {
         val session = userLoginSessionDao.findOne(sessionId)
         val user = userDao.findOne(session.userId) ?: return RestResponse.error(ResultCode.INVALID_USER_LOGIN_SESSION)
         val orderList = printOrderDao.findByUserId(user.id)
-        return RestResponse.ok(orderList)
+        val orderListVo = orderList.map {
+            var status = 0
+            if (!it.payed) status = 0
+            if (it.payed && !it.printedOnPrintStation) status = 1
+            if (it.printedOnPrintStation) status = 2
+            OrderSimpleVo(it.id, it.orderNo, it.totalFee, it.discount, 0, it.createTime, status)
+        }
+        return RestResponse.ok(orderListVo)
     }
 
 

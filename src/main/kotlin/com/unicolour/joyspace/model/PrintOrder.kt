@@ -133,6 +133,5 @@ class PrintOrderItem {
     //endregion
 
     @Column
-    @NotNull
     var status: Int = PrintOrderImageStatus.CREATED.value
 }

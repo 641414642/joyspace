@@ -56,6 +56,14 @@ data class CouponVo(var id: Int? = null,
                     var discount: Int? = null,
                     var available: Int? = null)
 
+data class OrderSimpleVo(var orderId: Int? = null,
+                         var orderNo: String? = null,
+                         var totalFee: Int? = null,
+                         var discount: Int? = null,
+                         var postage: Int? = null,
+                         var creatTime:Calendar? = null,
+                         var status:Int? = null)
+
 data class OrderVo(var orderId: Int? = null,
                    var orderNo: String? = null,
                    var wxPayParams: WxPayParam? = null,
