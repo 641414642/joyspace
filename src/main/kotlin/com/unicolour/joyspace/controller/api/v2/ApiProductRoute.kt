@@ -1,5 +1,6 @@
 package com.unicolour.joyspace.controller.api.v2
 
+import com.google.gson.Gson
 import com.unicolour.joyspace.dao.ProductDao
 import com.unicolour.joyspace.dao.TemplateDao
 import com.unicolour.joyspace.dao.TemplateImageInfoDao
@@ -11,6 +12,7 @@ import com.unicolour.joyspace.service.ProductService
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.core.io.Resource
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RestController
@@ -30,6 +32,14 @@ class ApiProductRoute {
     private lateinit var templateDao: TemplateDao
     @Value("\${com.unicolour.joyspace.baseUrl}")
     private lateinit var baseUrl: String
+    @Value("classpath:static/doc/home_page/9526/test.json")
+    private lateinit var json_9526: Resource
+    @Value("classpath:static/doc/home_page/9527/test.json")
+    private lateinit var json_9527: Resource
+    @Value("classpath:static/doc/home_page/9528/test.json")
+    private lateinit var json_9528: Resource
+    @Value("classpath:static/doc/home_page/9529/test.json")
+    private lateinit var json_9529: Resource
 
     /**
      * 主页数据
@@ -57,6 +67,58 @@ class ApiProductRoute {
      */
     @GetMapping(value = "/v2/product/{type}")
     fun getProductsByType(@PathVariable("type") type: Int): RestResponse {
+        if (type == 2) {
+            val products = mutableListOf<ProductVo>()
+            products.add(ProductVo(9526,
+                    "展会6",
+                    1440.0,
+                    2160.0,
+                    2,
+                    "模板拼图",
+                    1,
+                    "1400 x 2160 mm",
+                    1,
+                    "",
+                    100,
+                    null))
+            products.add(ProductVo(9527,
+                    "展会7",
+                    1440.0,
+                    2160.0,
+                    2,
+                    "模板拼图",
+                    1,
+                    "1400 x 2160 mm",
+                    1,
+                    "",
+                    100,
+                    null))
+            products.add(ProductVo(9528,
+                    "展会8",
+                    1440.0,
+                    2160.0,
+                    2,
+                    "模板拼图",
+                    1,
+                    "1400 x 2160 mm",
+                    1,
+                    "",
+                    100,
+                    null))
+            products.add(ProductVo(9529,
+                    "展会9",
+                    1440.0,
+                    2160.0,
+                    2,
+                    "模板拼图",
+                    1,
+                    "1400 x 2160 mm",
+                    1,
+                    "",
+                    100,
+                    null))
+            return RestResponse.ok(products)
+        }
         val templateIds = templateDao.findByType(type).map { it.id }
         val products = productDao.findByTemplateIdInAndEnabledOrderBySequence(templateIds, true)
         val productVoList = products.map {
@@ -89,6 +151,15 @@ class ApiProductRoute {
      */
     @GetMapping(value = "/v2/product/detail/{id}")
     fun getTemplateDetail(@PathVariable("id") id: Int): RestResponse {
+        val testProductList = listOf(9526, 9527, 9528, 9529)
+        if (id in testProductList) {
+            when (id) {
+                9526 -> return RestResponse.ok(Gson().fromJson(json_9526.inputStream.bufferedReader().use { it.readText() }, TemplateVo::class.java))
+                9527 -> return RestResponse.ok(Gson().fromJson(json_9527.inputStream.bufferedReader().use { it.readText() }, TemplateVo::class.java))
+                9528 -> return RestResponse.ok(Gson().fromJson(json_9528.inputStream.bufferedReader().use { it.readText() }, TemplateVo::class.java))
+                9529 -> return RestResponse.ok(Gson().fromJson(json_9529.inputStream.bufferedReader().use { it.readText() }, TemplateVo::class.java))
+            }
+        }
         val product = productDao.findOne(id)
         val temp = product.template
         val layerBg = Layer(1, "background", images = mutableListOf())

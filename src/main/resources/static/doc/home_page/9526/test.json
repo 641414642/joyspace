@@ -1,0 +1,68 @@
+{
+  "id": 9526,
+  "version": 1.0,
+  "name": "展会专用模板3",
+  "type": 1,
+  "scenes": [
+    {
+      "id": 1,
+      "name": "",
+      "type": "page",
+      "width": 1440,
+      "height": 2160,
+      "layers": [
+        {
+          "id": 1,
+          "type": "background",
+          "images": [
+            {
+              "id": 1,
+              "type": "sticker",
+              "x": 0,
+              "y": 0,
+              "width": 1440,
+              "height": 2160,
+              "angleClip": 0,
+              "bgcolor": "",
+              "resourceURL": "http://47.52.238.144:6600/doc/home_page/9526/background_layer.png"
+            }
+          ]
+        },
+        {
+          "id": 2,
+          "type": "image",
+          "images": [
+            {
+              "id": 1,
+              "type": "user",
+              "x": 223,
+              "y": 79,
+              "width": 1217,
+              "height": 2010,
+              "angleClip": 0,
+              "bgcolor": "",
+              "resourceURL": ""
+            }
+          ]
+        },
+        {
+          "id": 3,
+          "type": "image",
+          "images": [
+            {
+              "id": 1,
+              "type": "front",
+              "x": 0,
+              "y": 0,
+              "width": 1440,
+              "height": 2160,
+              "angleClip": 0,
+              "bgcolor": "",
+              "resourceURL": "http://47.52.238.144:6600/doc/home_page/9526/front_layer.png"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
