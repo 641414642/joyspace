@@ -61,7 +61,7 @@ class ApiOrderRoute {
 
 
     //查看订单图片状态
-    @GetMapping("/api/order/status")
+    @GetMapping("/v2/order/status")
     fun printOrderStatus(@RequestParam("sessionId") sessionId: String,
                          @RequestParam("printOrderId") printOrderId: Int): RestResponse {
         val session = userLoginSessionDao.findOne(sessionId)
@@ -81,7 +81,7 @@ class ApiOrderRoute {
 
 
     //上传订单图片
-    @PostMapping("/api/order/image")
+    @PostMapping("/v2/order/image")
     fun uploadOrderItemImage(request: HttpServletRequest,
                              @RequestParam("sessionId") sessionId: String,
                              @RequestParam("orderItemId") orderItemId: Int,
