@@ -135,14 +135,19 @@
     box-sizing: border-box;
 }
 
-.order_stat_box h4,
-.order_stat_box p {
+.order_stat_box h4 {
     font-size: 14px;
     margin: 5px;
+}
+
+.order_stat_box p {
+    font-weight: bold;
+    font-size: 16px;
+    margin: 5px;
+    margin-top: 10px;
 }
 
 .order_stat_box .icon {
     font-size: 80px;
     color: rgba(0,0,0,0.05);
 }
-

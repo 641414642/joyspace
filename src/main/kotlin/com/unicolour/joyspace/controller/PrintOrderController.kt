@@ -18,6 +18,7 @@ import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.servlet.ModelAndView
+import java.text.SimpleDateFormat
 import java.util.*
 
 @Controller
@@ -55,20 +56,46 @@ class PrintOrderController {
     @Autowired
     lateinit var wxEntTransferRecordItemDao: WxEntTransferRecordItemDao
 
+    private fun parseDate(dateStr: String): Calendar {
+        val cal = Calendar.getInstance()
+
+        if (dateStr.isEmpty()) {
+            cal.set(Calendar.HOUR_OF_DAY, 0)
+            cal.set(Calendar.MINUTE, 0)
+            cal.set(Calendar.SECOND, 0)
+            cal.set(Calendar.MILLISECOND, 0)
+        }
+        else {
+            cal.timeInMillis = SimpleDateFormat("yyyy-MM-dd").parse(dateStr).time
+        }
+
+        return cal
+    }
+
     @RequestMapping("/printOrder/list")
     fun printOrderList(
             modelAndView: ModelAndView,
             @RequestParam(name = "orderNo", required = false, defaultValue = "") orderNo: String?,
+            @RequestParam(name = "inputPositionId", required = false, defaultValue = "0") inputPositionId: Int,
+            @RequestParam(name = "inputPrintStationId", required = false, defaultValue = "0") inputPrintStationId: Int,
+            @RequestParam(name = "inputTimeRange", required = false, defaultValue = "1") inputTimeRange: Int,
+            @RequestParam(name = "inputStartTime", required = false, defaultValue = "") inputStartTime: String,
+            @RequestParam(name = "inputEndTime", required = false, defaultValue = "") inputEndTime: String,
             @RequestParam(name = "partial", required = false, defaultValue = "false") partial: Boolean?,
             @RequestParam(name = "pageno", required = false, defaultValue = "1") pageno: Int): ModelAndView {
 
         val loginManager = managerService.loginManager
+        val companyId = loginManager!!.companyId
 
-        val pageable = PageRequest(pageno - 1, 50, Sort.Direction.DESC, "id")
-        val printOrders = if (orderNo == null || orderNo == "")
-            printOrderDao.findByCompanyIdOrderByIdDesc(loginManager!!.companyId, pageable)
-        else
-            printOrderDao.findByOrderNoIgnoreCaseAndCompanyId(orderNo, loginManager!!.companyId, pageable)
+        val startTime = parseDate(inputStartTime)
+        val endTime = parseDate(inputEndTime)
+
+        val endTime1 = (endTime.clone() as Calendar).apply { add(Calendar.DAY_OF_MONTH, 1) }
+
+        val printOrders = printOrderService.queryPrinterOrders(pageno, 50,
+                companyId, startTime, endTime1, inputPositionId, inputPrintStationId, "id desc")
+
+        val allPrintStationsOfCompany = printStationDao.findByCompanyId(companyId)
 
         val idUserMap = userDao.findByIdIn(printOrders.content.map { it.userId }).map { Pair(it.id, it) }.toMap()
         val idPrintStationMap = printStationDao.findByIdIn(printOrders.content.map { it.printStationId }).map { Pair(it.id, it) }.toMap()
@@ -111,6 +138,50 @@ class PrintOrderController {
             modelAndView.viewName = "/printOrder/list :: order_list_content"
         }
         else {
+            val dateFormat = SimpleDateFormat("yyyy-MM-dd")
+
+            modelAndView.model["positions"] = positionDao.findByCompanyId(companyId)
+            modelAndView.model["inputPositionId"] = inputPositionId
+
+            modelAndView.model["allPrintStations"] = allPrintStationsOfCompany
+            modelAndView.model["printStations"] = if (inputPositionId == 0) allPrintStationsOfCompany else allPrintStationsOfCompany.filter { it.positionId == inputPositionId }
+            modelAndView.model["inputPrintStationId"] = inputPrintStationId
+
+            modelAndView.model["inputTimeRange"] = inputTimeRange
+            modelAndView.model["inputStartTime"] = dateFormat.format(startTime.timeInMillis)
+            modelAndView.model["inputEndTime"] = dateFormat.format(endTime.timeInMillis)
+
+            val startOfToday = Calendar.getInstance().apply { toStartOfTheDay(this) }
+            val startOfTomorrow = Calendar.getInstance().apply { add(Calendar.DAY_OF_MONTH, 1); toStartOfTheDay(this) }
+            val startOfTwoDaysAgo = Calendar.getInstance().apply { add(Calendar.DAY_OF_MONTH, -2); toStartOfTheDay(this) }
+
+            val startOfThisMonth = Calendar.getInstance().apply {
+                set(Calendar.DAY_OF_MONTH, 1)
+                toStartOfTheDay(this)
+            }
+
+            val startOfNextMonth = Calendar.getInstance().apply {
+                set(Calendar.DAY_OF_MONTH, 1)
+                toStartOfTheDay(this)
+                add(Calendar.MONTH, 1)
+            }
+
+            val todayStat = printOrderService.printOrderStat(companyId, startOfToday, startOfTomorrow, inputPositionId, inputPrintStationId)
+            val lastTwoDaysStat = printOrderService.printOrderStat(companyId, startOfTwoDaysAgo, startOfToday, inputPositionId, inputPrintStationId)
+            val monthStat = printOrderService.printOrderStat(companyId, startOfThisMonth, startOfNextMonth, inputPositionId, inputPrintStationId)
+
+            modelAndView.model["orderCount_today"] = todayStat.payedOrderCount
+            modelAndView.model["printPageCount_today"] = todayStat.printPageCount
+            modelAndView.model["income_today"] = todayStat.totalAmount - todayStat.totalDiscount
+
+            modelAndView.model["orderCount_lastThreeDays"] = todayStat.payedOrderCount + lastTwoDaysStat.payedOrderCount
+            modelAndView.model["printPageCount_lastThreeDays"] = todayStat.printPageCount + lastTwoDaysStat.printPageCount
+            modelAndView.model["income_lastThreeDays"] = todayStat.totalAmount - todayStat.totalDiscount + lastTwoDaysStat.totalAmount - lastTwoDaysStat.totalDiscount
+
+            modelAndView.model["orderCount_month"] = monthStat.payedOrderCount
+            modelAndView.model["printPageCount_month"] = monthStat.printPageCount
+            modelAndView.model["income_month"] = monthStat.totalAmount - monthStat.totalDiscount
+
             modelAndView.model["viewCat"] = "business_mgr"
             modelAndView.model["viewContent"] = "printOrder_list"
             modelAndView.viewName = "layout"
@@ -190,45 +261,5 @@ class PrintOrderController {
         cal.set(Calendar.MINUTE, 0)
         cal.set(Calendar.SECOND, 0)
         cal.set(Calendar.MILLISECOND, 0)
-    }
-
-    @GetMapping("/printOrder/stat")
-    fun printOrderStat(modelAndView: ModelAndView): ModelAndView {
-        val startOfToday = Calendar.getInstance().apply { toStartOfTheDay(this) }
-        val startOfTomorrow = Calendar.getInstance().apply { add(Calendar.DAY_OF_MONTH, 1); toStartOfTheDay(this) }
-        val startOfTwoDaysAgo = Calendar.getInstance().apply { add(Calendar.DAY_OF_MONTH, -2); toStartOfTheDay(this) }
-
-        val startOfThisMonth = Calendar.getInstance().apply {
-            set(Calendar.DAY_OF_MONTH, 1)
-            toStartOfTheDay(this)
-        }
-
-        val startOfNextMonth = Calendar.getInstance().apply {
-            set(Calendar.DAY_OF_MONTH, 1)
-            toStartOfTheDay(this)
-            add(Calendar.MONTH, 1)
-        }
-
-        val todayStat = printOrderService.printOrderStat(startOfToday, startOfTomorrow)
-        val lastTwoDaysStat = printOrderService.printOrderStat(startOfTwoDaysAgo, startOfToday)
-        val monthStat = printOrderService.printOrderStat(startOfThisMonth, startOfNextMonth)
-
-        modelAndView.model["orderCount_today"] = todayStat.payedOrderCount
-        modelAndView.model["printPageCount_today"] = todayStat.printPageCount
-        modelAndView.model["income_today"] = todayStat.totalAmount - todayStat.totalDiscount
-
-        modelAndView.model["orderCount_lastThreeDays"] = todayStat.payedOrderCount + lastTwoDaysStat.payedOrderCount
-        modelAndView.model["printPageCount_lastThreeDays"] = todayStat.printPageCount + lastTwoDaysStat.printPageCount
-        modelAndView.model["income_lastThreeDays"] = todayStat.totalAmount - todayStat.totalDiscount + lastTwoDaysStat.totalAmount - lastTwoDaysStat.totalDiscount
-
-        modelAndView.model["orderCount_month"] = monthStat.payedOrderCount
-        modelAndView.model["printPageCount_month"] = monthStat.printPageCount
-        modelAndView.model["income_month"] = monthStat.totalAmount - monthStat.totalDiscount
-
-        modelAndView.model["viewCat"] = "business_mgr"
-        modelAndView.model["viewContent"] = "printOrder_stat"
-        modelAndView.viewName = "layout"
-
-        return modelAndView
     }
 }

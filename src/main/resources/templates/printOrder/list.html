@@ -17,6 +17,128 @@
 
 	<!-- Main content -->
 	<section class="content">
+		<div class="row" style="margin: 0 -5px -5px -5px">
+			<div class="order_stat_box">
+				<div class="small-box bg-aqua">
+					<div class="inner">
+						<h4>当天</h4>
+						<h4>支付订单数量</h4>
+
+						<p th:text="${orderCount_today}"></p>
+					</div>
+					<div class="icon">
+						<i class="ion ion-bag"></i>
+					</div>
+				</div>
+			</div>
+			<div class="order_stat_box">
+				<div class="small-box bg-aqua">
+					<div class="inner">
+						<h4>当天</h4>
+						<h4>打印张数</h4>
+
+						<p th:text="${printPageCount_today}"></p>
+					</div>
+					<div class="icon">
+						<i class="ion ion-android-print"></i>
+					</div>
+				</div>
+			</div>
+			<div class="order_stat_box">
+				<div class="small-box bg-aqua">
+					<div class="inner">
+						<h4>当天</h4>
+						<h4>收款金额</h4>
+
+						<p th:text="${#numbers.formatDecimal(income_today / 100.0, 1, 'DEFAULT', 2, 'DEFAULT') + '元'}"></p>
+					</div>
+					<div class="icon">
+						<i class="ion ion-cash"></i>
+					</div>
+				</div>
+			</div>
+
+			<div class="order_stat_box">
+				<div class="small-box bg-green">
+					<div class="inner">
+						<h4>近三天</h4>
+						<h4>支付订单数量</h4>
+
+						<p th:text="${orderCount_lastThreeDays}"></p>
+					</div>
+					<div class="icon">
+						<i class="ion ion-bag"></i>
+					</div>
+				</div>
+			</div>
+			<div class="order_stat_box">
+				<div class="small-box bg-green">
+					<div class="inner">
+						<h4>近三天</h4>
+						<h4>打印张数</h4>
+
+						<p th:text="${printPageCount_lastThreeDays}"></p>
+					</div>
+					<div class="icon">
+						<i class="ion ion-android-print"></i>
+					</div>
+				</div>
+			</div>
+			<div class="order_stat_box">
+				<div class="small-box bg-green">
+					<div class="inner">
+						<h4>近三天</h4>
+						<h4>收款金额</h4>
+
+						<p th:text="${#numbers.formatDecimal(income_lastThreeDays / 100.0, 1, 'DEFAULT', 2, 'DEFAULT') + '元'}"></p>
+					</div>
+					<div class="icon">
+						<i class="ion ion-cash"></i>
+					</div>
+				</div>
+			</div>
+
+			<div class="order_stat_box">
+				<div class="small-box bg-yellow">
+					<div class="inner">
+						<h4>当月</h4>
+						<h4>支付订单数量</h4>
+
+						<p th:text="${orderCount_month}"></p>
+					</div>
+					<div class="icon">
+						<i class="ion ion-bag"></i>
+					</div>
+				</div>
+			</div>
+			<div class="order_stat_box">
+				<div class="small-box bg-yellow">
+					<div class="inner">
+						<h4>当月</h4>
+						<h4>打印张数</h4>
+
+						<p th:text="${printPageCount_month}"></p>
+					</div>
+					<div class="icon">
+						<i class="ion ion-android-print"></i>
+					</div>
+				</div>
+			</div>
+			<div class="order_stat_box">
+				<div class="small-box bg-yellow">
+					<div class="inner">
+						<h4>当月</h4>
+						<h4>收款金额</h4>
+
+						<p th:text="${#numbers.formatDecimal(income_month / 100.0, 1, 'DEFAULT', 2, 'DEFAULT') + '元'}"></p>
+					</div>
+					<div class="icon">
+						<i class="ion ion-cash"></i>
+					</div>
+				</div>
+			</div>
+		</div>
+
 		<div class="box">
 			<div class="box-header with-border">
 				<input type="hidden" id="refreshUrl" th:value="@{/printOrder/list}"/>
@@ -24,11 +146,50 @@
 					<input type="hidden" id="pageNoField" name="pageno" />
 					<input type="hidden" name="partial" value="false" />
 					<div class="form-inline">
-						<label class="form-label">订单编号</label>
-						<input class="form-control" type="text" name="orderNo" th:value="${inputOrderNo}" />
-						&nbsp;&nbsp;
-						<button type="submit" class="btn btn-default btn-sm">查询</button>
-						<a href="#" th:href="@{/printOrder/list(autoRefresh=true)}" class="btn btn-default btn-sm">重置</a>
+						<label class="form-label" for="inputPositionId">店面</label>
+						<select name="inputPositionId" class="form-control" id="inputPositionId">
+							<option value="0">&lt;所有店面&gt;</option>
+							<option th:each="position : ${positions}"
+									th:value="${position.id}"
+									th:text="${position.name}"
+									th:selected="${inputPositionId == position.id}">
+							</option>
+						</select>
+						<label class="form-label" for="inputPrintStationId" style="margin-left: 10px">自助机</label>
+						<select id="printStationCache" style="display:none">
+							<option th:each="printStation : ${allPrintStations}"
+									th:attr="data-position-id=${printStation.positionId}"
+									th:value="${printStation.id}"
+									th:text="${printStation.name == '' ? '自助机' + printStation.id : printStation.name}">
+							</option>
+						</select>
+						<select name="inputPrintStationId" class="form-control" id="inputPrintStationId">
+							<option value="0">&lt;所有自助机&gt;</option>
+							<option th:class="${'pid_' + printStation.positionId}" th:each="printStation : ${printStations}"
+									th:value="${printStation.id}"
+									th:text="${printStation.name == '' ? '自助机' + printStation.id : printStation.name}"
+									th:selected="${inputPrintStationId == printStation.id}">
+							</option>
+						</select>
+
+						<label class="form-label" for="inputTimeRange" style="margin-left: 10px">时间</label>
+						<select name="inputTimeRange" class="form-control" id="inputTimeRange">
+							<option value="1" th:selected="${inputTimeRange == 1}">当天</option>
+							<option value="2" th:selected="${inputTimeRange == 2}">近三天</option>
+							<option value="3" th:selected="${inputTimeRange == 3}">本周</option>
+							<option value="4" th:selected="${inputTimeRange == 4}">本月</option>
+							<option value="5" th:selected="${inputTimeRange == 5}">自定义</option>
+						</select>
+						<div class="input-group date timeRange">
+							<input class="form-control pull-right" style="width:8em" id="startTime" name="inputStartTime" type="text" th:value="${inputStartTime}" />
+						</div>
+						到
+						<div class="input-group date timeRange">
+							<input class="form-control pull-right" style="width:8em" id="endTime" name="inputEndTime" type="text" th:value="${inputEndTime}" />
+						</div>
+
+						<button type="submit" class="btn btn-default btn-sm" style="margin-left: 10px">查询</button>
+						<a href="#" th:href="@{/printOrder/list}" class="btn btn-default btn-sm">重置</a>
 
 						<div class="pull-right checkbox">
 							<label>
