@@ -15,7 +15,11 @@ function refreshPrintOrderList(url ,pageNo) {
             data: {
                 pageno: pageNo,
                 partial: true,
-                orderNo: ''
+                inputPositionId: $("#inputPositionId").val(),
+                inputPrintStationId: $("#inputPrintStationId").val(),
+                inputTimeRange: $("#inputTimeRange").val(),
+                inputStartTime: $("#startTime").val(),
+                inputEndTime: $("#endTime").val()
             },
             success: function (data) {
                 var parent = $("#printOrderListTable").parent()
