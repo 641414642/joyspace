@@ -66,8 +66,8 @@ function updateTimeRange() {
     }
     else if (selTimeRange == "3") {  //本周
         if (now.getDay() > 0) {
-            $("#startTime").datepicker("setDate", getDate(-now.getDay()));
-            $("#endTime").datepicker("setDate", getDate(-now.getDay() + 6));
+            $("#startTime").datepicker("setDate", getDate(-now.getDay() + 1));
+            $("#endTime").datepicker("setDate", getDate(-now.getDay() + 7));
         }
         else {
             $("#startTime").datepicker("setDate", getDate(-6));
