@@ -13,8 +13,6 @@ import com.unicolour.joyspace.service.PrintOrderService
 import com.unicolour.joyspace.util.Pager
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.data.domain.PageRequest
-import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.servlet.ModelAndView
@@ -170,15 +168,15 @@ class PrintOrderController {
             val lastTwoDaysStat = printOrderService.printOrderStat(companyId, startOfTwoDaysAgo, startOfToday, inputPositionId, inputPrintStationId)
             val monthStat = printOrderService.printOrderStat(companyId, startOfThisMonth, startOfNextMonth, inputPositionId, inputPrintStationId)
 
-            modelAndView.model["orderCount_today"] = todayStat.payedOrderCount
+            modelAndView.model["orderCount_today"] = todayStat.orderCount
             modelAndView.model["printPageCount_today"] = todayStat.printPageCount
             modelAndView.model["income_today"] = todayStat.totalAmount - todayStat.totalDiscount
 
-            modelAndView.model["orderCount_lastThreeDays"] = todayStat.payedOrderCount + lastTwoDaysStat.payedOrderCount
+            modelAndView.model["orderCount_lastThreeDays"] = todayStat.orderCount + lastTwoDaysStat.orderCount
             modelAndView.model["printPageCount_lastThreeDays"] = todayStat.printPageCount + lastTwoDaysStat.printPageCount
             modelAndView.model["income_lastThreeDays"] = todayStat.totalAmount - todayStat.totalDiscount + lastTwoDaysStat.totalAmount - lastTwoDaysStat.totalDiscount
 
-            modelAndView.model["orderCount_month"] = monthStat.payedOrderCount
+            modelAndView.model["orderCount_month"] = monthStat.orderCount
             modelAndView.model["printPageCount_month"] = monthStat.printPageCount
             modelAndView.model["income_month"] = monthStat.totalAmount - monthStat.totalDiscount
 

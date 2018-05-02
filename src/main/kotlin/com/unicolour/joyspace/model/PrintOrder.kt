@@ -84,6 +84,10 @@ class PrintOrder {
 
     @OneToMany(mappedBy = "printOrder")
     lateinit var printOrderItems: List<PrintOrderItem>
+
+    @Column
+    @NotNull
+    var pageCount = 0     //打印页数
 }
 
 @Entity

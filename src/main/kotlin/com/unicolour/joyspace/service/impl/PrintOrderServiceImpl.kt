@@ -23,6 +23,7 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.support.TransactionTemplate
 import org.springframework.web.client.RestTemplate
 import org.springframework.web.multipart.MultipartFile
+import java.io.IOException
 import java.io.InputStreamReader
 import java.io.StringReader
 import java.math.BigInteger
@@ -180,6 +181,7 @@ open class PrintOrderServiceImpl : PrintOrderService {
         newOrder.printedOnPrintStation = false
         newOrder.transfered = false
         newOrder.transferProportion = printStation.transferProportion
+        newOrder.pageCount = orderInput.orderItems.sumBy { it.copies }
 
         val orderItems = ArrayList<PrintOrderItem>()
         newOrder.printOrderItems = orderItems
@@ -918,11 +920,6 @@ open class PrintOrderServiceImpl : PrintOrderService {
     }
 
     override fun printOrderStat(companyId: Int, startTime: Calendar, endTime: Calendar, positionId: Int, printStationId: Int): PrintOrderStatDTO {
-        var payedOrderCount = 0
-        var printPageCount = 0
-        var totalAmount = 0
-        var totalDiscount = 0
-
         val printStationIds = ArrayList<Int>()
         if (printStationId > 0) {
             printStationIds.add(printStationId)
@@ -933,28 +930,13 @@ open class PrintOrderServiceImpl : PrintOrderService {
             )
         }
 
-        val printOrders = printOrderDao.queryPrintOrders(companyId, startTime, endTime, printStationIds)
 
-        for (printOrder in printOrders) {
-            if (printOrder.payed) {
-                payedOrderCount ++
-                totalAmount += printOrder.totalFee
-                totalDiscount += printOrder.discount
-            }
-
-            if (printOrder.printedOnPrintStation) {
-                printOrder.printOrderItems.forEach {
-                    printPageCount += it.copies
-                }
-            }
-        }
-
-        return PrintOrderStatDTO(
-                payedOrderCount,
-                printPageCount,
-                totalAmount,
-                totalDiscount
-        )
+        return printOrderDao.printOrderStat(
+                companyId = companyId,
+                startTime = startTime,
+                endTime = endTime,
+                payed = true,
+                printStationIds = printStationIds)
     }
 
     override fun queryPrinterOrders(pageNo: Int, pageSize: Int,

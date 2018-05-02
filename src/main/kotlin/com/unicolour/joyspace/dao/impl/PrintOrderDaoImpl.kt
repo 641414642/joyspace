@@ -1,6 +1,7 @@
 package com.unicolour.joyspace.dao.impl
 
 import com.unicolour.joyspace.dao.PrintOrderCustomQuery
+import com.unicolour.joyspace.dto.PrintOrderStatDTO
 import com.unicolour.joyspace.model.PrintOrder
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageImpl
@@ -15,6 +16,38 @@ class PrintOrderDaoImpl : PrintOrderCustomQuery  {
     @PersistenceContext
     lateinit var em: EntityManager
 
+    override fun printOrderStat(companyId: Int, startTime: Calendar?, endTime: Calendar?,
+                                payed: Boolean?, printStationIds: List<Int>): PrintOrderStatDTO {
+        val cb = em.criteriaBuilder
+        val cq = cb.createTupleQuery()
+
+        val orderRoot = cq.from(PrintOrder::class.java)
+
+        cq.multiselect(
+                cb.count(orderRoot),
+                cb.sum(orderRoot.get("totalFee")),
+                cb.sum(orderRoot.get("discount")),
+                cb.sum(orderRoot.get("pageCount"))
+        )
+
+        where(companyId, printStationIds, startTime, endTime, payed, cb, cq, orderRoot)
+
+        val query = em.createQuery(cq)
+        val result = query.singleResult
+
+        val count = result[0] as Long
+        val totalFee = result[1] as Long?
+        val discount = result[2] as Long?
+        val pageCount = result[3] as Long?
+
+        return PrintOrderStatDTO(
+                orderCount = count.toInt(),
+                totalAmount = totalFee?.toInt() ?: 0,
+                totalDiscount = discount?.toInt() ?: 0,
+                printPageCount = pageCount?.toInt() ?: 0
+        )
+    }
+
     override fun queryPrintOrders(companyId: Int, startTime: Calendar?, endTime: Calendar?, printStationIds: List<Int>): List<PrintOrder> {
         val cb = em.criteriaBuilder
         val cq = cb.createQuery(PrintOrder::class.java)
@@ -23,7 +56,7 @@ class PrintOrderDaoImpl : PrintOrderCustomQuery  {
 
         cq.select(orderRoot)
 
-        where(companyId, printStationIds, startTime, endTime, cb, cq, orderRoot)
+        where(companyId, printStationIds, startTime, endTime, null, cb, cq, orderRoot)
 
         val query = em.createQuery(cq)
 
@@ -41,8 +74,8 @@ class PrintOrderDaoImpl : PrintOrderCustomQuery  {
         cq.select(orderRoot)
         cqCount.select(cb.count(orderCountRoot))
 
-        where(companyId, printStationIds, startTime, endTime, cb, cq, orderRoot)
-        where(companyId, printStationIds, startTime, endTime, cb, cqCount, orderRoot)
+        where(companyId, printStationIds, startTime, endTime, null, cb, cq, orderRoot)
+        where(companyId, printStationIds, startTime, endTime, null, cb, cqCount, orderRoot)
 
         orderBy(cb, pageable.sort, cq, orderRoot)
 
@@ -71,6 +104,7 @@ class PrintOrderDaoImpl : PrintOrderCustomQuery  {
 
     private fun where(companyId: Int, printStationIds: List<Int>,
                       startTime: Calendar?, endTime: Calendar?,
+                      payed: Boolean?,
                       cb: CriteriaBuilder, cq: CriteriaQuery<*>, root: Root<PrintOrder>) {
 
         val conditions = ArrayList<Predicate>()
@@ -80,9 +114,11 @@ class PrintOrderDaoImpl : PrintOrderCustomQuery  {
         }
 
         if (endTime != null) {
-            val end = endTime.clone() as Calendar
-            end.add(Calendar.DAY_OF_MONTH, 1)
-            conditions.add(cb.lessThan(root.get("createTime"), end))
+            conditions.add(cb.lessThan(root.get("createTime"), endTime))
+        }
+
+        if (payed != null) {
+            conditions.add(cb.equal(root.get<Boolean>("payed"), payed))
         }
 
         if (printStationIds.isNotEmpty()) {
