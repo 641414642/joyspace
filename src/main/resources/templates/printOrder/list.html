@@ -17,7 +17,7 @@
 
 	<!-- Main content -->
 	<section class="content">
-		<div class="row" style="margin: 0 -5px -5px -5px">
+		<div id="orderStatRow" class="row" style="margin: 0 -5px -5px -5px" th:fragment="order_stat">
 			<div class="order_stat_box">
 				<div class="small-box bg-aqua">
 					<div class="inner">
@@ -142,6 +142,8 @@
 		<div class="box">
 			<div class="box-header with-border">
 				<input type="hidden" id="refreshUrl" th:value="@{/printOrder/list}"/>
+				<input type="hidden" id="refreshStatUrl" th:value="@{/printOrder/stat}"/>
+
 				<form th:action="@{/printOrder/list}" method="get" target="_self">
 					<input type="hidden" id="pageNoField" name="pageno" />
 					<input type="hidden" name="partial" value="false" />
@@ -288,10 +290,12 @@
 	</section>
 	<script src="../../static/js/order.js" th:src="@{/js/order.js}"></script>
 	<script type="text/javascript">
-		var refreshUrl = document.getElementById("refreshUrl").value
-		var pageNo = document.getElementById("pageNoField").value
+		var refreshUrl = document.getElementById("refreshUrl").value;
+		var pageNo = document.getElementById("pageNoField").value;
+		startRefresh(refreshUrl, pageNo);
 
-		startRefresh(refreshUrl, pageNo)
+		var refreshStatUrl = document.getElementById("refreshStatUrl").value;
+		startRefreshStat(refreshStatUrl);
 	</script>
 </div>
 </body>

@@ -36,10 +36,36 @@ function refreshPrintOrderList(url ,pageNo) {
     }, 5000)
 }
 
+function refreshPrintOrderStat(url) {
+    if (document.getElementById("autoRefresh").checked) {
+        $.ajax({
+            type: "GET",
+            url: url,
+            data: {
+                inputPositionId: $("#inputPositionId").val(),
+                inputPrintStationId: $("#inputPrintStationId").val()
+            },
+            success: function (data) {
+                $("#orderStatRow").replaceWith(data);
+            }
+        });
+    }
+
+    setTimeout(function() {
+        refreshPrintOrderStat(url);
+    }, 60000)
+}
+
 function startRefresh(url, pageNo) {
     setTimeout(function() {
         refreshPrintOrderList(url, pageNo);
     }, 5000)
+}
+
+function startRefreshStat(url) {
+    setTimeout(function() {
+        refreshPrintOrderStat(url);
+    }, 60000)
 }
 
 function getDate(numberOfDaysToAdd) {

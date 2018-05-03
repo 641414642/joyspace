@@ -188,6 +188,51 @@ class PrintOrderController {
         return modelAndView
     }
 
+    @RequestMapping("/printOrder/stat")
+    fun printOrderStat(
+            modelAndView: ModelAndView,
+            @RequestParam(name = "inputPositionId", required = false, defaultValue = "0") inputPositionId: Int,
+            @RequestParam(name = "inputPrintStationId", required = false, defaultValue = "0") inputPrintStationId: Int): ModelAndView {
+
+        val loginManager = managerService.loginManager
+        val companyId = loginManager!!.companyId
+
+        val startOfToday = Calendar.getInstance().apply { toStartOfTheDay(this) }
+        val startOfTomorrow = Calendar.getInstance().apply { add(Calendar.DAY_OF_MONTH, 1); toStartOfTheDay(this) }
+        val startOfTwoDaysAgo = Calendar.getInstance().apply { add(Calendar.DAY_OF_MONTH, -2); toStartOfTheDay(this) }
+
+        val startOfThisMonth = Calendar.getInstance().apply {
+            set(Calendar.DAY_OF_MONTH, 1)
+            toStartOfTheDay(this)
+        }
+
+        val startOfNextMonth = Calendar.getInstance().apply {
+            set(Calendar.DAY_OF_MONTH, 1)
+            toStartOfTheDay(this)
+            add(Calendar.MONTH, 1)
+        }
+
+        val todayStat = printOrderService.printOrderStat(companyId, startOfToday, startOfTomorrow, inputPositionId, inputPrintStationId)
+        val lastTwoDaysStat = printOrderService.printOrderStat(companyId, startOfTwoDaysAgo, startOfToday, inputPositionId, inputPrintStationId)
+        val monthStat = printOrderService.printOrderStat(companyId, startOfThisMonth, startOfNextMonth, inputPositionId, inputPrintStationId)
+
+        modelAndView.model["orderCount_today"] = todayStat.orderCount
+        modelAndView.model["printPageCount_today"] = todayStat.printPageCount
+        modelAndView.model["income_today"] = todayStat.totalAmount - todayStat.totalDiscount
+
+        modelAndView.model["orderCount_lastThreeDays"] = todayStat.orderCount + lastTwoDaysStat.orderCount
+        modelAndView.model["printPageCount_lastThreeDays"] = todayStat.printPageCount + lastTwoDaysStat.printPageCount
+        modelAndView.model["income_lastThreeDays"] = todayStat.totalAmount - todayStat.totalDiscount + lastTwoDaysStat.totalAmount - lastTwoDaysStat.totalDiscount
+
+        modelAndView.model["orderCount_month"] = monthStat.orderCount
+        modelAndView.model["printPageCount_month"] = monthStat.printPageCount
+        modelAndView.model["income_month"] = monthStat.totalAmount - monthStat.totalDiscount
+
+        modelAndView.viewName = "/printOrder/list :: order_stat"
+
+        return modelAndView
+    }
+
     @RequestMapping(path = arrayOf("/printOrder/detail"), method = arrayOf(RequestMethod.GET))
     fun printOrderDetail(modelAndView: ModelAndView, @RequestParam(name = "id", required = true) id: Int): ModelAndView {
         val printOrder = printOrderDao.findOne(id)
