@@ -142,6 +142,16 @@ $(function() {
     $("#endTime").datepicker({ autoclose: true, format: 'yyyy-mm-dd' });
 
     $("#inputTimeRange").change(updateTimeRange);
+
+    $("#exportOrderListButton").on("click", function(e){
+        e.preventDefault();
+        var exportUrl = $("#exportOrderListButton").data("url");
+        window.location.href = exportUrl +
+            "?positionId=" + $("#inputPositionId").val() +
+            "&printStationId=" + $("#inputPrintStationId").val() +
+            "&startTime=" + encodeURIComponent($("#startTime").val()) +
+            "&endTime=" + encodeURIComponent($("#endTime").val());
+    })
 })
 
 function reprintOrder(event) {

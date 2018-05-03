@@ -2,13 +2,13 @@ package com.unicolour.joyspace.controller
 
 import com.unicolour.joyspace.dao.*
 import com.unicolour.joyspace.dto.CommonRequestResult
+import com.unicolour.joyspace.dto.PrintOrderWrapper
 import com.unicolour.joyspace.dto.ResultCode
 import com.unicolour.joyspace.exception.ProcessException
-import com.unicolour.joyspace.model.Position
-import com.unicolour.joyspace.model.PrintOrder
 import com.unicolour.joyspace.model.WxEntTransferRecord
 import com.unicolour.joyspace.model.WxEntTransferRecordItem
 import com.unicolour.joyspace.service.ManagerService
+import com.unicolour.joyspace.service.PrintOrderExcelView
 import com.unicolour.joyspace.service.PrintOrderService
 import com.unicolour.joyspace.util.Pager
 import org.springframework.beans.factory.annotation.Autowired
@@ -70,10 +70,58 @@ class PrintOrderController {
         return cal
     }
 
-    @RequestMapping("/printOrder/list")
+    @GetMapping("/printOrder/export")
+    fun printOrderExport(
+            modelAndView: ModelAndView,
+            @RequestParam(name = "positionId", required = false, defaultValue = "0") positionId: Int,
+            @RequestParam(name = "printStationId", required = false, defaultValue = "0") printStationId: Int,
+            @RequestParam(name = "startTime", required = false, defaultValue = "") startTime: String,
+            @RequestParam(name = "endTime", required = false, defaultValue = "") endTime: String): ModelAndView {
+        val loginManager = managerService.loginManager
+        val companyId = loginManager!!.companyId
+
+        val startTimeObj = parseDate(startTime)
+        val endTimeObj = parseDate(endTime)
+
+        val endTime1 = (endTimeObj.clone() as Calendar).apply { add(Calendar.DAY_OF_MONTH, 1) }
+
+        val printOrders = printOrderService.queryPrinterOrders(1, 1_0000_0000,
+                companyId, startTimeObj, endTime1, positionId, printStationId, "id desc")
+
+        modelAndView.model["printOrderCount"] = printOrders.totalElements
+
+        val idUserMap = userDao.findByIdIn(printOrders.content.map { it.userId }).map { Pair(it.id, it) }.toMap()
+        val idPrintStationMap = printStationDao.findByIdIn(printOrders.content.map { it.printStationId }).map { Pair(it.id, it) }.toMap()
+        val idPositionMap = positionDao.findByIdIn(idPrintStationMap.values.map { it.positionId }).map { Pair(it.id, it) }.toMap()
+
+        modelAndView.model["printOrders"] = printOrders.content.map {
+            val printStation = idPrintStationMap[it.printStationId]!!
+            val position = idPositionMap[printStation.positionId]!!
+            val user = idUserMap[it.userId]!!
+            var userName = user.nickName ?: user.fullName ?: ""
+            if (userName != "") {
+                userName = " / $userName"
+            }
+            var tri: WxEntTransferRecordItem? = null
+            var tr: WxEntTransferRecord? = null
+            if (it.transfered) {
+                tri = wxEntTransferRecordItemDao.findByPrintOrderId(it.id)
+                if (tri != null) {
+                    tr = wxEntTransferRecordDao.findOne(tri.recordId)
+                }
+            }
+
+            PrintOrderWrapper(it, position, "ID:${user.id}" + userName, tr, tri)
+        }
+
+        modelAndView.view = PrintOrderExcelView()
+
+        return modelAndView
+    }
+
+    @GetMapping("/printOrder/list")
     fun printOrderList(
             modelAndView: ModelAndView,
-            @RequestParam(name = "orderNo", required = false, defaultValue = "") orderNo: String?,
             @RequestParam(name = "inputPositionId", required = false, defaultValue = "0") inputPositionId: Int,
             @RequestParam(name = "inputPrintStationId", required = false, defaultValue = "0") inputPrintStationId: Int,
             @RequestParam(name = "inputTimeRange", required = false, defaultValue = "1") inputTimeRange: Int,
@@ -99,18 +147,8 @@ class PrintOrderController {
         val idPrintStationMap = printStationDao.findByIdIn(printOrders.content.map { it.printStationId }).map { Pair(it.id, it) }.toMap()
         val idPositionMap = positionDao.findByIdIn(idPrintStationMap.values.map { it.positionId }).map { Pair(it.id, it) }.toMap()
 
-        modelAndView.model["inputOrderNo"] = orderNo
-
         val pager = Pager(printOrders.totalPages, 7, pageno - 1)
         modelAndView.model["pager"] = pager
-
-        class PrintOrderWrapper(
-                val order: PrintOrder,
-                val position: Position,
-                val userName: String,
-                val transferRecord: WxEntTransferRecord?,
-                val transferRecordItem: WxEntTransferRecordItem?
-        )
 
         modelAndView.model["printOrders"] = printOrders.content.map {
             val printStation = idPrintStationMap[it.printStationId]!!
