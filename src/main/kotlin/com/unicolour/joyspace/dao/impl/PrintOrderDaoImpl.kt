@@ -121,6 +121,10 @@ class PrintOrderDaoImpl : PrintOrderCustomQuery  {
             conditions.add(cb.equal(root.get<Boolean>("payed"), payed))
         }
 
+        if (companyId > 0) {
+            conditions.add(cb.equal(root.get<Int>("companyId"), companyId))
+        }
+
         if (printStationIds.isNotEmpty()) {
             if (printStationIds.size == 1) {
                 conditions.add(cb.equal(root.get<Int>("printStationId"), printStationIds.first()))
@@ -131,9 +135,6 @@ class PrintOrderDaoImpl : PrintOrderCustomQuery  {
                 printStationIds.forEach { inElement.value(it) }
                 conditions.add(inElement)
             }
-        }
-        else {
-            conditions.add(cb.equal(root.get<Int>("companyId"), companyId))
         }
 
         cq.where(*conditions.toTypedArray())

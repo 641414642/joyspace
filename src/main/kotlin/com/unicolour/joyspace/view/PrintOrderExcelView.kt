@@ -1,4 +1,4 @@
-package com.unicolour.joyspace.service
+package com.unicolour.joyspace.view
 
 import com.unicolour.joyspace.dto.PrintOrderWrapper
 import org.apache.poi.hssf.util.HSSFColor

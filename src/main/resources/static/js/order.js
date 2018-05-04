@@ -118,6 +118,14 @@ $(function() {
     var autoRefresh = localStorage.getItem("autoRefreshOrderList");
     $("#autoRefresh").prop('checked', autoRefresh != "false");
 
+    //投放商选择改变后，刷新页面，重新加载店面和自助机列表
+    $("#inputCompanyId").on("change", function() {
+        $("#inputPositionId").val("0");
+        $("#inputPrintStationId").val("0");
+        $("#inputCompanyId").closest("form").submit();
+    });
+
+    //店面选择改变，更新自助机选择列表
     $("#inputPositionId").on("change", function() {
         var selPrintStationId = $("#inputPrintStationId option:selected").val();
 

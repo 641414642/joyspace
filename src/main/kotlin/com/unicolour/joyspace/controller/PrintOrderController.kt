@@ -8,11 +8,12 @@ import com.unicolour.joyspace.exception.ProcessException
 import com.unicolour.joyspace.model.WxEntTransferRecord
 import com.unicolour.joyspace.model.WxEntTransferRecordItem
 import com.unicolour.joyspace.service.ManagerService
-import com.unicolour.joyspace.service.PrintOrderExcelView
 import com.unicolour.joyspace.service.PrintOrderService
 import com.unicolour.joyspace.util.Pager
+import com.unicolour.joyspace.view.PrintOrderExcelView
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.servlet.ModelAndView
@@ -26,6 +27,9 @@ class PrintOrderController {
 
     @Autowired
     lateinit var printStationDao: PrintStationDao
+
+    @Autowired
+    lateinit var companyDao: CompanyDao
 
     @Autowired
     lateinit var positionDao: PositionDao
@@ -122,6 +126,7 @@ class PrintOrderController {
     @GetMapping("/printOrder/list")
     fun printOrderList(
             modelAndView: ModelAndView,
+            @RequestParam(name = "inputCompanyId", required = false, defaultValue = "0") inputCompanyId: Int,
             @RequestParam(name = "inputPositionId", required = false, defaultValue = "0") inputPositionId: Int,
             @RequestParam(name = "inputPrintStationId", required = false, defaultValue = "0") inputPrintStationId: Int,
             @RequestParam(name = "inputTimeRange", required = false, defaultValue = "1") inputTimeRange: Int,
@@ -130,8 +135,13 @@ class PrintOrderController {
             @RequestParam(name = "partial", required = false, defaultValue = "false") partial: Boolean?,
             @RequestParam(name = "pageno", required = false, defaultValue = "1") pageno: Int): ModelAndView {
 
-        val loginManager = managerService.loginManager
-        val companyId = loginManager!!.companyId
+        val isSuperAdmin = managerService.loginManagerHasRole("ROLE_SUPERADMIN")
+
+        val companyId = if (isSuperAdmin) {
+                inputCompanyId
+            } else {
+                managerService.loginManager!!.companyId
+            }
 
         val startTime = parseDate(inputStartTime)
         val endTime = parseDate(inputEndTime)
@@ -175,6 +185,11 @@ class PrintOrderController {
         }
         else {
             val dateFormat = SimpleDateFormat("yyyy-MM-dd")
+
+            if (isSuperAdmin) {
+                modelAndView.model["companies"] = companyDao.findAll(Sort(Sort.Order(Sort.Direction.ASC, "id")))
+                modelAndView.model["inputCompanyId"] = inputCompanyId
+            }
 
             modelAndView.model["positions"] = positionDao.findByCompanyId(companyId)
             modelAndView.model["inputPositionId"] = inputPositionId
