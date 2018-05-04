@@ -151,3 +151,10 @@
     font-size: 80px;
     color: rgba(0,0,0,0.05);
 }
+
+.order_list_stat {
+    float: right;
+    display: inline-block;
+    padding: 10px 20px 20px 50px;
+    font-weight: bold;
+}

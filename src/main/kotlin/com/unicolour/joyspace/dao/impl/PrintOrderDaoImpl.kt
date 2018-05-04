@@ -48,7 +48,7 @@ class PrintOrderDaoImpl : PrintOrderCustomQuery  {
         )
     }
 
-    override fun queryPrintOrders(companyId: Int, startTime: Calendar?, endTime: Calendar?, printStationIds: List<Int>): List<PrintOrder> {
+    override fun queryPrintOrders(sort: Sort, companyId: Int, startTime: Calendar?, endTime: Calendar?, printStationIds: List<Int>): List<PrintOrder> {
         val cb = em.criteriaBuilder
         val cq = cb.createQuery(PrintOrder::class.java)
 
@@ -57,6 +57,8 @@ class PrintOrderDaoImpl : PrintOrderCustomQuery  {
         cq.select(orderRoot)
 
         where(companyId, printStationIds, startTime, endTime, null, cb, cq, orderRoot)
+
+        orderBy(cb, sort, cq, orderRoot)
 
         val query = em.createQuery(cq)
 

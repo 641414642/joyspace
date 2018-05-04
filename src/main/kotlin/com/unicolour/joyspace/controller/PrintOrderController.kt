@@ -89,16 +89,16 @@ class PrintOrderController {
 
         val endTime1 = (endTimeObj.clone() as Calendar).apply { add(Calendar.DAY_OF_MONTH, 1) }
 
-        val printOrders = printOrderService.queryPrinterOrders(1, 1_0000_0000,
+        val printOrders = printOrderService.queryPrinterOrders(
                 companyId, startTimeObj, endTime1, positionId, printStationId, "id desc")
 
-        modelAndView.model["printOrderCount"] = printOrders.totalElements
+        modelAndView.model["printOrderCount"] = printOrders.size
 
-        val idUserMap = userDao.findByIdIn(printOrders.content.map { it.userId }).map { Pair(it.id, it) }.toMap()
-        val idPrintStationMap = printStationDao.findByIdIn(printOrders.content.map { it.printStationId }).map { Pair(it.id, it) }.toMap()
+        val idUserMap = userDao.findByIdIn(printOrders.map { it.userId }).map { Pair(it.id, it) }.toMap()
+        val idPrintStationMap = printStationDao.findByIdIn(printOrders.map { it.printStationId }).map { Pair(it.id, it) }.toMap()
         val idPositionMap = positionDao.findByIdIn(idPrintStationMap.values.map { it.positionId }).map { Pair(it.id, it) }.toMap()
 
-        modelAndView.model["printOrders"] = printOrders.content.map {
+        modelAndView.model["printOrders"] = printOrders.map {
             val printStation = idPrintStationMap[it.printStationId]!!
             val position = idPositionMap[printStation.positionId]!!
             val user = idUserMap[it.userId]!!
@@ -179,6 +179,14 @@ class PrintOrderController {
 
             PrintOrderWrapper(it, position, "ID:${user.id}" + userName, tr, tri)
         }
+
+        val orderStat = printOrderService.printOrderStat(companyId, startTime, endTime1, inputPositionId, inputPrintStationId)
+
+        val turnOver = orderStat.totalAmount - orderStat.totalDiscount
+
+        modelAndView.model["orderCount"] = "${printOrders.totalElements} 份订单"
+        modelAndView.model["photoCopies"] = "${orderStat.printPageCount} 张照片"
+        modelAndView.model["turnOver"] = "交易额 ${turnOver/100}.${String.format("%02d", turnOver%100)} 元"
 
         if (partial == true) {
             modelAndView.viewName = "/printOrder/list :: order_list_content"

@@ -4,6 +4,7 @@ import com.unicolour.joyspace.dto.PrintOrderStatDTO
 import com.unicolour.joyspace.model.PrintOrder
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
+import org.springframework.data.domain.Sort
 import java.util.*
 
 interface PrintOrderCustomQuery {
@@ -11,7 +12,7 @@ interface PrintOrderCustomQuery {
                          startTime: Calendar?, endTime: Calendar?,
                          printStationIds: List<Int>): Page<PrintOrder>
 
-    fun queryPrintOrders(companyId: Int,
+    fun queryPrintOrders(sort: Sort, companyId: Int,
                          startTime: Calendar?, endTime: Calendar?,
                          printStationIds: List<Int>): List<PrintOrder>
 

@@ -41,4 +41,9 @@ interface PrintOrderService {
                            startTime: Calendar?, endTime: Calendar?,
                            positionId: Int, printStationId: Int,
                            order: String): Page<PrintOrder>
+    //订单查询
+    fun queryPrinterOrders(companyId: Int,
+                           startTime: Calendar?, endTime: Calendar?,
+                           positionId: Int, printStationId: Int,
+                           order: String): List<PrintOrder>
 }

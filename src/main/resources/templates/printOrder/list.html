@@ -217,6 +217,12 @@
 
 			<th:block th:fragment="order_list_content">
 			<div id="printOrderListTable" class="box-body">
+				<div class="row">
+					<span class="order_list_stat" th:text="${turnOver}"></span>
+					<span class="order_list_stat" th:text="${photoCopies}"></span>
+					<span class="order_list_stat" th:text="${orderCount}"></span>
+				</div>
+
 				<table class="table table-bordered table-striped">
 					<tr>
 						<th style="width:50px">ID</th>

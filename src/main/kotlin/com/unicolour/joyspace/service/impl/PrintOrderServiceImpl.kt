@@ -973,6 +973,39 @@ open class PrintOrderServiceImpl : PrintOrderService {
 
         return printOrderDao.queryPrintOrders(pageReq, companyId, startTime, endTime, printStationIds)
     }
+
+    override fun queryPrinterOrders(companyId: Int,
+                                    startTime: Calendar?, endTime: Calendar?,
+                                    positionId: Int, printStationId: Int,
+                                    order: String
+    ): List<PrintOrder> {
+
+        val orderField: String
+        val asc: Boolean
+
+        val t = order.indexOf(" ")
+        if (t != -1) {
+            orderField = order.substring(0, t)
+            asc = order.substring(t + 1).equals("ASC", ignoreCase = true)
+        } else {
+            orderField = order
+            asc = true
+        }
+
+        val printStationIds = ArrayList<Int>()
+        if (printStationId > 0) {
+            printStationIds.add(printStationId)
+        }
+        else if (positionId > 0) {
+            printStationIds.addAll(
+                    printStationDao.findByPositionId(positionId).map { it.id }
+            )
+        }
+
+        val sort = Sort(Sort.Order(if (asc) Sort.Direction.ASC else Sort.Direction.DESC, orderField))
+
+        return printOrderDao.queryPrintOrders(sort, companyId, startTime, endTime, printStationIds)
+    }
 }
 
 
