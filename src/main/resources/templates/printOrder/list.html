@@ -218,9 +218,9 @@
 			<th:block th:fragment="order_list_content">
 			<div id="printOrderListTable" class="box-body">
 				<div class="row">
-					<span class="order_list_stat" th:text="${turnOver}"></span>
-					<span class="order_list_stat" th:text="${photoCopies}"></span>
-					<span class="order_list_stat" th:text="${orderCount}"></span>
+					<span class="order_list_stat">交易额&nbsp;<span th:text="${turnOver}"></span>&nbsp;元</span>
+					<span class="order_list_stat"><span th:text="${photoCopies}"></span>&nbsp;张照片</span>
+					<span class="order_list_stat"><span th:text="${orderCount}"></span>&nbsp;份订单</span>
 				</div>
 
 				<table class="table table-bordered table-striped">

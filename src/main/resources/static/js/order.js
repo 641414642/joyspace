@@ -154,8 +154,14 @@ $(function() {
     $("#exportOrderListButton").on("click", function(e){
         e.preventDefault();
         var exportUrl = $("#exportOrderListButton").data("url");
+        var companyId = $("#inputCompanyId").val();
+        if (companyId === undefined || companyId === null) {
+            companyId = "";
+        }
+
         window.location.href = exportUrl +
-            "?positionId=" + $("#inputPositionId").val() +
+            "?companyId=" + companyId +
+            "&positionId=" + $("#inputPositionId").val() +
             "&printStationId=" + $("#inputPrintStationId").val() +
             "&startTime=" + encodeURIComponent($("#startTime").val()) +
             "&endTime=" + encodeURIComponent($("#endTime").val());

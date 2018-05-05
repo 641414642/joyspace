@@ -77,12 +77,18 @@ class PrintOrderController {
     @GetMapping("/printOrder/export")
     fun printOrderExport(
             modelAndView: ModelAndView,
+            @RequestParam(name = "companyId", required = false, defaultValue = "0") inputCompanyId: Int,
             @RequestParam(name = "positionId", required = false, defaultValue = "0") positionId: Int,
             @RequestParam(name = "printStationId", required = false, defaultValue = "0") printStationId: Int,
             @RequestParam(name = "startTime", required = false, defaultValue = "") startTime: String,
             @RequestParam(name = "endTime", required = false, defaultValue = "") endTime: String): ModelAndView {
-        val loginManager = managerService.loginManager
-        val companyId = loginManager!!.companyId
+        val isSuperAdmin = managerService.loginManagerHasRole("ROLE_SUPERADMIN")
+
+        val companyId = if (isSuperAdmin) {
+            inputCompanyId
+        } else {
+            managerService.loginManager!!.companyId
+        }
 
         val startTimeObj = parseDate(startTime)
         val endTimeObj = parseDate(endTime)
@@ -92,6 +98,10 @@ class PrintOrderController {
         val printOrders = printOrderService.queryPrinterOrders(
                 companyId, startTimeObj, endTime1, positionId, printStationId, "id desc")
 
+        val orderStat = printOrderService.printOrderStat(companyId, startTimeObj, endTime1, positionId, printStationId)
+
+        modelAndView.model["photoCopies"] = orderStat.printPageCount
+        modelAndView.model["turnOver"] = orderStat.totalAmount - orderStat.totalDiscount
         modelAndView.model["printOrderCount"] = printOrders.size
 
         val idUserMap = userDao.findByIdIn(printOrders.map { it.userId }).map { Pair(it.id, it) }.toMap()
@@ -184,9 +194,9 @@ class PrintOrderController {
 
         val turnOver = orderStat.totalAmount - orderStat.totalDiscount
 
-        modelAndView.model["orderCount"] = "${printOrders.totalElements} 份订单"
-        modelAndView.model["photoCopies"] = "${orderStat.printPageCount} 张照片"
-        modelAndView.model["turnOver"] = "交易额 ${turnOver/100}.${String.format("%02d", turnOver%100)} 元"
+        modelAndView.model["orderCount"] = printOrders.totalElements
+        modelAndView.model["photoCopies"] = orderStat.printPageCount
+        modelAndView.model["turnOver"] = "${turnOver/100}.${String.format("%02d", turnOver%100)}"
 
         if (partial == true) {
             modelAndView.viewName = "/printOrder/list :: order_list_content"

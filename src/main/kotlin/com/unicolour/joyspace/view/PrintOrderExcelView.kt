@@ -12,6 +12,9 @@ import javax.servlet.http.HttpServletResponse
 class PrintOrderExcelView : AbstractXlsxView() {
     override fun buildExcelDocument(model: MutableMap<String, Any>, workbook: Workbook, request: HttpServletRequest, response: HttpServletResponse) {
         val printOrders = model["printOrders"] as List<PrintOrderWrapper>
+        val orderCount = model["printOrderCount"] as Int
+        val photoCopies = model["photoCopies"] as Int
+        val turnOver = model["turnOver"] as Int
 
         response.setHeader("Content-Disposition", """attachment; filename="PrintOrders.xlsx"""")
 
@@ -31,9 +34,24 @@ class PrintOrderExcelView : AbstractXlsxView() {
         val currencyCellStyle = workbook.createCellStyle()
         currencyCellStyle.dataFormat = createHelper.createDataFormat().getFormat("""¥#,##0.00;¥-#,##0.00""")
 
-        // create header row
-        val header = sheet.createRow(0)
+
+        var rowOffset = 0
         var column = 0
+        val statHeaderRow = sheet.createRow(rowOffset++)
+        statHeaderRow.createCell(column++).apply { setCellValue("订单数量"); cellStyle = headerStyle }
+        statHeaderRow.createCell(column++).apply { setCellValue("照片数量"); cellStyle = headerStyle }
+        statHeaderRow.createCell(column).apply { setCellValue("营业额"); cellStyle = headerStyle }
+
+        column = 0
+        val statRow = sheet.createRow(rowOffset++)
+        statRow.createCell(column++).apply { setCellValue(orderCount.toDouble()); cellStyle = intCellStyle }
+        statRow.createCell(column++).apply { setCellValue(photoCopies.toDouble()); cellStyle = intCellStyle }
+        statRow.createCell(column).apply { setCellValue(turnOver / 100.0); cellStyle = currencyCellStyle }
+        rowOffset++
+
+        // create header row
+        val header = sheet.createRow(rowOffset)
+        column = 0
         header.createCell(column++).apply { setCellValue("ID"); cellStyle = headerStyle; sheet.setColumnWidth(columnIndex, 10 * 256) }
         header.createCell(column++).apply { setCellValue("编号"); cellStyle = headerStyle; sheet.setColumnWidth(columnIndex, 20 * 256) }
         header.createCell(column++).apply { setCellValue("创建时间"); cellStyle = headerStyle; sheet.setColumnWidth(columnIndex, 20 * 256) }
@@ -54,7 +72,7 @@ class PrintOrderExcelView : AbstractXlsxView() {
 
         for((index, wrapper) in printOrders.withIndex()){
             column = 0
-            val row =  sheet.createRow(index+1)
+            val row =  sheet.createRow(rowOffset + index + 1)
             row.createCell(column++).apply { setCellValue(wrapper.order.id.toDouble()); cellStyle = intCellStyle }
             row.createCell(column++).setCellValue(wrapper.order.orderNo)
             row.createCell(column++).apply { setCellValue(wrapper.order.createTime); cellStyle = dateTimeCellStyle }
