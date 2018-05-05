@@ -128,7 +128,7 @@
 }
 
 .order_stat_box {
-    width: 11.1%;
+    width: 33.3%;
     padding-left: 5px;
     padding-right: 5px;
     float: left;
@@ -137,7 +137,9 @@
 
 .order_stat_box h4 {
     font-size: 14px;
-    margin: 5px;
+    margin: 5px 0px;
+    overflow: hidden;
+    white-space: nowrap;
 }
 
 .order_stat_box p {
@@ -157,4 +159,16 @@
     display: inline-block;
     padding: 10px 20px 20px 50px;
     font-weight: bold;
+}
+
+@media (min-width: 768px) {
+    .order_stat_box {
+        width: 11.1%;
+    }
+
+    .order_stat_box h4 {
+        font-size: 14px;
+        margin: 5px;
+        white-space: wrap;
+    }
 }
