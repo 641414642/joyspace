@@ -147,6 +147,7 @@
 				<form th:action="@{/printOrder/list}" method="get" target="_self">
 					<input type="hidden" id="pageNoField" name="pageno" />
 					<input type="hidden" name="partial" value="false" />
+					<input type="hidden" name="query" value="true" />
 					<div class="form-inline">
 						<th:block sec:authorize="hasRole('ROLE_SUPERADMIN')">
 							<label class="form-label" for="inputCompanyId">投放商</label>
@@ -205,7 +206,7 @@
 						<a href="#" th:href="@{/printOrder/list}" class="btn btn-default btn-sm" style="margin-left: 10px">重置</a>
 						<a href="#" id="exportOrderListButton" class="btn btn-info btn-sm" style="margin-left: 10px" th:attr="data-url=@{/printOrder/export}">导出</a>
 
-						<div class="pull-right checkbox">
+						<div class="pull-right checkbox" th:if="${query==false}">
 							<label>
 								<input id="autoRefresh" type="checkbox" />
 								自动刷新
@@ -217,7 +218,7 @@
 
 			<th:block th:fragment="order_list_content">
 			<div id="printOrderListTable" class="box-body">
-				<div class="row">
+				<div class="row" th:classappend="${query ? 'query' : ''}">
 					<span class="order_list_stat">交易额&nbsp;<span th:text="${turnOver}"></span>&nbsp;元</span>
 					<span class="order_list_stat"><span th:text="${photoCopies}"></span>&nbsp;张照片</span>
 					<span class="order_list_stat"><span th:text="${orderCount}"></span>&nbsp;份订单</span>

@@ -136,6 +136,7 @@ class PrintOrderController {
     @GetMapping("/printOrder/list")
     fun printOrderList(
             modelAndView: ModelAndView,
+            @RequestParam(name = "query", required = false, defaultValue = "false") query: Boolean,
             @RequestParam(name = "inputCompanyId", required = false, defaultValue = "0") inputCompanyId: Int,
             @RequestParam(name = "inputPositionId", required = false, defaultValue = "0") inputPositionId: Int,
             @RequestParam(name = "inputPrintStationId", required = false, defaultValue = "0") inputPrintStationId: Int,
@@ -202,6 +203,8 @@ class PrintOrderController {
             modelAndView.viewName = "/printOrder/list :: order_list_content"
         }
         else {
+            modelAndView.model["query"] = query
+
             val dateFormat = SimpleDateFormat("yyyy-MM-dd")
 
             if (isSuperAdmin) {

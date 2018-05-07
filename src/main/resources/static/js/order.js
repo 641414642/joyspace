@@ -8,7 +8,8 @@ function viewPrintOrderTransferDetail(event) {
 }
 
 function refreshPrintOrderList(url ,pageNo) {
-    if (document.getElementById("autoRefresh").checked) {
+    var autoRefreshCheckBox = document.getElementById("autoRefresh");
+    if (autoRefreshCheckBox && autoRefreshCheckBox.checked) {
         $.ajax({
             type: "GET",
             url: url,
