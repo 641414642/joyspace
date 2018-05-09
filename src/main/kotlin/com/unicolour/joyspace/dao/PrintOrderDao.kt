@@ -8,7 +8,7 @@ import org.springframework.data.repository.CrudRepository
 import org.springframework.data.repository.query.Param
 import java.util.*
 
-interface PrintOrderDao : CrudRepository<PrintOrder, Int> {
+interface PrintOrderDao : CrudRepository<PrintOrder, Int>, PrintOrderCustomQuery {
     fun existsByOrderNo(orderNo: String) : Boolean
     fun findByOrderNo(orderNo: String): PrintOrder?
 
@@ -17,8 +17,6 @@ interface PrintOrderDao : CrudRepository<PrintOrder, Int> {
             @Param("printStationId") printStationId: Int,
             @Param("updateTime") updateTime: Calendar): List<PrintOrder>
 
-    fun findByCompanyIdOrderByIdDesc(companyId: Int, pageable: Pageable): Page<PrintOrder>
-    fun findByOrderNoIgnoreCaseAndCompanyId(orderNo: String, companyId: Int, pageable: Pageable): Page<PrintOrder>
     fun findByCompanyIdAndPayedIsTrueAndTransferedIsFalse(companyId: Int): List<PrintOrder>
     fun findByUserId(userId: Int): List<PrintOrder>
     fun countByUserIdAndPayedIsFalse(userId: Int): Long

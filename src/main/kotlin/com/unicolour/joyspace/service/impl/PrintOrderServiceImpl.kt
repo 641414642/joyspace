@@ -12,6 +12,9 @@ import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.core.io.Resource
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.PageRequest
+import org.springframework.data.domain.Sort
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
@@ -20,6 +23,7 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.support.TransactionTemplate
 import org.springframework.web.client.RestTemplate
 import org.springframework.web.multipart.MultipartFile
+import java.io.IOException
 import java.io.InputStreamReader
 import java.io.StringReader
 import java.math.BigInteger
@@ -177,6 +181,7 @@ open class PrintOrderServiceImpl : PrintOrderService {
         newOrder.printedOnPrintStation = false
         newOrder.transfered = false
         newOrder.transferProportion = printStation.transferProportion
+        newOrder.pageCount = orderInput.orderItems.sumBy { it.copies }
 
         val orderItems = ArrayList<PrintOrderItem>()
         newOrder.printOrderItems = orderItems
@@ -943,33 +948,92 @@ open class PrintOrderServiceImpl : PrintOrderService {
         throw ProcessException(1, "Failed WxEntTransfer for companyId=${record.companyId}, receiverOpenId=${record.receiverOpenId}, amount=${record.amount}")
     }
 
-    override fun printOrderStat(startTime: Calendar, endTime: Calendar): PrintOrderStatDTO {
-        var payedOrderCount = 0
-        var printPageCount = 0
-        var totalAmount = 0
-        var totalDiscount = 0
-
-        val printOrders = printOrderDao.findByUpdateTimeGreaterThanEqualAndUpdateTimeBefore(startTime, endTime)
-        for (printOrder in printOrders) {
-            if (printOrder.payed) {
-                payedOrderCount ++
-                totalAmount += printOrder.totalFee
-                totalDiscount += printOrder.discount
-            }
-
-            if (printOrder.printedOnPrintStation) {
-                printOrder.printOrderItems.forEach {
-                    printPageCount += it.copies
-                }
-            }
+    override fun printOrderStat(companyId: Int, startTime: Calendar, endTime: Calendar, positionId: Int, printStationId: Int): PrintOrderStatDTO {
+        val printStationIds = ArrayList<Int>()
+        if (printStationId > 0) {
+            printStationIds.add(printStationId)
+        }
+        else if (positionId > 0) {
+            printStationIds.addAll(
+                    printStationDao.findByPositionId(positionId).map { it.id }
+            )
         }
 
-        return PrintOrderStatDTO(
-                payedOrderCount,
-                printPageCount,
-                totalAmount,
-                totalDiscount
-        )
+
+        return printOrderDao.printOrderStat(
+                companyId = companyId,
+                startTime = startTime,
+                endTime = endTime,
+                payed = true,
+                printStationIds = printStationIds)
+    }
+
+    override fun queryPrinterOrders(pageNo: Int, pageSize: Int,
+                                    companyId: Int,
+                                    startTime: Calendar?, endTime: Calendar?,
+                                    positionId: Int, printStationId: Int,
+                                    order: String
+    ): Page<PrintOrder> {
+
+        val orderField: String
+        val asc: Boolean
+
+        val t = order.indexOf(" ")
+        if (t != -1) {
+            orderField = order.substring(0, t)
+            asc = order.substring(t + 1).equals("ASC", ignoreCase = true)
+        } else {
+            orderField = order
+            asc = true
+        }
+
+        val printStationIds = ArrayList<Int>()
+        if (printStationId > 0) {
+            printStationIds.add(printStationId)
+        }
+        else if (positionId > 0) {
+            printStationIds.addAll(
+                    printStationDao.findByPositionId(positionId).map { it.id }
+            )
+        }
+
+        val pageReq = PageRequest(pageNo - 1, pageSize,
+                Sort(Sort.Order(if (asc) Sort.Direction.ASC else Sort.Direction.DESC, orderField)))
+
+        return printOrderDao.queryPrintOrders(pageReq, companyId, startTime, endTime, printStationIds)
+    }
+
+    override fun queryPrinterOrders(companyId: Int,
+                                    startTime: Calendar?, endTime: Calendar?,
+                                    positionId: Int, printStationId: Int,
+                                    order: String
+    ): List<PrintOrder> {
+
+        val orderField: String
+        val asc: Boolean
+
+        val t = order.indexOf(" ")
+        if (t != -1) {
+            orderField = order.substring(0, t)
+            asc = order.substring(t + 1).equals("ASC", ignoreCase = true)
+        } else {
+            orderField = order
+            asc = true
+        }
+
+        val printStationIds = ArrayList<Int>()
+        if (printStationId > 0) {
+            printStationIds.add(printStationId)
+        }
+        else if (positionId > 0) {
+            printStationIds.addAll(
+                    printStationDao.findByPositionId(positionId).map { it.id }
+            )
+        }
+
+        val sort = Sort(Sort.Order(if (asc) Sort.Direction.ASC else Sort.Direction.DESC, orderField))
+
+        return printOrderDao.queryPrintOrders(sort, companyId, startTime, endTime, printStationIds)
     }
 }
 

@@ -4,6 +4,7 @@ import com.unicolour.joyspace.dto.*
 import com.unicolour.joyspace.model.PrintOrder
 import com.unicolour.joyspace.model.UserImageFile
 import graphql.schema.DataFetcher
+import org.springframework.data.domain.Page
 import org.springframework.web.multipart.MultipartFile
 import java.util.*
 
@@ -35,5 +36,17 @@ interface PrintOrderService {
     fun addReprintOrderTask(printOrderId: Int, printStationId: Int)
 
     //订单统计
-    fun printOrderStat(startTime: Calendar, endTime: Calendar): PrintOrderStatDTO
+    fun printOrderStat(companyId: Int, startTime: Calendar, endTime: Calendar, positionId: Int, printStationId: Int): PrintOrderStatDTO
+
+    //订单查询
+    fun queryPrinterOrders(pageNo: Int, pageSize: Int,
+                           companyId: Int,
+                           startTime: Calendar?, endTime: Calendar?,
+                           positionId: Int, printStationId: Int,
+                           order: String): Page<PrintOrder>
+    //订单查询
+    fun queryPrinterOrders(companyId: Int,
+                           startTime: Calendar?, endTime: Calendar?,
+                           positionId: Int, printStationId: Int,
+                           order: String): List<PrintOrder>
 }
