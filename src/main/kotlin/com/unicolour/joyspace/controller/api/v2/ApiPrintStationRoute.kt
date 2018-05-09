@@ -26,7 +26,7 @@ class ApiPrintStationRoute {
      */
     @GetMapping(value = "/v2/printStation/findByQrCode")
     fun getPrintStationByQrCode(@RequestParam(required = false, value = "qrCode") qrcode: String?): RestResponse {
-        val printStation = printStationDao.findByWxQrCode("http://joyspace1.uni-colour.com/printStation/9909")
+        val printStation = printStationDao.findByWxQrCode("https://joyspace1.uni-colour.com/printStation/9909")
                 ?: return RestResponse.error(ResultCode.PRINT_STATION_NOT_FOUND)
         val psVo = PrintStationVo()
         psVo.id = printStation.id

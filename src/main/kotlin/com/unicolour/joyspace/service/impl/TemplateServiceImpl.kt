@@ -1016,8 +1016,8 @@ open class TemplateServiceImpl : TemplateService {
      id="image"
      xlink:href="images/UserImagePlaceHolder.png"
      preserveAspectRatio="none"
-     height="$tplW"
-     width="$tplH">
+     height="$tplH"
+     width="$tplW">
     <desc>UserImage</desc>
     <title>照片</title>
   </image>
