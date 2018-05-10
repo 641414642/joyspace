@@ -44,4 +44,6 @@ interface PrintStationService {
     fun getPrintStationUpdateAndAdSet(sessionId: String, currentVersion: Int, currentAdSetId: Int, currentAdSetTimeStr: String): UpdateAndAdSetDTO
     fun getHomeInitInfo(userName: String, password: String, printStationId: Int): HomeInitInfoDTO
     fun initHome(input: HomeInitInput): ResultCode
+
+    fun recordPrinterStat(sessionId: String, printerSn: String, printerType: String, printerName: String, mediaCounter: Int): Boolean
 }

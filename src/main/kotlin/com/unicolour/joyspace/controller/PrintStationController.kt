@@ -324,8 +324,9 @@ class PrintStationController {
 
     @RequestMapping("/printStation/tasks", method = arrayOf(RequestMethod.GET))
     @ResponseBody
-    fun fetchedPrintStationTasks(@RequestParam("sessionId") sessionId: String,
-                    @RequestParam("taskIdAfter") taskIdAfter: Int) : List<PrintStationTaskDTO> {
+    fun fetchedPrintStationTasks(
+            @RequestParam("sessionId") sessionId: String,
+            @RequestParam("taskIdAfter") taskIdAfter: Int) : List<PrintStationTaskDTO> {
         val tasks = printStationService.getUnFetchedPrintStationTasks(sessionId, taskIdAfter)
         val taskDTOs = ArrayList<PrintStationTaskDTO>()
 
@@ -470,5 +471,17 @@ class PrintStationController {
     @ResponseBody
     fun initHome(@RequestBody input: HomeInitInput): Int {
         return printStationService.initHome(input).value
+    }
+
+    @PostMapping("/printStation/reportPrinterStat")
+    @ResponseBody
+    fun reportPrinterStat(
+            @RequestParam("sessionId") sessionId: String,
+            @RequestParam("printerSerialNo") printerSn: String,
+            @RequestParam("printerType") printerType: String,
+            @RequestParam("printerName") printerName: String,
+            @RequestParam("mediaCounter") mediaCounter: Int
+    ): Boolean {
+        return printStationService.recordPrinterStat(sessionId, printerSn, printerType, printerName, mediaCounter)
     }
 }
