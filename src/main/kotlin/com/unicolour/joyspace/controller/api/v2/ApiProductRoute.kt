@@ -54,9 +54,9 @@ class ApiProductRoute {
         advers.add(Advert("ad_5", "轮播图", "www.baidu.com", "https://joyspace1.uni-colour.com/doc/home_page/home_5.jpg"))
         val producTypes = mutableListOf<ProductType>()
         producTypes.add(ProductType(0, "普通照片", "智能手机照片高质量打印","https://joyspace1.uni-colour.com/doc/home_page/product_type_0.png"))
-        producTypes.add(ProductType(1, "证件照", "支持多种尺寸，自动排版","https://joyspace1.uni-colour.com/doc/home_page/product_type_0.png"))
-        producTypes.add(ProductType(2, "模版拼图", "多种精美模板 随心定制","https://joyspace1.uni-colour.com/doc/home_page/product_type_0.png"))
-        producTypes.add(ProductType(3, "相册", "生活也许是一本书","https://joyspace1.uni-colour.com/doc/home_page/product_type_0.png"))
+        producTypes.add(ProductType(1, "证件照", "支持多种尺寸，自动排版","https://joyspace1.uni-colour.com/doc/home_page/product_type_1.png"))
+        producTypes.add(ProductType(2, "模版拼图", "多种精美模板 随心定制","https://joyspace1.uni-colour.com/doc/home_page/product_type_2.png"))
+        producTypes.add(ProductType(3, "相册", "生活也许是一本书","https://joyspace1.uni-colour.com/doc/home_page/product_type_3.png"))
         val homePage = HomePageVo(advers, producTypes)
         return RestResponse.ok(homePage)
     }

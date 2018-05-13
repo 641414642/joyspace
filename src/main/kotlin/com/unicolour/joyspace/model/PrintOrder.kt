@@ -88,6 +88,11 @@ class PrintOrder {
     @Column
     @NotNull
     var pageCount = 0     //打印页数
+
+    //是否已取消订单
+    @Column
+    @NotNull
+    var canceled: Boolean = false
 }
 
 @Entity

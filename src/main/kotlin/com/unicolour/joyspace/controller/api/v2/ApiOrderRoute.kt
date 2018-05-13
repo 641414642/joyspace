@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.multipart.MultipartFile
+import java.util.*
 import javax.servlet.http.HttpServletRequest
 
 
@@ -23,9 +24,9 @@ class ApiOrderRoute {
     @Autowired
     private lateinit var printOrderDao: PrintOrderDao
     @Autowired
-    private lateinit var userLoginSessionDao:UserLoginSessionDao
+    private lateinit var userLoginSessionDao: UserLoginSessionDao
     @Autowired
-    private lateinit var userDao:UserDao
+    private lateinit var userDao: UserDao
 
     /**
      * 创建订单
@@ -38,12 +39,12 @@ class ApiOrderRoute {
             //val params: WxPayParams? = null
             val orderItems = order.printOrderItems.map { OrderItemRet(it.id, it.productId) }
             return RestResponse.ok(CreateOrderRequestResult(order.id, order.orderNo, params, orderItems, order.totalFee, order.discount))
-        } catch(e: ProcessException) {
+        } catch (e: ProcessException) {
             e.printStackTrace()
-            return RestResponse(e.errcode,null,e.message)
-        }  catch (ex: Exception) {
+            return RestResponse(e.errcode, null, e.message)
+        } catch (ex: Exception) {
             ex.printStackTrace()
-            return RestResponse(1,null,ex.message)
+            return RestResponse(1, null, ex.message)
         }
     }
 
@@ -52,9 +53,15 @@ class ApiOrderRoute {
      * 取消订单
      */
     @PostMapping(value = "/v2/order/cancel")
-    fun cancelOrder(): RestResponse {
-        val order = OrderVo()
-        return RestResponse.ok(order)
+    fun cancelOrder(@RequestParam("sessionId") sessionId: String,
+                    @RequestParam("orderId") orderId: Int): RestResponse {
+        val session = userLoginSessionDao.findOne(sessionId) ?: return RestResponse.error(ResultCode.INVALID_USER_LOGIN_SESSION)
+        userDao.findOne(session.userId) ?: return RestResponse.error(ResultCode.INVALID_USER_LOGIN_SESSION)
+        val order = printOrderDao.findOne(orderId)
+        order.canceled = true
+        order.updateTime = Calendar.getInstance()
+        printOrderDao.save(order)
+        return RestResponse.ok()
     }
 
     //微信支付回调
@@ -78,15 +85,13 @@ class ApiOrderRoute {
     }
 
 
-
-
     //上传订单图片
     @PostMapping("/v2/order/image")
     fun uploadOrderItemImage(request: HttpServletRequest,
                              @RequestParam("sessionId") sessionId: String,
                              @RequestParam("orderItemId") orderItemId: Int,
                              @RequestParam("name") name: String,
-                             @RequestParam("image") imgFile: MultipartFile?) : ResponseEntity<UploadOrderImageResult> {
+                             @RequestParam("image") imgFile: MultipartFile?): ResponseEntity<UploadOrderImageResult> {
 
         val allUploaded = printOrderService.uploadOrderImage(sessionId, orderItemId, imgFile)
         return ResponseEntity.ok(UploadOrderImageResult(allUploaded))
@@ -101,7 +106,7 @@ class ApiOrderRoute {
         val session = userLoginSessionDao.findOne(sessionId)
         val user = userDao.findOne(session.userId) ?: return RestResponse.error(ResultCode.INVALID_USER_LOGIN_SESSION)
         val orderList = printOrderDao.findByUserId(user.id)
-        val orderListVo = orderList.map {
+        val orderListVo = orderList.filter { !it.canceled }.map {
             var status = 0
             if (!it.payed) status = 0
             if (it.payed && !it.printedOnPrintStation) status = 1
