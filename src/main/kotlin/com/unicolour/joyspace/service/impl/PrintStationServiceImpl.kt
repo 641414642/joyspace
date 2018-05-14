@@ -877,17 +877,17 @@ open class PrintStationServiceImpl : PrintStationService {
             record.printerName = printerName
             record.mediaCounter = mediaCounter
 
+            val printerTypeRecord = findPrinterType(printerType)
+            val alertThresholds = printerTypeRecord?.mediaAlertThresholds?.splitToSequence(',')?.map { it.toIntOrNull() }
+
             val phoneNumber = manager?.cellPhone ?: manager?.phone
-            if (phoneNumber != null) {
+            if (phoneNumber != null && alertThresholds != null && !alertThresholds.contains(null)) {
                 var mediaCounterThreshold = 0
-                if ((lastRecord == null || lastRecord.mediaCounter>= 10) && mediaCounter < 10) {
-                    mediaCounterThreshold = 10
-                }
-                else if ((lastRecord == null || lastRecord.mediaCounter>= 20) && mediaCounter < 20) {
-                    mediaCounterThreshold = 20
-                }
-                else if ((lastRecord == null || lastRecord.mediaCounter>= 50) && mediaCounter < 50) {
-                    mediaCounterThreshold = 50
+                for (alertThreshold in alertThresholds) {
+                    if ((lastRecord == null || lastRecord.mediaCounter >= alertThreshold!!) && mediaCounter < alertThreshold!!) {
+                        mediaCounterThreshold = alertThreshold
+                        break
+                    }
                 }
 
                 if (mediaCounterThreshold > 0) {
@@ -910,6 +910,15 @@ open class PrintStationServiceImpl : PrintStationService {
         else {
             return false
         }
+    }
+
+    private fun findPrinterType(printerType: String): PrinterType? {
+        var pTypeRecord = printerTypeDao.findOne(printerType)
+        if (pTypeRecord == null && printerType.contains("EPSON")) {
+            pTypeRecord = printerTypeDao.findOne("EPSON")
+        }
+
+        return pTypeRecord
     }
 }
 

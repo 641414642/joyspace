@@ -19,5 +19,10 @@ class PrinterType {
     @Column
     @NotNull
     var resolution: Int = 0
+
+    /** 耗材报警阈值列表 (从高到低，用逗号分隔) */
+    @Column
+    @NotNull
+    var mediaAlertThresholds: String = ""
 }
 

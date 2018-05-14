@@ -54,8 +54,14 @@ alter table print_station_login_session drop column version;
 insert into printer_type (name,resolution) values ('CY', 300);
 insert into printer_type (name,resolution) values ('EPSON SL-D700', 360);
 insert into printer_type (name,resolution) values ('Shinko CHC-S2145', 300);
+insert into printer_type (name,resolution) values ('EPSON', 360);
 
 alter table print_order add column page_count integer;
 update print_order set page_count = (select sum(copies) from print_order_item where print_order_id=print_order.id);
 update print_order set page_count = 0 where page_count is NULL;
 alter table print_order alter column page_count set not null;
+
+alter table printer_type add column media_alert_thresholds varchar(100);
+update printer_type set media_alert_thresholds='';
+update printer_type set media_alert_thresholds='50,25,10' where name='CY';
+alter table printer_type alter column media_alert_thresholds set not null;
