@@ -16,5 +16,9 @@ class OrderItemInput(
 
 class OrderCancelInput(
         var sessionId: String = "",
-        var orderId:Int = 0
+        var orderId: Int = 0)
+
+class OrderPayInput(
+        var sessionId: String = "",
+        var orderId: Int = 0
 )
