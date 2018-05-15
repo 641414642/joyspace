@@ -1031,6 +1031,69 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </div>
 </div>
 <div class="sect3">
+<h4 id="_支付订单">支付订单:</h4>
+<div class="ulist">
+<ul>
+<li>
+<p>URL: /v2/order/pay</p>
+</li>
+<li>
+<p>Method: POST</p>
+</li>
+<li>
+<p>RequestBody:</p>
+</li>
+</ul>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>		{
+		  "sessionId" : "xxxxxxxxx",
+		  "orderId" : 123
+		}</pre>
+</div>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>返回:</p>
+</li>
+</ul>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>	{
+        "state" : 0,
+        "msg" : null,
+		"result":{
+		    "orderId": x,         //订单id
+            "orderNo": "xxxxxxxxx",    //订单编号
+            "wxPayParams": {
+                "timeStamp" : "1499865120",
+                "nonceStr": "asdfasdfasdfas",
+                "pkg": "prepay_id=wx23423452345dfgl",
+                "paySign" : "6354ldgsgadfas"
+            },
+            "totalFee": xxx,     //总价, 单位为分
+            "discount": xxx,      //折扣, 单位为分,  总价-折扣+邮费 为用户应支付的价格
+            "postage": xxx,       //邮费, 单位为分
+            "orderItems" {                 //和请求中的 orderItems 对应
+                {
+                    "id": xx,              //订单项id
+                    "productId" : xx       //产品id
+                },
+                {
+                    "id": xx,
+                    "productId" : xx
+                },
+                ...
+            }
+		}
+	}</pre>
+</div>
+</div>
+</div>
+<div class="sect3">
 <h4 id="_取消订单">取消订单:</h4>
 <div class="ulist">
 <ul>
@@ -1427,6 +1490,74 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </div>
 </div>
 <div class="sect3">
+<h4 id="_获取订单详情">获取订单详情:</h4>
+<div class="ulist">
+<ul>
+<li>
+<p>URL: /v2/order</p>
+</li>
+<li>
+<p>Method: GET</p>
+</li>
+<li>
+<p>参数:</p>
+</li>
+</ul>
+</div>
+<table class="tableblock frame-all grid-all spread">
+<colgroup>
+<col style="width: 50%;">
+<col style="width: 50%;">
+</colgroup>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">参数名</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">描述</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">sessionId</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">登录返回的sessionId</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">orderId</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">订单ID</p></td>
+</tr>
+</tbody>
+</table>
+<div class="ulist">
+<ul>
+<li>
+<p>返回:</p>
+</li>
+</ul>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>        {
+            "state" : 0,
+            "msg" : null,
+            "result"{
+                           "orderId":321,
+                           "orderNo":"",
+                            "companyId":xx,
+                            "printStationId":xx,
+                            "createTime":"",
+                            "payTime":"",
+                            "totalFee":xx,
+                            "updateTime":"",
+                            "name":产品名称,
+                            "count":10,  //张数
+                            "productType":0,
+                            "productTypeStr":"普通照片",
+                            "productImgUrl":"xxx",   //产品的缩略图
+                            "printType":0     //0：现场取片；1：邮寄配送
+                            .
+            }
+    	}</pre>
+</div>
+</div>
+</div>
+<div class="sect3">
 <h4 id="_新增地址">新增地址:</h4>
 <div class="ulist">
 <ul>
@@ -1630,7 +1761,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2018-05-13 23:49:14 +08:00
+Last updated 2018-05-15 21:44:41 +08:00
 </div>
 </div>
 </body>

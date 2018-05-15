@@ -151,17 +151,9 @@ open class PrintOrderServiceImpl : PrintOrderService {
 
     @Transactional
     override fun createOrder(orderInput: OrderInput): PrintOrder {
-        val session = userLoginSessionDao.findOne(orderInput.sessionId)
+        val session = userLoginSessionDao.findOne(orderInput.sessionId) ?: throw ProcessException(1, "用户未登录")
 
-        if (session == null) {
-            throw ProcessException(1, "用户未登录")
-        }
-
-        val printStation = printStationDao.findOne(orderInput.printStationId)
-
-        if (printStation == null) {
-            throw ProcessException(2, "没有找到指定的自助机")
-        }
+        val printStation = printStationDao.findOne(orderInput.printStationId) ?: throw ProcessException(2, "没有找到指定的自助机")
 
         val ret = calculateOrderFee(orderInput)
 

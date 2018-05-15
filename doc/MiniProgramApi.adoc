@@ -368,6 +368,51 @@
 	}
 ----
 
+==== 支付订单:
+- URL: /v2/order/pay
+- Method: POST
+- RequestBody:
+
+----
+		{
+		  "sessionId" : "xxxxxxxxx",
+		  "orderId" : 123
+		}
+----
+
+- 返回:
+
+----
+	{
+        "state" : 0,
+        "msg" : null,
+		"result":{
+		    "orderId": x,         //订单id
+            "orderNo": "xxxxxxxxx",    //订单编号
+            "wxPayParams": {
+                "timeStamp" : "1499865120",
+                "nonceStr": "asdfasdfasdfas",
+                "pkg": "prepay_id=wx23423452345dfgl",
+                "paySign" : "6354ldgsgadfas"
+            },
+            "totalFee": xxx,     //总价, 单位为分
+            "discount": xxx,      //折扣, 单位为分,  总价-折扣+邮费 为用户应支付的价格
+            "postage": xxx,       //邮费, 单位为分
+            "orderItems" {                 //和请求中的 orderItems 对应
+                {
+                    "id": xx,              //订单项id
+                    "productId" : xx       //产品id
+                },
+                {
+                    "id": xx,
+                    "productId" : xx
+                },
+                ...
+            }
+		}
+	}
+----
+
 ==== 取消订单:
 - URL: /v2/order/cancel
 - Method: POST
@@ -550,6 +595,44 @@
                         }
                         ...
                                 ]
+            }
+    	}
+----
+
+
+
+==== 获取订单详情:
+- URL: /v2/order
+- Method: GET
+- 参数:
+|==========================================================
+|参数名         |描述
+|sessionId      |登录返回的sessionId
+|orderId      |订单ID
+|==========================================================
+
+- 返回:
+
+----
+        {
+            "state" : 0,
+            "msg" : null,
+            "result"{
+                           "orderId":321,
+                           "orderNo":"",
+                            "companyId":xx,
+                            "printStationId":xx,
+                            "createTime":"",
+                            "payTime":"",
+                            "totalFee":xx,
+                            "updateTime":"",
+                            "name":产品名称,
+                            "count":10,  //张数
+                            "productType":0,
+                            "productTypeStr":"普通照片",
+                            "productImgUrl":"xxx",   //产品的缩略图
+                            "printType":0     //0：现场取片；1：邮寄配送
+                            .
             }
     	}
 ----

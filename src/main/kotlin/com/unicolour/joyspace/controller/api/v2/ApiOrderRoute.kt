@@ -30,7 +30,7 @@ class ApiOrderRoute {
     @Autowired
     private lateinit var userDao: UserDao
     @Autowired
-    private lateinit var productDao:ProductDao
+    private lateinit var productDao: ProductDao
 
     /**
      * 创建订单
@@ -39,6 +39,11 @@ class ApiOrderRoute {
     fun createOrder(@RequestBody orderInput: OrderInput): RestResponse {
         try {
             val order = printOrderService.createOrder(orderInput)
+            if ((order.totalFee - order.discount) <= 0) {
+                order.payed = true
+                order.updateTime = Calendar.getInstance()
+                printOrderDao.save(order)
+            }
             val params = printOrderService.startPayment(order.id)
             //val params: WxPayParams? = null
             val orderItems = order.printOrderItems.map { OrderItemRet(it.id, it.productId) }
@@ -60,7 +65,12 @@ class ApiOrderRoute {
         try {
             val session = userLoginSessionDao.findOne(orderInput.sessionId) ?: return RestResponse.error(ResultCode.INVALID_USER_LOGIN_SESSION)
             userDao.findOne(session.userId) ?: return RestResponse.error(ResultCode.INVALID_USER_LOGIN_SESSION)
-            val order = printOrderDao.findOne(orderInput.orderId)?:return RestResponse.error(ResultCode.PRINT_ORDER_NOT_FOUND)
+            val order = printOrderDao.findOne(orderInput.orderId) ?: return RestResponse.error(ResultCode.PRINT_ORDER_NOT_FOUND)
+            if ((order.totalFee - order.discount) <= 0){
+                order.payed = true
+                order.updateTime = Calendar.getInstance()
+                printOrderDao.save(order)
+            }
             val params = printOrderService.startPayment(orderInput.orderId)
             val orderItems = order.printOrderItems.map { OrderItemRet(it.id, it.productId) }
             return RestResponse.ok(CreateOrderRequestResult(order.id, order.orderNo, params, orderItems, order.totalFee, order.discount))
@@ -72,7 +82,6 @@ class ApiOrderRoute {
             return RestResponse(1, null, ex.message)
         }
     }
-
 
 
     /**
@@ -159,6 +168,44 @@ class ApiOrderRoute {
                     0)
         }
         return RestResponse.ok(orderListVo)
+    }
+
+    /**
+     * 获取订单详情
+     */
+    @GetMapping(value = "/v2/order")
+    fun getOrder(@RequestParam("sessionId") sessionId: String,
+                 @RequestParam("orderId") orderId: Int): RestResponse {
+        val session = userLoginSessionDao.findOne(sessionId) ?: return RestResponse.error(ResultCode.INVALID_USER_LOGIN_SESSION)
+        userDao.findOne(session.userId) ?: return RestResponse.error(ResultCode.INVALID_USER_LOGIN_SESSION)
+        val order = printOrderDao.findOne(orderId) ?: return RestResponse.error(ResultCode.PRINT_ORDER_NOT_FOUND)
+        var status = 0
+        if (!order.payed) status = 0
+        if (order.payed && !order.printedOnPrintStation) status = 1
+        if (order.printedOnPrintStation) status = 2
+        val product = productDao.findOne(order.printOrderItems.first().productId)
+        val thumbnailImageUrl = product.imageFiles
+                .filter { it.type == ProductImageFileType.THUMB.value }
+                .map { "/assets/product/images/${it.id}.${it.fileType}" }
+                .firstOrNull()
+        val productType = order.printOrderItems.first().productType
+        val productTypeStr = com.unicolour.joyspace.model.ProductType.values().first { it.value == productType }.dispName
+        val resOrderVo = OrderSimpleVo(order.id,
+                order.orderNo,
+                order.totalFee,
+                order.discount,
+                0,
+                order.createTime,
+                status,
+                order.updateTime,
+                product.name,
+                order.pageCount,
+                productType,
+                productTypeStr,
+                thumbnailImageUrl,
+                0)
+
+        return RestResponse.ok(resOrderVo)
     }
 
 
