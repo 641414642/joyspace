@@ -13,3 +13,8 @@ class OrderItemInput(
         var productVersion: String = "",  //产品版本号
         var images: List<ImageParam>? = null
 )
+
+class OrderPayInput(
+        var sessionId: String = "",
+        var orderId: Int = 0
+)

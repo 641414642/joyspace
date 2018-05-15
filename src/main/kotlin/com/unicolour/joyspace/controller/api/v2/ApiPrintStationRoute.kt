@@ -6,6 +6,7 @@ import com.unicolour.joyspace.dto.PrintStationProduct
 import com.unicolour.joyspace.dto.PrintStationVo
 import com.unicolour.joyspace.dto.ResultCode
 import com.unicolour.joyspace.dto.common.RestResponse
+import com.unicolour.joyspace.service.PrintStationService
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.GetMapping
@@ -19,6 +20,8 @@ class ApiPrintStationRoute {
     private lateinit var printStationProductDao: PrintStationProductDao
     @Autowired
     private lateinit var printStationDao: PrintStationDao
+    @Autowired
+    private lateinit var printStationService: PrintStationService
 
 
     /**
@@ -39,7 +42,9 @@ class ApiPrintStationRoute {
         psVo.status = printStation.status
 
         psVo.products = printStationProductDao.findByPrintStationId(printStation.id).map {
-            PrintStationProduct(it.productId, it.product.name, it.product.template.type.toString(), it.product.defaultPrice)
+            val priceMap: Map<Int, Int> = printStationService.getPriceMap(printStation)
+            val price = priceMap.getOrDefault(it.productId, it.product.defaultPrice)
+            PrintStationProduct(it.productId, it.product.name, it.product.template.type.toString(), price)
         }.toMutableList()
         return RestResponse.ok(psVo)
     }

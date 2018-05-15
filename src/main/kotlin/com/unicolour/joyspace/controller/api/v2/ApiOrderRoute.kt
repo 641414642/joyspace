@@ -48,6 +48,27 @@ class ApiOrderRoute {
         }
     }
 
+    /**
+     * 支付订单
+     */
+    @PostMapping(value = "/v2/order/pay")
+    fun payOrder(@RequestBody orderInput: OrderPayInput): RestResponse {
+        try {
+            val session = userLoginSessionDao.findOne(orderInput.sessionId) ?: return RestResponse.error(ResultCode.INVALID_USER_LOGIN_SESSION)
+            userDao.findOne(session.userId) ?: return RestResponse.error(ResultCode.INVALID_USER_LOGIN_SESSION)
+            val order = printOrderDao.findOne(orderInput.orderId)?:return RestResponse.error(ResultCode.PRINT_ORDER_NOT_FOUND)
+            val params = printOrderService.startPayment(orderInput.orderId)
+            val orderItems = order.printOrderItems.map { OrderItemRet(it.id, it.productId) }
+            return RestResponse.ok(CreateOrderRequestResult(order.id, order.orderNo, params, orderItems, order.totalFee, order.discount))
+        } catch (e: ProcessException) {
+            e.printStackTrace()
+            return RestResponse(e.errcode, null, e.message)
+        } catch (ex: Exception) {
+            ex.printStackTrace()
+            return RestResponse(1, null, ex.message)
+        }
+    }
+
 
     /**
      * 取消订单
