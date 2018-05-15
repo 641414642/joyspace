@@ -19,8 +19,8 @@ interface PrintOrderDao : CrudRepository<PrintOrder, Int>, PrintOrderCustomQuery
 
     fun findByCompanyIdAndPayedIsTrueAndTransferedIsFalse(companyId: Int): List<PrintOrder>
     fun findByUserId(userId: Int): List<PrintOrder>
-    fun countByUserIdAndPayedIsFalse(userId: Int): Long
-    fun countByUserIdAndPayedIsTrueAndPrintedOnPrintStationIsFalse(userId: Int): Long
+    fun countByUserIdAndPayedIsFalseAndCanceledIsFalse(userId: Int): Long
+    fun countByUserIdAndPayedIsTrueAndPrintedOnPrintStationIsFalseAndCanceledIsFalse(userId: Int): Long
     fun countByUserIdAndPrintedOnPrintStationIsTrue(userId: Int): Long
 
     fun findByUpdateTimeGreaterThanEqualAndUpdateTimeBefore(startTime: Calendar, endTime: Calendar): Iterable<PrintOrder>

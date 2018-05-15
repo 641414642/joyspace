@@ -38,8 +38,8 @@ class ApiUserRoute {
         val userInfo = UserInfoVo()
         userInfo.nickName = user.nickName
         userInfo.imageUrl = user.avatar
-        userInfo.unPayCount = printOrderDao.countByUserIdAndPayedIsFalse(user.id).toInt()
-        userInfo.handlingCount = printOrderDao.countByUserIdAndPayedIsTrueAndPrintedOnPrintStationIsFalse(user.id).toInt()
+        userInfo.unPayCount = printOrderDao.countByUserIdAndPayedIsFalseAndCanceledIsFalse(user.id).toInt()
+        userInfo.handlingCount = printOrderDao.countByUserIdAndPayedIsTrueAndPrintedOnPrintStationIsFalseAndCanceledIsFalse(user.id).toInt()
         return RestResponse.ok(userInfo)
     }
 

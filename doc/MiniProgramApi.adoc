@@ -537,8 +537,14 @@
                             "printStationId":xx,
                             "createTime":"",
                             "payTime":"",
-                            "totalFee":xx
-                            .
+                            "totalFee":xx,
+                            "updateTime":"",
+                            "name":产品名称,
+                            "count":10,  //张数
+                            "productType":0,
+                            "productTypeStr":"普通照片",
+                            "productImgUrl":"xxx",   //产品的缩略图
+                            "printType":0     //0：现场取片；1：邮寄配送
                             .
                             .
                         }

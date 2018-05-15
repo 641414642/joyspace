@@ -1,11 +1,13 @@
 package com.unicolour.joyspace.controller.api.v2
 
 import com.unicolour.joyspace.dao.PrintOrderDao
+import com.unicolour.joyspace.dao.ProductDao
 import com.unicolour.joyspace.dao.UserDao
 import com.unicolour.joyspace.dao.UserLoginSessionDao
 import com.unicolour.joyspace.dto.*
 import com.unicolour.joyspace.dto.common.RestResponse
 import com.unicolour.joyspace.exception.ProcessException
+import com.unicolour.joyspace.model.ProductImageFileType
 import com.unicolour.joyspace.service.PrintOrderService
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
@@ -27,6 +29,8 @@ class ApiOrderRoute {
     private lateinit var userLoginSessionDao: UserLoginSessionDao
     @Autowired
     private lateinit var userDao: UserDao
+    @Autowired
+    private lateinit var productDao:ProductDao
 
     /**
      * 创建订单
@@ -53,11 +57,10 @@ class ApiOrderRoute {
      * 取消订单
      */
     @PostMapping(value = "/v2/order/cancel")
-    fun cancelOrder(@RequestParam("sessionId") sessionId: String,
-                    @RequestParam("orderId") orderId: Int): RestResponse {
-        val session = userLoginSessionDao.findOne(sessionId) ?: return RestResponse.error(ResultCode.INVALID_USER_LOGIN_SESSION)
+    fun cancelOrder(@RequestBody param: OrderCancelInput): RestResponse {
+        val session = userLoginSessionDao.findOne(param.sessionId) ?: return RestResponse.error(ResultCode.INVALID_USER_LOGIN_SESSION)
         userDao.findOne(session.userId) ?: return RestResponse.error(ResultCode.INVALID_USER_LOGIN_SESSION)
-        val order = printOrderDao.findOne(orderId)
+        val order = printOrderDao.findOne(param.orderId)
         order.canceled = true
         order.updateTime = Calendar.getInstance()
         printOrderDao.save(order)
@@ -111,7 +114,27 @@ class ApiOrderRoute {
             if (!it.payed) status = 0
             if (it.payed && !it.printedOnPrintStation) status = 1
             if (it.printedOnPrintStation) status = 2
-            OrderSimpleVo(it.id, it.orderNo, it.totalFee, it.discount, 0, it.createTime, status)
+            val product = productDao.findOne(it.printOrderItems.first().productId)
+            val thumbnailImageUrl = product.imageFiles
+                    .filter { it.type == ProductImageFileType.THUMB.value }
+                    .map { "/assets/product/images/${it.id}.${it.fileType}" }
+                    .firstOrNull()
+            val productType = it.printOrderItems.first().productType
+            val productTypeStr = com.unicolour.joyspace.model.ProductType.values().first { it.value == productType }.dispName
+            OrderSimpleVo(it.id,
+                    it.orderNo,
+                    it.totalFee,
+                    it.discount,
+                    0,
+                    it.createTime,
+                    status,
+                    it.updateTime,
+                    product.name,
+                    it.pageCount,
+                    productType,
+                    productTypeStr,
+                    thumbnailImageUrl,
+                    0)
         }
         return RestResponse.ok(orderListVo)
     }

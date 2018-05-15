@@ -13,3 +13,8 @@ class OrderItemInput(
         var productVersion: String = "",  //产品版本号
         var images: List<ImageParam>? = null
 )
+
+class OrderCancelInput(
+        var sessionId: String = "",
+        var orderId:Int = 0
+)

@@ -47,11 +47,11 @@
         },
         {
           "id": 2,
-          "type": "image",
+          "type": "front",
           "images": [
             {
               "id": 1,
-              "type": "user",
+              "type": "sticker",
               "x": 0,
               "y": 0,
               "width": 2160,

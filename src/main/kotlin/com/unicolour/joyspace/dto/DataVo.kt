@@ -65,7 +65,14 @@ data class OrderSimpleVo(var orderId: Int? = null,
                          var discount: Int? = null,
                          var postage: Int? = null,
                          var creatTime:Calendar? = null,
-                         var status:Int? = null)
+                         var status:Int? = null,
+                         var updateTime:Calendar? = null,
+                         var name:String? = null,//产品类型+产品名称
+                         var count:Int? = null,//该笔订单的张数
+                         var productType:Int? = null,
+                         var productTypeStr:String? = null,
+                         var productImgUrl:String? = null,
+                         var printType:Int? = null)//打印方式：0：现场取片；1：邮寄配送
 
 data class OrderVo(var orderId: Int? = null,
                    var orderNo: String? = null,
