@@ -22,3 +22,8 @@ class OrderPayInput(
         var sessionId: String = "",
         var orderId: Int = 0
 )
+
+class CouponInput(
+        var sessionId: String = "",
+        var couponCode: String = ""
+)

@@ -4,6 +4,7 @@ import com.unicolour.joyspace.dao.CouponDao
 import com.unicolour.joyspace.dao.UserDao
 import com.unicolour.joyspace.dao.UserLoginSessionDao
 import com.unicolour.joyspace.dto.ClaimCouponResult
+import com.unicolour.joyspace.dto.CouponInput
 import com.unicolour.joyspace.dto.CouponVo
 import com.unicolour.joyspace.dto.ResultCode
 import com.unicolour.joyspace.dto.common.RestResponse
@@ -12,10 +13,7 @@ import com.unicolour.joyspace.service.CouponService
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.transaction.support.TransactionTemplate
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestParam
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 
 @RestController
 class ApiCouponRoute {
@@ -132,15 +130,14 @@ class ApiCouponRoute {
      * 用户领取优惠券
      */
     @PostMapping(value = "/v2/user/claimCoupon")
-    fun claimCoupon(@RequestParam("sessionId") sessionId: String,
-                    @RequestParam("couponCode") couponCode: String): RestResponse {
-        val session = userLoginSessionDao.findOne(sessionId)
+    fun claimCoupon(@RequestBody param: CouponInput): RestResponse {
+        val session = userLoginSessionDao.findOne(param.sessionId)
                 ?: return RestResponse.error(ResultCode.INVALID_USER_LOGIN_SESSION)
         val user = userDao.findOne(session.userId)
         var result = ClaimCouponResult()
         synchronized(couponLock, {
             transactionTemplate.execute {
-                result = couponService.claimCouponResult(couponCode, session, user)
+                result = couponService.claimCouponResult(param.couponCode, session, user)
             }
         })
         return if (result.result == 0) {
@@ -153,7 +150,7 @@ class ApiCouponRoute {
                     coupon.expire,
                     coupon.minExpense,
                     coupon.discount,
-                    0))
+                    1))
         } else {
             RestResponse(result.result, null, result.description)
         }
