@@ -555,7 +555,7 @@ open class PrintOrderServiceImpl : PrintOrderService {
             orderTransferFeeAddUp += orderTransferFee
         }
 
-        val totalTransferFee:Int = maxOf(1, (totalAmount.toDouble() * wxPayTransferCharge + 0.5).toInt())  //根据订单总金额计算的手续费
+        val totalTransferFee:Int = Math.ceil(totalAmount.toDouble() * wxPayTransferCharge).toInt()  //根据订单总金额计算的手续费
         if (totalTransferFee != orderTransferFeeAddUp) {
             val maxAmountOrder = orders.maxBy { it.totalFee - it.discount }
             if (maxAmountOrder != null && orderIdToTransferFeeMap.containsKey(maxAmountOrder.id)) {
@@ -671,12 +671,6 @@ open class PrintOrderServiceImpl : PrintOrderService {
                 val coupon = couponDao.findOne(orderInput.couponId)
                 if (coupon == null) {
                     throw ProcessException(1, "指定的优惠券不可用")
-                } else if (coupon.companyId != printStation.companyId) {
-                    throw ProcessException(1, "优惠券不能在此店面使用")
-                } else if (coupon.begin != null && curTime < coupon.begin!!.time) {
-                    throw ProcessException(1, "优惠券还未到使用时间")
-                } else if (coupon.expire != null && curTime > coupon.expire!!.time) {
-                    throw ProcessException(1, "优惠券已过期")
                 } else if (totalFee < coupon.minExpense) {
                     throw ProcessException(1, "没有达到最低消费金额")
                 } else {
