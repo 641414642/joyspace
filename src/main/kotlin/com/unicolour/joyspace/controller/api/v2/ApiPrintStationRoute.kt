@@ -101,14 +101,15 @@ class ApiPrintStationRoute {
     @GetMapping(value = "/v2/printStation/nearby")
     fun getNearByList(@RequestParam("longitude", required = false) longitude: Double?,
                       @RequestParam("latitude", required = false) latitude: Double?): RestResponse {
-        var city = ""
-        if (longitude != null && latitude != null) {
-            val addressComponent = positionService.getAddressComponent(longitude, latitude)
-            addressComponent?.let {
-                city = addressComponent.city
-            }
-        }
-        val printStations = printStationDao.findByAddressCity(if (city.isEmpty()) "北京市" else city)
+//        var city = ""
+//        if (longitude != null && latitude != null) {
+//            val addressComponent = positionService.getAddressComponent(longitude, latitude)
+//            addressComponent?.let {
+//                city = addressComponent.city
+//            }
+//        }
+
+        val printStations = printStationDao.findByAddressNation("中国")
         val resultList = printStations.map { printStation ->
             val psVo = PrintStationVo()
             psVo.id = printStation.id

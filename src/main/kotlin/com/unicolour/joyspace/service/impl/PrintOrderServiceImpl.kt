@@ -125,6 +125,9 @@ open class PrintOrderServiceImpl : PrintOrderService {
     @Autowired
     lateinit var transactionTemplate: TransactionTemplate
 
+    @Autowired
+    lateinit var wxPayRecordDao: WxPayRecordDao
+
     //小程序appid
     @Value("\${com.unicolour.wxAppId}")
     lateinit var wxAppId: String
@@ -710,6 +713,17 @@ open class PrintOrderServiceImpl : PrintOrderService {
         return Pair(totalFee, discount)
     }
 
+    private fun createPayNo(): String {
+        val dateTime = SimpleDateFormat("yyyyMMdd").format(Date())
+        var tradeNo:String
+        do {
+            val randomStr = BigInteger(4 * 8, secureRandom).toString(36).toUpperCase()
+            tradeNo = "$dateTime$randomStr"
+        } while (wxPayRecordDao.existsByTradeNo(tradeNo))
+
+        return tradeNo
+    }
+
     override fun startPayment(orderId: Int): WxPayParams {
         val order = printOrderDao.findOne(orderId)
         val company = companyDao.findOne(order.companyId)
@@ -735,6 +749,16 @@ open class PrintOrderServiceImpl : PrintOrderService {
         val notifyUrl = "$baseUrl/wxpay/notify"
         val ipAddress: String = java.net.InetAddress.getByName(URL(baseUrl).host).hostAddress
 
+
+        val wxPayRecord = WxPayRecord()
+        wxPayRecord.tradeNo = createPayNo()
+        wxPayRecord.createTime = Calendar.getInstance()
+        wxPayRecord.updateTime = wxPayRecord.createTime
+        wxPayRecord.fee = order.totalFee - order.discount
+        wxPayRecord.orderId = order.id
+        wxPayRecordDao.save(wxPayRecord)
+
+
         val requestBody = getPaymentRequestParams(payKey, TreeMap(hashMapOf<String, String>(
                 "appid" to appId,
                 "body" to "优利绚彩-照片打印",
@@ -742,7 +766,7 @@ open class PrintOrderServiceImpl : PrintOrderService {
                 "nonce_str" to nonceStr,
                 "notify_url" to notifyUrl,
                 "openid" to openId,
-                "out_trade_no" to order.orderNo,
+                "out_trade_no" to wxPayRecord.tradeNo,
                 "spbill_create_ip" to ipAddress,
                 "total_fee" to (order.totalFee - order.discount).toString(),
                 "trade_type" to "JSAPI"
@@ -812,7 +836,11 @@ open class PrintOrderServiceImpl : PrintOrderService {
             return "订单号为空"
         }
         else {
-            val printOrder = printOrderDao.findByOrderNo(result.out_trade_no!!)
+
+            val wxPayRecord = wxPayRecordDao.findByTradeNo(result.out_trade_no!!) ?: return "没有找到交易记录"
+            wxPayRecord.updateTime = Calendar.getInstance()
+            wxPayRecordDao.save(wxPayRecord)
+            val printOrder = printOrderDao.findOne(wxPayRecord.orderId)
             if (printOrder == null) {
                 return "没有找到订单"
             }

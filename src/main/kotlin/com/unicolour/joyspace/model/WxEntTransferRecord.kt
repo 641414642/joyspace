@@ -68,3 +68,41 @@ class WxEntTransferRecordItem {
     @NotNull
     var amount: Int = 0
 }
+
+
+//微信企业支付记录
+@Entity
+@Table(name = "wx_pay_record")
+class WxPayRecord {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    var id: Int = 0
+
+    //订单Id
+    @Column
+    @NotNull
+    var orderId: Int = 0
+
+    //支付金额（单位分）
+    @Column
+    @NotNull
+    var fee: Int = 0
+
+
+    //商户订单号
+    @Column(length = 32)
+    @NotNull
+    lateinit var tradeNo: String
+
+    //发起支付的时间
+    @Column
+    @NotNull
+    lateinit var createTime: Calendar
+
+    //完成的时间
+    @Column
+    @NotNull
+    lateinit var updateTime: Calendar
+
+
+}
