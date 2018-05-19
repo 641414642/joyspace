@@ -18,7 +18,7 @@ interface PrintStationService {
     fun updatePrintStationStatus(printStationSessionId: String, status: PrintStationStatus, additionalInfo: String): Boolean
     fun activatePrintStation(manager: Manager?, code: String, name:String, password: String,
                              positionId: Int, selectedProductIds: Set<Int>, uuid: String)
-    val loginDataFetcher: DataFetcher<PrintStationLoginResult>
+    val loginDataFetcher: DataFetcher<PrintStationLoginResultOld>
 
     val printStationDataFetcher: DataFetcher<PrintStation>
     val nearestDataFetcher: DataFetcher<PrintStationFindResultSingle>

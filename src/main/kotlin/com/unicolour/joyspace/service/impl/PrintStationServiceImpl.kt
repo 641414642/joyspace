@@ -145,14 +145,23 @@ open class PrintStationServiceImpl : PrintStationService {
     }
 
     //登录
-    override val loginDataFetcher: DataFetcher<PrintStationLoginResult>
+    override val loginDataFetcher: DataFetcher<PrintStationLoginResultOld>
         get() {
-            return DataFetcher<PrintStationLoginResult> { env ->
+            return DataFetcher<PrintStationLoginResultOld> { env ->
                 val printStationId = env.getArgument<Int>("printStationId")
                 val password = env.getArgument<String>("password")
                 val version = env.getArgument<Int?>("version")
                 val uuid = env.getArgument<String?>("uuid") ?: ""
-                transactionTemplate.execute { login(printStationId, password, version, uuid) }
+                val ret = transactionTemplate.execute {
+                    login(printStationId, password, version, uuid)
+                }
+
+                PrintStationLoginResultOld(
+                        result = ret.result,
+                        sessionId = ret.sessionId,
+                        printerType = ret.printerType.name,
+                        resolution = ret.printerType.resolution
+                )
             }
         }
 
@@ -248,7 +257,8 @@ open class PrintStationServiceImpl : PrintStationService {
                 newSession.expireTime = Calendar.getInstance().apply { add(Calendar.SECOND, 3600) }
                 printStationLoginSessionDao.save(newSession)
 
-                return PrintStationLoginResult(sessionId = newSession.id, printerType = printStation.printerType, resolution = printerType.resolution)            }
+                return PrintStationLoginResult(sessionId = newSession.id, printerType = printerType.toDTO())
+            }
         }
 
         return PrintStationLoginResult(result = 2)   //验证失败
@@ -312,7 +322,7 @@ open class PrintStationServiceImpl : PrintStationService {
         newSession.expireTime = Calendar.getInstance().apply { add(Calendar.SECOND, 3600) }
         printStationLoginSessionDao.save(newSession)
 
-        return PrintStationLoginResult(sessionId = newSession.id, printerType = printStation.printerType, resolution = printerType.resolution)
+        return PrintStationLoginResult(sessionId = newSession.id, printerType = printerType.toDTO())
     }
 
     override fun initPublicKey(printStationId: Int, uuid: String, pubKeyStr: String): Int {
@@ -920,5 +930,14 @@ open class PrintStationServiceImpl : PrintStationService {
 
         return pTypeRecord
     }
+}
+
+private fun PrinterType.toDTO(): PrinterTypeDTO {
+    return PrinterTypeDTO(
+            name = this.name,
+            displayName = this.displayName,
+            rollPaper = this.rollPaper,
+            resolution = this.resolution
+    )
 }
 

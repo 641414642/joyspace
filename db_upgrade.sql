@@ -65,3 +65,15 @@ alter table printer_type add column media_alert_thresholds varchar(100);
 update printer_type set media_alert_thresholds='';
 update printer_type set media_alert_thresholds='50,25,10' where name='CY';
 alter table printer_type alter column media_alert_thresholds set not null;
+
+alter table printer_type add column display_name varchar(100);
+update printer_type set display_name = name;
+update printer_type set display_name = 'EPSON 桌面打印机' where name='EPSON';
+alter table printer_type alter column display_name set not null;
+
+alter table printer_type add column roll_paper boolean;
+update printer_type set roll_paper = false;
+update printer_type set roll_paper = true where name='EPSON SL-D700';
+alter table printer_type alter column roll_paper set not null;
+
+insert into printer_type (name,display_name,resolution,media_alert_thresholds,roll_paper) values ('Fujifilm DX100', 'Fujifilm DX100', 360, '', true);

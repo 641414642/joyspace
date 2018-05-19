@@ -111,7 +111,7 @@ type PrintStationLoginRequestResult {
     #登录sessionId
     sessionId: String
 
-    #打印机信号
+    #打印机型号
     printerType: String!
 }
 

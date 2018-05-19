@@ -416,8 +416,9 @@ class PrintStationController {
             @RequestParam("printStationId") printStationId: Int,
             @RequestParam("password") password: String,
             @RequestParam("version", required = false, defaultValue = "-1") version: Int,
-            @RequestParam("uuid") uuid: String
-    ): PrintStationLoginResult {
+            @RequestParam("uuid") uuid: String,
+            @RequestParam("apiVersion", required = false, defaultValue = "1") apiVersion: Int
+    ): Any {
         logger.info("PrintStation login, id=$printStationId, version=$version, uuid=$uuid");
         val result = printStationService.login(printStationId,
                 password,
@@ -425,7 +426,17 @@ class PrintStationController {
                 uuid)
 
         logger.info("PrintStation login, result = $result")
-        return result
+        return if (apiVersion > 1) {
+            result
+        }
+        else {
+            PrintStationLoginResultOld(
+                    result = result.result,
+                    sessionId = result.sessionId,
+                    printerType = result.printerType.name,
+                    resolution = result.printerType.resolution
+            )
+        }
     }
 
     @PostMapping("/printStation/loginWithKey")
@@ -433,14 +444,26 @@ class PrintStationController {
     fun printStationLoginWithKey(
             @RequestParam("printStationId") printStationId: Int,
             @RequestParam("version", required = false, defaultValue = "-1") version: Int,
-            @RequestParam("sign") sign: String
-    ): PrintStationLoginResult {
+            @RequestParam("sign") sign: String,
+            @RequestParam("apiVersion", required = false, defaultValue = "1") apiVersion: Int
+    ): Any {
         logger.info("PrintStation login with key, id=$printStationId, version=$version, sign=$sign")
         val versionValue = if (version > 0) version else null
         val result = printStationService.loginWithKey(printStationId, sign, versionValue)
 
         logger.info("PrintStation login with key, result = $result")
-        return result
+
+        return if (apiVersion > 1) {
+            result
+        }
+        else {
+            PrintStationLoginResultOld(
+                    result = result.result,
+                    sessionId = result.sessionId,
+                    printerType = result.printerType.name,
+                    resolution = result.printerType.resolution
+            )
+        }
     }
 
     @PostMapping("/printStation/initPubKey")
