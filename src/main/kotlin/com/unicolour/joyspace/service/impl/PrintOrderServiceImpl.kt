@@ -317,7 +317,10 @@ open class PrintOrderServiceImpl : PrintOrderService {
             order.imageFileUploaded = true
             order.updateTime = Calendar.getInstance()
             printOrderDao.save(order)
-
+            if ((order.totalFee - order.discount) <= 0) {
+                //0元单直接生成打印任务
+                printStationService.createPrintStationTask(order.printStationId, PrintStationTaskType.PROCESS_PRINT_ORDER, order.id.toString())
+            }
             return true
         }
         else {
