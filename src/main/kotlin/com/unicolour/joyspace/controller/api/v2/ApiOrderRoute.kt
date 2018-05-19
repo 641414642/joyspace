@@ -1,9 +1,6 @@
 package com.unicolour.joyspace.controller.api.v2
 
-import com.unicolour.joyspace.dao.PrintOrderDao
-import com.unicolour.joyspace.dao.ProductDao
-import com.unicolour.joyspace.dao.UserDao
-import com.unicolour.joyspace.dao.UserLoginSessionDao
+import com.unicolour.joyspace.dao.*
 import com.unicolour.joyspace.dto.*
 import com.unicolour.joyspace.dto.common.RestResponse
 import com.unicolour.joyspace.exception.ProcessException
@@ -31,6 +28,10 @@ class ApiOrderRoute {
     private lateinit var userDao: UserDao
     @Autowired
     private lateinit var productDao: ProductDao
+    @Autowired
+    private lateinit var printStationDao: PrintStationDao
+    @Autowired
+    private lateinit var couponDao: CouponDao
 
     /**
      * 创建订单
@@ -190,6 +191,31 @@ class ApiOrderRoute {
                 .firstOrNull()
         val productType = order.printOrderItems.first().productType
         val productTypeStr = com.unicolour.joyspace.model.ProductType.values().first { it.value == productType }.dispName
+        val printStation = printStationDao.findOne(order.printStationId)
+        var couponVo:CouponVo? = null
+        if (order.couponId != null) {
+            val coupon = couponDao.findOne(order.couponId)
+            couponVo = CouponVo(coupon.id,
+                    coupon.name,
+                    coupon.code,
+                    coupon.begin,
+                    coupon.expire,
+                    coupon.minExpense,
+                    coupon.discount,
+                    1)
+        }
+
+        val psVo = PrintStationVo()
+        psVo.id = printStation.id
+        psVo.address = printStation.addressNation + printStation.addressProvince + printStation.addressCity + printStation.addressDistrict + printStation.addressStreet
+        psVo.longitude = printStation.position.longitude
+        psVo.latitude = printStation.position.latitude
+        psVo.wxQrCode = printStation.wxQrCode
+        psVo.positionId = printStation.positionId.toString()
+        psVo.companyId = printStation.companyId.toString()
+        psVo.status = printStation.status
+        psVo.name = printStation.name
+        psVo.imgUrl = ""
         val resOrderVo = OrderSimpleVo(order.id,
                 order.orderNo,
                 order.totalFee,
@@ -203,7 +229,9 @@ class ApiOrderRoute {
                 productType,
                 productTypeStr,
                 thumbnailImageUrl,
-                0)
+                0,
+                psVo,
+                couponVo)
 
         return RestResponse.ok(resOrderVo)
     }

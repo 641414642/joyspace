@@ -167,6 +167,7 @@ open class PrintOrderServiceImpl : PrintOrderService {
         newOrder.totalFee = ret.first
         newOrder.discount = ret.second
         //XXX newOrder.coupon = orderInput.coupon
+        if (ret.second>0) newOrder.couponId = orderInput.couponId
         newOrder.payed = false
         newOrder.imageFileUploaded = false
         newOrder.downloadedToPrintStation = false

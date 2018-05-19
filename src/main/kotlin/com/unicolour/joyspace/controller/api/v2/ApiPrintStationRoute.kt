@@ -43,6 +43,7 @@ class ApiPrintStationRoute {
         psVo.positionId = printStation.positionId.toString()
         psVo.companyId = printStation.companyId.toString()
         psVo.status = printStation.status
+        psVo.imgUrl = ""
 
         psVo.products = printStationProductDao.findByPrintStationId(printStation.id).map {
             val priceMap: Map<Int, Int> = printStationService.getPriceMap(printStation)
@@ -80,6 +81,7 @@ class ApiPrintStationRoute {
                 psVo.positionId = nearest.positionId.toString()
                 psVo.companyId = nearest.companyId.toString()
                 psVo.status = nearest.status
+                psVo.imgUrl = ""
 
                 psVo.products = printStationProductDao.findByPrintStationId(nearest.id).map {
                     val priceMap: Map<Int, Int> = printStationService.getPriceMap(nearest)
@@ -106,7 +108,7 @@ class ApiPrintStationRoute {
                 city = addressComponent.city
             }
         }
-        val printStations = printStationDao.findByAddressCity(if (city.isEmpty()) "北京" else city)
+        val printStations = printStationDao.findByAddressCity(if (city.isEmpty()) "北京市" else city)
         val resultList = printStations.map { printStation ->
             val psVo = PrintStationVo()
             psVo.id = printStation.id
@@ -118,6 +120,7 @@ class ApiPrintStationRoute {
             psVo.companyId = printStation.companyId.toString()
             psVo.status = printStation.status
             psVo.name = printStation.name
+            psVo.imgUrl = ""
             psVo
         }
 

@@ -44,7 +44,8 @@ data class PrintStationVo(var id: Int? = null,
                           var positionId: String? = null,
                           var companyId: String? = null,
                           var status: Int? = null,
-                          var products: MutableList<PrintStationProduct>? = null)
+                          var products: MutableList<PrintStationProduct>? = null,
+                          var imgUrl: String? = null)
 
 data class PrintStationProduct(var id: Int? = null,
                                var name: String? = null,
@@ -73,7 +74,9 @@ data class OrderSimpleVo(var orderId: Int? = null,
                          var productType:Int? = null,
                          var productTypeStr:String? = null,
                          var productImgUrl:String? = null,
-                         var printType:Int? = null)//打印方式：0：现场取片；1：邮寄配送
+                         var printType:Int? = null,//打印方式：0：现场取片；1：邮寄配送
+                         var printStation: PrintStationVo? = null,
+                         var coupon: CouponVo? = null)
 
 data class OrderVo(var orderId: Int? = null,
                    var orderNo: String? = null,

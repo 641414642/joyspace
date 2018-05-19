@@ -48,9 +48,9 @@ class ApiProductRoute {
     fun showHomePage(): RestResponse {
         val advers = mutableListOf<Advert>()
         advers.add(Advert("ad_1", "轮播图", "", "https://joyspace1.uni-colour.com/doc/home_page/1.png"))
-        advers.add(Advert("ad_2", "轮播图", "", "https://joyspace1.uni-colour.com/doc/home_page/4.png"))
+        advers.add(Advert("ad_2", "轮播图", "", "https://joyspace1.uni-colour.com/doc/home_page/2.png"))
         advers.add(Advert("ad_3", "轮播图", "", "https://joyspace1.uni-colour.com/doc/home_page/3.png"))
-        advers.add(Advert("ad_4", "轮播图", "", "https://joyspace1.uni-colour.com/doc/home_page/2.png"))
+        advers.add(Advert("ad_4", "轮播图", "", "https://joyspace1.uni-colour.com/doc/home_page/4.png"))
         val producTypes = mutableListOf<ProductType>()
         producTypes.add(ProductType(0, "普通照片", "智能手机照片高质量打印","https://joyspace1.uni-colour.com/doc/home_page/product_type_0.png"))
         producTypes.add(ProductType(1, "证件照", "支持多种尺寸，自动排版","https://joyspace1.uni-colour.com/doc/home_page/product_type_1.png"))
