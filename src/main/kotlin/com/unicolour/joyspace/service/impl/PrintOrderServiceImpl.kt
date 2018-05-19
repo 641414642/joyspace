@@ -317,8 +317,6 @@ open class PrintOrderServiceImpl : PrintOrderService {
             order.updateTime = Calendar.getInstance()
             printOrderDao.save(order)
 
-            printStationService.createPrintStationTask(order.printStationId, PrintStationTaskType.PROCESS_PRINT_ORDER, order.id.toString())
-
             return true
         }
         else {
@@ -818,6 +816,7 @@ open class PrintOrderServiceImpl : PrintOrderService {
                 printOrder.payed = true
                 printOrder.updateTime = Calendar.getInstance()
                 printOrderDao.save(printOrder)
+                printStationService.createPrintStationTask(printOrder.printStationId, PrintStationTaskType.PROCESS_PRINT_ORDER, printOrder.id.toString())
 
                 //转账
                 wxEntTransferExecutor.submit {

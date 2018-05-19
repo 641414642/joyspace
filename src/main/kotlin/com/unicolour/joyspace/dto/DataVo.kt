@@ -36,6 +36,7 @@ data class TemplateImage(var name: String? = null,
                          var url: String? = null)
 
 data class PrintStationVo(var id: Int? = null,
+                          var name:String? = null,
                           var address: String? = null,
                           var longitude: Double? = null,
                           var latitude: Double? = null,
