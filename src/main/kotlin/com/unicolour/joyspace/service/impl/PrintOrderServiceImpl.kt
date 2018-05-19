@@ -1,6 +1,7 @@
 package com.unicolour.joyspace.service.impl
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.google.gson.Gson
 import com.unicolour.joyspace.dao.*
 import com.unicolour.joyspace.dto.*
 import com.unicolour.joyspace.exception.ProcessException
@@ -768,6 +769,7 @@ open class PrintOrderServiceImpl : PrintOrderService {
                 return createWxPayParams(payKey, result, nonceStr)
             }
             else {
+                logger.error("微信支付调用失败--info ： ${Gson().toJson(result)}")
                 throw ProcessException(3, "return_code=${result.return_code}, result_code=${result.result_code}")
             }
         }

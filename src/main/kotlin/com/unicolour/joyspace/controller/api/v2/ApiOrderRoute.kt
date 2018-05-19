@@ -45,10 +45,10 @@ class ApiOrderRoute {
                 order.updateTime = Calendar.getInstance()
                 printOrderDao.save(order)
             }
-            val params = printOrderService.startPayment(order.id)
+            //val params = printOrderService.startPayment(order.id)
             //val params: WxPayParams? = null
             val orderItems = order.printOrderItems.map { OrderItemRet(it.id, it.productId) }
-            return RestResponse.ok(CreateOrderRequestResult(order.id, order.orderNo, params, orderItems, order.totalFee, order.discount))
+            return RestResponse.ok(CreateOrderRequestResult(order.id, order.orderNo, null, orderItems, order.totalFee, order.discount))
         } catch (e: ProcessException) {
             e.printStackTrace()
             return RestResponse(e.errcode, null, e.message)
