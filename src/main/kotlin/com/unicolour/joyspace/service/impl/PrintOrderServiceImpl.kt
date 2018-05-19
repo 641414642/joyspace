@@ -71,6 +71,9 @@ open class PrintOrderServiceImpl : PrintOrderService {
     lateinit var printStationService: PrintStationService
 
     @Autowired
+    lateinit var couponService: CouponService
+
+    @Autowired
     lateinit var imageService: ImageService
 
     @Autowired
@@ -674,7 +677,13 @@ open class PrintOrderServiceImpl : PrintOrderService {
                 } else if (totalFee < coupon.minExpense) {
                     throw ProcessException(1, "没有达到最低消费金额")
                 } else {
-                    discount = coupon.discount
+                    val couponCheckResult = couponService.checkCouponUse(orderInput.couponId, session.userId, orderInput.printStationId)
+                    if (couponCheckResult == CouponValidateResult.VALID) {
+                        discount = coupon.discount
+                    }
+                    else {
+                        throw ProcessException(1, couponCheckResult.desc)
+                    }
                 }
             }
         }

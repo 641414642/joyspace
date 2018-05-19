@@ -28,7 +28,6 @@ enum class CouponValidateResult(val desc:String) {
 class CouponValidateContext(
         val coupon: Coupon,
         val userCoupon: UserCoupon? = null,
-        val userId: Int = 0,
         val user: User? = null,
         val printStationId: Int = 0,
         val positionId: Int = 0,
@@ -109,4 +108,6 @@ interface CouponService {
                      selectedProductIds: Set<Int>,
                      selectedPositionIds: Set<Int>,
                      selectedPrintStationIds: Set<Int>): Boolean
+
+    fun checkCouponUse(couponId: Int, userId: Int, printStationId: Int): CouponValidateResult
 }

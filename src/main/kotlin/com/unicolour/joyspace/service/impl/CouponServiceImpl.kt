@@ -45,6 +45,30 @@ open class CouponServiceImpl : CouponService {
 
     private var couponLock = Object()
 
+    override fun checkCouponUse(couponId: Int, userId: Int, printStationId: Int) : CouponValidateResult {
+        val coupon = couponDao.findOne(couponId)
+        val user = userDao.findOne(userId)
+        val printStation = printStationDao.findOne(printStationId)
+        val userCoupon = userCouponDao.findByUserIdAndCouponId(userId, couponId)
+
+        val context = CouponValidateContext(
+                coupon = coupon,
+                user = user,
+                printStationId = printStationId,
+                positionId = printStation.positionId,
+                companyId = printStation.companyId,
+                userCoupon = userCoupon
+        )
+
+        return validateCoupon(context,
+                this::validateCouponEnabled,
+                this::validateCouponByUserRegTime,
+                this::validateCouponByTime,
+                this::validateCouponByPrintStation,
+                this::validateCouponByMaxUses,
+                this::validateCouponByMaxUsesPerUser)
+    }
+
     override val userCouponListDataFetcher: DataFetcher<UserCouponListResult>
         get() {
             return DataFetcher { env ->
