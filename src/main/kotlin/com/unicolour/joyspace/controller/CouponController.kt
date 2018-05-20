@@ -26,6 +26,7 @@ import java.time.LocalDate
 import java.time.ZoneId
 import java.util.*
 import javax.servlet.http.HttpServletRequest
+import java.util.Random
 
 @Controller
 class CouponController {
@@ -135,6 +136,7 @@ class CouponController {
 
         modelAndView.model["coupons"] = couponDao.findAll()
         modelAndView.model["claimMethods"] = CouponClaimMethod.values()
+        modelAndView.model["type"] = CouponType.values()
         modelAndView.model["productTypes"] = allProductTypes
         modelAndView.model["photo_products"] = allProducts.filter { it.productType == ProductType.PHOTO.value }
         modelAndView.model["template_products"] = allProducts.filter { it.productType == ProductType.TEMPLATE.value }
@@ -166,10 +168,10 @@ class CouponController {
             request: HttpServletRequest,
             @RequestParam(name = "id", required = true) id: Int,
             @RequestParam(name = "name", required = true) name: String,
-            @RequestParam(name = "code", required = true) code: String,
+            @RequestParam(name = "type", required = true) type: Int,
             @RequestParam(name = "disabled", required = false) disabled: Boolean?,
             @RequestParam(name = "claimMethod", required = true) claimMethod: Int,
-            @RequestParam(name = "maxUses", required = true) maxUses: Int,
+            @RequestParam(name = "number", required = true) number: Int,
             @RequestParam(name = "maxUsesPerUser", required = true) maxUsesPerUser: Int,
             @RequestParam(name = "minExpense", required = true) minExpense: Double,
             @RequestParam(name = "discount", required = true) discount: Double,
@@ -203,17 +205,50 @@ class CouponController {
 
         val df = SimpleDateFormat("yyyy-MM-dd")
         val couponClaimMethod = CouponClaimMethod.values().find{ it.value == claimMethod }
+
+        val code = this.getCouponCode(6)
+
         if (id <= 0) {
-            couponService.createCoupon(name, code, enabled, couponClaimMethod!!, maxUses, maxUsesPerUser,
+
+            couponService.createCoupon(name, code, type , enabled, couponClaimMethod!!, number, maxUsesPerUser,
                     (minExpense * 100).toInt(), (discount * 100).toInt(),
                     df.parse(begin), df.parse(expire), userRegDays,
                     selectedProductTypes, selectedProductIds, selectedPositionIds, selectedPrintStationIds)
             return true
         } else {
-            return couponService.updateCoupon(id, name, code, enabled, couponClaimMethod!!, maxUses, maxUsesPerUser,
+            return couponService.updateCoupon(id, name, type, enabled, couponClaimMethod!!, number, maxUsesPerUser,
                     (minExpense * 100).toInt(), (discount * 100).toInt(),
                     df.parse(begin), df.parse(expire), userRegDays,
                     selectedProductTypes, selectedProductIds, selectedPositionIds, selectedPrintStationIds)
         }
     }
+
+    @RequestMapping(path = arrayOf("/coupon/enabled"), method = arrayOf(RequestMethod.POST))
+    @ResponseBody
+    fun couponEnabled(
+            @RequestParam(name = "id", required = true) id: Int): Boolean {
+        return couponService.couponEnabled(id)
+    }
+
+
+
+
+
+    private fun getCouponCode(num: Int): String {
+
+        var str = ""
+
+        for (i in 0 until num) {
+
+            val intVal = (Math.random() * 26 + 65).toInt()
+            if (intVal % 2 == 0) {
+                str += intVal.toChar()
+            } else {
+                str += (Math.random() * 10).toInt()
+            }
+        }
+        return str
+    }
+
+
 }
