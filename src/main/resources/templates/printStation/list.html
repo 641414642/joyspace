@@ -63,7 +63,7 @@
 						<td th:text="${ps.printStation.company?.name}"></td>
 						<td th:text="${ps.printStation.position.name}"></td>
 						<td th:text="${#numbers.formatDecimal(ps.printStation.transferProportion / 10.0, 1, 'DEFAULT', 1, 'DEFAULT') + '%'}"></td>
-						<td th:text="${ps.printStation.printerType}"></td>
+						<td th:text="${ps.printerTypeDisp}"></td>
 						<td>
 							<th:block th:switch="${ps.printStation.status}">
 								<span th:case="0" class="label label-success">正常</span>

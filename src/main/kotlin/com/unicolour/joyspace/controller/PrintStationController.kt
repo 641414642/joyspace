@@ -66,6 +66,8 @@ class PrintStationController {
     @Autowired
     lateinit var objectMapper: ObjectMapper
 
+    class PrintStationInfo(val printStation: PrintStation, val online: Boolean, val printerTypeDisp: String)
+
     @RequestMapping("/printStation/list")
     fun printStationList(
             modelAndView: ModelAndView,
@@ -80,6 +82,8 @@ class PrintStationController {
             return modelAndView
         }
 
+        val printerNameDispMap = printerTypeDao.findAll().map { it.name to it.displayName }.toMap()
+
         val pageable = PageRequest(pageno - 1, 20, Sort.Direction.ASC, "id")
         val printStations = if (inputPositionId > 0)
                 printStationDao.findByCompanyIdAndPositionId(loginManager.companyId, inputPositionId, pageable)
@@ -88,8 +92,6 @@ class PrintStationController {
 
         val pager = Pager(printStations.totalPages, 7, pageno - 1)
         modelAndView.model["pager"] = pager
-
-        class PrintStationInfo(val printStation: PrintStation, val online: Boolean)
 
         val time = Calendar.getInstance()
         time.add(Calendar.SECOND, 3600 - 30)
@@ -103,7 +105,8 @@ class PrintStationController {
                 online = true
             }
 
-            PrintStationInfo(it, online)
+            val printerTypeDisp = printerNameDispMap[it.printerType] ?: ""
+            PrintStationInfo(it, online, printerTypeDisp)
         }
 
         modelAndView.model["inputPositionId"] = inputPositionId
@@ -121,6 +124,8 @@ class PrintStationController {
             @RequestParam(name = "inputCompanyId", required = false, defaultValue = "0") inputCompanyId: Int
     ): ModelAndView {
 
+        val printerNameDispMap = printerTypeDao.findAll().map { it.name to it.displayName }.toMap()
+
         val pageable = PageRequest(pageno - 1, 20, Sort.Direction.ASC, "id")
         val printStations = if (inputCompanyId > 0)
                 printStationDao.findByCompanyId(inputCompanyId, pageable)
@@ -129,8 +134,6 @@ class PrintStationController {
 
         val pager = Pager(printStations.totalPages, 7, pageno - 1)
         modelAndView.model["pager"] = pager
-
-        class PrintStationInfo(val printStation: PrintStation, val online: Boolean)
 
         val time = Calendar.getInstance()
         time.add(Calendar.SECOND, 3600 - 30)
@@ -144,7 +147,8 @@ class PrintStationController {
                 online = true
             }
 
-            PrintStationInfo(it, online)
+            val printerTypeDisp = printerNameDispMap[it.printerType] ?: ""
+            PrintStationInfo(it, online, printerTypeDisp)
         }
 
         modelAndView.model["inputCompanyId"] = inputCompanyId
