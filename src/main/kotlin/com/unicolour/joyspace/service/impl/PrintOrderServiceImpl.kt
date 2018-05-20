@@ -248,6 +248,21 @@ open class PrintOrderServiceImpl : PrintOrderService {
             }
         }
 
+        //修改优惠券使用次数
+        if (orderInput.couponId > 0) {
+            val coupon = couponDao.findOne(orderInput.couponId)
+            if (coupon != null) {
+                coupon.usageCount++
+                couponDao.save(coupon)
+            }
+
+            val userCoupon = userCouponDao.findByUserIdAndCouponId(session.userId, orderInput.couponId)
+            if (userCoupon != null) {
+                userCoupon.usageCount++
+                userCouponDao.save(userCoupon)
+            }
+        }
+
         return newOrder
     }
 
@@ -643,9 +658,6 @@ open class PrintOrderServiceImpl : PrintOrderService {
 
     override fun calculateOrderFee(orderInput: OrderInput) : Pair<Int, Int> {
         val session = userLoginSessionDao.findOne(orderInput.sessionId)
-        //XXX
-        //if (session == null) {
-        //}
 
         val printStation = printStationDao.findOne(orderInput.printStationId)
         val priceMap = printStationService.getPriceMap(printStation)
@@ -662,15 +674,12 @@ open class PrintOrderServiceImpl : PrintOrderService {
             totalFee += orderItemFee * printOrderItem.copies
         }
 
-        //XXX
         if (orderInput.couponId > 0) {
-            val curTime = System.currentTimeMillis()
-
             val userCoupon = userCouponDao.findByUserIdAndCouponId(session.userId, orderInput.couponId)
             if (userCoupon == null) {
                 throw ProcessException(1, "没有领取此优惠券")
             }
-            else {   //XXX 检查使用次数,产品等
+            else {   //XXX 检查产品等
                 val coupon = couponDao.findOne(orderInput.couponId)
                 if (coupon == null) {
                     throw ProcessException(1, "指定的优惠券不可用")
