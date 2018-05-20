@@ -81,6 +81,7 @@ class ApiPrintStationRoute {
                 psVo.positionId = nearest.positionId.toString()
                 psVo.companyId = nearest.companyId.toString()
                 psVo.status = nearest.status
+                psVo.name = nearest.name
                 psVo.imgUrl = ""
 
                 psVo.products = printStationProductDao.findByPrintStationId(nearest.id).map {

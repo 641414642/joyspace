@@ -4,7 +4,13 @@ class OrderInput(
         var sessionId: String = "",
         var printStationId: Int = 0,
         var orderItems: Array<OrderItemInput> = emptyArray(),
-        var couponId: Int = 0
+        var couponId: Int = 0,
+        var province: String? = null,
+        var city: String? = null,
+        var area: String? = null,
+        var address: String? = null,
+        var phoneNum: String? = null,
+        var name: String? = null
 )
 
 class OrderItemInput(
@@ -26,4 +32,16 @@ class OrderPayInput(
 class CouponInput(
         var sessionId: String = "",
         var couponCode: String = ""
+)
+
+class AddressInput(
+        var sessionId: String,
+        var province: String? = null,
+        var city: String? = null,
+        var area: String? = null,
+        var address: String? = null,
+        var phoneNum: String? = null,
+        var name: String? = null,
+        var default: Int? = null,
+        var id: Int? = null
 )

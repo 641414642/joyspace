@@ -179,6 +179,12 @@ open class PrintOrderServiceImpl : PrintOrderService {
         newOrder.transfered = false
         newOrder.transferProportion = printStation.transferProportion
         newOrder.pageCount = orderInput.orderItems.sumBy { it.copies }
+        newOrder.province = orderInput.province
+        newOrder.city = orderInput.city
+        newOrder.area = orderInput.area
+        newOrder.address = orderInput.address
+        newOrder.phoneNum = orderInput.phoneNum
+        newOrder.name = orderInput.name
 
         val orderItems = ArrayList<PrintOrderItem>()
         newOrder.printOrderItems = orderItems

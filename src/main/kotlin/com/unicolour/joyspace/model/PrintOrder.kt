@@ -93,6 +93,19 @@ class PrintOrder {
     @Column
     @NotNull
     var canceled: Boolean = false
+
+    @Column
+    var province: String? = null
+    @Column
+    var city: String? = null
+    @Column
+    var area: String? = null
+    @Column
+    var address: String? = null
+    @Column
+    var phoneNum: String? = null
+    @Column
+    var name: String? = null
 }
 
 @Entity

@@ -4,6 +4,7 @@ import com.unicolour.joyspace.dao.PrintOrderDao
 import com.unicolour.joyspace.dao.UserAddressDao
 import com.unicolour.joyspace.dao.UserDao
 import com.unicolour.joyspace.dao.UserLoginSessionDao
+import com.unicolour.joyspace.dto.AddressInput
 import com.unicolour.joyspace.dto.NoticeVo
 import com.unicolour.joyspace.dto.ResultCode
 import com.unicolour.joyspace.dto.UserInfoVo
@@ -11,10 +12,7 @@ import com.unicolour.joyspace.dto.common.RestResponse
 import com.unicolour.joyspace.model.Address
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestParam
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 import java.util.*
 
 @RestController
@@ -70,26 +68,25 @@ class ApiUserRoute {
      * 用户新增地址
      */
     @PostMapping(value = "/v2/user/address")
-    fun add(@RequestParam("sessionId") sessionId: String,
-            @RequestParam("province") province: String,
-            @RequestParam("city") city: String,
-            @RequestParam("area") area: String,
-            @RequestParam("address") address: String,
-            @RequestParam("phoneNum") phoneNum: String,
-            @RequestParam("name") name: String,
-            @RequestParam("default") default: Int?): RestResponse {
-        val session = userLoginSessionDao.findOne(sessionId)
+    fun add(@RequestBody param: AddressInput): RestResponse {
+        val session = userLoginSessionDao.findOne(param.sessionId)
         val user = userDao.findOne(session.userId) ?: return RestResponse.error(ResultCode.INVALID_USER_LOGIN_SESSION)
-        val addr = Address()
-        addr.userId = user.id
-        addr.province = province
-        addr.city = city
-        addr.area = area
-        addr.address = address
-        addr.phoneNum = phoneNum
-        addr.name = name
-        if (default == 1) addr.defalut = true
+        var addr = Address()
         addr.createTime = Calendar.getInstance()
+        if (param.id != null && param.id != 0) {
+            val srcAddress = userAddressDao.findOne(param.id)
+            if (srcAddress != null) {
+                addr = srcAddress
+            }
+        }
+        addr.userId = user.id
+        param.province?.let { addr.province = param.province }
+        param.city?.let { addr.city = param.city }
+        param.area?.let { addr.area = param.area }
+        param.address?.let { addr.address = param.address }
+        param.phoneNum?.let { addr.phoneNum = param.phoneNum }
+        param.name?.let { addr.name = param.name }
+        if (param.default == 1) addr.defalut = true
         userAddressDao.save(addr)
         return RestResponse.ok()
     }
