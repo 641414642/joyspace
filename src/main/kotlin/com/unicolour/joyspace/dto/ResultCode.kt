@@ -29,8 +29,9 @@ enum class ResultCode(val value:Int, val desc:String, val descEn: String) {
     PRINT_STATION_NOT_BELONG_TO_COMPANY(25, "自助机不属于此投放商", "Print station not belong to this company"),
     MANAGER_NOT_LOG_IN(26, "管理员未登录", "Manager not login"),
     REPRINT_TASK_EXISTS(27, "重新打印任务已存在", "Reprint task already exists"),
+    PRINT_ORDER_ALREADY_TRANSFERED(28, "订单已经转账过", "PrintOrder already transfered"),
 
     SERVER_ERROR(100, "服务器错误", "Server error"),
 
-    OTHER_ERROR(200, "其他错误", "Other error"),
+    OTHER_ERROR(200, "其他错误", "Other error")
 }
