@@ -41,6 +41,10 @@ class PrinterStatRecord {
     @NotNull
     var mediaCounter: Int = 0
 
+    @Column
+    @NotNull
+    var errorCode: Int = 0
+
     @Column(length = 20)
     var sendToPhoneNumber: String? = null
 }

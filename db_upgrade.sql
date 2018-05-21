@@ -77,3 +77,7 @@ update printer_type set roll_paper = true where name='EPSON SL-D700';
 alter table printer_type alter column roll_paper set not null;
 
 insert into printer_type (name,display_name,resolution,media_alert_thresholds,roll_paper) values ('Fujifilm DX100', 'Fujifilm DX100', 360, '', true);
+
+alter table printer_stat_record add column error_code integer;
+update printer_stat_record set error_code = 0;
+alter table printer_stat_record alter column error_code set not null;

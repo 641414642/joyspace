@@ -507,8 +507,9 @@ class PrintStationController {
             @RequestParam("printerSerialNo") printerSn: String,
             @RequestParam("printerType") printerType: String,
             @RequestParam("printerName") printerName: String,
-            @RequestParam("mediaCounter") mediaCounter: Int
+            @RequestParam("mediaCounter") mediaCounter: Int,
+            @RequestParam("errorCode") errorCode: Int
     ): Boolean {
-        return printStationService.recordPrinterStat(sessionId, printerSn, printerType, printerName, mediaCounter)
+        return printStationService.recordPrinterStat(sessionId, printerSn, printerType, printerName, mediaCounter, errorCode)
     }
 }
