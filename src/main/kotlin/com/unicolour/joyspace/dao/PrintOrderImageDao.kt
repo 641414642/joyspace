@@ -9,4 +9,6 @@ interface PrintOrderImageDao : CrudRepository<PrintOrderImage, Int> {
     fun countByOrderIdAndUserImageFileIdIsNull(orderItemId: Int) : Long
 }
 
-interface PrintOrderProductImageDao : CrudRepository<PrintOrderProductImage, Int>
+interface PrintOrderProductImageDao : CrudRepository<PrintOrderProductImage, Int>{
+    fun findByProductIdAndOrderId(productId: Int, orderId: Int): PrintOrderProductImage?
+}

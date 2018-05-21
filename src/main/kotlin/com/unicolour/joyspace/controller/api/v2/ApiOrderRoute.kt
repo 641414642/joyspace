@@ -170,10 +170,14 @@ class ApiOrderRoute {
             if (it.payed && !it.printedOnPrintStation) status = 1
             if (it.printedOnPrintStation) status = 2
             val product = productDao.findOne(it.printOrderItems.first().productId)
-            val thumbnailImageUrl = product.imageFiles
-                    .filter { it.type == ProductImageFileType.THUMB.value }
-                    .map { "/assets/product/images/${it.id}.${it.fileType}" }
-                    .firstOrNull()
+//            val thumbnailImageUrl = product.imageFiles
+//                    .filter { it.type == ProductImageFileType.THUMB.value }
+//                    .map { "/assets/product/images/${it.id}.${it.fileType}" }
+//                    .firstOrNull()
+
+            val proImg = printOrderProductImageDao.findByProductIdAndOrderId(product.id, it.id)
+            val img = proImg?.userImageFile
+            val thumbnailImageUrl = if (img != null) imageService.getImageUrl(img) else ""
             val productType = it.printOrderItems.first().productType
             val productTypeStr = com.unicolour.joyspace.model.ProductType.values().first { it.value == productType }.dispName
             OrderSimpleVo(it.id,
@@ -208,10 +212,13 @@ class ApiOrderRoute {
         if (order.payed && !order.printedOnPrintStation) status = 1
         if (order.printedOnPrintStation) status = 2
         val product = productDao.findOne(order.printOrderItems.first().productId)
-        val thumbnailImageUrl = product.imageFiles
-                .filter { it.type == ProductImageFileType.THUMB.value }
-                .map { "/assets/product/images/${it.id}.${it.fileType}" }
-                .firstOrNull()
+//        val thumbnailImageUrl = product.imageFiles
+//                .filter { it.type == ProductImageFileType.THUMB.value }
+//                .map { "/assets/product/images/${it.id}.${it.fileType}" }
+//                .firstOrNull()
+        val proImg = printOrderProductImageDao.findByProductIdAndOrderId(product.id, orderId)
+        val img = proImg?.userImageFile
+        val thumbnailImageUrl = if (img != null) imageService.getImageUrl(img) else ""
         val productType = order.printOrderItems.first().productType
         val productTypeStr = com.unicolour.joyspace.model.ProductType.values().first { it.value == productType }.dispName
         val printStation = printStationDao.findOne(order.printStationId)

@@ -44,7 +44,7 @@ class CouponInput(
 )
 
 class AddressInput(
-        var sessionId: String,
+        var sessionId: String? = null,
         var province: String? = null,
         var city: String? = null,
         var area: String? = null,
