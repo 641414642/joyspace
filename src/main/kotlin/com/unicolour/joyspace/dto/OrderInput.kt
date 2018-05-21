@@ -1,5 +1,7 @@
 package com.unicolour.joyspace.dto
 
+import org.springframework.web.multipart.MultipartFile
+
 class OrderInput(
         var sessionId: String = "",
         var printStationId: Int = 0,
@@ -10,7 +12,14 @@ class OrderInput(
         var area: String? = null,
         var address: String? = null,
         var phoneNum: String? = null,
-        var name: String? = null
+        var name: String? = null,
+        var printType: Int = 0,
+        var orderProImgs: Array<OrderProImgInput> = emptyArray()
+)
+
+class OrderProImgInput(
+        var productId: Int? = null,
+        var image: MultipartFile? = null
 )
 
 class OrderItemInput(

@@ -106,6 +106,10 @@ class PrintOrder {
     var phoneNum: String? = null
     @Column
     var name: String? = null
+
+    @Column
+    @NotNull
+    var printType = 0 //0:现场打印  1：邮寄
 }
 
 @Entity
@@ -155,5 +159,39 @@ class PrintOrderItem {
     //endregion
 
     @Column
+    var status: Int = PrintOrderImageStatus.CREATED.value
+}
+
+
+
+
+//订单中产品缩略图（用户上传）
+@Entity
+@Table(name = "print_order_product_image")
+class PrintOrderProductImage {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    var id: Int = 0
+
+    @Column
+    @NotNull
+    var orderId: Int = 0
+
+    @Column
+    @NotNull
+    var productId: Int = 0
+
+
+    //region 用户图片
+    @Column(name = "user_image_file_id", insertable = false, updatable = false)
+    var userImageFileId: Int? = null
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_image_file_id")
+    var userImageFile: UserImageFile? = null
+    //endregion
+
+    @Column
+    @NotNull
     var status: Int = PrintOrderImageStatus.CREATED.value
 }

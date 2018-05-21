@@ -179,12 +179,15 @@ open class PrintOrderServiceImpl : PrintOrderService {
         newOrder.transfered = false
         newOrder.transferProportion = printStation.transferProportion
         newOrder.pageCount = orderInput.orderItems.sumBy { it.copies }
-        newOrder.province = orderInput.province
-        newOrder.city = orderInput.city
-        newOrder.area = orderInput.area
-        newOrder.address = orderInput.address
-        newOrder.phoneNum = orderInput.phoneNum
-        newOrder.name = orderInput.name
+        newOrder.printType = orderInput.printType
+        if (newOrder.printType == 1) {
+            newOrder.province = orderInput.province
+            newOrder.city = orderInput.city
+            newOrder.area = orderInput.area
+            newOrder.address = orderInput.address
+            newOrder.phoneNum = orderInput.phoneNum
+            newOrder.name = orderInput.name
+        }
 
         val orderItems = ArrayList<PrintOrderItem>()
         newOrder.printOrderItems = orderItems
@@ -296,6 +299,9 @@ open class PrintOrderServiceImpl : PrintOrderService {
             //XXX
         }
     }
+
+
+
     @Transactional
     override fun uploadOrderImage(sessionId: String, orderItemId: Int, imgFile: MultipartFile?): Boolean {
         val imgInfo = imageService.uploadImage(sessionId, imgFile)

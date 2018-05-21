@@ -353,6 +353,7 @@
 ==== 创建订单:
 - URL: /v2/order/create
 - Method: POST
+- content-type:  multipart/form-data
 - RequestBody:
 
 ----
@@ -377,7 +378,19 @@
 			}
 			...
 		  ],
+		  "orderProImgs" :[
+			{
+				"productId" : xx,       //产品id
+				"image": xx            //图片文件内容
+			},
+			{
+			    "productId" : xx,
+			    "image": xx
+			}
+			...
+		  ]
 		  "couponId": 0,              //优惠券id (0表示不使用优惠券)
+		  "printType": 0,             //0：现场取片   1：邮寄
           "province": "陕西省",
           "city":"西安市",
           "area":"城区",
@@ -684,7 +697,9 @@
                             "productTypeStr":"普通照片",
                             "productImgUrl":"xxx",   //产品的缩略图
                             "printType":0     //0：现场取片；1：邮寄配送
-                            .
+                            "printStation":自助机信息对象
+                            "coupon":优惠券信息对象
+                            "address":地址信息对象
             }
     	}
 ----

@@ -76,7 +76,18 @@ data class OrderSimpleVo(var orderId: Int? = null,
                          var productImgUrl:String? = null,
                          var printType:Int? = null,//打印方式：0：现场取片；1：邮寄配送
                          var printStation: PrintStationVo? = null,
-                         var coupon: CouponVo? = null)
+                         var coupon: CouponVo? = null,
+                         var address: AddressVo? = null)
+
+data class AddressVo(var province: String? = null,
+                     var city: String? = null,
+                     var area: String? = null,
+                     var address: String? = null,
+                     var phoneNum: String? = null,
+                     var name: String? = null
+
+)
+
 
 data class OrderVo(var orderId: Int? = null,
                    var orderNo: String? = null,

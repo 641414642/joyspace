@@ -4,7 +4,10 @@ import com.unicolour.joyspace.dao.*
 import com.unicolour.joyspace.dto.*
 import com.unicolour.joyspace.dto.common.RestResponse
 import com.unicolour.joyspace.exception.ProcessException
+import com.unicolour.joyspace.model.PrintOrderImageStatus
+import com.unicolour.joyspace.model.PrintOrderProductImage
 import com.unicolour.joyspace.model.ProductImageFileType
+import com.unicolour.joyspace.service.ImageService
 import com.unicolour.joyspace.service.PrintOrderService
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
@@ -32,6 +35,12 @@ class ApiOrderRoute {
     private lateinit var printStationDao: PrintStationDao
     @Autowired
     private lateinit var couponDao: CouponDao
+    @Autowired
+    private lateinit var imageService: ImageService
+    @Autowired
+    private lateinit var userImageFileDao: UserImageFileDao
+    @Autowired
+    private lateinit var printOrderProductImageDao: PrintOrderProductImageDao
 
     /**
      * 创建订单
@@ -45,8 +54,22 @@ class ApiOrderRoute {
                 order.updateTime = Calendar.getInstance()
                 printOrderDao.save(order)
             }
-            //val params = printOrderService.startPayment(order.id)
-            //val params: WxPayParams? = null
+            //上传缩略图
+            orderInput.orderProImgs.forEach {
+                val proImage = PrintOrderProductImage()
+                proImage.orderId = order.id
+                proImage.productId = it.productId!!
+                val imgInfo = imageService.uploadImage(orderInput.sessionId, it.image)
+                if (imgInfo.errcode == 0) {
+                    proImage.userImageFile = userImageFileDao.findOne(imgInfo.imageId)
+                    proImage.status = PrintOrderImageStatus.UPLOADED.value
+                    printOrderProductImageDao.save(proImage)
+                }
+                else {
+                    throw ProcessException(1, "上传图片失败")
+                }
+            }
+
             val orderItems = order.printOrderItems.map { OrderItemRet(it.id, it.productId) }
             return RestResponse.ok(CreateOrderRequestResult(order.id, order.orderNo, null, orderItems, order.totalFee, order.discount))
         } catch (e: ProcessException) {
@@ -216,6 +239,16 @@ class ApiOrderRoute {
         psVo.status = printStation.status
         psVo.name = printStation.name
         psVo.imgUrl = ""
+        var addressVo: AddressVo? = null
+        if (order.printType == 1) {
+            addressVo = AddressVo()
+            addressVo.province = order.province
+            addressVo.city = order.city
+            addressVo.area = order.area
+            addressVo.address = order.address
+            addressVo.phoneNum = order.phoneNum
+            addressVo.name = order.name
+        }
         val resOrderVo = OrderSimpleVo(order.id,
                 order.orderNo,
                 order.totalFee,
@@ -229,9 +262,10 @@ class ApiOrderRoute {
                 productType,
                 productTypeStr,
                 thumbnailImageUrl,
-                0,
+                order.printType,
                 psVo,
-                couponVo)
+                couponVo,
+                addressVo)
 
         return RestResponse.ok(resOrderVo)
     }
