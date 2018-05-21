@@ -6,6 +6,7 @@ import com.unicolour.joyspace.dto.ImageInfo
 import com.unicolour.joyspace.model.UserImageFile
 import com.unicolour.joyspace.service.ImageService
 import graphql.schema.DataFetcher
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
@@ -20,6 +21,10 @@ import kotlin.collections.HashMap
 
 @Service
 class ImageServiceImpl : ImageService {
+
+    companion object {
+        val logger = LoggerFactory.getLogger(PositionServiceImpl::class.java)
+    }
     @Value("\${com.unicolour.joyspace.baseUrl}")
     lateinit var baseUrl: String
 
@@ -45,59 +50,67 @@ class ImageServiceImpl : ImageService {
             return ImageInfo(2, "没有图片文件")
         }
         else {
-            val fileName = UUID.randomUUID().toString().replace("-", "")
-            val filePath = "user/${session.userId}/${sessionId}/${fileName}"
-            val file = File(assetsDir, filePath)
-            file.parentFile.mkdirs()
+            try {
+                val fileName = UUID.randomUUID().toString().replace("-", "")
+                val filePath = "user/${session.userId}/${sessionId}/${fileName}"
+                val file = File(assetsDir, filePath)
+                file.parentFile.mkdirs()
 
-            imgFile.transferTo(file)
+                imgFile.transferTo(file)
 
-            val pb = ProcessBuilder("magick", "identify", file.absolutePath)
+                logger.info("file.absolutePath:${file.absolutePath}")
 
-            val process = pb.start()
+                val pb = ProcessBuilder("magick", "identify", file.absolutePath)
 
-            var retStr:String = "";
-            BufferedReader(InputStreamReader(process.inputStream)).use { reader ->
-                retStr = reader.readText()
-            }
+                val process = pb.start()
 
-            val retCode = process.waitFor()
-
-            if (retCode != 0) {
-                return ImageInfo(3, retStr)
-            }
-            else {
-                val patternStr = Pattern.quote(file.absolutePath) + "\\s(\\w+)\\s(\\d+)x(\\d+)\\s.*"
-                val pattern = Pattern.compile(patternStr)
-                val matcher = pattern.matcher(retStr)
-
-                matcher.find()
-
-                var imgType = matcher.group(1).toLowerCase()
-                if (imgType == "jpeg") {
-                    imgType = "jpg"
+                var retStr:String = "";
+                BufferedReader(InputStreamReader(process.inputStream)).use { reader ->
+                    retStr = reader.readText()
                 }
-                val imgWid = matcher.group(2).toInt()
-                val imgHei = matcher.group(3).toInt()
+
+                val retCode = process.waitFor()
+
+                if (retCode != 0) {
+                    logger.error("图片处理失败，retStr:$retStr , retCode: $retCode")
+                    return ImageInfo(3, retStr)
+                }
+                else {
+                    val patternStr = Pattern.quote(file.absolutePath) + "\\s(\\w+)\\s(\\d+)x(\\d+)\\s.*"
+                    val pattern = Pattern.compile(patternStr)
+                    val matcher = pattern.matcher(retStr)
+
+                    matcher.find()
+
+                    var imgType = matcher.group(1).toLowerCase()
+                    if (imgType == "jpeg") {
+                        imgType = "jpg"
+                    }
+                    val imgWid = matcher.group(2).toInt()
+                    val imgHei = matcher.group(3).toInt()
 
 
-                val fileWithExt = File(assetsDir, "${filePath}.${imgType}")
-                file.renameTo(fileWithExt)
+                    val fileWithExt = File(assetsDir, "${filePath}.${imgType}")
+                    file.renameTo(fileWithExt)
 
-                val url = "${baseUrl}/assets/${filePath}.${imgType}"
+                    val url = "${baseUrl}/assets/${filePath}.${imgType}"
 
-                val userImgFile = UserImageFile()
-                userImgFile.type = imgType
-                userImgFile.fileName = fileName
-                userImgFile.width = imgWid
-                userImgFile.height = imgHei
-                userImgFile.sessionId = sessionId
-                userImgFile.uploadTime = Calendar.getInstance()
-                userImgFile.userId = session.userId
+                    val userImgFile = UserImageFile()
+                    userImgFile.type = imgType
+                    userImgFile.fileName = fileName
+                    userImgFile.width = imgWid
+                    userImgFile.height = imgHei
+                    userImgFile.sessionId = sessionId
+                    userImgFile.uploadTime = Calendar.getInstance()
+                    userImgFile.userId = session.userId
 
-                userImageFileDao.save(userImgFile)
+                    userImageFileDao.save(userImgFile)
 
-                return ImageInfo(0, null, userImgFile.id, imgWid, imgHei, url)
+                    return ImageInfo(0, null, userImgFile.id, imgWid, imgHei, url)
+                }
+            } catch (e: Exception) {
+                logger.error("error occurs while ",e)
+                return ImageInfo(3, "")
             }
         }
     }

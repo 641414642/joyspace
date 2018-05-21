@@ -36,7 +36,8 @@ open class WebSecurityConfig : WebSecurityConfigurerAdapter() {
                 "/company/wxAccountAddConfirm",
                 "/printStation/**",
                 "/v2/**",
-                "/doc/**")
+                "/doc/**",
+                "/LLWDtNhzLW.txt")
 
         http.csrf().disable()
                 .authorizeRequests()
