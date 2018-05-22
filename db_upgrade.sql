@@ -81,3 +81,11 @@ insert into printer_type (name,display_name,resolution,media_alert_thresholds,ro
 alter table printer_stat_record add column error_code integer;
 update printer_stat_record set error_code = 0;
 alter table printer_stat_record alter column error_code set not null;
+
+alter table product add column deleted boolean;
+update product set deleted = false;
+alter table product alter column deleted set not null;
+alter table product drop column enabled;
+alter table product drop constraint fkghawd5rtv8ok565nwpdyyuto9;
+update product set company_id=0 where company_id=1;
+

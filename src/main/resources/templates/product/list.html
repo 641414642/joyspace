@@ -75,11 +75,18 @@
 								   title="上移">
 								</i>
 							</a>
-							<a href="#">
+							<a href="#" style="margin-right:5px">
 								<i class="fa fa-fw fa-arrow-down"
 								   th:attr="data-url=@{/product/move(id=${product.id},up='false')}"
 								   onclick="return moveProduct(event)"
 								   title="下移">
+								</i>
+							</a>
+							<a href="#" th:if="${isSuperAdmin || product.companyId==adminCompanyId}">
+								<i class="fa fa-trash-o"
+								   th:attr="data-id=${product.id},data-name=${product.name}"
+								   onclick="return deleteProduct(event)"
+								   title="删除">
 								</i>
 							</a>
 						</td>
@@ -91,6 +98,27 @@
 			</div>
 		</div>
 	</section>
+
+	<div class="modal fade" role="dialog" id="confirmDeleteDialog">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+					<h4 class="modal-title">删除</h4>
+				</div>
+				<form id="deleteProductForm" th:action="@{/product/deleteProduct}" method="post">
+					<input type="hidden" name="productId" id="productId" />
+					<div class="modal-body">
+						<p>您确定要删除产品"<span id="productName"></span>"吗?</p>
+					</div>
+					<div class="modal-footer">
+						<button type="submit" class="btn btn-primary">确定</button>
+						<button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
 
 	<script src="../../static/js/product.js" th:src="@{/js/product.js}"></script>
 </div>

@@ -7,7 +7,7 @@ import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.PagingAndSortingRepository
 import org.springframework.data.repository.query.Param
 
-interface ProductDao : PagingAndSortingRepository<Product, Int> {
+interface ProductDao : PagingAndSortingRepository<Product, Int>, ProductCustomQuery {
     @Query("SELECT p FROM Product p WHERE LOWER(p.name) LIKE LOWER(CONCAT('%', :name, '%'))")
     fun findByName(@Param("name") name: String, pageable: Pageable): Page<Product>
 

@@ -13,10 +13,7 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Controller
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RequestMethod
-import org.springframework.web.bind.annotation.RequestParam
-import org.springframework.web.bind.annotation.ResponseBody
+import org.springframework.web.bind.annotation.*
 import org.springframework.web.multipart.MultipartFile
 import org.springframework.web.servlet.ModelAndView
 
@@ -43,7 +40,7 @@ class ProductController {
     @RequestMapping("/product/list")
     fun productList(
             modelAndView: ModelAndView,
-            @RequestParam(name = "name", required = false, defaultValue = "") name: String?,
+            @RequestParam(name = "name", required = false, defaultValue = "") name: String,
             @RequestParam(name = "pageno", required = false, defaultValue = "1") pageno: Int): ModelAndView {
 
         val loginManager = managerService.loginManager
@@ -53,24 +50,20 @@ class ProductController {
             return modelAndView
         }
 
-        val pageable = PageRequest(pageno - 1, 20, Sort.Direction.ASC, "sequence")
-        val products =
-                if (name == null || name == "")
-                    //productDao.findByCompanyId(loginManager.companyId, pageable)
-                    productDao.findAll(pageable)
-                else
-                    //productDao.findByCompanyIdAndName(loginManager.companyId, name, pageable)
-                    productDao.findByName(name, pageable)
+        val products = productService.queryProducts(pageno, 20, loginManager.companyId, name, true,"sequence asc")
 
-        modelAndView.model.put("inputProductName", name)
+        modelAndView.model["inputProductName"] = name
+
+        modelAndView.model["isSuperAdmin"] = managerService.loginManagerHasRole("ROLE_SUPERADMIN")
+        modelAndView.model["adminCompanyId"] = loginManager.companyId
 
         val pager = Pager(products.totalPages, 7, pageno - 1)
-        modelAndView.model.put("pager", pager)
+        modelAndView.model["pager"] = pager
 
-        modelAndView.model.put("products", products.content)
+        modelAndView.model["products"] = products.content
 
-        modelAndView.model.put("viewCat", "product_mgr")
-        modelAndView.model.put("viewContent", "product_list")
+        modelAndView.model["viewCat"] = "product_mgr"
+        modelAndView.model["viewContent"] = "product_list"
         modelAndView.viewName = "layout"
 
         return modelAndView
@@ -91,8 +84,8 @@ class ProductController {
 
         modelAndView.model["templates"] = templateDao.findAll()
 
-        modelAndView.model.put("create", id <= 0)
-        modelAndView.model.put("product", product)
+        modelAndView.model["create"] = id <= 0
+        modelAndView.model["product"] = product
         modelAndView.viewName = "/product/edit :: content"
 
         return modelAndView
@@ -116,11 +109,11 @@ class ProductController {
             @RequestParam(name = "templateId", required = true) templateId: Int
     ): Boolean {
 
-        if (id <= 0) {
+        return if (id <= 0) {
             productService.createProduct(name, remark, defPrice, templateId)
-            return true
+            true
         } else {
-            return productService.updateProduct(id, name, remark, defPrice, templateId)
+            productService.updateProduct(id, name, remark, defPrice, templateId)
         }
     }
 
@@ -137,12 +130,12 @@ class ProductController {
         val thumbImages = productImageFileDao.findByProductIdAndType(productId = productId, type = ProductImageFileType.THUMB.value)
         val prevImages = productImageFileDao.findByProductIdAndType(productId = productId, type = ProductImageFileType.PREVIEW.value)
 
-        modelAndView.model.put("thumbImages", thumbImages.map {
-            PreviewImageFileDTO("${baseUrl}/assets/product/images/${it.id}.${it.fileType}", it.id)
-        })
-        modelAndView.model.put("previewImages", prevImages.map {
-            PreviewImageFileDTO("${baseUrl}/assets/product/images/${it.id}.${it.fileType}", it.id)
-        })
+        modelAndView.model["thumbImages"] = thumbImages.map {
+            PreviewImageFileDTO("$baseUrl/assets/product/images/${it.id}.${it.fileType}", it.id)
+        }
+        modelAndView.model["previewImages"] = prevImages.map {
+            PreviewImageFileDTO("$baseUrl/assets/product/images/${it.id}.${it.fileType}", it.id)
+        }
 
         modelAndView.viewName = "/product/edit :: manageImageFiles"
 
@@ -179,6 +172,12 @@ class ProductController {
         modelAndView.model["imgFileId"] = imgFileId
         modelAndView.viewName = "/product/imageFileDeleted"
         return modelAndView
+    }
+
+    @PostMapping("/product/deleteProduct")
+    @ResponseBody
+    fun deleteProduct(@RequestParam(name = "productId", required = true) productId: Int): Boolean {
+        return productService.deleteProductById(productId)
     }
 }
 

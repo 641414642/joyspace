@@ -8,6 +8,9 @@ import com.unicolour.joyspace.service.ProductService
 import graphql.schema.DataFetcher
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.PageRequest
+import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Service
 import org.springframework.web.multipart.MultipartFile
 import java.io.BufferedReader
@@ -53,7 +56,7 @@ open class ProductServiceImpl : ProductService {
 
     override fun getProductsOfPrintStation(printStationId: Int): List<PrintStationProduct> {
         val products = printStationProductDao.findByPrintStationId(printStationId)
-        return products.sortedBy { it.product.sequence }
+        return products.filter { !it.product.deleted }.sortedBy { it.product.sequence }
     }
 
     @Transactional
@@ -66,7 +69,7 @@ open class ProductServiceImpl : ProductService {
                 product.name = name
                 product.template = tpl
                 product.defaultPrice = (defPrice * 100).toInt()
-                product.enabled = true
+                product.deleted = false
                 product.remark = remark
 
                 productDao.save(product)
@@ -121,9 +124,9 @@ open class ProductServiceImpl : ProductService {
             product.name = name
             product.template = tpl
             product.defaultPrice = (defPrice * 100).toInt()
-            product.enabled = true
+            product.deleted = false
             product.remark = remark
-            product.company = manager.company
+            product.companyId = 0
             product.sequence = productDao.getMaxProductSequence(manager.companyId) + 1
 
             productDao.save(product)
@@ -322,6 +325,60 @@ open class ProductServiceImpl : ProductService {
                 else -> null
             }
         }
+    }
+
+    override fun queryProducts(pageNo: Int, pageSize: Int, companyId: Int, name: String, excludeDeleted: Boolean, order: String): Page<Product> {
+        val orderField: String
+        val asc: Boolean
+
+        val t = order.indexOf(" ")
+        if (t != -1) {
+            orderField = order.substring(0, t)
+            asc = order.substring(t + 1).equals("ASC", ignoreCase = true)
+        } else {
+            orderField = order
+            asc = true
+        }
+
+        val pageReq = PageRequest(pageNo - 1, pageSize,
+                Sort(Sort.Order(if (asc) Sort.Direction.ASC else Sort.Direction.DESC, orderField)))
+
+        return productDao.queryProducts(pageReq, companyId, name, excludeDeleted)
+    }
+
+    override fun queryProducts(companyId: Int, name: String, excludeDeleted: Boolean, order: String): List<Product> {
+        val orderField: String
+        val asc: Boolean
+
+        val t = order.indexOf(" ")
+        if (t != -1) {
+            orderField = order.substring(0, t)
+            asc = order.substring(t + 1).equals("ASC", ignoreCase = true)
+        } else {
+            orderField = order
+            asc = true
+        }
+
+        val sort = Sort(Sort.Order(if (asc) Sort.Direction.ASC else Sort.Direction.DESC, orderField))
+
+        return productDao.queryProducts(companyId, name, excludeDeleted, sort)
+    }
+
+    @Transactional
+    override fun deleteProductById(productId: Int): Boolean {
+        val manager = managerService.loginManager
+        val product = productDao.findOne(productId)
+
+        if (manager != null && product != null && !product.deleted) {
+            val isSuperAdmin = managerService.loginManagerHasRole("ROLE_SUPERADMIN")
+            if (isSuperAdmin || product.companyId == manager.companyId) {
+                product.deleted = true
+                productDao.save(product)
+                return true
+            }
+        }
+
+        return false
     }
 }
 
