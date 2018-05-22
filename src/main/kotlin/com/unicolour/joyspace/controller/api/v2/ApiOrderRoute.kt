@@ -54,21 +54,6 @@ class ApiOrderRoute {
                 order.updateTime = Calendar.getInstance()
                 printOrderDao.save(order)
             }
-            //上传缩略图
-            orderInput.orderProImgs.forEach {
-                val proImage = PrintOrderProductImage()
-                proImage.orderId = order.id
-                proImage.productId = it.productId!!
-                val imgInfo = imageService.uploadImage(orderInput.sessionId, it.image)
-                if (imgInfo.errcode == 0) {
-                    proImage.userImageFile = userImageFileDao.findOne(imgInfo.imageId)
-                    proImage.status = PrintOrderImageStatus.UPLOADED.value
-                    printOrderProductImageDao.save(proImage)
-                }
-                else {
-                    throw ProcessException(1, "上传图片失败")
-                }
-            }
 
             val orderItems = order.printOrderItems.map { OrderItemRet(it.id, it.productId) }
             return RestResponse.ok(CreateOrderRequestResult(order.id, order.orderNo, null, orderItems, order.totalFee, order.discount))
@@ -154,6 +139,31 @@ class ApiOrderRoute {
         val allUploaded = printOrderService.uploadOrderImage(sessionId, orderItemId, imgFile)
         return ResponseEntity.ok(UploadOrderImageResult(allUploaded))
     }
+
+    //上传缩略图
+    @PostMapping("/v2/order/thumbnail")
+    fun uploadOrderThumbnail(request: HttpServletRequest,
+                             @RequestParam("sessionId") sessionId: String,
+                             @RequestParam("orderId") orderId: Int,
+                             @RequestParam("productId") productId: Int,
+                             @RequestParam("image") imgFile: MultipartFile?): RestResponse {
+
+        //上传缩略图
+        val proImage = PrintOrderProductImage()
+        proImage.orderId = orderId
+        proImage.productId = productId
+        val imgInfo = imageService.uploadImage(sessionId, imgFile)
+        return if (imgInfo.errcode == 0) {
+            proImage.userImageFile = userImageFileDao.findOne(imgInfo.imageId)
+            proImage.status = PrintOrderImageStatus.UPLOADED.value
+            printOrderProductImageDao.save(proImage)
+            RestResponse.ok()
+        } else {
+            RestResponse.error(ResultCode.SERVER_ERROR)
+        }
+
+    }
+
 
 
     /**

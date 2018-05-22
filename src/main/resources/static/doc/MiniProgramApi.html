@@ -1307,6 +1307,69 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </div>
 </div>
 <div class="sect3">
+<h4 id="_上传订单缩略图">上传订单缩略图:</h4>
+<div class="ulist">
+<ul>
+<li>
+<p>URL: /v2/order/thumbnail</p>
+</li>
+<li>
+<p>Method: POST</p>
+</li>
+<li>
+<p>content-type:  multipart/form-data</p>
+</li>
+<li>
+<p>参数:</p>
+</li>
+</ul>
+</div>
+<table class="tableblock frame-all grid-all spread">
+<colgroup>
+<col style="width: 50%;">
+<col style="width: 50%;">
+</colgroup>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">参数名</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">描述</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">sessionId</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">登录返回的sessionId</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">orderId</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">订单 ID</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">productId</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">产品 ID</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">image</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">图片文件内容</p></td>
+</tr>
+</tbody>
+</table>
+<div class="ulist">
+<ul>
+<li>
+<p>返回值:</p>
+</li>
+</ul>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>           {
+                "state" : 0,
+                "msg" : null,
+                "result": null
+           }</pre>
+</div>
+</div>
+</div>
+<div class="sect3">
 <h4 id="_查询订单图片状态">查询订单图片状态:</h4>
 <div class="ulist">
 <ul>
@@ -1866,7 +1929,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2018-05-20 17:07:02 +08:00
+Last updated 2018-05-22 15:46:19 +08:00
 </div>
 </div>
 </body>

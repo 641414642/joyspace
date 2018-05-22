@@ -520,6 +520,29 @@
            }
 ----
 
+==== 上传订单缩略图:
+- URL: /v2/order/thumbnail
+- Method: POST
+- content-type:  multipart/form-data
+- 参数:
+|==========================================================
+|参数名         |描述
+|sessionId     |登录返回的sessionId
+|orderId       |订单 ID
+|productId     |产品 ID
+|image         |图片文件内容
+|==========================================================
+
+- 返回值:
+
+----
+           {
+                "state" : 0,
+                "msg" : null,
+                "result": null
+           }
+----
+
 ==== 查询订单图片状态:
 - URL: /v2/order/status
 - Method: GET
