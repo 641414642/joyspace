@@ -199,11 +199,7 @@
                     "companyId": xx,                //投放商id
                     "transportation": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",  //交通信息
                     "distance": xxx,              //距离指定经纬度的距离，单位米
-                    "images" : [
-                        "https://xxx.xxxxxxxxxxxxxxxx",
-                        "https://xxx.xxxxxxxxxxxxxxxx",
-                        "https://xxx.xxxxxxxxxxxxxxxx"
-                    ]
+
                 }
         }
 ----
@@ -353,7 +349,6 @@
 ==== 创建订单:
 - URL: /v2/order/create
 - Method: POST
-- content-type:  multipart/form-data
 - RequestBody:
 
 ----
@@ -378,17 +373,6 @@
 			}
 			...
 		  ],
-		  "orderProImgs" :[
-			{
-				"productId" : xx,       //产品id
-				"image": xx            //图片文件内容
-			},
-			{
-			    "productId" : xx,
-			    "image": xx
-			}
-			...
-		  ]
 		  "couponId": 0,              //优惠券id (0表示不使用优惠券)
 		  "printType": 0,             //0：现场取片   1：邮寄
           "province": "陕西省",
