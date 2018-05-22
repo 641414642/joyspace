@@ -124,7 +124,11 @@ class ApiProductRoute {
             val tpl = it.template
             val w = tpl.width
             val h = tpl.height
-            val displaySize = String.format("%1$.0f x %2$.0f mm", w, h)
+            var displaySize = String.format("%1$.0f x %2$.0f mm", w, h)
+            if (tpl.type == com.unicolour.joyspace.model.ProductType.ID_PHOTO.value){
+                val templateImage = templateImageInfoDao.findByTemplateIdAndTemplateVersion(tpl.id, tpl.currentVersion).first()
+                displaySize = String.format("%1$.0f x %2$.0f mm", templateImage.width, templateImage.height)
+            }
             val thumbnailImageUrl = it.imageFiles
                     .filter { it.type == ProductImageFileType.THUMB.value }
                     .map { "/assets/product/images/${it.id}.${it.fileType}" }
