@@ -100,6 +100,52 @@ open class CouponServiceImpl : CouponService {
         val userCoupons = userCouponDao.findByUserId(session.userId)
         val couponIds = userCoupons.map { it.couponId }
         val retCouponIds = ArrayList<Int>(couponIds)
+        val printStation =
+                if (printStationId > 0) {
+                    printStationDao.findOne(printStationId)
+                } else {
+                    null
+                }
+
+
+        //用户没有领取过的优惠券
+        val couponsNotClaimed =
+                if (couponIds.isEmpty()) {
+                    couponDao.findAll()
+                } else {
+                    couponDao.findByIdNotIn(couponIds)
+                }
+
+        for (c in couponsNotClaimed) {
+            val context = CouponValidateContext(
+                    coupon = c,
+                    user = user,
+                    printStationId = printStationId,
+                    positionId = printStation?.positionId ?: 0,
+                    companyId = printStation?.companyId ?: 0,
+                    claimMethod = CouponClaimMethod.SCAN_PRINT_STATION_CODE)
+
+            val checkResult = validateCoupon(context,
+                    this::validateCouponByClaimMethod,
+                    this::validateCouponByTime,
+                    this::validateCouponByMaxUses,
+                    this::validateCouponByPrintStation,
+                    this::validateCouponByUserRegTime)
+
+            if (checkResult == VALID) {
+                val userCoupon = UserCoupon()
+                userCoupon.couponId = c.id
+                userCoupon.userId = session.userId
+                userCoupon.usageCount = 0
+                userCoupon.claimTime = Date()
+                userCouponDao.save(userCoupon)
+
+                c.claimCount++
+                couponDao.save(c)
+
+                retCouponIds.add(c.id)
+            }
+        }
 
         //删除已禁用、不存在、过期、超过最大使用次数的优惠券
         for (userCoupon in userCoupons) {

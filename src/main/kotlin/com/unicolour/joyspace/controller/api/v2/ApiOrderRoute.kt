@@ -173,7 +173,7 @@ class ApiOrderRoute {
     fun listOrder(@RequestParam("sessionId") sessionId: String): RestResponse {
         val session = userLoginSessionDao.findOne(sessionId)
         val user = userDao.findOne(session.userId) ?: return RestResponse.error(ResultCode.INVALID_USER_LOGIN_SESSION)
-        val orderList = printOrderDao.findByUserId(user.id)
+        val orderList = printOrderDao.findByUserIdOrderByCreateTimeDesc(user.id)
         val orderListVo = orderList.filter { !it.canceled }.map {
             var status = 0
             if (!it.payed) status = 0
