@@ -18,7 +18,7 @@ interface PrintStationService {
     fun updatePrintStationStatus(printStationSessionId: String, status: PrintStationStatus, additionalInfo: String): Boolean
     fun activatePrintStation(manager: Manager?, code: String, name:String, password: String,
                              positionId: Int, selectedProductIds: Set<Int>, uuid: String)
-    val loginDataFetcher: DataFetcher<PrintStationLoginResult>
+    val loginDataFetcher: DataFetcher<PrintStationLoginResultOld>
 
     val printStationDataFetcher: DataFetcher<PrintStation>
     val nearestDataFetcher: DataFetcher<PrintStationFindResultSingle>
@@ -44,4 +44,6 @@ interface PrintStationService {
     fun getPrintStationUpdateAndAdSet(sessionId: String, currentVersion: Int, currentAdSetId: Int, currentAdSetTimeStr: String): UpdateAndAdSetDTO
     fun getHomeInitInfo(userName: String, password: String, printStationId: Int): HomeInitInfoDTO
     fun initHome(input: HomeInitInput): ResultCode
+
+    fun recordPrinterStat(sessionId: String, printerSn: String, printerType: String, printerName: String, mediaCounter: Int): Boolean
 }

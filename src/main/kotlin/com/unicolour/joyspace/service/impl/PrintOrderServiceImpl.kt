@@ -72,6 +72,9 @@ open class PrintOrderServiceImpl : PrintOrderService {
     lateinit var printStationService: PrintStationService
 
     @Autowired
+    lateinit var couponService: CouponService
+
+    @Autowired
     lateinit var imageService: ImageService
 
     @Autowired
@@ -249,6 +252,21 @@ open class PrintOrderServiceImpl : PrintOrderService {
 //
 //                orderImages.add(orderImg)
 //            }
+        }
+
+        //修改优惠券使用次数
+        if (orderInput.couponId > 0) {
+            val coupon = couponDao.findOne(orderInput.couponId)
+            if (coupon != null) {
+                coupon.usageCount++
+                couponDao.save(coupon)
+            }
+
+            val userCoupon = userCouponDao.findByUserIdAndCouponId(session.userId, orderInput.couponId)
+            if (userCoupon != null) {
+                userCoupon.usageCount++
+                userCouponDao.save(userCoupon)
+            }
         }
 
         return newOrder
@@ -580,6 +598,10 @@ open class PrintOrderServiceImpl : PrintOrderService {
 
     //计算多个订单的转账金额，手续费以及其中每个订单的手续费
     private fun calcOrdersAmountAndTransferFee(orders: List<PrintOrder>) : OrdersAmountAndTransferFeeCalcResult{
+        if (orders.isEmpty()) {
+            return OrdersAmountAndTransferFeeCalcResult(0, 0, emptyMap())
+        }
+
         val orderIdToTransferFeeMap = HashMap<Int, Int>()
         var totalAmount = 0   //总金额
 
@@ -594,7 +616,7 @@ open class PrintOrderServiceImpl : PrintOrderService {
             orderTransferFeeAddUp += orderTransferFee
         }
 
-        val totalTransferFee:Int = maxOf(1, (totalAmount.toDouble() * wxPayTransferCharge + 0.5).toInt())  //根据订单总金额计算的手续费
+        val totalTransferFee:Int = Math.ceil(totalAmount.toDouble() * wxPayTransferCharge).toInt()  //根据订单总金额计算的手续费
         if (totalTransferFee != orderTransferFeeAddUp) {
             val maxAmountOrder = orders.maxBy { it.totalFee - it.discount }
             if (maxAmountOrder != null && orderIdToTransferFeeMap.containsKey(maxAmountOrder.id)) {
@@ -620,6 +642,7 @@ open class PrintOrderServiceImpl : PrintOrderService {
     private fun startWxEntTransfer(orders: List<PrintOrder>, orderAmountAndFee: OrdersAmountAndTransferFeeCalcResult) {
         val account = companyService.getAvailableWxAccount(orders[0].companyId)
         if (account == null) {
+            logger.info("No available WxAccount for companyId=${orders[0].companyId}")
             return
         }
 
@@ -648,12 +671,32 @@ open class PrintOrderServiceImpl : PrintOrderService {
                     order.transfered = true
                     printOrderDao.save(order)
                 } else {
-                    logger.info("No available WxAccount for companyId=${order.companyId}")
+                    logger.error("PrintOrder id=${order.id} already transfered, abort!")
+                    throw ProcessException(ResultCode.PRINT_ORDER_ALREADY_TRANSFERED)
                 }
             }
 
             doWxEntTransfer(record, orders)
         })
+    }
+
+    private fun getUntransferedPrintOrders(companyId: Int): List<PrintOrder> {
+        val orderList = printOrderDao.findByCompanyIdAndPayedIsTrueAndTransferedIsFalse(companyId)
+        val notTransferedOrders = ArrayList<PrintOrder>()
+        val now = System.currentTimeMillis()
+
+        for (printOrder in orderList) {
+            if (printOrder.createTime.timeInMillis < now - 1000 * 60 * 60 * 24) {  //过滤掉1天前的订单（临时)
+                continue
+            }
+
+            val transferRecordItem = wxEntTransferRecordItemDao.findByPrintOrderId(printOrder.id)
+            if (transferRecordItem == null) {
+                notTransferedOrders += printOrder
+            }
+        }
+
+        return notTransferedOrders
     }
 
     //每天结束前的批量转账
@@ -663,7 +706,7 @@ open class PrintOrderServiceImpl : PrintOrderService {
         companies.forEach{ company ->
             wxEntTransferExecutor.submit {
                 try {
-                    val notTransferedOrders = printOrderDao.findByCompanyIdAndPayedIsTrueAndTransferedIsFalse(company.id)
+                    val notTransferedOrders = getUntransferedPrintOrders(company.id)
                     val ordersAmountAndFee = calcOrdersAmountAndTransferFee(notTransferedOrders)
 
                     if (ordersAmountAndFee.totalTransferAmount > 100) {
@@ -679,9 +722,6 @@ open class PrintOrderServiceImpl : PrintOrderService {
 
     override fun calculateOrderFee(orderInput: OrderInput) : Pair<Int, Int> {
         val session = userLoginSessionDao.findOne(orderInput.sessionId)
-        //XXX
-        //if (session == null) {
-        //}
 
         val printStation = printStationDao.findOne(orderInput.printStationId)
         val priceMap = printStationService.getPriceMap(printStation)
@@ -698,26 +738,25 @@ open class PrintOrderServiceImpl : PrintOrderService {
             totalFee += orderItemFee * printOrderItem.copies
         }
 
-        //XXX
         if (orderInput.couponId > 0) {
-            val curTime = System.currentTimeMillis()
-
             val userCoupon = userCouponDao.findByUserIdAndCouponId(session.userId, orderInput.couponId)
             if (userCoupon == null) {
                 throw ProcessException(1, "没有领取此优惠券")
             }
-            else {   //XXX 检查使用次数,产品等
+            else {   //XXX 检查产品等
                 val coupon = couponDao.findOne(orderInput.couponId)
                 if (coupon == null) {
                     throw ProcessException(1, "指定的优惠券不可用")
-                } else if (coupon.begin != null && curTime < coupon.begin!!.time) {
-                    throw ProcessException(1, "优惠券还未到使用时间")
-                } else if (coupon.expire != null && curTime > coupon.expire!!.time) {
-                    throw ProcessException(1, "优惠券已过期")
                 } else if (totalFee < coupon.minExpense) {
                     throw ProcessException(1, "没有达到最低消费金额")
                 } else {
-                    discount = coupon.discount
+                    val couponCheckResult = couponService.checkCouponUse(orderInput.couponId, session.userId, orderInput.printStationId)
+                    if (couponCheckResult == CouponValidateResult.VALID) {
+                        discount = coupon.discount
+                    }
+                    else {
+                        throw ProcessException(1, couponCheckResult.desc)
+                    }
                 }
             }
         }
@@ -885,7 +924,7 @@ open class PrintOrderServiceImpl : PrintOrderService {
         if (!printOrder.transfered && orderAmountAndFee.totalTransferAmount > 100) {
             startWxEntTransfer(Collections.singletonList(printOrder), orderAmountAndFee)
         } else {
-            val notTransferedOrders = printOrderDao.findByCompanyIdAndPayedIsTrueAndTransferedIsFalse(printOrder.companyId)
+            val notTransferedOrders = getUntransferedPrintOrders(printOrder.companyId)
             val batchOrdersAmountAndFee = calcOrdersAmountAndTransferFee(notTransferedOrders)
 
             if (batchOrdersAmountAndFee.totalTransferAmount > 100) {

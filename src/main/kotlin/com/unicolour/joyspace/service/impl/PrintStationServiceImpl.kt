@@ -15,14 +15,14 @@ import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.support.TransactionTemplate
 import java.io.File
+import java.security.KeyFactory
+import java.security.PublicKey
+import java.security.Signature
+import java.security.spec.X509EncodedKeySpec
 import java.text.SimpleDateFormat
 import java.util.*
 import javax.transaction.Transactional
 import kotlin.collections.HashMap
-import java.security.PublicKey
-import java.security.KeyFactory
-import java.security.spec.X509EncodedKeySpec
-import java.security.Signature
 
 
 @Service
@@ -41,10 +41,10 @@ open class PrintStationServiceImpl : PrintStationService {
     lateinit var managerService : ManagerService
 
     @Autowired
-    lateinit var managerDao : ManagerDao
+    lateinit var smsService: SmsService
 
     @Autowired
-    lateinit var companyDao: CompanyDao
+    lateinit var printerStatRecordDao: PrinterStatRecordDao
 
     @Autowired
     lateinit var positionDao : PositionDao
@@ -146,14 +146,23 @@ open class PrintStationServiceImpl : PrintStationService {
     }
 
     //登录
-    override val loginDataFetcher: DataFetcher<PrintStationLoginResult>
+    override val loginDataFetcher: DataFetcher<PrintStationLoginResultOld>
         get() {
-            return DataFetcher<PrintStationLoginResult> { env ->
+            return DataFetcher<PrintStationLoginResultOld> { env ->
                 val printStationId = env.getArgument<Int>("printStationId")
                 val password = env.getArgument<String>("password")
                 val version = env.getArgument<Int?>("version")
                 val uuid = env.getArgument<String?>("uuid") ?: ""
-                transactionTemplate.execute { login(printStationId, password, version, uuid) }
+                val ret = transactionTemplate.execute {
+                    login(printStationId, password, version, uuid)
+                }
+
+                PrintStationLoginResultOld(
+                        result = ret.result,
+                        sessionId = ret.sessionId,
+                        printerType = ret.printerType.name,
+                        resolution = ret.printerType.resolution
+                )
             }
         }
 
@@ -249,7 +258,8 @@ open class PrintStationServiceImpl : PrintStationService {
                 newSession.expireTime = Calendar.getInstance().apply { add(Calendar.SECOND, 3600) }
                 printStationLoginSessionDao.save(newSession)
 
-                return PrintStationLoginResult(sessionId = newSession.id, printerType = printStation.printerType, resolution = printerType.resolution)            }
+                return PrintStationLoginResult(sessionId = newSession.id, printerType = printerType.toDTO())
+            }
         }
 
         return PrintStationLoginResult(result = 2)   //验证失败
@@ -313,7 +323,7 @@ open class PrintStationServiceImpl : PrintStationService {
         newSession.expireTime = Calendar.getInstance().apply { add(Calendar.SECOND, 3600) }
         printStationLoginSessionDao.save(newSession)
 
-        return PrintStationLoginResult(sessionId = newSession.id, printerType = printStation.printerType, resolution = printerType.resolution)
+        return PrintStationLoginResult(sessionId = newSession.id, printerType = printerType.toDTO())
     }
 
     override fun initPublicKey(printStationId: Int, uuid: String, pubKeyStr: String): Int {
@@ -849,5 +859,86 @@ open class PrintStationServiceImpl : PrintStationService {
             }
         }
     }
+
+    @Transactional
+    override fun recordPrinterStat(sessionId: String, printerSn: String, printerType: String, printerName: String, mediaCounter: Int): Boolean {
+        val session = printStationLoginSessionDao.findOne(sessionId)
+        if (session != null) {
+            logger.info("Report printer stat, printerSerialNo: $printerSn, printerType: $printerType, printerName: $printerName, mediaCounter: $mediaCounter")
+
+            val printStation = printStationDao.findOne(session.printStationId)
+            val position = printStation.position
+
+            val lastRecord = printerStatRecordDao.findFirstByPrintStationIdOrderByIdDesc(printStation.id)
+            if (lastRecord != null && lastRecord.mediaCounter == mediaCounter) {
+                logger.info("Report printer stat, mediaCounter not changed")
+                return true
+            }
+
+            val manager = managerService.getCompanyManager(printStation.companyId)
+
+            val record = PrinterStatRecord()
+
+            record.reportTime = Calendar.getInstance()
+            record.companyId = printStation.companyId
+            record.positionId = printStation.positionId
+            record.printStationId = printStation.id
+            record.printerSerialNo = printerSn
+            record.printerType = printerType
+            record.printerName = printerName
+            record.mediaCounter = mediaCounter
+
+            val printerTypeRecord = findPrinterType(printerType)
+            val alertThresholds = printerTypeRecord?.mediaAlertThresholds?.splitToSequence(',')?.map { it.toIntOrNull() }
+
+            val phoneNumber = manager?.cellPhone ?: manager?.phone
+            if (phoneNumber != null && alertThresholds != null && !alertThresholds.contains(null)) {
+                var mediaCounterThreshold = 0
+                for (alertThreshold in alertThresholds) {
+                    if ((lastRecord == null || lastRecord.mediaCounter >= alertThreshold!!) && mediaCounter < alertThreshold!!) {
+                        mediaCounterThreshold = alertThreshold
+                        break
+                    }
+                }
+
+                if (mediaCounterThreshold > 0) {
+                    val smsTpl = "【优利绚彩】您在%s的%d号设备，目前耗材已不足以打印%d张，请您提前准备更换耗材"
+
+                    val sendResult = smsService.send(phoneNumber, String.format(smsTpl, position.name, printStation.id, mediaCounterThreshold))
+                    if (sendResult.first != 3) {
+                        logger.error("Send Printer Stat SMS error, PhoneNumber: $phoneNumber, ResponseCode: ${sendResult.first}, ResponseId: ${sendResult.second}")
+                    } else {
+                        logger.info("Send Printer Stat SMS success, PhoneNumber: $phoneNumber, ResponseCode: ${sendResult.first}, ResponseId: ${sendResult.second}")
+                        record.sendToPhoneNumber = phoneNumber
+                    }
+                }
+            }
+
+            printerStatRecordDao.save(record)
+
+            return true
+        }
+        else {
+            return false
+        }
+    }
+
+    private fun findPrinterType(printerType: String): PrinterType? {
+        var pTypeRecord = printerTypeDao.findOne(printerType)
+        if (pTypeRecord == null && printerType.contains("EPSON")) {
+            pTypeRecord = printerTypeDao.findOne("EPSON")
+        }
+
+        return pTypeRecord
+    }
+}
+
+private fun PrinterType.toDTO(): PrinterTypeDTO {
+    return PrinterTypeDTO(
+            name = this.name,
+            displayName = this.displayName,
+            rollPaper = this.rollPaper,
+            resolution = this.resolution
+    )
 }
 

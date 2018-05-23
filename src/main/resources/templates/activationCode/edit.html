@@ -61,7 +61,7 @@
                         <select name="printerType" class="form-control" id="printerType">
                             <option th:each="printerType : ${printerTypes}"
                                     th:value="${printerType.name}"
-                                    th:text="${printerType.name}"
+                                    th:text="${printerType.displayName}"
                                     th:selected="${code.printerType == printerType.name}">
                             </option>
                         </select>

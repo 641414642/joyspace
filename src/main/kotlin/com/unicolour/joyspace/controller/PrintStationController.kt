@@ -66,6 +66,8 @@ class PrintStationController {
     @Autowired
     lateinit var objectMapper: ObjectMapper
 
+    class PrintStationInfo(val printStation: PrintStation, val online: Boolean, val printerTypeDisp: String)
+
     @RequestMapping("/printStation/list")
     fun printStationList(
             modelAndView: ModelAndView,
@@ -80,6 +82,8 @@ class PrintStationController {
             return modelAndView
         }
 
+        val printerNameDispMap = printerTypeDao.findAll().map { it.name to it.displayName }.toMap()
+
         val pageable = PageRequest(pageno - 1, 20, Sort.Direction.ASC, "id")
         val printStations = if (inputPositionId > 0)
                 printStationDao.findByCompanyIdAndPositionId(loginManager.companyId, inputPositionId, pageable)
@@ -88,8 +92,6 @@ class PrintStationController {
 
         val pager = Pager(printStations.totalPages, 7, pageno - 1)
         modelAndView.model["pager"] = pager
-
-        class PrintStationInfo(val printStation: PrintStation, val online: Boolean)
 
         val time = Calendar.getInstance()
         time.add(Calendar.SECOND, 3600 - 30)
@@ -103,7 +105,8 @@ class PrintStationController {
                 online = true
             }
 
-            PrintStationInfo(it, online)
+            val printerTypeDisp = printerNameDispMap[it.printerType] ?: ""
+            PrintStationInfo(it, online, printerTypeDisp)
         }
 
         modelAndView.model["inputPositionId"] = inputPositionId
@@ -121,6 +124,8 @@ class PrintStationController {
             @RequestParam(name = "inputCompanyId", required = false, defaultValue = "0") inputCompanyId: Int
     ): ModelAndView {
 
+        val printerNameDispMap = printerTypeDao.findAll().map { it.name to it.displayName }.toMap()
+
         val pageable = PageRequest(pageno - 1, 20, Sort.Direction.ASC, "id")
         val printStations = if (inputCompanyId > 0)
                 printStationDao.findByCompanyId(inputCompanyId, pageable)
@@ -129,8 +134,6 @@ class PrintStationController {
 
         val pager = Pager(printStations.totalPages, 7, pageno - 1)
         modelAndView.model["pager"] = pager
-
-        class PrintStationInfo(val printStation: PrintStation, val online: Boolean)
 
         val time = Calendar.getInstance()
         time.add(Calendar.SECOND, 3600 - 30)
@@ -144,7 +147,8 @@ class PrintStationController {
                 online = true
             }
 
-            PrintStationInfo(it, online)
+            val printerTypeDisp = printerNameDispMap[it.printerType] ?: ""
+            PrintStationInfo(it, online, printerTypeDisp)
         }
 
         modelAndView.model["inputCompanyId"] = inputCompanyId
@@ -324,8 +328,9 @@ class PrintStationController {
 
     @RequestMapping("/printStation/tasks", method = arrayOf(RequestMethod.GET))
     @ResponseBody
-    fun fetchedPrintStationTasks(@RequestParam("sessionId") sessionId: String,
-                    @RequestParam("taskIdAfter") taskIdAfter: Int) : List<PrintStationTaskDTO> {
+    fun fetchedPrintStationTasks(
+            @RequestParam("sessionId") sessionId: String,
+            @RequestParam("taskIdAfter") taskIdAfter: Int) : List<PrintStationTaskDTO> {
         val tasks = printStationService.getUnFetchedPrintStationTasks(sessionId, taskIdAfter)
         val taskDTOs = ArrayList<PrintStationTaskDTO>()
 
@@ -415,8 +420,9 @@ class PrintStationController {
             @RequestParam("printStationId") printStationId: Int,
             @RequestParam("password") password: String,
             @RequestParam("version", required = false, defaultValue = "-1") version: Int,
-            @RequestParam("uuid") uuid: String
-    ): PrintStationLoginResult {
+            @RequestParam("uuid") uuid: String,
+            @RequestParam("apiVersion", required = false, defaultValue = "1") apiVersion: Int
+    ): Any {
         logger.info("PrintStation login, id=$printStationId, version=$version, uuid=$uuid");
         val result = printStationService.login(printStationId,
                 password,
@@ -424,7 +430,17 @@ class PrintStationController {
                 uuid)
 
         logger.info("PrintStation login, result = $result")
-        return result
+        return if (apiVersion > 1) {
+            result
+        }
+        else {
+            PrintStationLoginResultOld(
+                    result = result.result,
+                    sessionId = result.sessionId,
+                    printerType = result.printerType.name,
+                    resolution = result.printerType.resolution
+            )
+        }
     }
 
     @PostMapping("/printStation/loginWithKey")
@@ -432,14 +448,26 @@ class PrintStationController {
     fun printStationLoginWithKey(
             @RequestParam("printStationId") printStationId: Int,
             @RequestParam("version", required = false, defaultValue = "-1") version: Int,
-            @RequestParam("sign") sign: String
-    ): PrintStationLoginResult {
+            @RequestParam("sign") sign: String,
+            @RequestParam("apiVersion", required = false, defaultValue = "1") apiVersion: Int
+    ): Any {
         logger.info("PrintStation login with key, id=$printStationId, version=$version, sign=$sign")
         val versionValue = if (version > 0) version else null
         val result = printStationService.loginWithKey(printStationId, sign, versionValue)
 
         logger.info("PrintStation login with key, result = $result")
-        return result
+
+        return if (apiVersion > 1) {
+            result
+        }
+        else {
+            PrintStationLoginResultOld(
+                    result = result.result,
+                    sessionId = result.sessionId,
+                    printerType = result.printerType.name,
+                    resolution = result.printerType.resolution
+            )
+        }
     }
 
     @PostMapping("/printStation/initPubKey")
@@ -470,5 +498,17 @@ class PrintStationController {
     @ResponseBody
     fun initHome(@RequestBody input: HomeInitInput): Int {
         return printStationService.initHome(input).value
+    }
+
+    @PostMapping("/printStation/reportPrinterStat")
+    @ResponseBody
+    fun reportPrinterStat(
+            @RequestParam("sessionId") sessionId: String,
+            @RequestParam("printerSerialNo") printerSn: String,
+            @RequestParam("printerType") printerType: String,
+            @RequestParam("printerName") printerName: String,
+            @RequestParam("mediaCounter") mediaCounter: Int
+    ): Boolean {
+        return printStationService.recordPrinterStat(sessionId, printerSn, printerType, printerName, mediaCounter)
     }
 }
