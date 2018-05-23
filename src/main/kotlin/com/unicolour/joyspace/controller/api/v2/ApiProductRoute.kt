@@ -16,6 +16,7 @@ import org.springframework.core.io.Resource
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RestController
+import java.math.BigDecimal
 
 @RestController
 class ApiProductRoute {
@@ -55,7 +56,7 @@ class ApiProductRoute {
         producTypes.add(ProductType(0, "普通照片", "智能手机照片高质量打印","https://joyspace1.uni-colour.com/doc/home_page/product_type_0.png"))
         producTypes.add(ProductType(1, "证件照", "支持多种尺寸，自动排版","https://joyspace1.uni-colour.com/doc/home_page/product_type_1.png"))
         producTypes.add(ProductType(2, "模版拼图", "多种精美模板 随心定制","https://joyspace1.uni-colour.com/doc/home_page/product_type_2.png"))
-        producTypes.add(ProductType(3, "相册", "生活也许是一本书","https://joyspace1.uni-colour.com/doc/home_page/product_type_3.png"))
+        //producTypes.add(ProductType(3, "相册", "生活也许是一本书","https://joyspace1.uni-colour.com/doc/home_page/product_type_3.png"))
         val homePage = HomePageVo(advers, producTypes)
         return RestResponse.ok(homePage)
     }
@@ -135,8 +136,8 @@ class ApiProductRoute {
                     .firstOrNull()
             ProductVo(it.id,
                     it.name,
-                    it.template.width,
-                    it.template.height,
+                    getPixels(it.template.width),
+                    getPixels(it.template.height),
                     it.template.type,
                     com.unicolour.joyspace.model.ProductType.values().first { it.value == tpl.type }.dispName,
                     tpl.currentVersion,
@@ -167,12 +168,12 @@ class ApiProductRoute {
         val temp = product.template
         val layerBg = Layer(1, "background", images = mutableListOf())
         if (temp.type == com.unicolour.joyspace.model.ProductType.ID_PHOTO.value) {
-            layerBg.images!!.add(Img(1, "sticker", 0.0, 0.0, temp.width, temp.height, 0.0, "", "${baseUrl}/assets/template/preview/${temp.id}_v${temp.currentVersion}/mask.png"))
+            layerBg.images!!.add(Img(1, "sticker", 0.0, 0.0, getPixels(temp.width), getPixels(temp.height), 0.0, "", "${baseUrl}/assets/template/preview/${temp.id}_v${temp.currentVersion}/mask.png"))
         }
         val layerUser = Layer(2, "image", images = mutableListOf())
         val templateImages = templateImageInfoDao.findByTemplateIdAndTemplateVersion(temp.id, temp.currentVersion)
-        layerUser.images!!.addAll(templateImages.map { Img(it.id, "user", it.x, it.y, it.width, it.height, 0.0, "", "") })
-        val scene = Scene(1, "", "page", temp.width, temp.height, layers = mutableListOf())
+        layerUser.images!!.addAll(templateImages.map { Img(it.id, "user", getPixels(it.x), getPixels(it.y), getPixels(it.width), getPixels(it.height), 0.0, "", "") })
+        val scene = Scene(1, "", "page", getPixels(temp.width), getPixels(temp.height), layers = mutableListOf())
         scene.layers!!.add(layerBg)
         scene.layers!!.add(layerUser)
         val templateVo = TemplateVo(temp.id, temp.currentVersion, temp.name, temp.type, listOf())
@@ -180,4 +181,15 @@ class ApiProductRoute {
         return RestResponse.ok(templateVo)
     }
 
+    /**
+     * 毫米->像素   360DPI
+     */
+    private fun getPixels(mm: Double): Double {
+        return BigDecimal(mm).multiply(BigDecimal(14.1732288)).setScale(0,BigDecimal.ROUND_HALF_UP).toDouble()
+    }
+
+}
+
+fun main(args: Array<String>) {
+    println(BigDecimal(152.4).multiply(BigDecimal(14.1732288)).setScale(0,BigDecimal.ROUND_HALF_UP).toDouble())
 }

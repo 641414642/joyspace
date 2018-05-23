@@ -47,8 +47,8 @@ class ApiUserRoute {
         val session = userLoginSessionDao.findOne(sessionId)
         userDao.findOne(session.userId) ?: return RestResponse.error(ResultCode.INVALID_USER_LOGIN_SESSION)
         val noticeList = mutableListOf<NoticeVo>()
-        noticeList.add(NoticeVo("通知", "快来看看这些精美的手工日记吧，所有照片。。。", Date(), ""))
-        noticeList.add(NoticeVo("活动消息", "情人节，悦印送您优惠券啦，除了送花还可以。。。", Date(), ""))
+        //noticeList.add(NoticeVo("通知", "快来看看这些精美的手工日记吧，所有照片。。。", Date(), ""))
+        //noticeList.add(NoticeVo("活动消息", "情人节，悦印送您优惠券啦，除了送花还可以。。。", Date(), ""))
         return RestResponse.ok(noticeList)
     }
 
