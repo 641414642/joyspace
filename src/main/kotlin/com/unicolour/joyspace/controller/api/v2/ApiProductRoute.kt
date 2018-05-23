@@ -190,6 +190,3 @@ class ApiProductRoute {
 
 }
 
-fun main(args: Array<String>) {
-    println(BigDecimal(152.4).multiply(BigDecimal(14.1732288)).setScale(0,BigDecimal.ROUND_HALF_UP).toDouble())
-}

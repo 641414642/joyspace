@@ -97,7 +97,7 @@ open class CouponServiceImpl : CouponService {
         }
 
     override fun summaryCouponIdByOrder(session: UserLoginSession, printStationId: Int, user: User?, fee: Int, invalid: java.util.ArrayList<Int>): java.util.ArrayList<Int> {
-        val userCoupons = userCouponDao.findByUserId(session.userId)
+        var userCoupons = userCouponDao.findByUserId(session.userId)
         val couponIds = userCoupons.map { it.couponId }
         val retCouponIds = ArrayList<Int>(couponIds)
         val printStation =
@@ -142,10 +142,10 @@ open class CouponServiceImpl : CouponService {
 
                 c.claimCount++
                 couponDao.save(c)
-
-                retCouponIds.add(c.id)
             }
         }
+
+        userCoupons = userCouponDao.findByUserId(session.userId)
 
         //删除已禁用、不存在、过期、超过最大使用次数的优惠券
         for (userCoupon in userCoupons) {
