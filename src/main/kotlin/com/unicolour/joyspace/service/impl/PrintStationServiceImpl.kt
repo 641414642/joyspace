@@ -915,22 +915,17 @@ open class PrintStationServiceImpl : PrintStationService {
             }
 
             if (phoneNumber != null && record.printerType == "CY" && record.errorCode != 0) {
-                val smsTpl = "【优利绚彩】您在%s的%d号设备，%s"
-                val errorMessage = when (errorCode) {
-                    STATUS_USUALLY_PAPER_END -> "相纸已经用尽，不能打印了，请您立即更换耗材"
-                    STATUS_USUALLY_RIBBON_END -> "色带已经用尽，不能打印了，请您立即更换耗材"
-                    GROUP_SETTING -> "发生操作错误，请前往检查"
-                    GROUP_HARDWARE -> "发生硬件错误，请前往检查"
-                    GROUP_SYSTEM -> "发生系统错误，请前往检查"
-                    else -> "发生错误，请前往检查"
-                }
+                val errorCode = CyPrinterErrorCode.values().firstOrNull { it.value == record.errorCode }
+                if (errorCode != null && errorCode.sendSms) {
+                    val smsTpl = "【优利绚彩】您在%s的%d号设备，%s"
 
-                val sendResult = smsService.send(phoneNumber, String.format(smsTpl, position.name, printStation.id, errorMessage))
-                if (sendResult.first != 3) {
-                    logger.error("Send Printer Stat SMS error, PhoneNumber: $phoneNumber, ResponseCode: ${sendResult.first}, ResponseId: ${sendResult.second}")
-                } else {
-                    logger.info("Send Printer Stat SMS success, PhoneNumber: $phoneNumber, ResponseCode: ${sendResult.first}, ResponseId: ${sendResult.second}")
-                    record.sendToPhoneNumber = phoneNumber
+                    val sendResult = smsService.send(phoneNumber, String.format(smsTpl, position.name, printStation.id, errorCode.message))
+                    if (sendResult.first != 3) {
+                        logger.error("Send Printer Stat SMS error, PhoneNumber: $phoneNumber, ResponseCode: ${sendResult.first}, ResponseId: ${sendResult.second}")
+                    } else {
+                        logger.info("Send Printer Stat SMS success, PhoneNumber: $phoneNumber, ResponseCode: ${sendResult.first}, ResponseId: ${sendResult.second}")
+                        record.sendToPhoneNumber = phoneNumber
+                    }
                 }
             }
 
