@@ -384,10 +384,33 @@ open class PrintOrderServiceImpl : PrintOrderService {
                 )
             }
             val userImgFile = it.userImageFile!!
+            val product = productDao.findOne(it.productId)
+            var width = product.template.width
+            var height = product.template.height
+            when (product.id) {
+                9526 -> {
+                    width = 101.6
+                    height = 152.4
+                }
+                9527 -> {
+                    width = 101.6
+                    height = 152.4
+                }
+                9528 -> {
+                    width = 152.4
+                    height = 101.6
+                }
+                9529 -> {
+                    width = 101.6
+                    height = 152.4
+                }
+            }
             orderItemDTOs += PrintOrderItemDTO(
                     id = it.id,
                     copies = it.copies,
                     productId = it.productId,
+                    width = width,
+                    height = height,
                     productType = it.productType,
                     productVersion = it.productVersion,
                     orderImages = imageDTOs,

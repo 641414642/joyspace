@@ -22,10 +22,6 @@ import java.math.BigDecimal
 class ApiProductRoute {
     val logger = LoggerFactory.getLogger(this::class.java)
     @Autowired
-    private lateinit var adSetService: AdSetService
-    @Autowired
-    private lateinit var productService: ProductService
-    @Autowired
     private lateinit var productDao: ProductDao
     @Autowired
     private lateinit var templateImageInfoDao: TemplateImageInfoDao
@@ -71,24 +67,24 @@ class ApiProductRoute {
             val products = mutableListOf<ProductVo>()
             products.add(ProductVo(9526,
                     "展会6",
+                    960.0,
                     1440.0,
-                    2160.0,
                     2,
                     "模板拼图",
                     1,
-                    "1400 x 2160 mm",
+                    "101.6 x 152.4 mm",
                     1,
                     "",
                     100,
                     null))
             products.add(ProductVo(9527,
                     "展会7",
+                    960.0,
                     1440.0,
-                    2160.0,
                     2,
                     "模板拼图",
                     1,
-                    "1400 x 2160 mm",
+                    "101.6 x 152.4 mm",
                     1,
                     "",
                     100,
@@ -96,23 +92,23 @@ class ApiProductRoute {
             products.add(ProductVo(9528,
                     "展会8",
                     1440.0,
-                    2160.0,
+                    960.0,
                     2,
                     "模板拼图",
                     1,
-                    "1400 x 2160 mm",
+                    "152.4 x 101.6 mm",
                     1,
                     "",
                     100,
                     null))
             products.add(ProductVo(9529,
                     "展会9",
+                    960.0,
                     1440.0,
-                    2160.0,
                     2,
                     "模板拼图",
                     1,
-                    "1400 x 2160 mm",
+                    "101.6 x 152.4 mm",
                     1,
                     "",
                     100,
@@ -134,10 +130,12 @@ class ApiProductRoute {
                     .filter { it.type == ProductImageFileType.THUMB.value }
                     .map { "/assets/product/images/${it.id}.${it.fileType}" }
                     .firstOrNull()
+            var mode = 240
+            if (it.template.width*it.template.height>19354.8) mode = 180
             ProductVo(it.id,
                     it.name,
-                    getPixels(it.template.width),
-                    getPixels(it.template.height),
+                    getPixels(it.template.width,mode),
+                    getPixels(it.template.height,mode),
                     it.template.type,
                     com.unicolour.joyspace.model.ProductType.values().first { it.value == tpl.type }.dispName,
                     tpl.currentVersion,
@@ -166,14 +164,28 @@ class ApiProductRoute {
         }
         val product = productDao.findOne(id)
         val temp = product.template
+        var mode = 240
+        if (temp.width*temp.height>19354.8) mode = 180
         val layerBg = Layer(1, "background", images = mutableListOf())
         if (temp.type == com.unicolour.joyspace.model.ProductType.ID_PHOTO.value) {
-            layerBg.images!!.add(Img(1, "sticker", 0.0, 0.0, getPixels(temp.width), getPixels(temp.height), 0.0, "", "${baseUrl}/assets/template/preview/${temp.id}_v${temp.currentVersion}/mask.png"))
+            layerBg.images!!.add(Img(1, "sticker", 0.0, 0.0, getPixels(temp.width,mode), getPixels(temp.height,mode), 0.0, "", "${baseUrl}/assets/template/preview/${temp.id}_v${temp.currentVersion}/mask.png"))
         }
         val layerUser = Layer(2, "image", images = mutableListOf())
         val templateImages = templateImageInfoDao.findByTemplateIdAndTemplateVersion(temp.id, temp.currentVersion)
-        layerUser.images!!.addAll(templateImages.map { Img(it.id, "user", getPixels(it.x), getPixels(it.y), getPixels(it.width), getPixels(it.height), 0.0, "", "") })
-        val scene = Scene(1, "", "page", getPixels(temp.width), getPixels(temp.height), layers = mutableListOf())
+        layerUser.images!!.addAll(templateImages.map {
+            var mode = 240
+            if (it.width*it.height>19354.8) mode = 180
+            Img(it.id,
+                    "user",
+                    getPixels(it.x, mode),
+                    getPixels(it.y, mode),
+                    getPixels(it.width, mode),
+                    getPixels(it.height, mode),
+                    0.0,
+                    "",
+                    "")
+        })
+        val scene = Scene(1, "", "page", getPixels(temp.width,mode), getPixels(temp.height,mode), layers = mutableListOf())
         scene.layers!!.add(layerBg)
         scene.layers!!.add(layerUser)
         val templateVo = TemplateVo(temp.id, temp.currentVersion, temp.name, temp.type, listOf())
@@ -182,10 +194,11 @@ class ApiProductRoute {
     }
 
     /**
-     * 毫米->像素   360DPI
+     * 毫米->像素   240DPI    if 宽x高>=19354.8mm use 180DPI
+     * @param mode 分辨率
      */
-    private fun getPixels(mm: Double): Double {
-        return BigDecimal(mm).multiply(BigDecimal(14.1732288)).setScale(0,BigDecimal.ROUND_HALF_UP).toDouble()
+    private fun getPixels(mm: Double,mode:Int): Double {
+        return BigDecimal(mm).divide(BigDecimal(25.4),7,BigDecimal.ROUND_HALF_UP).multiply(BigDecimal(mode)).setScale(0,BigDecimal.ROUND_HALF_UP).toDouble()
     }
 
 }

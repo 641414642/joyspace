@@ -8,8 +8,8 @@
       "id": 1,
       "name": "",
       "type": "page",
-      "width": 1440,
-      "height": 2160,
+      "width": 960,
+      "height": 1440,
       "layers": [
         {
           "id": 1,
@@ -20,8 +20,8 @@
               "type": "sticker",
               "x": 0,
               "y": 0,
-              "width": 1440,
-              "height": 2160,
+              "width": 960,
+              "height": 1440,
               "angleClip": 0,
               "bgcolor": "",
               "resourceURL": "https://joyspace1.uni-colour.com/doc/home_page/9526/background_layer.png"
@@ -35,10 +35,10 @@
             {
               "id": 1,
               "type": "user",
-              "x": 223,
-              "y": 79,
-              "width": 1217,
-              "height": 2010,
+              "x": 149,
+              "y": 53,
+              "width": 811,
+              "height": 1340,
               "angleClip": 0,
               "bgcolor": "",
               "resourceURL": ""
@@ -54,8 +54,8 @@
               "type": "front",
               "x": 0,
               "y": 0,
-              "width": 1440,
-              "height": 2160,
+              "width": 960,
+              "height": 1440,
               "angleClip": 0,
               "bgcolor": "",
               "resourceURL": "https://joyspace1.uni-colour.com/doc/home_page/9526/front_layer.png"
