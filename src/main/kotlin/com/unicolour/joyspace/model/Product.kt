@@ -28,7 +28,7 @@ class Product {
 
     @Column
     @NotNull
-    var enabled: Boolean = false
+    var deleted: Boolean = false
 
     /** 备注 */
     @Column(length = 255)
@@ -42,16 +42,10 @@ class Product {
     @OneToMany(mappedBy = "product")
     lateinit var imageFiles: List<ProductImageFile>
 
-    //region 投放商
     /** 投放商ID */
-    @Column(name = "company_id", insertable = false, updatable = false)
-    var companyId: Int = 0
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "company_id")
+    @Column
     @NotNull
-    lateinit var company: Company
-    //endregion
+    var companyId: Int = 0
 
     @Column
     @NotNull

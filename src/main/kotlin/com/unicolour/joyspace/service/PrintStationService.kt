@@ -45,5 +45,5 @@ interface PrintStationService {
     fun getHomeInitInfo(userName: String, password: String, printStationId: Int): HomeInitInfoDTO
     fun initHome(input: HomeInitInput): ResultCode
 
-    fun recordPrinterStat(sessionId: String, printerSn: String, printerType: String, printerName: String, mediaCounter: Int): Boolean
+    fun recordPrinterStat(sessionId: String, printerSn: String, printerType: String, printerName: String, mediaCounter: Int, errorCode: Int): Boolean
 }

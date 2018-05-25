@@ -150,3 +150,29 @@ function couponEnabled(event) {
         }
     });
 }
+
+//确认删除产品
+function deleteProduct(event) {
+    var source = event.target || event.srcElement;
+    $("#productId").val($(source).data("id"));
+    $("#productName").text($(source).data("name"));
+    $("#confirmDeleteDialog").modal("show");
+}
+
+$(function() {
+    var frm = $('#deleteProductForm');
+    frm.submit(function (ev) {
+        $.ajax({
+            type: frm.attr('method'),
+            url: frm.attr('action'),
+            data: frm.serialize(),
+            success: function (data) {
+                if (data) {
+                    window.location.reload();
+                }
+            }
+        });
+
+        ev.preventDefault();
+    });
+})

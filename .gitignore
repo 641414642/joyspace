@@ -8,3 +8,5 @@
 /gradle-app.setting
 /src/asciidoc/snippets/
 /out/
+*.iml
+*.ipr

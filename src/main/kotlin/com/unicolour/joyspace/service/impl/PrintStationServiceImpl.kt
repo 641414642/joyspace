@@ -431,10 +431,10 @@ open class PrintStationServiceImpl : PrintStationService {
             printStation.addressCity = printStation.position.addressCity
             printStation.addressDistrict = printStation.position.addressDistrict
             printStation.addressStreet = printStation.position.addressStreet
+            printStation.printerType = printerType
 
             if (managerService.loginManagerHasRole("ROLE_SUPERADMIN")) {
                 printStation.transferProportion = transferProportion
-                printStation.printerType = printerType
                 if (adSetId > 0) {
                     printStation.adSet = adSetDao.findOne(adSetId)
                 }
@@ -861,17 +861,17 @@ open class PrintStationServiceImpl : PrintStationService {
     }
 
     @Transactional
-    override fun recordPrinterStat(sessionId: String, printerSn: String, printerType: String, printerName: String, mediaCounter: Int): Boolean {
+    override fun recordPrinterStat(sessionId: String, printerSn: String, printerType: String, printerName: String, mediaCounter: Int, errorCode: Int): Boolean {
         val session = printStationLoginSessionDao.findOne(sessionId)
         if (session != null) {
-            logger.info("Report printer stat, printerSerialNo: $printerSn, printerType: $printerType, printerName: $printerName, mediaCounter: $mediaCounter")
+            logger.info("Report printer stat, printerSerialNo: $printerSn, printerType: $printerType, printerName: $printerName, mediaCounter: $mediaCounter, errorCode: $errorCode")
 
             val printStation = printStationDao.findOne(session.printStationId)
             val position = printStation.position
 
             val lastRecord = printerStatRecordDao.findFirstByPrintStationIdOrderByIdDesc(printStation.id)
-            if (lastRecord != null && lastRecord.mediaCounter == mediaCounter) {
-                logger.info("Report printer stat, mediaCounter not changed")
+            if (lastRecord != null && lastRecord.mediaCounter == mediaCounter && lastRecord.errorCode == errorCode) {
+                logger.info("Report printer stat, mediaCounter and errorCode not changed")
                 return true
             }
 
@@ -887,6 +887,7 @@ open class PrintStationServiceImpl : PrintStationService {
             record.printerType = printerType
             record.printerName = printerName
             record.mediaCounter = mediaCounter
+            record.errorCode = errorCode
 
             val printerTypeRecord = findPrinterType(printerType)
             val alertThresholds = printerTypeRecord?.mediaAlertThresholds?.splitToSequence(',')?.map { it.toIntOrNull() }
@@ -905,6 +906,21 @@ open class PrintStationServiceImpl : PrintStationService {
                     val smsTpl = "【优利绚彩】您在%s的%d号设备，目前耗材已不足以打印%d张，请您提前准备更换耗材"
 
                     val sendResult = smsService.send(phoneNumber, String.format(smsTpl, position.name, printStation.id, mediaCounterThreshold))
+                    if (sendResult.first != 3) {
+                        logger.error("Send Printer Stat SMS error, PhoneNumber: $phoneNumber, ResponseCode: ${sendResult.first}, ResponseId: ${sendResult.second}")
+                    } else {
+                        logger.info("Send Printer Stat SMS success, PhoneNumber: $phoneNumber, ResponseCode: ${sendResult.first}, ResponseId: ${sendResult.second}")
+                        record.sendToPhoneNumber = phoneNumber
+                    }
+                }
+            }
+
+            if (phoneNumber != null && record.printerType == "CY" && record.errorCode != 0) {
+                val errorCode = CyPrinterErrorCode.values().firstOrNull { it.value == record.errorCode }
+                if (errorCode != null && errorCode.sendSms) {
+                    val smsTpl = "【优利绚彩】您在%s的%d号设备，%s"
+
+                    val sendResult = smsService.send(phoneNumber, String.format(smsTpl, position.name, printStation.id, errorCode.message))
                     if (sendResult.first != 3) {
                         logger.error("Send Printer Stat SMS error, PhoneNumber: $phoneNumber, ResponseCode: ${sendResult.first}, ResponseId: ${sendResult.second}")
                     } else {
@@ -941,4 +957,12 @@ private fun PrinterType.toDTO(): PrinterTypeDTO {
             resolution = this.resolution
     )
 }
+
+const val GROUP_USUALLY =		0x00010000
+const val GROUP_SETTING =		0x00020000
+const val GROUP_HARDWARE =		0x00040000
+const val GROUP_SYSTEM	=		0x00080000
+
+const val STATUS_USUALLY_PAPER_END	 = GROUP_USUALLY or 0x0008
+const val STATUS_USUALLY_RIBBON_END	 = GROUP_USUALLY or 0x0010
 

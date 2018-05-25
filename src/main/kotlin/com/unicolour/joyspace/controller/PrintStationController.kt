@@ -11,6 +11,7 @@ import com.unicolour.joyspace.model.ProductType
 import com.unicolour.joyspace.service.ManagerService
 import com.unicolour.joyspace.service.PrintOrderService
 import com.unicolour.joyspace.service.PrintStationService
+import com.unicolour.joyspace.service.ProductService
 import com.unicolour.joyspace.util.Pager
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
@@ -43,7 +44,7 @@ class PrintStationController {
     lateinit var adSetDao: AdSetDao
 
     @Autowired
-    lateinit var productDao: ProductDao
+    lateinit var productService: ProductService
 
     @Autowired
     lateinit var companyDao: CompanyDao
@@ -168,9 +169,7 @@ class PrintStationController {
         val supportedProductIdSet = printStationProductDao.findByPrintStationId(id).map { it.productId }.toHashSet()
         val companyId = printStation.companyId
 
-        //val allProducts = productDao.findByCompanyIdOrderBySequenceAsc(loginManager!!.companyId)
-        val allProducts = productDao.findAll()
-                .sortedBy { it.sequence }
+        val products = productService.queryProducts(printStation.companyId, "", true, "sequence asc")
                 .map {
                     ProductItem(
                             productId = it.id,
@@ -183,10 +182,10 @@ class PrintStationController {
         modelAndView.model["printStation"] = printStation
         modelAndView.model["positions"] = positionDao.findByCompanyId(companyId)
         modelAndView.model["adSets"] = adSetDao.findByCompanyIdOrPublicResourceIsTrue(companyId)
-        modelAndView.model["photo_products"] = allProducts.filter { it.productType == ProductType.PHOTO.value }
-        modelAndView.model["template_products"] = allProducts.filter { it.productType == ProductType.TEMPLATE.value }
-        modelAndView.model["id_photo_products"] = allProducts.filter { it.productType == ProductType.ID_PHOTO.value }
-        modelAndView.model["productIds"] = allProducts.map { it.productId }.joinToString(separator = ",")
+        modelAndView.model["photo_products"] = products.filter { it.productType == ProductType.PHOTO.value }
+        modelAndView.model["template_products"] = products.filter { it.productType == ProductType.TEMPLATE.value }
+        modelAndView.model["id_photo_products"] = products.filter { it.productType == ProductType.ID_PHOTO.value }
+        modelAndView.model["productIds"] = products.map { it.productId }.joinToString(separator = ",")
         modelAndView.model["printerTypes"] = printerTypeDao.findAll()
 
         modelAndView.viewName = "/printStation/edit :: content"
@@ -245,9 +244,7 @@ class PrintStationController {
             modelAndView: ModelAndView): ModelAndView {
         val printStation = PrintStation()
 
-        //val allProducts = productDao.findByCompanyIdOrderBySequenceAsc(loginManager!!.companyId)
-        val allProducts = productDao.findAll()
-                .sortedBy { it.sequence }
+        val products = productService.queryProducts(printStation.companyId, "", true, "sequence asc")
                 .map {
                     ProductItem(
                             productId = it.id,
@@ -273,10 +270,10 @@ class PrintStationController {
 
         modelAndView.model["printStation"] = printStation
         modelAndView.model["allCompany"] = allCompany
-        modelAndView.model["photo_products"] = allProducts.filter { it.productType == ProductType.PHOTO.value }
-        modelAndView.model["template_products"] = allProducts.filter { it.productType == ProductType.TEMPLATE.value }
-        modelAndView.model["id_photo_products"] = allProducts.filter { it.productType == ProductType.ID_PHOTO.value }
-        modelAndView.model["productIds"] = allProducts.map { it.productId }.joinToString(separator = ",")
+        modelAndView.model["photo_products"] = products.filter { it.productType == ProductType.PHOTO.value }
+        modelAndView.model["template_products"] = products.filter { it.productType == ProductType.TEMPLATE.value }
+        modelAndView.model["id_photo_products"] = products.filter { it.productType == ProductType.ID_PHOTO.value }
+        modelAndView.model["productIds"] = products.map { it.productId }.joinToString(separator = ",")
         modelAndView.viewName = "/printStation/activate :: content"
 
         return modelAndView
@@ -507,8 +504,9 @@ class PrintStationController {
             @RequestParam("printerSerialNo") printerSn: String,
             @RequestParam("printerType") printerType: String,
             @RequestParam("printerName") printerName: String,
-            @RequestParam("mediaCounter") mediaCounter: Int
+            @RequestParam("mediaCounter") mediaCounter: Int,
+            @RequestParam("errorCode") errorCode: Int
     ): Boolean {
-        return printStationService.recordPrinterStat(sessionId, printerSn, printerType, printerName, mediaCounter)
+        return printStationService.recordPrinterStat(sessionId, printerSn, printerType, printerName, mediaCounter, errorCode)
     }
 }
