@@ -24,6 +24,14 @@ import org.springframework.web.servlet.ModelAndView
 import java.util.*
 import javax.servlet.http.HttpServletRequest
 import kotlin.collections.ArrayList
+import org.springframework.web.servlet.view.RedirectView
+import org.springframework.web.servlet.mvc.support.RedirectAttributes
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.RequestMapping
+
+
+
+
 
 @Controller
 class PrintStationController {
@@ -321,6 +329,14 @@ class PrintStationController {
         }
 
         return modelAndView
+    }
+
+
+    @GetMapping("/printStation/qrCode/{id}")
+    fun printStationQrCode(@PathVariable("id") id: Int, attributes: RedirectAttributes): RedirectView {
+        val qrCodeImgUrl = printStationService.getPrintStationQrCodeUrl(id)
+        attributes.addFlashAttribute("flashAttribute", "redirectWithRedirectView")
+        return RedirectView(qrCodeImgUrl)
     }
 
     @RequestMapping("/printStation/tasks", method = arrayOf(RequestMethod.GET))

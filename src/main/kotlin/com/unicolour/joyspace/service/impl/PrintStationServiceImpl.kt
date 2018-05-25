@@ -1,5 +1,9 @@
 package com.unicolour.joyspace.service.impl
 
+import com.google.zxing.BarcodeFormat
+import com.google.zxing.EncodeHintType
+import com.google.zxing.qrcode.QRCodeWriter
+import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel
 import com.unicolour.joyspace.dao.*
 import com.unicolour.joyspace.dto.*
 import com.unicolour.joyspace.exception.ProcessException
@@ -13,6 +17,9 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.support.TransactionTemplate
+import java.awt.Color
+import java.awt.Font
+import java.awt.RenderingHints
 import java.io.File
 import java.security.KeyFactory
 import java.security.PublicKey
@@ -20,6 +27,7 @@ import java.security.Signature
 import java.security.spec.X509EncodedKeySpec
 import java.text.SimpleDateFormat
 import java.util.*
+import javax.imageio.ImageIO
 import javax.transaction.Transactional
 import kotlin.collections.HashMap
 
@@ -915,11 +923,11 @@ open class PrintStationServiceImpl : PrintStationService {
             }
 
             if (phoneNumber != null && record.printerType == "CY" && record.errorCode != 0) {
-                val errorCode = CyPrinterErrorCode.values().firstOrNull { it.value == record.errorCode }
-                if (errorCode != null && errorCode.sendSms) {
+                val errorCodeObj = CyPrinterErrorCode.values().firstOrNull { it.value == record.errorCode }
+                if (errorCodeObj != null && errorCodeObj.sendSms) {
                     val smsTpl = "【优利绚彩】您在%s的%d号设备，%s"
 
-                    val sendResult = smsService.send(phoneNumber, String.format(smsTpl, position.name, printStation.id, errorCode.message))
+                    val sendResult = smsService.send(phoneNumber, String.format(smsTpl, position.name, printStation.id, errorCodeObj.message))
                     if (sendResult.first != 3) {
                         logger.error("Send Printer Stat SMS error, PhoneNumber: $phoneNumber, ResponseCode: ${sendResult.first}, ResponseId: ${sendResult.second}")
                     } else {
@@ -946,6 +954,66 @@ open class PrintStationServiceImpl : PrintStationService {
 
         return pTypeRecord
     }
+
+    override fun getPrintStationQrCodeUrl(printStationId: Int): String {
+        val psQrCodeImgFile = File(assetsDir, "printStation/qrCode/$printStationId.png")
+        if (!psQrCodeImgFile.exists()) {
+            psQrCodeImgFile.parentFile.mkdirs()
+            createPrintStationQrCodeImageFile(printStationId, psQrCodeImgFile)
+        }
+
+        return "$baseUrl/assets/printStation/qrCode/$printStationId.png"
+    }
+
+    private fun createPrintStationQrCodeImageFile(printStationId: Int, psQrCodeImgFile: File) {
+        val psUrl = getPrintStationUrl(printStationId)
+
+        val qrCodeAreaX = 195
+        val qrCodeAreaY = 368
+        val qrCodeAreaSize = 492
+
+        val labelFontSize = 48
+        val labelAreaX = 473
+        val labelAreaY = 1037
+        val labelAreaW = 263
+        val labelAreaH = 71
+
+
+        val bgImg = ImageIO.read(PrintStationServiceImpl::class.java.getResourceAsStream("/static/img/print_station_qr_code_bg.png"))
+        val graphics = bgImg.createGraphics()
+
+        val hintMap = EnumMap<EncodeHintType, Any>(EncodeHintType::class.java)
+        hintMap[EncodeHintType.CHARACTER_SET] = "utf-8"
+        hintMap[EncodeHintType.MARGIN] = 4
+        hintMap[EncodeHintType.ERROR_CORRECTION] = ErrorCorrectionLevel.M
+
+        val qrCodeWriter = QRCodeWriter()
+        val byteMatrix = qrCodeWriter.encode(psUrl, BarcodeFormat.QR_CODE, qrCodeAreaSize, qrCodeAreaSize, hintMap)
+        val matrixWidth = byteMatrix.width
+        val matrixHeight = byteMatrix.height
+
+        graphics.color = Color.BLACK
+        for (x in 0 until matrixWidth) {
+            for (y in 0 until matrixHeight) {
+                if (byteMatrix.get(x, y)) {
+                    graphics.fillRect(x + qrCodeAreaX, y + qrCodeAreaY, 1, 1)
+                }
+            }
+        }
+
+        graphics.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON)
+        graphics.font = Font(Font.SANS_SERIF, Font.BOLD, labelFontSize)
+        val labelFontMetrics = graphics.fontMetrics
+        val labelHei = labelFontMetrics.height
+        val labelWid = labelFontMetrics.stringWidth(printStationId.toString())
+
+        graphics.drawString(printStationId.toString(),
+                labelAreaX + (labelAreaW - labelWid) / 2,
+                labelAreaY + (labelAreaH - labelHei) / 2 + labelFontMetrics.getAscent())
+        graphics.dispose()
+
+        ImageIO.write(bgImg, "png", psQrCodeImgFile)
+    }
 }
 
 private fun PrinterType.toDTO(): PrinterTypeDTO {
@@ -956,12 +1024,4 @@ private fun PrinterType.toDTO(): PrinterTypeDTO {
             resolution = this.resolution
     )
 }
-
-const val GROUP_USUALLY =		0x00010000
-const val GROUP_SETTING =		0x00020000
-const val GROUP_HARDWARE =		0x00040000
-const val GROUP_SYSTEM	=		0x00080000
-
-const val STATUS_USUALLY_PAPER_END	 = GROUP_USUALLY or 0x0008
-const val STATUS_USUALLY_RIBBON_END	 = GROUP_USUALLY or 0x0010
 

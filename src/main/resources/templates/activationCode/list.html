@@ -68,11 +68,9 @@
 						<td th:unless="${c.code.used}"><span class="label label-success">未使用</span></td>
 						<td th:text="${c.code.useTime == null ? '' : #calendars.format(c.code.useTime, 'yyyy-MM-dd HH:mm')}"></td>
 						<td>
-							<a href="#" style="margin-right:5px">
+							<a href="#" th:href="@{/printStation/qrCode/} + ${c.code.printStationId}" target="_blank" style="margin-right:5px">
 								<i class="fa fa-fw fa-qrcode"
 								   data-dlgtitle="自助机二维码"
-								   th:attr="data-qrcode=${c.qrCodeUrl}"
-								   onclick="return showQrCode(event)"
 								   title="二维码">
 								</i>
 							</a>
