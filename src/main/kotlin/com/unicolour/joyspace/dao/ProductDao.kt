@@ -26,5 +26,5 @@ interface ProductDao : PagingAndSortingRepository<Product, Int>, ProductCustomQu
     fun findFirstByCompanyIdAndSequenceLessThanOrderBySequenceDesc(companyId: Int, sequence: Int) : Product?
     fun findByIdIn(idList: List<Int>): List<Product>
 
-    fun findByTemplateIdInAndEnabledOrderBySequence(templateIdList: List<Int>, enabled: Boolean): List<Product>
+    fun findByTemplateIdInAndDeletedOrderBySequence(templateIdList: List<Int>, deleted: Boolean): List<Product>
 }

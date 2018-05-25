@@ -7,8 +7,6 @@ import com.unicolour.joyspace.dao.TemplateImageInfoDao
 import com.unicolour.joyspace.dto.*
 import com.unicolour.joyspace.dto.common.RestResponse
 import com.unicolour.joyspace.model.ProductImageFileType
-import com.unicolour.joyspace.service.AdSetService
-import com.unicolour.joyspace.service.ProductService
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
@@ -116,7 +114,7 @@ class ApiProductRoute {
             return RestResponse.ok(products)
         }
         val templateIds = templateDao.findByType(type).map { it.id }
-        val products = productDao.findByTemplateIdInAndEnabledOrderBySequence(templateIds, true)
+        val products = productDao.findByTemplateIdInAndDeletedOrderBySequence(templateIds, false)
         val productVoList = products.map {
             val tpl = it.template
             val w = tpl.width
