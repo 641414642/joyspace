@@ -152,7 +152,10 @@ open class CouponServiceImpl : CouponService {
             val coupon = couponDao.findOne(userCoupon.couponId)
             val context = CouponValidateContext(
                     coupon = coupon,
-                    userCoupon = userCoupon)
+                    userCoupon = userCoupon,
+                    printStationId = printStationId,
+                    positionId = printStation?.positionId ?: 0,
+                    companyId = printStation?.companyId ?: 0)
 
             val checkResult =
                     if (coupon == null) {
@@ -161,6 +164,7 @@ open class CouponServiceImpl : CouponService {
                         validateCoupon(context,
                                 this::validateCouponEnabled,
                                 this::validateCouponByTime,
+                                this::validateCouponByPrintStation,
                                 this::validateCouponByMaxUses,
                                 this::validateCouponByMaxUses)
                     }

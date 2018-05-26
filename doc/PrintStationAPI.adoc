@@ -35,6 +35,8 @@
             "id": xxx,            //订单项id
             "copies": xxx,        //打印项份数
             "productId": xxx，    //订单项产品id
+            "width":12.5,          //相纸宽 单位mm
+            "height":12.5,          //相纸高 单位mm
             "productType": xxx,   //产品类型  0: 普通照片,  1: 证件照,  2: 模板拼图
             "productVersion": "xxx.xxx",    //产品版本号
             "orderImages": [      //订单项中的用户图片列表
