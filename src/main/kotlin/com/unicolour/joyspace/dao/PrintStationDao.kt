@@ -1,6 +1,5 @@
 package com.unicolour.joyspace.dao
 
-import com.unicolour.joyspace.model.AliPayConfig
 import com.unicolour.joyspace.model.PrintStation
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable

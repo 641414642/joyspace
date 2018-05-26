@@ -1,9 +1,7 @@
 package com.unicolour.joyspace.controller.api.v2
 
 import com.google.gson.Gson
-import com.unicolour.joyspace.dao.ProductDao
-import com.unicolour.joyspace.dao.TemplateDao
-import com.unicolour.joyspace.dao.TemplateImageInfoDao
+import com.unicolour.joyspace.dao.*
 import com.unicolour.joyspace.dto.*
 import com.unicolour.joyspace.dto.common.RestResponse
 import com.unicolour.joyspace.model.ProductImageFileType
@@ -13,6 +11,7 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.core.io.Resource
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import java.math.BigDecimal
 
@@ -25,6 +24,8 @@ class ApiProductRoute {
     private lateinit var templateImageInfoDao: TemplateImageInfoDao
     @Autowired
     private lateinit var templateDao: TemplateDao
+    @Autowired
+    private lateinit var printStationProductDao: PrintStationProductDao
     @Value("\${com.unicolour.joyspace.baseUrl}")
     private lateinit var baseUrl: String
     @Value("classpath:static/doc/home_page/9526/test.json")
@@ -43,9 +44,9 @@ class ApiProductRoute {
     fun showHomePage(): RestResponse {
         val advers = mutableListOf<Advert>()
         advers.add(Advert("ad_1", "轮播图", "", "https://joyspace1.uni-colour.com/doc/home_page/1.png"))
-        advers.add(Advert("ad_2", "轮播图", "", "https://joyspace1.uni-colour.com/doc/home_page/2.png"))
+        advers.add(Advert("ad_2", "轮播图", "", "https://joyspace1.uni-colour.com/doc/home_page/4.png"))
         advers.add(Advert("ad_3", "轮播图", "", "https://joyspace1.uni-colour.com/doc/home_page/3.png"))
-        advers.add(Advert("ad_4", "轮播图", "", "https://joyspace1.uni-colour.com/doc/home_page/4.png"))
+        advers.add(Advert("ad_4", "轮播图", "", "https://joyspace1.uni-colour.com/doc/home_page/2.png"))
         val producTypes = mutableListOf<ProductType>()
         producTypes.add(ProductType(0, "普通照片", "智能手机照片高质量打印","https://joyspace1.uni-colour.com/doc/home_page/product_type_0.png"))
         producTypes.add(ProductType(1, "证件照", "支持多种尺寸，自动排版","https://joyspace1.uni-colour.com/doc/home_page/product_type_1.png"))
@@ -60,7 +61,8 @@ class ApiProductRoute {
      * 获取某个类型的全部产品（规格／模版）信息
      */
     @GetMapping(value = "/v2/product/{type}")
-    fun getProductsByType(@PathVariable("type") type: Int): RestResponse {
+    fun getProductsByType(@PathVariable("type") type: Int,
+                          @RequestParam(required = false, value = "printStationId") printStationId: Int?): RestResponse {
         if (type == 2) {
             val products = mutableListOf<ProductVo>()
             products.add(ProductVo(9526,
@@ -114,7 +116,12 @@ class ApiProductRoute {
             return RestResponse.ok(products)
         }
         val templateIds = templateDao.findByType(type).map { it.id }
-        val products = productDao.findByTemplateIdInAndDeletedOrderBySequence(templateIds, false)
+        var products = productDao.findByTemplateIdInAndDeletedOrderBySequence(templateIds, false)
+        if (printStationId != null) {
+            products = products.filter {
+                printStationProductDao.existsByPrintStationIdAndProductId(printStationId, it.id)
+            }
+        }
         val productVoList = products.map {
             val tpl = it.template
             val w = tpl.width
