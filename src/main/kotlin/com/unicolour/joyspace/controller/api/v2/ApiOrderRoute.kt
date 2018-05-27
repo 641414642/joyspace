@@ -6,7 +6,6 @@ import com.unicolour.joyspace.dto.common.RestResponse
 import com.unicolour.joyspace.exception.ProcessException
 import com.unicolour.joyspace.model.PrintOrderImageStatus
 import com.unicolour.joyspace.model.PrintOrderProductImage
-import com.unicolour.joyspace.model.ProductImageFileType
 import com.unicolour.joyspace.service.ImageService
 import com.unicolour.joyspace.service.PrintOrderService
 import org.slf4j.LoggerFactory
@@ -134,9 +133,13 @@ class ApiOrderRoute {
                              @RequestParam("sessionId") sessionId: String,
                              @RequestParam("orderItemId") orderItemId: Int,
                              @RequestParam("name") name: String,
+                             @RequestParam("x",required = false) x: Double?,
+                             @RequestParam("y",required = false) y: Double?,
+                             @RequestParam("scale",required = false) scale: Double?,
+                             @RequestParam("rotate",required = false) rotate: Double?,
                              @RequestParam("image") imgFile: MultipartFile?): ResponseEntity<UploadOrderImageResult> {
 
-        val allUploaded = printOrderService.uploadOrderImage(sessionId, orderItemId, imgFile)
+        val allUploaded = printOrderService.uploadOrderImage(sessionId, orderItemId, imgFile, x ?: 0.0, y ?: 0.0, scale ?: 0.0, rotate ?: 0.0)
         return ResponseEntity.ok(UploadOrderImageResult(allUploaded))
     }
 

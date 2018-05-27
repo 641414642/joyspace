@@ -24,7 +24,6 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.support.TransactionTemplate
 import org.springframework.web.client.RestTemplate
 import org.springframework.web.multipart.MultipartFile
-import java.io.IOException
 import java.io.InputStreamReader
 import java.io.StringReader
 import java.math.BigInteger
@@ -215,6 +214,16 @@ open class PrintOrderServiceImpl : PrintOrderService {
 
             orderItems.add(newOrderItem)
 
+            val orderImg = PrintOrderImage()
+            orderImg.orderId = newOrder.id
+            orderImg.orderItemId = newOrderItem.id
+            orderImg.name = ""
+            orderImg.userImageFile = null
+            orderImg.processParams = null
+            orderImg.status = PrintOrderImageStatus.CREATED.value
+            printOrderImageDao.save(orderImg)
+            orderImages.add(orderImg)
+
 //            val tplVerSplit = orderItemInput.productVersion.split('.')
 //            val tplId = tplVerSplit[0].toInt()
 //            val tplVer = tplVerSplit[1].toInt()
@@ -321,11 +330,12 @@ open class PrintOrderServiceImpl : PrintOrderService {
 
 
     @Transactional
-    override fun uploadOrderImage(sessionId: String, orderItemId: Int, imgFile: MultipartFile?): Boolean {
+    override fun uploadOrderImage(sessionId: String, orderItemId: Int, imgFile: MultipartFile?, x: Double, y: Double, scale: Double, rotate: Double): Boolean {
         val imgInfo = imageService.uploadImage(sessionId, imgFile)
         if (imgInfo.errcode == 0) {
             val orderImg = printOrderItemDao.findOne(orderItemId)
-            if (orderImg == null) {
+            val printOrderImg = printOrderImageDao.findByOrderItemIdAndName(orderItemId,"")
+            if (orderImg == null || printOrderImg == null) {
                 throw ProcessException(2, "没有此item图片")
             }
             else {
@@ -333,6 +343,12 @@ open class PrintOrderServiceImpl : PrintOrderService {
                 orderImg.status = PrintOrderImageStatus.UPLOADED.value
 
                 printOrderItemDao.save(orderImg)
+                printOrderImg.userImageFile = orderImg.userImageFile
+                printOrderImg.status = PrintOrderImageStatus.UPLOADED.value
+                val param = OrderImgProcessParam(x,y,scale,rotate)
+                printOrderImg.processParams = Gson().toJson(param)
+                printOrderImageDao.save(printOrderImg)
+
                 return checkOrderImageUploaded(orderImg.printOrderId)
             }
         }
@@ -366,23 +382,6 @@ open class PrintOrderServiceImpl : PrintOrderService {
         val orderItemDTOs = ArrayList<PrintOrderItemDTO>()
 
         order.printOrderItems.forEach {
-            val imageDTOs = ArrayList<PrintOrderImageDTO>()
-            it.orderImages.forEach { img ->
-                val userImgFile = img.userImageFile!!
-
-                imageDTOs += PrintOrderImageDTO(
-                        id = img.id,
-                        name = img.name,
-                        processParams = img.processParams,
-                        userImageFile = UserImageFileDTO(
-                                type = userImgFile.type,
-                                width = userImgFile.width,
-                                height = userImgFile.height,
-                                url = "${baseUrl}/assets/user/${userImgFile.userId}/${userImgFile.sessionId}/${userImgFile.fileName}.${userImgFile.type}",
-                                fileName = userImgFile.fileName
-                        )
-                )
-            }
             val userImgFile = it.userImageFile!!
             val product = productDao.findOne(it.productId)
             var width = product.template.width
@@ -405,12 +404,37 @@ open class PrintOrderServiceImpl : PrintOrderService {
                     height = 152.4
                 }
             }
+            var dpi = 240
+            if (width * height > 19354.8) dpi = 180
+
+            val imageDTOs = ArrayList<PrintOrderImageDTO>()
+            it.orderImages.forEach { img ->
+                val userImgFile = img.userImageFile!!
+                val param = Gson().fromJson(img.processParams, OrderImgProcessParam::class.java)
+                param.dpi = dpi
+                img.processParams = Gson().toJson(param)
+                imageDTOs += PrintOrderImageDTO(
+                        id = img.id,
+                        name = img.name,
+                        processParams = img.processParams,
+                        userImageFile = UserImageFileDTO(
+                                type = userImgFile.type,
+                                width = userImgFile.width,
+                                height = userImgFile.height,
+                                url = "${baseUrl}/assets/user/${userImgFile.userId}/${userImgFile.sessionId}/${userImgFile.fileName}.${userImgFile.type}",
+                                fileName = userImgFile.fileName
+                        )
+                )
+            }
+
+
             orderItemDTOs += PrintOrderItemDTO(
                     id = it.id,
                     copies = it.copies,
                     productId = it.productId,
                     width = width,
                     height = height,
+                    dpi = dpi,
                     productType = it.productType,
                     productVersion = it.productVersion,
                     orderImages = imageDTOs,

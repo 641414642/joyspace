@@ -28,6 +28,14 @@ class OrderItemInput(
         var images: List<ImageParam>? = null
 )
 
+class OrderImgProcessParam(
+        var x: Double = 0.0,
+        var y: Double = 0.0,
+        var scale: Double = 0.0,
+        var rotate: Double = 0.0,
+        var dpi: Int = 0
+)
+
 class OrderCancelInput(
         var sessionId: String = "",
         var orderId: Int = 0)

@@ -37,6 +37,7 @@
             "productId": xxx，    //订单项产品id
             "width":12.5,          //相纸宽 单位mm
             "height":12.5,          //相纸高 单位mm
+            "dpi":240,             //像素
             "productType": xxx,   //产品类型  0: 普通照片,  1: 证件照,  2: 模板拼图
             "productVersion": "xxx.xxx",    //产品版本号
             "orderImages": [      //订单项中的用户图片列表
@@ -71,4 +72,16 @@
     "saturate": 1.0,         //饱和度调整 (0~2), 数值为1时保持不变
     "effect": "none",        //图片效果, none: 没有,  grayscale: 黑白图片效果,  sepia: 怀旧效果
 }
+
+
+新小程序：
+{
+  "x" :  123,
+  "y" :  456,
+  "scale" : 0.567,
+  "rotate" : 0.789,
+  "dpi" : 180
+}
+
+
 ----
