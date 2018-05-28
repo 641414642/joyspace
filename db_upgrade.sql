@@ -62,7 +62,7 @@ update print_order set page_count = 0 where page_count is NULL;
 alter table print_order alter column page_count set not null;
 
 
-ALTER TABLE public.print_order ADD canceled BOOLEAN DEFAULT FALSE  NOT NULL;
+
 
 alter table printer_type add column media_alert_thresholds varchar(100);
 update printer_type set media_alert_thresholds='';
@@ -91,4 +91,7 @@ alter table product alter column deleted set not null;
 alter table product drop column enabled;
 alter table product drop constraint fkghawd5rtv8ok565nwpdyyuto9;
 update product set company_id=0 where company_id=1;
+
+ALTER TABLE print_order ADD canceled BOOLEAN DEFAULT FALSE  NOT NULL;
+ALTER TABLE print_order ADD print_type INTEGER DEFAULT 0  ;
 
