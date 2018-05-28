@@ -116,32 +116,32 @@ data class UserInfoVo(var nickName: String? = null,
                       var unPayCount: Int? = null,
                       var handlingCount: Int? = null)
 
-data class TemplateVo(var id: Int? = null,
-                      var version: Int? = null,
-                      var name: String? = null,
-                      var type: Int? = null,
-                      var scenes: List<Scene>? = null)
+data class TemplateVo(var id: Int = 0,
+                      var version: Int = 0,
+                      var name: String = "",
+                      var type: Int = 0,
+                      var scenes: List<Scene> = emptyList())
 
-data class Scene(var id: Int? = null,
-                 var name: String? = null,
-                 var type: String? = null,
-                 var width: Double? = null,
-                 var height: Double? = null,
-                 var layers: MutableList<Layer>? = null)
+data class Scene(var id: Int = 0,
+                 var name: String = "",
+                 var type: String = "",
+                 var width: Double = 0.0,
+                 var height: Double = 0.0,
+                 var layers: List<Layer> = emptyList())
 
-data class Layer(var id: Int? = null,
-                 var type: String? = null,
-                 var images: MutableList<Img>? = null)
+data class Layer(var id: Int = 0,
+                 var type: String = "",
+                 var images: List<Img> = emptyList())
 
-data class Img(var id: Int? = null,
-               var type: String? = null,
-               var x: Double? = null,
-               var y: Double? = null,
-               var width: Double? = null,
-               var height: Double? = null,
-               var angleClip: Double? = null,
-               var bgcolor: String? = null,
-               var resourceURL: String? = null)
+data class Img(var id: Int = 0,
+               var type: String = "",
+               var x: Double = 0.0,
+               var y: Double = 0.0,
+               var width: Double = 0.0,
+               var height: Double = 0.0,
+               var angleClip: Double = 0.0,
+               var bgcolor: String = "",
+               var resourceURL: String = "")
 
 data class OrderStatusVo(var orderItems: List<OrderItemS>? = null)
 data class OrderItemS(var images: List<ImageS>? = null)

@@ -1,7 +1,6 @@
 package com.unicolour.joyspace.service.impl
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.google.gson.Gson
 import com.unicolour.joyspace.dao.*
 import com.unicolour.joyspace.dto.*
 import com.unicolour.joyspace.exception.ProcessException
@@ -346,7 +345,7 @@ open class PrintOrderServiceImpl : PrintOrderService {
                 printOrderImg.userImageFile = orderImg.userImageFile
                 printOrderImg.status = PrintOrderImageStatus.UPLOADED.value
                 val param = OrderImgProcessParam(x,y,scale,rotate)
-                printOrderImg.processParams = Gson().toJson(param)
+                printOrderImg.processParams = objectMapper.writeValueAsString(param)
                 printOrderImageDao.save(printOrderImg)
 
                 return checkOrderImageUploaded(orderImg.printOrderId)
@@ -382,7 +381,6 @@ open class PrintOrderServiceImpl : PrintOrderService {
         val orderItemDTOs = ArrayList<PrintOrderItemDTO>()
 
         order.printOrderItems.forEach {
-            val userImgFile = it.userImageFile!!
             val product = productDao.findOne(it.productId)
             var width = product.template.width
             var height = product.template.height
@@ -410,9 +408,9 @@ open class PrintOrderServiceImpl : PrintOrderService {
             val imageDTOs = ArrayList<PrintOrderImageDTO>()
             it.orderImages.forEach { img ->
                 val userImgFile = img.userImageFile!!
-                val param = Gson().fromJson(img.processParams, OrderImgProcessParam::class.java)
+                val param = objectMapper.readValue(img.processParams, OrderImgProcessParam::class.java)
                 param.dpi = dpi
-                img.processParams = Gson().toJson(param)
+                img.processParams = objectMapper.writeValueAsString(param)
                 imageDTOs += PrintOrderImageDTO(
                         id = img.id,
                         name = img.name,
@@ -427,24 +425,14 @@ open class PrintOrderServiceImpl : PrintOrderService {
                 )
             }
 
-
             orderItemDTOs += PrintOrderItemDTO(
                     id = it.id,
                     copies = it.copies,
                     productId = it.productId,
-                    width = width,
-                    height = height,
-                    dpi = dpi,
                     productType = it.productType,
                     productVersion = it.productVersion,
-                    orderImages = imageDTOs,
-                    userImageFile = UserImageFileDTO(
-                            type = userImgFile.type,
-                            width = userImgFile.width,
-                            height = userImgFile.height,
-                            url = "${baseUrl}/assets/user/${userImgFile.userId}/${userImgFile.sessionId}/${userImgFile.fileName}.${userImgFile.type}",
-                            fileName = userImgFile.fileName
-                    ))
+                    orderImages = imageDTOs
+            )
         }
 
         val user = userDao.findOne(order.userId)
@@ -891,7 +879,7 @@ open class PrintOrderServiceImpl : PrintOrderService {
                 return createWxPayParams(payKey, result, nonceStr)
             }
             else {
-                logger.error("微信支付调用失败--info ： ${Gson().toJson(result)}")
+                logger.error("微信支付调用失败--info ： ${objectMapper.writeValueAsString(result)}")
                 throw ProcessException(3, "return_code=${result.return_code}, result_code=${result.result_code}")
             }
         }

@@ -1,7 +1,10 @@
 package com.unicolour.joyspace.controller.api.v2
 
-import com.google.gson.Gson
-import com.unicolour.joyspace.dao.*
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.unicolour.joyspace.dao.PrintStationProductDao
+import com.unicolour.joyspace.dao.ProductDao
+import com.unicolour.joyspace.dao.TemplateDao
+import com.unicolour.joyspace.dao.TemplateImageInfoDao
 import com.unicolour.joyspace.dto.*
 import com.unicolour.joyspace.dto.common.RestResponse
 import com.unicolour.joyspace.model.ProductImageFileType
@@ -26,6 +29,10 @@ class ApiProductRoute {
     private lateinit var templateDao: TemplateDao
     @Autowired
     private lateinit var printStationProductDao: PrintStationProductDao
+
+    @Autowired
+    private lateinit var objectMapper: ObjectMapper
+
     @Value("\${com.unicolour.joyspace.baseUrl}")
     private lateinit var baseUrl: String
     @Value("classpath:static/doc/home_page/9526/test.json")
@@ -161,23 +168,29 @@ class ApiProductRoute {
         val testProductList = listOf(9526, 9527, 9528, 9529)
         if (id in testProductList) {
             when (id) {
-                9526 -> return RestResponse.ok(Gson().fromJson(json_9526.inputStream.bufferedReader().use { it.readText() }, TemplateVo::class.java))
-                9527 -> return RestResponse.ok(Gson().fromJson(json_9527.inputStream.bufferedReader().use { it.readText() }, TemplateVo::class.java))
-                9528 -> return RestResponse.ok(Gson().fromJson(json_9528.inputStream.bufferedReader().use { it.readText() }, TemplateVo::class.java))
-                9529 -> return RestResponse.ok(Gson().fromJson(json_9529.inputStream.bufferedReader().use { it.readText() }, TemplateVo::class.java))
+                9526 -> return RestResponse.ok(objectMapper.readValue(json_9526.inputStream, TemplateVo::class.java))
+                9527 -> return RestResponse.ok(objectMapper.readValue(json_9527.inputStream, TemplateVo::class.java))
+                9528 -> return RestResponse.ok(objectMapper.readValue(json_9528.inputStream, TemplateVo::class.java))
+                9529 -> return RestResponse.ok(objectMapper.readValue(json_9529.inputStream, TemplateVo::class.java))
             }
         }
+
         val product = productDao.findOne(id)
-        val temp = product.template
+        val template = product.template
+
         var mode = 240
-        if (temp.width*temp.height>19354.8) mode = 180
-        val layerBg = Layer(1, "background", images = mutableListOf())
-        if (temp.type == com.unicolour.joyspace.model.ProductType.ID_PHOTO.value) {
-            layerBg.images!!.add(Img(1, "sticker", 0.0, 0.0, getPixels(temp.width,mode), getPixels(temp.height,mode), 0.0, "", "${baseUrl}/assets/template/preview/${temp.id}_v${temp.currentVersion}/mask.png"))
+        if (template.width * template.height > 19354.8) {
+            mode = 180
         }
-        val layerUser = Layer(2, "image", images = mutableListOf())
-        val templateImages = templateImageInfoDao.findByTemplateIdAndTemplateVersion(temp.id, temp.currentVersion)
-        layerUser.images!!.addAll(templateImages.map {
+
+        val layerBg = Layer(1, "background")
+        if (template.type == com.unicolour.joyspace.model.ProductType.ID_PHOTO.value) {
+            layerBg.images = listOf(Img(1, "sticker", 0.0, 0.0, getPixels(template.width,mode), getPixels(template.height,mode), 0.0, "", "${baseUrl}/assets/template/preview/${template.id}_v${template.currentVersion}/mask.png"))
+        }
+
+        val layerUser = Layer(2, "image")
+        val templateImages = templateImageInfoDao.findByTemplateIdAndTemplateVersion(template.id, template.currentVersion)
+        layerUser.images = templateImages.map {
             var mode = 240
             if (it.width*it.height>19354.8) mode = 180
             Img(it.id,
@@ -189,12 +202,11 @@ class ApiProductRoute {
                     0.0,
                     "",
                     "")
-        })
-        val scene = Scene(1, "", "page", getPixels(temp.width,mode), getPixels(temp.height,mode), layers = mutableListOf())
-        scene.layers!!.add(layerBg)
-        scene.layers!!.add(layerUser)
-        val templateVo = TemplateVo(temp.id, temp.currentVersion, temp.name, temp.type, listOf())
-        templateVo.scenes = listOf(scene)
+        }
+
+        val scene = Scene(1, "", "page", getPixels(template.width,mode), getPixels(template.height,mode), layers = listOf(layerBg, layerUser))
+        val templateVo = TemplateVo(template.id, template.currentVersion, template.name, template.type, listOf(scene))
+
         return RestResponse.ok(templateVo)
     }
 
@@ -206,5 +218,51 @@ class ApiProductRoute {
         return BigDecimal(mm).divide(BigDecimal(25.4),7,BigDecimal.ROUND_HALF_UP).multiply(BigDecimal(mode)).setScale(0,BigDecimal.ROUND_HALF_UP).toDouble()
     }
 
+    /**
+     * 获取某个产品（规格／模版）的详细信息
+     */
+    @GetMapping(value = "/v2/product/detailInMM/{id}")
+    fun getTemplateDetailInMM(@PathVariable("id") id: Int): RestResponse {
+        val product = productDao.findOne(id)
+        val template = product.template
+
+        val layerBg = Layer(1, "background")
+        if (template.type == com.unicolour.joyspace.model.ProductType.ID_PHOTO.value) {
+            layerBg.images = listOf(
+                Img(id = 1,
+                    type = "sticker",
+                    x = 0.0,
+                    y = 0.0,
+                    width = template.width,
+                    height = template.height,
+                    resourceURL = "$baseUrl/assets/template/preview/${template.id}_v${template.currentVersion}/mask.png"
+                )
+            )
+        }
+
+        val layerUser = Layer(2, "image")
+        val templateImages = templateImageInfoDao.findByTemplateIdAndTemplateVersion(template.id, template.currentVersion)
+        layerUser.images = templateImages.map {
+            Img(id = it.id,
+                type = "user",
+                x = it.x,
+                y = it.y,
+                width = it.width,
+                height = it.height
+            )
+        }
+
+        val scene = Scene(
+                id = 1,
+                name = "",
+                type = "page",
+                width = template.width,
+                height = template.height,
+                layers = listOf(layerBg, layerUser))
+
+        val templateVo = TemplateVo(template.id, template.currentVersion, template.name, template.type, listOf(scene))
+
+        return RestResponse.ok(templateVo)
+    }
 }
 
