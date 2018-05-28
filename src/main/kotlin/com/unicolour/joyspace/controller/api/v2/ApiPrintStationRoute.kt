@@ -49,13 +49,14 @@ class ApiPrintStationRoute {
         psVo.name = printStation.name
         psVo.imgUrl = ""
 
+        val priceMap: Map<Int, Int> = printStationService.getPriceMap(printStation)
         psVo.products = printStationProductDao.findByPrintStationId(printStation.id).map {
-            val priceMap: Map<Int, Int> = printStationService.getPriceMap(printStation)
             val price = priceMap.getOrDefault(it.productId, it.product.defaultPrice)
             PrintStationProduct(it.productId, it.product.name, it.product.template.type.toString(), price)
         }.toMutableList()
         val tProduct = productDao.findOne(9528)
-        psVo.products!!.add(PrintStationProduct(9528,tProduct.name,"2",tProduct.defaultPrice))
+        val tPrice = priceMap.getOrDefault(tProduct.id,tProduct.defaultPrice)
+        psVo.products!!.add(PrintStationProduct(9528,tProduct.name,"2",tPrice))
         return RestResponse.ok(psVo)
     }
 
@@ -90,13 +91,14 @@ class ApiPrintStationRoute {
                 psVo.name = nearest.name
                 psVo.imgUrl = ""
 
+                val priceMap: Map<Int, Int> = printStationService.getPriceMap(nearest)
                 psVo.products = printStationProductDao.findByPrintStationId(nearest.id).map {
-                    val priceMap: Map<Int, Int> = printStationService.getPriceMap(nearest)
                     val price = priceMap.getOrDefault(it.productId, it.product.defaultPrice)
                     PrintStationProduct(it.productId, it.product.name, it.product.template.type.toString(), price)
                 }.toMutableList()
                 val tProduct = productDao.findOne(9528)
-                psVo.products!!.add(PrintStationProduct(9528,tProduct.name,"2",tProduct.defaultPrice))
+                val tPrice = priceMap.getOrDefault(tProduct.id,tProduct.defaultPrice)
+                psVo.products!!.add(PrintStationProduct(9528,tProduct.name,"2",tPrice))
                 return RestResponse.ok(psVo)
             }
         }

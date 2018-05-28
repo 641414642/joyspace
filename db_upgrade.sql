@@ -94,4 +94,5 @@ update product set company_id=0 where company_id=1;
 
 ALTER TABLE print_order ADD canceled BOOLEAN DEFAULT FALSE  NOT NULL;
 ALTER TABLE print_order ADD print_type INTEGER DEFAULT 0  ;
+INSERT INTO public.product (id, company_id, default_price, name, remark, template_id, sequence, deleted) VALUES (9528, 0, 100, '展会8', '', 1, 9528, false);
 
