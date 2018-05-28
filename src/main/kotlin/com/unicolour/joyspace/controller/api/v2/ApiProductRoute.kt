@@ -140,7 +140,7 @@ class ApiProductRoute {
             }
             val thumbnailImageUrl = it.imageFiles
                     .filter { it.type == ProductImageFileType.THUMB.value }
-                    .map { "/assets/product/images/${it.id}.${it.fileType}" }
+                    .map { "$baseUrl/assets/product/images/${it.id}.${it.fileType}" }
                     .firstOrNull()
             var mode = 240
             if (it.template.width*it.template.height>19354.8) mode = 180
@@ -185,7 +185,7 @@ class ApiProductRoute {
 
         val layerBg = Layer(1, "background")
         if (template.type == com.unicolour.joyspace.model.ProductType.ID_PHOTO.value) {
-            layerBg.images = listOf(Img(1, "sticker", 0.0, 0.0, getPixels(template.width,mode), getPixels(template.height,mode), 0.0, "", "${baseUrl}/assets/template/preview/${template.id}_v${template.currentVersion}/mask.png"))
+            layerBg.images = listOf(Img(1, "sticker", 0.0, 0.0, getPixels(template.width,mode), getPixels(template.height,mode), 0.0, "", "$baseUrl/assets/template/preview/${template.id}_v${template.currentVersion}/mask.png"))
         }
 
         val layerUser = Layer(2, "image")
