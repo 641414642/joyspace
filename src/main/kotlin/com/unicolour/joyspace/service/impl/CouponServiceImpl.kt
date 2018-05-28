@@ -166,7 +166,7 @@ open class CouponServiceImpl : CouponService {
                                 this::validateCouponByTime,
                                 this::validateCouponByPrintStation,
                                 this::validateCouponByMaxUses,
-                                this::validateCouponByMaxUses)
+                                this::validateCouponByMaxUsesPerUser)
                     }
 
             if (checkResult != VALID) {
@@ -247,7 +247,7 @@ open class CouponServiceImpl : CouponService {
                                 this::validateCouponEnabled,
                                 this::validateCouponByTime,
                                 this::validateCouponByMaxUses,
-                                this::validateCouponByMaxUses)
+                                this::validateCouponByMaxUsesPerUser)
                     }
 
             if (checkResult != VALID) {
