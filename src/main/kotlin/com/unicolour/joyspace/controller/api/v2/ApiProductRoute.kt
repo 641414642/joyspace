@@ -43,6 +43,8 @@ class ApiProductRoute {
     private lateinit var json_9528: Resource
     @Value("classpath:static/doc/home_page/9529/test.json")
     private lateinit var json_9529: Resource
+    @Value("classpath:static/doc/home_page/9528/test_mm.json")
+    private lateinit var json_9528_mm: Resource
 
     /**
      * 主页数据
@@ -223,6 +225,7 @@ class ApiProductRoute {
      */
     @GetMapping(value = "/v2/product/detailInMM/{id}")
     fun getTemplateDetailInMM(@PathVariable("id") id: Int): RestResponse {
+        if (id==9528) return RestResponse.ok(objectMapper.readValue(json_9528_mm.inputStream, TemplateVo::class.java))
         val product = productDao.findOne(id)
         val template = product.template
 

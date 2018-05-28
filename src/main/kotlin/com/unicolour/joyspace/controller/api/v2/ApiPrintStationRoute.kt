@@ -2,6 +2,7 @@ package com.unicolour.joyspace.controller.api.v2
 
 import com.unicolour.joyspace.dao.PrintStationDao
 import com.unicolour.joyspace.dao.PrintStationProductDao
+import com.unicolour.joyspace.dao.ProductDao
 import com.unicolour.joyspace.dto.PrintStationProduct
 import com.unicolour.joyspace.dto.PrintStationVo
 import com.unicolour.joyspace.dto.ResultCode
@@ -25,6 +26,8 @@ class ApiPrintStationRoute {
     private lateinit var printStationService: PrintStationService
     @Autowired
     private lateinit var positionService:PositionService
+    @Autowired
+    private lateinit var productDao:ProductDao
 
 
     /**
@@ -51,6 +54,8 @@ class ApiPrintStationRoute {
             val price = priceMap.getOrDefault(it.productId, it.product.defaultPrice)
             PrintStationProduct(it.productId, it.product.name, it.product.template.type.toString(), price)
         }.toMutableList()
+        val tProduct = productDao.findOne(9528)
+        psVo.products!!.add(PrintStationProduct(9528,tProduct.name,"2",tProduct.defaultPrice))
         return RestResponse.ok(psVo)
     }
 
@@ -90,7 +95,8 @@ class ApiPrintStationRoute {
                     val price = priceMap.getOrDefault(it.productId, it.product.defaultPrice)
                     PrintStationProduct(it.productId, it.product.name, it.product.template.type.toString(), price)
                 }.toMutableList()
-
+                val tProduct = productDao.findOne(9528)
+                psVo.products!!.add(PrintStationProduct(9528,tProduct.name,"2",tProduct.defaultPrice))
                 return RestResponse.ok(psVo)
             }
         }
