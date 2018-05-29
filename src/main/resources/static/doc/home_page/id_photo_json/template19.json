@@ -1,0 +1,84 @@
+{
+	"msg": "OK",
+	"state": 1,
+	"result": {
+		"template": {
+			"id": 220,
+			"version": 1.0,
+			"name": "DZ21-结婚证",
+			"type": 2,
+			"scenes": [{
+				"id": 1,
+				"name": "",
+				"type": "page",
+				"width": 2160,
+				"height": 1440,
+				"layers": [{
+						"id": 1,
+						"type": "background",
+						"images": [{
+							"id": 1,
+							"type": "sticker",
+							"x": 0,
+							"y": 0,
+							"width": 2160,
+							"height": 1440,
+							"angleClip": 0,
+							"bgcolor": "",
+							"resourceURL": "background_layer.png"
+						}]
+					},
+					{
+						"id": 2,
+						"type": "image",
+						"images": [{
+								"id": 1,
+								"type": "user",
+								"x": 215,
+								"y": 147,
+								"width": 794,
+								"height": 538,
+								"angleClip": 0,
+								"bgcolor": "",
+								"resourceURL": ""
+							},
+							{
+								"id": 2,
+								"type": "user",
+								"x": 1115,
+								"y": 147,
+								"width": 794,
+								"height": 538,
+								"angleClip": 0,
+								"bgcolor": "",
+								"resourceURL": ""
+							},
+							{
+								"id": 3,
+								"type": "user",
+								"x": 215,
+								"y": 755,
+								"width": 794,
+								"height": 538,
+								"angleClip": 0,
+								"bgcolor": "",
+								"resourceURL": ""
+							},
+							{
+								"id": 4,
+								"type": "user",
+								"x": 1115,
+								"y": 755,
+								"width": 794,
+								"height": 538,
+								"angleClip": 0,
+								"bgcolor": "",
+								"resourceURL": ""
+							}
+						]
+					}
+				]
+			}]
+		}
+	}
+}
