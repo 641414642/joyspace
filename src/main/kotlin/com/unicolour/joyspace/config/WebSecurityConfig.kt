@@ -37,6 +37,7 @@ open class WebSecurityConfig : WebSecurityConfigurerAdapter() {
                 "/printStation/**",
                 "/v2/**",
                 "/doc/**",
+                "/printStation/LLWDtNhzLW.txt",
                 "/LLWDtNhzLW.txt")
 
         http.csrf().disable()
