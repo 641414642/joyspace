@@ -15,6 +15,7 @@ import com.unicolour.joyspace.service.ProductService
 import com.unicolour.joyspace.util.Pager
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
 import org.springframework.http.MediaType
@@ -66,6 +67,9 @@ class PrintStationController {
 
     @Autowired
     lateinit var objectMapper: ObjectMapper
+
+    @Value("\${com.unicolour.joyspace.baseUrl}")
+    lateinit var baseUrl: String
 
     class PrintStationInfo(val printStation: PrintStation, val online: Boolean, val printerTypeDisp: String)
 
@@ -309,9 +313,13 @@ class PrintStationController {
     @RequestMapping("/printStation/{id}")
     fun printStation(
             modelAndView: ModelAndView,
-            @PathVariable("id") id: Int): ModelAndView {
+            @PathVariable("id") id: String?): ModelAndView {
 
-        val printStation = printStationDao.findOne(id)
+        if (id == "LLWDtNhzLW"){
+            return ModelAndView("redirect:$baseUrl/LLWDtNhzLW.txt")
+        }
+
+        val printStation = printStationDao.findOne(id?.toInt())
 
         if (printStation != null) {
             modelAndView.viewName = "/printStation/index"
