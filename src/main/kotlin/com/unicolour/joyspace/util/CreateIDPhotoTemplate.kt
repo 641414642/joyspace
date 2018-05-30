@@ -25,9 +25,9 @@ import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
 import javax.imageio.ImageIO
 
-fun main(args: Array<String>) {
-    Application.launch(CreateIDPhotoTemplate::class.java)
-}
+//fun main(args: Array<String>) {
+//    Application.launch(CreateIDPhotoTemplate::class.java)
+//}
 
 class CreateIDPhotoTemplate : Application() {
     val pref = Preferences.userNodeForPackage(CreateIDPhotoTemplate::class.java)
