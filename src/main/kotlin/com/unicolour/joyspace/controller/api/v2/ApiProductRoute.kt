@@ -45,48 +45,6 @@ class ApiProductRoute {
     private lateinit var json_9529: Resource
     @Value("classpath:static/doc/home_page/9528/test_mm.json")
     private lateinit var json_9528_mm: Resource
-    @Value("classpath:static/doc/home_page/id_photo_json/template1.json")
-    private lateinit var template1: Resource
-    @Value("classpath:static/doc/home_page/id_photo_json/template2.json")
-    private lateinit var template2: Resource
-    @Value("classpath:static/doc/home_page/id_photo_json/template3.json")
-    private lateinit var template3: Resource
-    @Value("classpath:static/doc/home_page/id_photo_json/template4.json")
-    private lateinit var template4: Resource
-    @Value("classpath:static/doc/home_page/id_photo_json/template5.json")
-    private lateinit var template5: Resource
-    @Value("classpath:static/doc/home_page/id_photo_json/template6.json")
-    private lateinit var template6: Resource
-    @Value("classpath:static/doc/home_page/id_photo_json/template7.json")
-    private lateinit var template7: Resource
-    @Value("classpath:static/doc/home_page/id_photo_json/template8.json")
-    private lateinit var template8: Resource
-    @Value("classpath:static/doc/home_page/id_photo_json/template9.json")
-    private lateinit var template9: Resource
-    @Value("classpath:static/doc/home_page/id_photo_json/template10.json")
-    private lateinit var template10: Resource
-    @Value("classpath:static/doc/home_page/id_photo_json/template11.json")
-    private lateinit var template11: Resource
-    @Value("classpath:static/doc/home_page/id_photo_json/template12.json")
-    private lateinit var template12: Resource
-    @Value("classpath:static/doc/home_page/id_photo_json/template13.json")
-    private lateinit var template13: Resource
-    @Value("classpath:static/doc/home_page/id_photo_json/template14.json")
-    private lateinit var template14: Resource
-    @Value("classpath:static/doc/home_page/id_photo_json/template15.json")
-    private lateinit var template15: Resource
-    @Value("classpath:static/doc/home_page/id_photo_json/template16.json")
-    private lateinit var template16: Resource
-    @Value("classpath:static/doc/home_page/id_photo_json/template17.json")
-    private lateinit var template17: Resource
-    @Value("classpath:static/doc/home_page/id_photo_json/template18.json")
-    private lateinit var template18: Resource
-    @Value("classpath:static/doc/home_page/id_photo_json/template19.json")
-    private lateinit var template19: Resource
-    @Value("classpath:static/doc/home_page/id_photo_json/template20.json")
-    private lateinit var template20: Resource
-    @Value("classpath:static/doc/home_page/id_photo_json/template21.json")
-    private lateinit var template21: Resource
 
 
 
@@ -98,7 +56,6 @@ class ApiProductRoute {
                         @RequestParam("columnCount") columnCount: Int,
                         @RequestParam("name") name: String): RestResponse {
         val idPhotoParam = IDPhotoParam()
-
         return RestResponse.ok(idPhotoParam)
     }
 
@@ -245,7 +202,7 @@ class ApiProductRoute {
 
         val layerBg = Layer(1, "background")
         if (template.type == com.unicolour.joyspace.model.ProductType.ID_PHOTO.value) {
-            layerBg.images = listOf(Img(1, "sticker", 0.0, 0.0, getPixels(template.width,mode), getPixels(template.height,mode), 0.0, "", "$baseUrl/assets/template/preview/${template.id}_v${template.currentVersion}/mask.png"))
+            layerBg.images = listOf(Img(1, "sticker", 0.0, 0.0, getPixels(template.width,mode), getPixels(template.height,mode), 0.0, "", "$baseUrl/assets/template/preview/${template.id}_v${template.currentVersion}/template.jpg"))
         }
 
         val layerUser = Layer(2, "image")
@@ -296,7 +253,7 @@ class ApiProductRoute {
                     y = 0.0,
                     width = template.width,
                     height = template.height,
-                    resourceURL = "$baseUrl/assets/template/preview/${template.id}_v${template.currentVersion}/mask.png"
+                    resourceURL = "$baseUrl/assets/template/preview/${template.id}_v${template.currentVersion}/template.jpg"
                 )
             )
         }

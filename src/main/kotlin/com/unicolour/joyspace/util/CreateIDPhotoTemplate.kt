@@ -12,6 +12,8 @@ import javafx.scene.control.TextField
 import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
 import javafx.stage.Stage
+import org.apache.batik.apps.rasterizer.DestinationType
+import org.apache.batik.apps.rasterizer.SVGConverter
 import java.awt.Color
 import java.awt.image.BufferedImage
 import java.io.File
@@ -23,9 +25,9 @@ import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
 import javax.imageio.ImageIO
 
-//fun main(args: Array<String>) {
-//    Application.launch(CreateIDPhotoTemplate::class.java)
-//}
+fun main(args: Array<String>) {
+    Application.launch(CreateIDPhotoTemplate::class.java)
+}
 
 class CreateIDPhotoTemplate : Application() {
     val pref = Preferences.userNodeForPackage(CreateIDPhotoTemplate::class.java)
@@ -45,7 +47,7 @@ Z0604-01-002 25 35 2x4 6x4 5 5
 Z0604-01-001 22 32 2x4 6x4 5 5
 Driving-License 21 26 2x4 6x4 5 5
 Car 60 91 1x2 6x4 5 5"""))
-        val dirTextField = TextField(pref.get("outputdir", "R:\\templates\\"))
+        val dirTextField = TextField(pref.get("outputdir", "/Users/mojito/template"))
         val startButton = Button("生成")
         val box = VBox(10.0,
                 Label("输出目录:"), dirTextField,
@@ -192,6 +194,15 @@ Car 60 91 1x2 6x4 5 5"""))
                     </html>
                 """
             Files.write(tplPreviewFile.toPath(), previewHtml.toByteArray(), StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING)
+
+            //转 jpeg
+            val svgConverter = SVGConverter()
+            svgConverter.setSources(arrayOf(tplFile.absolutePath))
+            svgConverter.destinationType = DestinationType.JPEG
+            svgConverter.quality = 0.9f
+            svgConverter.dst = tplDir
+            svgConverter.backgroundColor = Color.WHITE
+            svgConverter.execute()
         }
     }
 
