@@ -291,7 +291,7 @@
 								   title="转账详情">
 								</i>
 							</a>
-							<a href="#" th:if="${orderWrapper.order.imageFileUploaded}" sec:authorize="hasRole('ROLE_SUPERADMIN')">
+							<a href="#" th:if="${orderWrapper.order.imageFileUploaded}">
 								<i class="fa fa-print"
 								   th:attr="data-url=@{/printOrder/reprint(printOrderId=${orderWrapper.order.id})}"
 								   onclick="return reprintOrder(event)"

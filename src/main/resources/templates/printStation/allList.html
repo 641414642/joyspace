@@ -78,11 +78,9 @@
 						<td th:text="${ps.printStation.lastLoginVersion}"></td>
 						<td th:text="${ps.printStation.adSet?.name}"></td>
 						<td>
-							<a href="#" style="margin-right:5px">
+							<a href="#" th:href="@{/printStation/qrCode/} + ${ps.printStation.id}" target="_blank" style="margin-right:5px">
 								<i class="fa fa-fw fa-qrcode"
 								   data-dlgtitle="自助机二维码"
-								   th:attr="data-qrcode=${ps.printStation.wxQrCode}"
-								   onclick="return showQrCode(event)"
 								   title="二维码">
 								</i>
 							</a>
