@@ -23,6 +23,9 @@ import org.apache.batik.gvt.ImageNode
 import org.apache.batik.util.XMLResourceDescriptor
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.PageRequest
+import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Service
 import org.springframework.transaction.support.TransactionTemplate
 import org.springframework.web.multipart.MultipartFile
@@ -322,6 +325,7 @@ open class TemplateServiceImpl : TemplateService {
 //            tpl.company = manager.company
 //            tpl.publicTemplate = publicTemplate
             tpl.uuid = UUID.randomUUID().toString().replace("-", "")
+            tpl.deleted = false
 
             templateDao.save(tpl)
 
@@ -409,6 +413,23 @@ open class TemplateServiceImpl : TemplateService {
                 false
             }
         }
+    }
+
+    @Transactional
+    override fun deleteTemplateById(templateId: Int): Boolean {
+        val manager = managerService.loginManager
+        val template = templateDao.findOne(templateId)
+
+        if (manager != null && template != null && !template.deleted) {
+            val isSuperAdmin = managerService.loginManagerHasRole("ROLE_SUPERADMIN")
+            if (isSuperAdmin /*|| template.companyId == manager.companyId*/) {
+                template.deleted = true
+                templateDao.save(template)
+                return true
+            }
+        }
+
+        return false
     }
 
     private fun visitImageNodes(node: GraphicsNode, callback: (ImageNode) -> Unit) {
@@ -969,6 +990,44 @@ open class TemplateServiceImpl : TemplateService {
             false
         }
     }
+
+    override fun queryTemplates(pageNo: Int, pageSize: Int, type: ProductType?, name: String, excludeDeleted: Boolean, order: String): Page<Template> {
+        val orderField: String
+        val asc: Boolean
+
+        val t = order.indexOf(" ")
+        if (t != -1) {
+            orderField = order.substring(0, t)
+            asc = order.substring(t + 1).equals("ASC", ignoreCase = true)
+        } else {
+            orderField = order
+            asc = true
+        }
+
+        val pageReq = PageRequest(pageNo - 1, pageSize,
+                Sort(Sort.Order(if (asc) Sort.Direction.ASC else Sort.Direction.DESC, orderField)))
+
+        return templateDao.queryTemplates(pageReq, type, name, excludeDeleted)
+    }
+
+    override fun queryTemplates(type: ProductType?, name: String, excludeDeleted: Boolean, order: String): List<Template> {
+        val orderField: String
+        val asc: Boolean
+
+        val t = order.indexOf(" ")
+        if (t != -1) {
+            orderField = order.substring(0, t)
+            asc = order.substring(t + 1).equals("ASC", ignoreCase = true)
+        } else {
+            orderField = order
+            asc = true
+        }
+
+        val sort = Sort(Sort.Order(if (asc) Sort.Direction.ASC else Sort.Direction.DESC, orderField))
+
+        return templateDao.queryTemplates(type, name, excludeDeleted, sort)
+    }
+
 
     private fun savePhotoTemplate(tplWidth: Double, tplHeight: Double, tpl: Template) {
         val tplSvg = createPhotoTemplateSVG(tplWidth, tplHeight)

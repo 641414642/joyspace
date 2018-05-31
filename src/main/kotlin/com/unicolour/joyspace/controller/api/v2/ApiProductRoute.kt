@@ -3,11 +3,11 @@ package com.unicolour.joyspace.controller.api.v2
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.unicolour.joyspace.dao.PrintStationProductDao
 import com.unicolour.joyspace.dao.ProductDao
-import com.unicolour.joyspace.dao.TemplateDao
 import com.unicolour.joyspace.dao.TemplateImageInfoDao
 import com.unicolour.joyspace.dto.*
 import com.unicolour.joyspace.dto.common.RestResponse
 import com.unicolour.joyspace.model.ProductImageFileType
+import com.unicolour.joyspace.service.TemplateService
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
@@ -26,7 +26,7 @@ class ApiProductRoute {
     @Autowired
     private lateinit var templateImageInfoDao: TemplateImageInfoDao
     @Autowired
-    private lateinit var templateDao: TemplateDao
+    private lateinit var templateService: TemplateService
     @Autowired
     private lateinit var printStationProductDao: PrintStationProductDao
 
@@ -128,7 +128,8 @@ class ApiProductRoute {
 //                    null))
             return RestResponse.ok(products)
         }
-        val templateIds = templateDao.findByType(type).map { it.id }
+        val productType = com.unicolour.joyspace.model.ProductType.values().firstOrNull { it.value == type }
+        val templateIds = templateService.queryTemplates(productType, "", true, "id asc").map { it.id }
         var products = productDao.findByTemplateIdInAndDeletedOrderBySequence(templateIds, false)
         if (printStationId != null) {
             products = products.filter {

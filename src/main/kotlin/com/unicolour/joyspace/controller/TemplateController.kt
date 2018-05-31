@@ -8,10 +8,11 @@ import com.unicolour.joyspace.model.Template
 import com.unicolour.joyspace.service.TemplateService
 import com.unicolour.joyspace.util.Pager
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.data.domain.PageRequest
-import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Controller
-import org.springframework.web.bind.annotation.*
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestMethod
+import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.multipart.MultipartFile
 import org.springframework.web.servlet.ModelAndView
 
@@ -34,17 +35,7 @@ class TemplateController {
             @RequestParam(name = "type", required = false, defaultValue = "-1") type: Int,
             @RequestParam(name = "pageno", required = false, defaultValue = "1") pageno: Int): ModelAndView {
 
-        val pageable = PageRequest(pageno - 1, 20, Sort.Direction.ASC, "id")
-        val nameIsNullOrBlank = name.isNullOrBlank()
-        val templates =
-                if (nameIsNullOrBlank && type < 0)
-                    templateDao.findAll(pageable)
-                else if (!nameIsNullOrBlank && type >= 0)
-                    templateDao.findByNameAndType(name!!, type, pageable)
-                else if (type >= 0)
-                    templateDao.findByType(type, pageable)
-                else
-                    templateDao.findByName(name!!, pageable)
+        val templates = templateService.queryTemplates(pageno, 20, ProductType.values().firstOrNull { it.value == type }, name ?: "", true,"id asc")
 
         class TemplateWrapper(val template: Template, val idPhotoSize: String)
 
@@ -91,8 +82,6 @@ class TemplateController {
             template.width = 0.0
             template.height = 0.0
         }
-
-        modelAndView.model["templates"] = templateDao.findAll()
 
         modelAndView.model["create"] = id <= 0
         modelAndView.model["template"] = template

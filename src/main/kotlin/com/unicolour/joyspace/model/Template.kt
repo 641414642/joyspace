@@ -50,6 +50,10 @@ class Template : Serializable {
     @Column(length = 2000)
     var tplParam: String? = ""
 
+    @Column
+    @NotNull
+    var deleted: Boolean = false
+
 //    //region 投放商
 //    /** 投放商ID */
 //    @Column(name = "company_id", insertable = false, updatable = false)

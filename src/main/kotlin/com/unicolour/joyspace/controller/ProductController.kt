@@ -2,16 +2,14 @@ package com.unicolour.joyspace.controller
 
 import com.unicolour.joyspace.dao.ProductDao
 import com.unicolour.joyspace.dao.ProductImageFileDao
-import com.unicolour.joyspace.dao.TemplateDao
 import com.unicolour.joyspace.model.Product
 import com.unicolour.joyspace.model.ProductImageFileType
 import com.unicolour.joyspace.service.ManagerService
 import com.unicolour.joyspace.service.ProductService
+import com.unicolour.joyspace.service.TemplateService
 import com.unicolour.joyspace.util.Pager
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.data.domain.PageRequest
-import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.multipart.MultipartFile
@@ -35,7 +33,7 @@ class ProductController {
     lateinit var managerService: ManagerService
 
     @Autowired
-    lateinit var templateDao: TemplateDao
+    lateinit var templateService: TemplateService
 
     @RequestMapping("/product/list")
     fun productList(
@@ -82,7 +80,7 @@ class ProductController {
             product = Product()
         }
 
-        modelAndView.model["templates"] = templateDao.findAll()
+        modelAndView.model["templates"] = templateService.queryTemplates(null, "", true, "id asc")
 
         modelAndView.model["create"] = id <= 0
         modelAndView.model["product"] = product

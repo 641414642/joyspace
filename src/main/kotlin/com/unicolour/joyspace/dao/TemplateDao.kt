@@ -7,7 +7,7 @@ import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.PagingAndSortingRepository
 import org.springframework.data.repository.query.Param
 
-interface TemplateDao : PagingAndSortingRepository<Template, Int> {
+interface TemplateDao : PagingAndSortingRepository<Template, Int>, TemplateCustomQuery {
     @Query("SELECT t FROM Template t WHERE LOWER(t.name) LIKE LOWER(CONCAT('%', :name, '%'))")
     fun findByName(@Param("name") name: String, pageable: Pageable): Page<Template>
 
