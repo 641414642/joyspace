@@ -159,7 +159,7 @@ class PrintOrderItem {
     //endregion
 
     @Column
-    var status: Int = PrintOrderImageStatus.CREATED.value
+    var status: Int? = PrintOrderImageStatus.CREATED.value
 }
 
 

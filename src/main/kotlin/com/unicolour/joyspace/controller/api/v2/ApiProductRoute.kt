@@ -48,18 +48,6 @@ class ApiProductRoute {
 
 
 
-    /**
-     * 获取证件照参数
-     */
-    @GetMapping(value = "/v2/photo/param")
-    fun getIdPhotoParam(@RequestParam("rowCount") rowCount: Int,
-                        @RequestParam("columnCount") columnCount: Int,
-                        @RequestParam("name") name: String): RestResponse {
-        val idPhotoParam = IDPhotoParam()
-        return RestResponse.ok(idPhotoParam)
-    }
-
-
 
     /**
      * 主页数据
@@ -67,15 +55,15 @@ class ApiProductRoute {
     @GetMapping(value = "/v2/app/homepage")
     fun showHomePage(): RestResponse {
         val advers = mutableListOf<Advert>()
-        advers.add(Advert("ad_1", "轮播图", "", "https://joyspace1.uni-colour.com/doc/home_page/1.png"))
-        advers.add(Advert("ad_2", "轮播图", "", "https://joyspace1.uni-colour.com/doc/home_page/4.png"))
-        advers.add(Advert("ad_3", "轮播图", "", "https://joyspace1.uni-colour.com/doc/home_page/3.png"))
-        advers.add(Advert("ad_4", "轮播图", "", "https://joyspace1.uni-colour.com/doc/home_page/2.png"))
+        advers.add(Advert("ad_1", "轮播图", "", "$baseUrl/doc/home_page/1.png"))
+        advers.add(Advert("ad_2", "轮播图", "", "$baseUrl/doc/home_page/4.png"))
+        advers.add(Advert("ad_3", "轮播图", "", "$baseUrl/doc/home_page/3.png"))
+        advers.add(Advert("ad_4", "轮播图", "", "$baseUrl/doc/home_page/2.png"))
         val producTypes = mutableListOf<ProductType>()
-        producTypes.add(ProductType(0, "普通照片", "智能手机照片高质量打印","https://joyspace1.uni-colour.com/doc/home_page/product_type_0.png"))
-        producTypes.add(ProductType(1, "证件照", "支持多种尺寸，自动排版","https://joyspace1.uni-colour.com/doc/home_page/product_type_1.png"))
-        producTypes.add(ProductType(2, "模版拼图", "多种精美模板 随心定制","https://joyspace1.uni-colour.com/doc/home_page/product_type_2.png"))
-        //producTypes.add(ProductType(3, "相册", "生活也许是一本书","https://joyspace1.uni-colour.com/doc/home_page/product_type_3.png"))
+        producTypes.add(ProductType(0, "普通照片", "智能手机照片高质量打印","$baseUrl/doc/home_page/product_type_0.png"))
+        producTypes.add(ProductType(1, "证件照", "支持多种尺寸，自动排版","$baseUrl/doc/home_page/product_type_1.png"))
+        producTypes.add(ProductType(2, "模版拼图", "多种精美模板 随心定制","$baseUrl/doc/home_page/product_type_2.png"))
+        //producTypes.add(ProductType(3, "相册", "生活也许是一本书","$baseUrl/doc/home_page/product_type_3.png"))
         val homePage = HomePageVo(advers, producTypes)
         return RestResponse.ok(homePage)
     }
@@ -89,30 +77,30 @@ class ApiProductRoute {
                           @RequestParam(required = false, value = "printStationId") printStationId: Int?): RestResponse {
         if (type == 2) {
             val products = mutableListOf<ProductVo>()
-            products.add(ProductVo(9526,
-                    "展会6",
-                    960.0,
-                    1440.0,
-                    2,
-                    "模板拼图",
-                    1,
-                    "101.6 x 152.4 mm",
-                    1,
-                    "",
-                    100,
-                    null))
-            products.add(ProductVo(9527,
-                    "展会7",
-                    960.0,
-                    1440.0,
-                    2,
-                    "模板拼图",
-                    1,
-                    "101.6 x 152.4 mm",
-                    1,
-                    "",
-                    100,
-                    null))
+//            products.add(ProductVo(9526,
+//                    "展会6",
+//                    960.0,
+//                    1440.0,
+//                    2,
+//                    "模板拼图",
+//                    1,
+//                    "101.6 x 152.4 mm",
+//                    1,
+//                    "",
+//                    100,
+//                    null))
+//            products.add(ProductVo(9527,
+//                    "展会7",
+//                    960.0,
+//                    1440.0,
+//                    2,
+//                    "模板拼图",
+//                    1,
+//                    "101.6 x 152.4 mm",
+//                    1,
+//                    "",
+//                    100,
+//                    null))
             products.add(ProductVo(9528,
                     "展会8",
                     1440.0,
@@ -125,18 +113,18 @@ class ApiProductRoute {
                     "",
                     100,
                     null))
-            products.add(ProductVo(9529,
-                    "展会9",
-                    960.0,
-                    1440.0,
-                    2,
-                    "模板拼图",
-                    1,
-                    "101.6 x 152.4 mm",
-                    1,
-                    "",
-                    100,
-                    null))
+//            products.add(ProductVo(9529,
+//                    "展会9",
+//                    960.0,
+//                    1440.0,
+//                    2,
+//                    "模板拼图",
+//                    1,
+//                    "101.6 x 152.4 mm",
+//                    1,
+//                    "",
+//                    100,
+//                    null))
             return RestResponse.ok(products)
         }
         val templateIds = templateDao.findByType(type).map { it.id }
