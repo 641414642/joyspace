@@ -102,7 +102,7 @@ class ApiProductRoute {
 //                    100,
 //                    null))
             products.add(ProductVo(9528,
-                    "展会8",
+                    "美好的一天",
                     1440.0,
                     960.0,
                     2,
@@ -112,7 +112,7 @@ class ApiProductRoute {
                     1,
                     "",
                     100,
-                    null))
+                    "$baseUrl/doc/home_page/9528/thumb.png"))
 //            products.add(ProductVo(9529,
 //                    "展会9",
 //                    960.0,
