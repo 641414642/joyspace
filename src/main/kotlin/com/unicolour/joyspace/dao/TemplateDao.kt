@@ -13,6 +13,8 @@ interface TemplateDao : PagingAndSortingRepository<Template, Int> {
 
     fun findByType(type: Int, pageable: Pageable): Page<Template>
 
+    fun findByType(type: Int):List<Template>
+
     @Query("SELECT t FROM Template t WHERE t.type=:type AND LOWER(t.name) LIKE LOWER(CONCAT('%', :name, '%'))")
     fun findByNameAndType(@Param("name") name: String, @Param("type") type: Int, pageable: Pageable): Page<Template>
 }

@@ -1,0 +1,68 @@
+{
+  "id": 9528,
+  "version": 1.0,
+  "name": "展会专用模板1",
+  "type": 3,
+  "scenes": [
+    {
+      "id": 1,
+      "name": "",
+      "type": "page",
+      "width": 1440,
+      "height": 960,
+      "layers": [
+        {
+          "id": 1,
+          "type": "background",
+          "images": [
+            {
+              "id": 1,
+              "type": "sticker",
+              "x": 0,
+              "y": 0,
+              "width": 1440,
+              "height": 960,
+              "angleClip": 0,
+              "bgcolor": "",
+              "resourceURL": "https://joyspace1.uni-colour.com/doc/home_page/9528/background_layer.png"
+            }
+          ]
+        },
+        {
+          "id": 2,
+          "type": "image",
+          "images": [
+            {
+              "id": 1,
+              "type": "user",
+              "x": 114,
+              "y": 114,
+              "width": 1212,
+              "height": 732,
+              "angleClip": 0,
+              "bgcolor": "",
+              "resourceURL": ""
+            }
+          ]
+        },
+        {
+          "id": 2,
+          "type": "front",
+          "images": [
+            {
+              "id": 1,
+              "type": "sticker",
+              "x": 0,
+              "y": 0,
+              "width": 1440,
+              "height": 960,
+              "angleClip": 0,
+              "bgcolor": "",
+              "resourceURL": "https://joyspace1.uni-colour.com/doc/home_page/9528/front_layer.png"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

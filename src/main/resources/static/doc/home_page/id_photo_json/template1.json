@@ -1,0 +1,128 @@
+{
+	"msg": "OK",
+	"state": 1,
+	"result": {
+		"template": {
+			"id": 221,
+			"version": 1.0,
+			"name": "5寸标准1寸照",
+			"type": 2,
+			"scenes": [{
+				"id": 1,
+				"name": "",
+				"type": "page",
+				"width": 1800,
+				"height": 1260,
+				"layers": [{
+						"id": 1,
+						"type": "background",
+						"images": [{
+							"id": 1,
+							"type": "sticker",
+							"x": 0,
+							"y": 0,
+							"width": 1800,
+							"height": 1260,
+							"angleClip": 0,
+							"bgcolor": "",
+							"resourceURL": "background_layer.png"
+						}]
+					},
+					{
+						"id": 2,
+						"type": "image",
+						"images": [{
+								"id": 1,
+								"type": "user",
+								"x": 171,
+								"y": 125,
+								"width": 354,
+								"height": 496,
+								"angleClip": 0,
+								"bgcolor": "",
+								"resourceURL": ""
+							},
+							{
+								"id": 2,
+								"type": "user",
+								"x": 539,
+								"y": 125,
+								"width": 354,
+								"height": 496,
+								"angleClip": 0,
+								"bgcolor": "",
+								"resourceURL": ""
+							},
+							{
+								"id": 3,
+								"type": "user",
+								"x": 907,
+								"y": 125,
+								"width": 354,
+								"height": 496,
+								"angleClip": 0,
+								"bgcolor": "",
+								"resourceURL": ""
+							},
+							{
+								"id": 4,
+								"type": "user",
+								"x": 1275,
+								"y": 125,
+								"width": 354,
+								"height": 496,
+								"angleClip": 0,
+								"bgcolor": "",
+								"resourceURL": ""
+							},
+							{
+								"id": 5,
+								"type": "user",
+								"x": 171,
+								"y": 639,
+								"width": 354,
+								"height": 496,
+								"angleClip": 0,
+								"bgcolor": "",
+								"resourceURL": ""
+							},
+							{
+								"id": 6,
+								"type": "user",
+								"x": 539,
+								"y": 639,
+								"width": 354,
+								"height": 496,
+								"angleClip": 0,
+								"bgcolor": "",
+								"resourceURL": ""
+							},
+							{
+								"id": 7,
+								"type": "user",
+								"x": 907,
+								"y": 639,
+								"width": 354,
+								"height": 496,
+								"angleClip": 0,
+								"bgcolor": "",
+								"resourceURL": ""
+							},
+							{
+								"id": 8,
+								"type": "user",
+								"x": 1275,
+								"y": 639,
+								"width": 354,
+								"height": 496,
+								"angleClip": 0,
+								"bgcolor": "",
+								"resourceURL": ""
+							}
+						]
+					}
+				]
+			}]
+		}
+	}
+}

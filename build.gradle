@@ -38,6 +38,7 @@ asciidoctor {
 		include 'AppAPI.adoc'
 		include 'WeChatAPI.adoc'
 		include 'PrintStationAPI.adoc'
+		include 'MiniProgramApi.adoc'
 	}
 }
 

@@ -23,7 +23,6 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.support.TransactionTemplate
 import org.springframework.web.client.RestTemplate
 import org.springframework.web.multipart.MultipartFile
-import java.io.IOException
 import java.io.InputStreamReader
 import java.io.StringReader
 import java.math.BigInteger
@@ -127,6 +126,9 @@ open class PrintOrderServiceImpl : PrintOrderService {
     @Autowired
     lateinit var transactionTemplate: TransactionTemplate
 
+    @Autowired
+    lateinit var wxPayRecordDao: WxPayRecordDao
+
     //小程序appid
     @Value("\${com.unicolour.wxAppId}")
     lateinit var wxAppId: String
@@ -154,17 +156,9 @@ open class PrintOrderServiceImpl : PrintOrderService {
 
     @Transactional
     override fun createOrder(orderInput: OrderInput): PrintOrder {
-        val session = userLoginSessionDao.findOne(orderInput.sessionId)
+        val session = userLoginSessionDao.findOne(orderInput.sessionId) ?: throw ProcessException(1, "用户未登录")
 
-        if (session == null) {
-            throw ProcessException(1, "用户未登录")
-        }
-
-        val printStation = printStationDao.findOne(orderInput.printStationId)
-
-        if (printStation == null) {
-            throw ProcessException(2, "没有找到指定的自助机")
-        }
+        val printStation = printStationDao.findOne(orderInput.printStationId) ?: throw ProcessException(2, "没有找到指定的自助机")
 
         val ret = calculateOrderFee(orderInput)
 
@@ -178,6 +172,7 @@ open class PrintOrderServiceImpl : PrintOrderService {
         newOrder.totalFee = ret.first
         newOrder.discount = ret.second
         //XXX newOrder.coupon = orderInput.coupon
+        if (ret.second>0) newOrder.couponId = orderInput.couponId
         newOrder.payed = false
         newOrder.imageFileUploaded = false
         newOrder.downloadedToPrintStation = false
@@ -185,6 +180,15 @@ open class PrintOrderServiceImpl : PrintOrderService {
         newOrder.transfered = false
         newOrder.transferProportion = printStation.transferProportion
         newOrder.pageCount = orderInput.orderItems.sumBy { it.copies }
+        newOrder.printType = orderInput.printType
+        if (newOrder.printType == 1) {
+            newOrder.province = orderInput.province
+            newOrder.city = orderInput.city
+            newOrder.area = orderInput.area
+            newOrder.address = orderInput.address
+            newOrder.phoneNum = orderInput.phoneNum
+            newOrder.name = orderInput.name
+        }
 
         val orderItems = ArrayList<PrintOrderItem>()
         newOrder.printOrderItems = orderItems
@@ -209,43 +213,53 @@ open class PrintOrderServiceImpl : PrintOrderService {
 
             orderItems.add(newOrderItem)
 
-            val tplVerSplit = orderItemInput.productVersion.split('.')
-            val tplId = tplVerSplit[0].toInt()
-            val tplVer = tplVerSplit[1].toInt()
+            val orderImg = PrintOrderImage()
+            orderImg.orderId = newOrder.id
+            orderImg.orderItemId = newOrderItem.id
+            orderImg.name = ""
+            orderImg.userImageFile = null
+            orderImg.processParams = null
+            orderImg.status = PrintOrderImageStatus.CREATED.value
+            printOrderImageDao.save(orderImg)
+            orderImages.add(orderImg)
 
-            val tplImages = templateImageInfoDao.findByTemplateIdAndTemplateVersion(tplId, tplVer)
-            for (tplImg in tplImages.filter { it.userImage }.distinctBy { it.name }) {
-                var userImgId = 0
-                var processParams: String? = null
-                val orderItemImages = orderItemInput.images
-                if (orderItemImages != null) {
-                    val orderItemImg = orderItemImages.find { it.name == tplImg.name }
-                    if (orderItemImg != null) {
-                        userImgId = orderItemImg.imageId
+//            val tplVerSplit = orderItemInput.productVersion.split('.')
+//            val tplId = tplVerSplit[0].toInt()
+//            val tplVer = tplVerSplit[1].toInt()
 
-                        val userImgFile = userImageFileDao.findOne(userImgId)
-                        if (userImgFile != null) {
-                            if (userImgFile.userId != session.userId) {
-                                throw ProcessException(3, "图片不属于指定用户")
-                            }
-                        }
-
-                        processParams = objectMapper.writeValueAsString(ImageProcessParams(orderItemImg))
-                    }
-                }
-
-                val orderImg = PrintOrderImage()
-                orderImg.orderId = newOrder.id
-                orderImg.orderItemId = newOrderItem.id
-                orderImg.name = tplImg.name
-                orderImg.userImageFile = if (userImgId == 0) null else userImageFileDao.findOne(userImgId)
-                orderImg.processParams = processParams
-                orderImg.status = PrintOrderImageStatus.CREATED.value
-
-                printOrderImageDao.save(orderImg)
-
-                orderImages.add(orderImg)
-            }
+//            val tplImages = templateImageInfoDao.findByTemplateIdAndTemplateVersion(tplId, tplVer)
+//            for (tplImg in tplImages.filter { it.userImage }.distinctBy { it.name }) {
+//                var userImgId = 0
+//                var processParams: String? = null
+//                val orderItemImages = orderItemInput.images
+//                if (orderItemImages != null) {
+//                    val orderItemImg = orderItemImages.find { it.name == tplImg.name }
+//                    if (orderItemImg != null) {
+//                        userImgId = orderItemImg.imageId
+//
+//                        val userImgFile = userImageFileDao.findOne(userImgId)
+//                        if (userImgFile != null) {
+//                            if (userImgFile.userId != session.userId) {
+//                                throw ProcessException(3, "图片不属于指定用户")
+//                            }
+//                        }
+//
+//                        processParams = objectMapper.writeValueAsString(ImageProcessParams(orderItemImg))
+//                    }
+//                }
+//
+//                val orderImg = PrintOrderImage()
+//                orderImg.orderId = newOrder.id
+//                orderImg.orderItemId = newOrderItem.id
+//                orderImg.name = tplImg.name
+//                orderImg.userImageFile = if (userImgId == 0) null else userImageFileDao.findOne(userImgId)
+//                orderImg.processParams = processParams
+//                orderImg.status = PrintOrderImageStatus.CREATED.value
+//
+//                printOrderImageDao.save(orderImg)
+//
+//                orderImages.add(orderImg)
+//            }
         }
 
         //修改优惠券使用次数
@@ -288,6 +302,7 @@ open class PrintOrderServiceImpl : PrintOrderService {
             }
         }
 
+    @Deprecated("上传改为单张")
     @Transactional
     override fun uploadOrderItemImage(sessionId: String, orderItemId: Int, name:String, imageProcessParam: ImageProcessParams?, imgFile: MultipartFile?): Boolean {
         val imgInfo = imageService.uploadImage(sessionId, imgFile)
@@ -311,18 +326,50 @@ open class PrintOrderServiceImpl : PrintOrderService {
         }
     }
 
+
+
+    @Transactional
+    override fun uploadOrderImage(sessionId: String, orderItemId: Int, imgFile: MultipartFile?, x: Double, y: Double, scale: Double, rotate: Double): Boolean {
+        val imgInfo = imageService.uploadImage(sessionId, imgFile)
+        if (imgInfo.errcode == 0) {
+            val orderImg = printOrderItemDao.findOne(orderItemId)
+            val printOrderImg = printOrderImageDao.findByOrderItemIdAndName(orderItemId,"")
+            if (orderImg == null || printOrderImg == null) {
+                throw ProcessException(2, "没有此item图片")
+            }
+            else {
+                orderImg.userImageFile = userImageFileDao.findOne(imgInfo.imageId)
+                orderImg.status = PrintOrderImageStatus.UPLOADED.value
+
+                printOrderItemDao.save(orderImg)
+                printOrderImg.userImageFile = orderImg.userImageFile
+                printOrderImg.status = PrintOrderImageStatus.UPLOADED.value
+                val param = OrderImgProcessParam(x,y,scale,rotate)
+                printOrderImg.processParams = objectMapper.writeValueAsString(param)
+                printOrderImageDao.save(printOrderImg)
+
+                return checkOrderImageUploaded(orderImg.printOrderId)
+            }
+        }
+        else {
+            throw ProcessException(1, "上传图片失败")
+            //XXX
+        }
+    }
+
     //检查是否所有订单图片都已上传，如果都上传了返回true并修改订单状态
     @Synchronized
     private fun checkOrderImageUploaded(orderId: Int) : Boolean {
-        val missingImageCount = printOrderImageDao.countByOrderIdAndUserImageFileIdIsNull(orderId)  //userImageFileId is null 表示此订单图片还没有上传
+        val missingImageCount = printOrderItemDao.countByPrintOrderIdAndUserImageFileIdIsNull(orderId)  //userImageFileId is null 表示此订单图片还没有上传
         if (missingImageCount == 0L) {
             val order = printOrderDao.findOne(orderId)
             order.imageFileUploaded = true
             order.updateTime = Calendar.getInstance()
             printOrderDao.save(order)
-
-            printStationService.createPrintStationTask(order.printStationId, PrintStationTaskType.PROCESS_PRINT_ORDER, order.id.toString())
-
+            if ((order.totalFee - order.discount) <= 0) {
+                //0元单直接生成打印任务
+                printStationService.createPrintStationTask(order.printStationId, PrintStationTaskType.PROCESS_PRINT_ORDER, order.id.toString())
+            }
             return true
         }
         else {
@@ -334,10 +381,36 @@ open class PrintOrderServiceImpl : PrintOrderService {
         val orderItemDTOs = ArrayList<PrintOrderItemDTO>()
 
         order.printOrderItems.forEach {
+            val product = productDao.findOne(it.productId)
+            var width = product.template.width
+            var height = product.template.height
+            when (product.id) {
+                9526 -> {
+                    width = 101.6
+                    height = 152.4
+                }
+                9527 -> {
+                    width = 101.6
+                    height = 152.4
+                }
+                9528 -> {
+                    width = 152.4
+                    height = 101.6
+                }
+                9529 -> {
+                    width = 101.6
+                    height = 152.4
+                }
+            }
+            var dpi = 240
+            if (width * height > 19354.8) dpi = 180
+
             val imageDTOs = ArrayList<PrintOrderImageDTO>()
             it.orderImages.forEach { img ->
                 val userImgFile = img.userImageFile!!
-
+                val param = objectMapper.readValue(img.processParams, OrderImgProcessParam::class.java)
+                param.dpi = dpi
+                img.processParams = objectMapper.writeValueAsString(param)
                 imageDTOs += PrintOrderImageDTO(
                         id = img.id,
                         name = img.name,
@@ -358,7 +431,8 @@ open class PrintOrderServiceImpl : PrintOrderService {
                     productId = it.productId,
                     productType = it.productType,
                     productVersion = it.productVersion,
-                    orderImages = imageDTOs)
+                    orderImages = imageDTOs
+            )
         }
 
         val user = userDao.findOne(order.userId)
@@ -725,6 +799,17 @@ open class PrintOrderServiceImpl : PrintOrderService {
         return Pair(totalFee, discount)
     }
 
+    private fun createPayNo(): String {
+        val dateTime = SimpleDateFormat("yyyyMMdd").format(Date())
+        var tradeNo:String
+        do {
+            val randomStr = BigInteger(4 * 8, secureRandom).toString(36).toUpperCase()
+            tradeNo = "$dateTime$randomStr"
+        } while (wxPayRecordDao.existsByTradeNo(tradeNo))
+
+        return tradeNo
+    }
+
     override fun startPayment(orderId: Int): WxPayParams {
         val order = printOrderDao.findOne(orderId)
         val company = companyDao.findOne(order.companyId)
@@ -750,6 +835,16 @@ open class PrintOrderServiceImpl : PrintOrderService {
         val notifyUrl = "$baseUrl/wxpay/notify"
         val ipAddress: String = java.net.InetAddress.getByName(URL(baseUrl).host).hostAddress
 
+
+        val wxPayRecord = WxPayRecord()
+        wxPayRecord.tradeNo = createPayNo()
+        wxPayRecord.createTime = Calendar.getInstance()
+        wxPayRecord.updateTime = wxPayRecord.createTime
+        wxPayRecord.fee = order.totalFee - order.discount
+        wxPayRecord.orderId = order.id
+        wxPayRecordDao.save(wxPayRecord)
+
+
         val requestBody = getPaymentRequestParams(payKey, TreeMap(hashMapOf<String, String>(
                 "appid" to appId,
                 "body" to "优利绚彩-照片打印",
@@ -757,7 +852,7 @@ open class PrintOrderServiceImpl : PrintOrderService {
                 "nonce_str" to nonceStr,
                 "notify_url" to notifyUrl,
                 "openid" to openId,
-                "out_trade_no" to order.orderNo,
+                "out_trade_no" to wxPayRecord.tradeNo,
                 "spbill_create_ip" to ipAddress,
                 "total_fee" to (order.totalFee - order.discount).toString(),
                 "trade_type" to "JSAPI"
@@ -784,6 +879,7 @@ open class PrintOrderServiceImpl : PrintOrderService {
                 return createWxPayParams(payKey, result, nonceStr)
             }
             else {
+                logger.error("微信支付调用失败--info ： ${objectMapper.writeValueAsString(result)}")
                 throw ProcessException(3, "return_code=${result.return_code}, result_code=${result.result_code}")
             }
         }
@@ -826,7 +922,11 @@ open class PrintOrderServiceImpl : PrintOrderService {
             return "订单号为空"
         }
         else {
-            val printOrder = printOrderDao.findByOrderNo(result.out_trade_no!!)
+
+            val wxPayRecord = wxPayRecordDao.findByTradeNo(result.out_trade_no!!) ?: return "没有找到交易记录"
+            wxPayRecord.updateTime = Calendar.getInstance()
+            wxPayRecordDao.save(wxPayRecord)
+            val printOrder = printOrderDao.findOne(wxPayRecord.orderId)
             if (printOrder == null) {
                 return "没有找到订单"
             }
@@ -836,6 +936,7 @@ open class PrintOrderServiceImpl : PrintOrderService {
                 printOrder.payed = true
                 printOrder.updateTime = Calendar.getInstance()
                 printOrderDao.save(printOrder)
+                printStationService.createPrintStationTask(printOrder.printStationId, PrintStationTaskType.PROCESS_PRINT_ORDER, printOrder.id.toString())
 
                 //转账
                 wxEntTransferExecutor.submit {

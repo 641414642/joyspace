@@ -135,6 +135,22 @@ function moveProduct(event, up) {
     });
 }
 
+function couponEnabled(event) {
+
+    var source = event.target || event.srcElement;
+    var actionUrl = $(source).data('url');
+
+    $.ajax({
+        type: 'post',
+        url: actionUrl,
+        success: function (data) {
+            if (data) {
+                window.location.reload();
+            }
+        }
+    });
+}
+
 //确认删除产品
 function deleteProduct(event) {
     var source = event.target || event.srcElement;

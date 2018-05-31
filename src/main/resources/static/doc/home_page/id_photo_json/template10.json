@@ -1,0 +1,84 @@
+{
+	"msg": "OK",
+	"state": 1,
+	"result": {
+		"template": {
+			"id": 207,
+			"version": 1.0,
+			"name": "护照&毕业照",
+			"type": 2,
+			"scenes": [{
+				"id": 1,
+				"name": "",
+				"type": "page",
+				"width": 1440,
+				"height": 2160,
+				"layers": [{
+						"id": 1,
+						"type": "background",
+						"images": [{
+							"id": 1,
+							"type": "sticker",
+							"x": 0,
+							"y": 0,
+							"width": 1440,
+							"height": 2160,
+							"angleClip": 0,
+							"bgcolor": "",
+							"resourceURL": "background_layer.png"
+						}]
+					},
+					{
+						"id": 2,
+						"type": "image",
+						"images": [{
+								"id": 1,
+								"type": "user",
+								"x": 260,
+								"y": 390,
+								"width": 468,
+								"height": 680,
+								"angleClip": 0,
+								"bgcolor": "",
+								"resourceURL": ""
+							},
+							{
+								"id": 2,
+								"type": "user",
+								"x": 742,
+								"y": 390,
+								"width": 468,
+								"height": 680,
+								"angleClip": 0,
+								"bgcolor": "",
+								"resourceURL": ""
+							},
+							{
+								"id": 3,
+								"type": "user",
+								"x": 260,
+								"y": 1084,
+								"width": 468,
+								"height": 680,
+								"angleClip": 0,
+								"bgcolor": "",
+								"resourceURL": ""
+							},
+							{
+								"id": 4,
+								"type": "user",
+								"x": 742,
+								"y": 1084,
+								"width": 468,
+								"height": 680,
+								"angleClip": 0,
+								"bgcolor": "",
+								"resourceURL": ""
+							}
+						]
+					}
+				]
+			}]
+		}
+	}
+}

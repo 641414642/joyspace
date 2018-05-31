@@ -4,6 +4,7 @@ import com.unicolour.joyspace.dao.*
 import com.unicolour.joyspace.dto.*
 import com.unicolour.joyspace.exception.ProcessException
 import com.unicolour.joyspace.model.*
+import com.unicolour.joyspace.model.PrintStationProduct
 import com.unicolour.joyspace.service.*
 import com.unicolour.joyspace.util.format
 import graphql.schema.DataFetcher

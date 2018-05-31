@@ -60,7 +60,7 @@
                         <span class="help-block"></span>
                     </div>
                     <div class="form-group">
-                        <label for="tplHeight" class="control-label">高度高度:</label>
+                        <label for="tplHeight" class="control-label">模板高度:</label>
                         <div class="input-group">
                             <input class="form-control" type="text" id="tplHeight" name="tplHeight"
                                    th:value="${template.height == 0 ? '' : #numbers.formatDecimal(template.height, 1, 'DEFAULT', 2, 'DEFAULT')}"/>
@@ -69,7 +69,7 @@
                         <span class="help-block"></span>
                     </div>
                     <div class="form-group">
-                        <label for="elementWidth" class="control-label">头像宽度:</label>
+                        <label for="elementWidth" class="control-label">证件照照片宽度:</label>
                         <div class="input-group">
                             <input class="form-control" type="text" id="elementWidth" name="elementWidth"
                                    th:value="${idPhotoParam.elementWidth == 0 ? '' : #numbers.formatDecimal(idPhotoParam.elementWidth, 1, 'DEFAULT', 2, 'DEFAULT')}"/>
@@ -78,7 +78,7 @@
                         <span class="help-block"></span>
                     </div>
                     <div class="form-group">
-                        <label for="elementHeight" class="control-label">头像高度:</label>
+                        <label for="elementHeight" class="control-label">证件照照片高度:</label>
                         <div class="input-group">
                             <input class="form-control" type="text" id="elementHeight" name="elementHeight"
                                    th:value="${idPhotoParam.elementHeight == 0 ? '' : #numbers.formatDecimal(idPhotoParam.elementHeight, 1, 'DEFAULT', 2, 'DEFAULT')}"/>
@@ -124,7 +124,7 @@
                         <span class="help-block"></span>
                     </div>
                     <div class="form-group">
-                        <label for="maskImageFile" class="control-label" th:text="${create ? '头像蒙版图片:' : '头像蒙版图片 (如果为空, 使用旧版本的蒙版图片):'}"></label>
+                        <label for="maskImageFile" class="control-label" th:text="${create ? '头像框蒙版图片:' : '头像框蒙版图片 (如果为空, 使用旧版本的蒙版图片):'}"></label>
                         <input type="file" name="maskImageFile" class="form-control" id="maskImageFile" />
                         <span class="help-block"></span>
                     </div>

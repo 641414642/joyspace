@@ -18,4 +18,11 @@ interface PrintOrderDao : CrudRepository<PrintOrder, Int>, PrintOrderCustomQuery
             @Param("updateTime") updateTime: Calendar): List<PrintOrder>
 
     fun findByCompanyIdAndPayedIsTrueAndTransferedIsFalse(companyId: Int): List<PrintOrder>
+    fun findByUserIdOrderByCreateTimeDesc(userId: Int): List<PrintOrder>
+    fun countByUserIdAndPayedIsFalseAndCanceledIsFalse(userId: Int): Long
+    fun countByUserIdAndPayedIsTrueAndPrintedOnPrintStationIsFalseAndCanceledIsFalse(userId: Int): Long
+    fun countByUserIdAndPrintedOnPrintStationIsTrue(userId: Int): Long
+
+    fun findByUpdateTimeGreaterThanEqualAndUpdateTimeBefore(startTime: Calendar, endTime: Calendar): Iterable<PrintOrder>
+
 }

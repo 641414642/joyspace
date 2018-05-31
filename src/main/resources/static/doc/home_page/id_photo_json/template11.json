@@ -1,0 +1,62 @@
+{
+	"msg": "OK",
+	"state": 1,
+	"result": {
+		"template": {
+			"id": 215,
+			"version": 1.0,
+			"name": "结婚证",
+			"type": 2,
+			"scenes": [{
+				"id": 1,
+				"name": "",
+				"type": "page",
+				"width": 1440,
+				"height": 2160,
+				"layers": [{
+						"id": 1,
+						"type": "background",
+						"images": [{
+							"id": 1,
+							"type": "sticker",
+							"x": 0,
+							"y": 0,
+							"width": 1440,
+							"height": 2160,
+							"angleClip": 0,
+							"bgcolor": "",
+							"resourceURL": "background_layer.png"
+						}]
+					},
+					{
+						"id": 2,
+						"type": "image",
+						"images": [{
+								"id": 1,
+								"type": "user",
+								"x": 338,
+								"y": 450,
+								"width": 794,
+								"height": 538,
+								"angleClip": 0,
+								"bgcolor": "",
+								"resourceURL": ""
+							},
+							{
+								"id": 2,
+								"type": "user",
+								"x": 338,
+								"y": 1002,
+								"width": 794,
+								"height": 538,
+								"angleClip": 0,
+								"bgcolor": "",
+								"resourceURL": ""
+							}
+						]
+					}
+				]
+			}]
+		}
+	}
+}

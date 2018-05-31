@@ -1,6 +1,5 @@
 package com.unicolour.joyspace.dao
 
-import com.unicolour.joyspace.model.AliPayConfig
 import com.unicolour.joyspace.model.PrintStation
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
@@ -16,6 +15,7 @@ interface PrintStationDao : PagingAndSortingRepository<PrintStation, Int> {
     fun findByCompanyId(companyId: Int): List<PrintStation>
 
     fun findByAddressCity(cityName: String): List<PrintStation>
+    fun findByAddressNation(nationName: String): List<PrintStation>
     fun findByIdIn(idList: List<Int>): List<PrintStation>
     fun findByPositionId(positionId: Int): List<PrintStation>
 
