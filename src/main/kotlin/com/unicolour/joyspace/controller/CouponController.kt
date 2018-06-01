@@ -11,6 +11,7 @@ import com.unicolour.joyspace.dto.ProductTypeItem
 import com.unicolour.joyspace.model.*
 import com.unicolour.joyspace.service.CouponService
 import com.unicolour.joyspace.service.ManagerService
+import com.unicolour.joyspace.service.ProductService
 import com.unicolour.joyspace.util.Pager
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.PageRequest
@@ -38,7 +39,7 @@ class CouponController {
     lateinit var couponDao: CouponDao
 
     @Autowired
-    lateinit var productDao: ProductDao
+    lateinit var productService: ProductService
 
     @Autowired
     lateinit var positionDao: PositionDao
@@ -111,7 +112,7 @@ class CouponController {
 
         val allProductTypes = ProductType.values()
                 .map { ProductTypeItem(it.value, it.dispName, supportedProductTypes.contains(it.value)) }
-        val allProducts = productDao.findAllByOrderBySequenceAsc()
+        val products = productService.queryProducts(loginManager!!.companyId, "", true, "sequence asc")
                 .map { ProductItem(it.id, it.template.type ,it.name, it.template.name, supportedProductIdSet.contains(it.id)) }
         val allPositions = positionDao.findByCompanyId(loginManager!!.companyId)
                 .map { PositionItem(it.id, it.name, it.address, supportedPositionIdSet.contains(it.id)) }
@@ -138,25 +139,25 @@ class CouponController {
         modelAndView.model["claimMethods"] = CouponClaimMethod.values()
         modelAndView.model["type"] = CouponType.values()
         modelAndView.model["productTypes"] = allProductTypes
-        modelAndView.model["photo_products"] = allProducts.filter { it.productType == ProductType.PHOTO.value }
-        modelAndView.model["template_products"] = allProducts.filter { it.productType == ProductType.TEMPLATE.value }
-        modelAndView.model["id_photo_products"] = allProducts.filter { it.productType == ProductType.ID_PHOTO.value }
+        modelAndView.model["photo_products"] = products.filter { it.productType == ProductType.PHOTO.value }
+        modelAndView.model["template_products"] = products.filter { it.productType == ProductType.TEMPLATE.value }
+        modelAndView.model["id_photo_products"] = products.filter { it.productType == ProductType.ID_PHOTO.value }
         modelAndView.model["positions"] = allPositions
         modelAndView.model["printStations"] = allPrintStations
-        modelAndView.model.put("productIds", allProducts.map { it.productId }.joinToString(separator = ","))
-        modelAndView.model.put("positionIds", allPositions.map { it.positionId }.joinToString(separator = ","))
-        modelAndView.model.put("printStationIds", allPrintStations.map { it.printStationId }.joinToString(separator = ","))
+        modelAndView.model["productIds"] = products.map { it.productId }.joinToString(separator = ",")
+        modelAndView.model["positionIds"] = allPositions.map { it.positionId }.joinToString(separator = ",")
+        modelAndView.model["printStationIds"] = allPrintStations.map { it.printStationId }.joinToString(separator = ",")
 
         if (id > 0) {
             modelAndView.model.put("userRegDays", coupon.constrains
                     .find { it.constrainsType == CouponConstrainsType.USER_REG_DAYS.value }?.value ?: 0)
         }
         else {
-            modelAndView.model.put("userRegDays", 0)
+            modelAndView.model["userRegDays"] = 0
         }
 
-        modelAndView.model.put("create", id <= 0)
-        modelAndView.model.put("coupon", coupon)
+        modelAndView.model["create"] = id <= 0
+        modelAndView.model["coupon"] = coupon
         modelAndView.viewName = "/coupon/edit :: content"
 
         return modelAndView
