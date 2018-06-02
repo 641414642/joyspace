@@ -1,6 +1,5 @@
 package com.unicolour.joyspace.controller.api
 
-import com.unicolour.joyspace.dao.ProductDao
 import com.unicolour.joyspace.dto.PreviewParam
 import com.unicolour.joyspace.dto.TemplatePreviewResult
 import com.unicolour.joyspace.service.TemplateService
@@ -14,9 +13,6 @@ import org.springframework.web.bind.annotation.RestController
 
 @RestController
 class ApiProductController {
-    @Autowired
-    lateinit var productDao: ProductDao
-
     @Autowired
     lateinit var templateService: TemplateService
 

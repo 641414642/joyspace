@@ -5,6 +5,7 @@ import com.unicolour.joyspace.dao.ProductDao
 import com.unicolour.joyspace.model.PriceList
 import com.unicolour.joyspace.service.ManagerService
 import com.unicolour.joyspace.service.PriceListService
+import com.unicolour.joyspace.service.ProductService
 import com.unicolour.joyspace.util.Pager
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.PageRequest
@@ -29,7 +30,7 @@ class PriceListController {
     lateinit var priceListService: PriceListService
 
     @Autowired
-    lateinit var productDao: ProductDao
+    lateinit var productService: ProductService
 
     @RequestMapping("/priceList/list")
     fun priceListList(
@@ -51,15 +52,15 @@ class PriceListController {
                 else
                     priceListDao.findByCompanyIdAndName(loginManager.companyId, name, pageable)
 
-        modelAndView.model.put("inputPriceListName", name)
+        modelAndView.model["inputPriceListName"] = name
 
         val pager = Pager(priceLists.totalPages, 7, pageno - 1)
-        modelAndView.model.put("pager", pager)
+        modelAndView.model["pager"] = pager
 
-        modelAndView.model.put("priceLists", priceLists.content)
+        modelAndView.model["priceLists"] = priceLists.content
 
-        modelAndView.model.put("viewCat", "product_mgr")
-        modelAndView.model.put("viewContent", "priceList_list")
+        modelAndView.model["viewCat"] = "product_mgr"
+        modelAndView.model["viewContent"] = "priceList_list"
         modelAndView.viewName = "layout"
 
         return modelAndView
@@ -72,6 +73,13 @@ class PriceListController {
             @RequestParam(name = "mode", required = true) mode: String
     ): ModelAndView {
 
+        val loginManager = managerService.loginManager
+
+        if (loginManager == null) {
+            modelAndView.viewName = "empty"
+            return modelAndView
+        }
+
         var priceMap: Map<Int, Int> = emptyMap()
         var priceList: PriceList? = null
         if (id > 0) {
@@ -83,8 +91,8 @@ class PriceListController {
             priceList = PriceList()
         }
 
-        val allProducts = productDao.findAll().toList()
-        val rows = allProducts.map {
+        val products = productService.queryProducts(loginManager.companyId, "", true,"sequence asc")
+        val rows = products.map {
             PriceRow(it.id, it.name,
                     String.format("%.2f", it.defaultPrice / 100.0),
                     if (priceMap.containsKey(it.id))
@@ -102,7 +110,7 @@ class PriceListController {
         })
 
         modelAndView.model.put("priceList", priceList)
-        modelAndView.model.put("productIds", allProducts.map { it.id }.joinToString(separator = ","))
+        modelAndView.model.put("productIds", products.map { it.id }.joinToString(separator = ","))
         modelAndView.model.put("rows", rows)
         modelAndView.viewName = "/priceList/edit :: content"
 
@@ -119,7 +127,7 @@ class PriceListController {
     ): Boolean {
 
         val productIdPriceMap = productIds.split(',')
-                .associateBy({ it.toInt() }, { request.getParameter("product_${it}") })
+                .associateBy({ it.toInt() }, { request.getParameter("product_$it") })
 
         if (id <= 0) {
             priceListService.createPriceList(name, productIdPriceMap)
