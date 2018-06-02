@@ -133,6 +133,10 @@ class ApiProductRoute {
             products = products.filter {
                 printStationProductDao.existsByPrintStationIdAndProductId(printStationId, it.id)
             }
+        }else{
+            products = products.filter {
+                printStationProductDao.existsByPrintStationIdAndProductId(1, it.id)
+            }
         }
         val productVoList = products.map {
             val tpl = it.template
