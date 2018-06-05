@@ -682,36 +682,38 @@ open class PrintOrderServiceImpl : PrintOrderService {
         }
 
         synchronized(this, {
-            val record = WxEntTransferRecord()
-            record.amount = orderAmountAndFee.totalTransferAmount
-            record.companyId = account.companyId
-            record.transferTime = Calendar.getInstance()
-            record.tradeNo = createTradeNo()
-            record.receiverName = account.name
-            record.receiverOpenId = account.openId
+            transactionTemplate.execute {
+                val record = WxEntTransferRecord()
+                record.amount = orderAmountAndFee.totalTransferAmount
+                record.companyId = account.companyId
+                record.transferTime = Calendar.getInstance()
+                record.tradeNo = createTradeNo()
+                record.receiverName = account.name
+                record.receiverOpenId = account.openId
 
-            wxEntTransferRecordDao.save(record)
+                wxEntTransferRecordDao.save(record)
 
-            orders.forEach { order ->
-                val transferRecordItem = wxEntTransferRecordItemDao.findByPrintOrderId(order.id)
-                if (transferRecordItem == null) {
-                    val recordItem = WxEntTransferRecordItem()
-                    recordItem.charge = orderAmountAndFee.orderIdToTransferFeeMap[order.id]!!
-                    recordItem.amount = order.totalFee - order.discount - recordItem.charge
-                    recordItem.printOrderId = order.id
-                    recordItem.recordId = record.id
+                orders.forEach { order ->
+                    val transferRecordItem = wxEntTransferRecordItemDao.findByPrintOrderId(order.id)
+                    if (transferRecordItem == null) {
+                        val recordItem = WxEntTransferRecordItem()
+                        recordItem.charge = orderAmountAndFee.orderIdToTransferFeeMap[order.id]!!
+                        recordItem.amount = order.totalFee - order.discount - recordItem.charge
+                        recordItem.printOrderId = order.id
+                        recordItem.recordId = record.id
 
-                    wxEntTransferRecordItemDao.save(recordItem)
+                        wxEntTransferRecordItemDao.save(recordItem)
 
-                    order.transfered = true
-                    printOrderDao.save(order)
-                } else {
-                    logger.error("PrintOrder id=${order.id} already transfered, abort!")
-                    throw ProcessException(ResultCode.PRINT_ORDER_ALREADY_TRANSFERED)
+                        order.transfered = true
+                        printOrderDao.save(order)
+                    } else {
+                        logger.error("PrintOrder id=${order.id} already transfered, abort!")
+                        throw ProcessException(ResultCode.PRINT_ORDER_ALREADY_TRANSFERED)
+                    }
                 }
-            }
 
-            doWxEntTransfer(record, orders)
+                doWxEntTransfer(record, orders)
+            }
         })
     }
 
