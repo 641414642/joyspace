@@ -330,7 +330,7 @@ class PrintOrderController {
         val recordItem = wxEntTransferRecordItemDao.findByPrintOrderId(id)
         val record = wxEntTransferRecordDao.findOne(recordItem!!.recordId)
 
-        if (loginManager!!.companyId != record.companyId) {
+        if (!managerService.loginManagerHasRole("ROLE_SUPERADMIN") && loginManager!!.companyId != record.companyId) {
             throw ProcessException(ResultCode.OTHER_ERROR)
         }
 
