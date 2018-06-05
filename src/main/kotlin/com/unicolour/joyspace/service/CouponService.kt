@@ -94,30 +94,21 @@ interface CouponService {
 
     fun getDataFetcher(fieldName:String): DataFetcher<Any>
 
-    fun createCoupon(name: String, code: String, type: Int, enabled: Boolean, couponClaimMethod: CouponClaimMethod,
-                     number: Int, maxUsesPerUser: Int, minExpense: Int, discount: Int,
+    fun createCoupon(name: String, code: String, enabled: Boolean, couponClaimMethod: CouponClaimMethod,
+                     maxUses: Int, maxUsesPerUser: Int, minExpense: Int, discount: Int,
                      begin: Date, expire: Date, userRegDays: Int,
                      selectedProductTypes: Set<ProductType>,
                      selectedProductIds: Set<Int>,
                      selectedPositionIds: Set<Int>,
                      selectedPrintStationIds: Set<Int>)
 
-    fun updateCoupon(id: Int, name: String, type: Int, enabled: Boolean, couponClaimMethod: CouponClaimMethod,
-                     number: Int, maxUsesPerUser: Int, minExpense: Int, discount: Int,
+    fun updateCoupon(id: Int, name: String, code: String, enabled: Boolean, couponClaimMethod: CouponClaimMethod,
+                     maxUses: Int, maxUsesPerUser: Int, minExpense: Int, discount: Int,
                      begin: Date, expire: Date, userRegDays: Int,
                      selectedProductTypes: Set<ProductType>,
                      selectedProductIds: Set<Int>,
                      selectedPositionIds: Set<Int>,
                      selectedPrintStationIds: Set<Int>): Boolean
-
-    fun checkCouponUse(couponId: Int, userId: Int, printStationId: Int): CouponValidateResult
-
-
-
-    fun couponEnabled(id: Int): Boolean
-
-
-
 
     /**
      * @see userCouponListDataFetcher

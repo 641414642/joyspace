@@ -40,12 +40,12 @@
 					<tr>
 						<th>ID</th>
 						<th>名称</th>
-						<th>兑换码</th>
-						<th>获取方式</th>
+						<th>代码</th>
+						<th>类型</th>
 						<th>状态</th>
 						<th>有效期</th>
-						<th>领取 / 使用 / 数量 / 次数</th>
-						<th>优惠规则</th>
+						<th>领取 / 使用 / 最大使用次数</th>
+						<th>优惠</th>
 						<th>操作</th>
 					</tr>
 					<tr th:each="coupon : ${coupons}">
@@ -69,21 +69,14 @@
 							<span> / </span>
 							<span th:text="${coupon.usageCount}"></span>
 							<span> / </span>
-							<span th:if="${coupon.number == 0}">无限制</span>
-							<span th:unless="${coupon.number == 0}" th:text="${coupon.number}"></span>
-							<span> / </span>
-							<span th:if="${coupon.maxUsesPerUser == 0}">无限制</span>
-							<span th:unless="${coupon.maxUsesPerUser == 0}" th:text="${coupon.maxUsesPerUser}"></span>
-
+							<span th:if="${coupon.maxUses == 0}">无限制</span>
+							<span th:unless="${coupon.maxUses == 0}" th:text="${coupon.maxUses}"></span>
 						</td>
 						<td>
 							<span> 满 </span>
 							<span th:text="${#numbers.formatDecimal(coupon.minExpense / 100.0, 1, 'DEFAULT', 2, 'DEFAULT')}"></span>
-							<span th:if="${coupon.type} == 1">减:</span>
-							<span th:if="${coupon.type} == 1" th:text="${#numbers.formatDecimal(coupon.discount / 100.0, 1, 'DEFAULT', 2, 'DEFAULT')}"></span>
-
-							<span th:if="${coupon.type} == 2" th:text="${#numbers.formatDecimal(coupon.discount / 100.0, 1, 'DEFAULT', 2, 'DEFAULT')}"></span>
-							<span th:if="${coupon.type} == 2"> 折 </span>
+							<span> 减 </span>
+							<span th:text="${#numbers.formatDecimal(coupon.discount / 100.0, 1, 'DEFAULT', 2, 'DEFAULT')}"></span>
 						</td>
 						<td>
 							<a href="#">
@@ -92,13 +85,6 @@
 								   onclick="return createOrEditCoupon(event, true)"
 								   title="编辑">
 								</i>
-
-								<i class="fa fa-fw fa-trash-o"
-								   th:attr="data-url=@{/coupon/enabled(id=${coupon.id},mode='enabled')}"
-								   onclick="return couponEnabled(event, true)"
-								   title="启用/禁用">
-								</i>
-
 							</a>
 						</td>
 					</tr>

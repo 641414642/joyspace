@@ -44,12 +44,6 @@ class Coupon {
     @NotNull
     var claimCount: Int = 0
 
-
-    //数量
-    @Column(name="number",columnDefinition="int default 0 ")
-    @NotNull
-    var number: Int = 0
-
     //每用户最大使用次数(0表示无限制)
     @Column
     @NotNull
@@ -72,10 +66,6 @@ class Coupon {
     @Column
     @NotNull
     var discount: Int = 0         //折扣金额（分）
-
-    @Column(name="type",columnDefinition="int default 0 ")
-    @NotNull
-    var type: Int = 0         //类型
 
     @OneToMany(mappedBy = "couponId")
     lateinit var constrains: List<CouponConstrains>
@@ -119,15 +109,6 @@ enum class CouponClaimMethod(val value:Int, val dispName:String) {
     SCAN_PRINT_STATION_CODE(1, "自动获取"),
     INPUT_CODE(2, "手动获取")
 }
-
-//优惠券类型
-enum class CouponType(val value:Int, val dispName:String) {
-    AFTER_CODE(1, "满减"),
-    DISCOUNT_CODE(2, "打折")
-}
-
-
-
 
 /** 用户优惠券列表 */
 @Entity

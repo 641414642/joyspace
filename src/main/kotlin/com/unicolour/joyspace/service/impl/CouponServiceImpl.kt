@@ -471,7 +471,7 @@ open class CouponServiceImpl : CouponService {
     }
 
     @Transactional
-    override fun createCoupon(name: String, code: String,type: Int, enabled: Boolean, couponClaimMethod: CouponClaimMethod, number: Int,
+    override fun createCoupon(name: String, code: String, enabled: Boolean, couponClaimMethod: CouponClaimMethod, maxUses: Int,
                               maxUsesPerUser: Int, minExpense: Int, discount: Int, begin: Date, expire: Date, userRegDays: Int,
                               selectedProductTypes: Set<ProductType>,
                               selectedProductIds: Set<Int>,
@@ -482,11 +482,10 @@ open class CouponServiceImpl : CouponService {
         val coupon = Coupon()
         coupon.name = name
         coupon.code = code
-        coupon.type = type
         coupon.enabled = enabled
         coupon.companyId = loginManager!!.companyId
         coupon.claimMethod = couponClaimMethod.value
-        coupon.number = number
+        coupon.maxUses = maxUses
         coupon.maxUsesPerUser = maxUsesPerUser
         coupon.minExpense = minExpense
         coupon.discount = discount
@@ -539,7 +538,7 @@ open class CouponServiceImpl : CouponService {
     }
 
     @Transactional
-    override fun updateCoupon(id: Int, name: String, type: Int, enabled: Boolean, couponClaimMethod: CouponClaimMethod, number: Int,
+    override fun updateCoupon(id: Int, name: String, code: String, enabled: Boolean, couponClaimMethod: CouponClaimMethod, maxUses: Int,
                               maxUsesPerUser: Int, minExpense: Int, discount: Int, begin: Date, expire: Date, userRegDays: Int,
                               selectedProductTypes: Set<ProductType>,
                               selectedProductIds: Set<Int>,
@@ -551,10 +550,10 @@ open class CouponServiceImpl : CouponService {
         }
         else {
             coupon.name = name
-            coupon.type = type
+            coupon.code = code
             coupon.enabled = enabled
             coupon.claimMethod = couponClaimMethod.value
-            coupon.number = number
+            coupon.maxUses = maxUses
             coupon.maxUsesPerUser = maxUsesPerUser
             coupon.minExpense = minExpense
             coupon.discount = discount
@@ -610,31 +609,4 @@ open class CouponServiceImpl : CouponService {
             return true
         }
     }
-
-    @Transactional
-    override fun couponEnabled(id: Int): Boolean{
-
-        val coupon = couponDao.findOne(id)
-
-        if (coupon == null) {
-
-            return false
-        }
-
-        if (coupon.enabled == false){
-
-            coupon.enabled = true
-
-        } else {
-
-            coupon.enabled = false
-            couponDao.save(coupon)
-        }
-
-        return true
-    }
-
-
-
-
 }

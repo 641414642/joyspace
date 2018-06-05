@@ -31,10 +31,10 @@
     <script src="../../static/js/bootstrap-datepicker.min.js" th:src="@{/js/bootstrap-datepicker.min.js}"></script>
 
     <script type="text/javascript">
-        $(document).ready(function() {
-            $('#editDialog').modal('show');
-        });
-    </script>
+		$(document).ready(function() {
+			$('#editDialog').modal('show');
+		});
+	</script>
 </head>
 <body>
 <div class="modal fade" role="dialog" id="editDialog">
@@ -56,6 +56,11 @@
                         <span class="help-block"></span>
                     </div>
                     <div class="form-group">
+                        <label for="code" class="control-label">代码:</label>
+                        <input type="text" name="code" class="form-control" id="code" th:value="${coupon.code}" />
+                        <span class="help-block"></span>
+                    </div>
+                    <div class="form-group">
                         <div style="display:inline-block;" class="checkbox">
                             <label>
                                 <input type="checkbox" th:checked="${coupon.enabled==false}" th:name="disabled" th:text="禁用"/>
@@ -73,27 +78,14 @@
                         </select>
                         <span class="help-block"></span>
                     </div>
-
                     <div class="form-group">
-                        <label for="type" class="control-label">类型:</label>
-                        <select name="type" class="form-control" id="type">
-                            <option th:each="m : ${type}"
-                                    th:value="${m.value}"
-                                    th:text="${m.dispName}"
-                                    th:selected="${m.value == coupon.type}">
-                            </option>
-                        </select>
-                        <span class="help-block"></span>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="number" class="control-label">数量(0表示无限制):</label>
-                        <input type="text" name="number" class="form-control" id="number" th:value="${coupon.number} ? ${coupon.number} : 1" />
+                        <label for="maxUses" class="control-label">最大使用次数(0表示无限制):</label>
+                        <input type="text" name="maxUses" class="form-control" id="maxUses" th:value="${coupon.maxUses}" />
                         <span class="help-block"></span>
                     </div>
                     <div class="form-group">
-                        <label for="maxUsesPerUser" class="control-label">次数(0表示无限制):</label>
-                        <input type="text" name="maxUsesPerUser" class="form-control" id="maxUsesPerUser" th:value="${coupon.maxUsesPerUser} ? ${coupon.maxUsesPerUser} : 1" />
+                        <label for="maxUsesPerUser" class="control-label">每用户最大使用次数(0表示无限制):</label>
+                        <input type="text" name="maxUsesPerUser" class="form-control" id="maxUsesPerUser" th:value="${coupon.maxUsesPerUser}" />
                         <span class="help-block"></span>
                     </div>
                     <div class="form-group">
@@ -112,7 +104,7 @@
                         <span class="help-block"></span>
                     </div>
                     <div class="form-group">
-                        <label for="discount" class="control-label">折扣金额(元)/比例:</label>
+                        <label for="discount" class="control-label">折扣金额(元):</label>
                         <input type="text" name="discount" class="form-control" id="discount" th:value="${coupon.discount/100.0}" />
                         <span class="help-block"></span>
                     </div>
@@ -122,32 +114,13 @@
                         <input type="text" name="userRegDays" class="form-control" id="userRegDays" th:value="${userRegDays}" />
                         <span class="help-block"></span>
                     </div>
-                    <script type="text/javascript">
-                        $("#selectAll").change(function() {
-
-                            if (this.checked){
-
-                                $(".position:checkbox").attr("checked",true);
-
-                            } else {
-
-                                $(".position:checkbox").removeAttr("checked",false);
-                            }
-                        });
-                    </script>
 
                     <div class="form-group">
                         <label class="control-label">店面:</label>
                         <div>
-                            <div class="checkbox" style="display:inline-block;width:100%">
-                                <label>
-                                    <input type="checkbox" id="selectAll">全选/取消</input>
-                                </label>
-                            </div>
-
                             <div style="display:inline-block; margin-right:20px" class="checkbox" th:each="position : ${positions}">
                                 <label>
-                                    <input class="position" type="checkbox" th:checked="${position.selected}"
+                                    <input type="checkbox" th:checked="${position.selected}"
                                            th:name="${'position_' + position.positionId}"
                                            th:text="${position.positionName + ' (' + position.address + ')'}"/>
                                 </label>
@@ -166,7 +139,6 @@
                             </div>
                         </div>
                     </div>
-
                     <div class="form-group">
                         <label class="control-label">产品类型:</label>
                         <div>
