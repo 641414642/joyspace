@@ -43,8 +43,16 @@
             <div id="printOrderDetail">
                 <div class="modal-body">
                     <div class="form-group">
-                        <label for="orderNo" class="control-label">商户订单号:</label>
-                        <input type="text" th:readonly="true" class="form-control" id="orderNo" th:value="${record.tradeNo}" />
+                        <label for="orderId" class="control-label">订单ID:</label>
+                        <input type="text" th:readonly="true" class="form-control" name="orderId" id="orderId" th:value="${order.id}" />
+                    </div>
+                    <div class="form-group">
+                        <label for="orderNo" class="control-label">订单编号:</label>
+                        <input type="text" th:readonly="true" class="form-control" name="orderNo" id="orderNo" th:value="${order.orderNo}" />
+                    </div>
+                    <div class="form-group">
+                        <label for="tradeNo" class="control-label">商户订单号:</label>
+                        <input type="text" th:readonly="true" class="form-control" id="tradeNo" th:value="${record.tradeNo}" />
                     </div>
                     <div class="form-group">
                         <label for="createTime" class="control-label">转账时间:</label>
