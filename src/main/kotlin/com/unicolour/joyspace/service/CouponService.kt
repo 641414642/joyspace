@@ -110,6 +110,7 @@ interface CouponService {
                      selectedPositionIds: Set<Int>,
                      selectedPrintStationIds: Set<Int>): Boolean
 
+    fun checkCouponUse(couponId: Int, userId: Int, printStationId: Int): CouponValidateResult
     /**
      * @see userCouponListDataFetcher
      */
