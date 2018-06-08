@@ -129,6 +129,9 @@ open class PrintOrderServiceImpl : PrintOrderService {
     @Autowired
     lateinit var wxPayRecordDao: WxPayRecordDao
 
+    @Autowired
+    lateinit var tPriceDao: TPriceDao
+
     //小程序appid
     @Value("\${com.unicolour.wxAppId}")
     lateinit var wxAppId: String
@@ -755,6 +758,18 @@ open class PrintOrderServiceImpl : PrintOrderService {
         }
     }
 
+    /**
+     * 根据梯度规则返回最终价格
+     */
+    private fun matchTprice(companyId: Int, productId: Int, copies: Int): Int {
+        val tPrice = tPriceDao.findByCompanyIdAndProductId(companyId, productId)
+        if (tPrice != null) {
+            val tPriceItem = tPrice.tPriceItems.firstOrNull { it.minCount <= copies && it.maxCount >= copies }
+            if (tPriceItem != null) return tPriceItem.price
+        }
+        return 0
+    }
+
     override fun calculateOrderFee(orderInput: OrderInput) : Pair<Int, Int> {
         val session = userLoginSessionDao.findOne(orderInput.sessionId)
 
@@ -766,10 +781,12 @@ open class PrintOrderServiceImpl : PrintOrderService {
         var discount = 0
 
         for (printOrderItem in orderInput.orderItems) {
-            val orderItemFee:Int = priceMap.getOrElse(printOrderItem.productId, {
+            var orderItemFee:Int = priceMap.getOrElse(printOrderItem.productId, {
                 val product = productIdObjMap.computeIfAbsent(printOrderItem.productId, { productId -> productDao.findOne(productId) })
                 product.defaultPrice
             })
+            val tPrice = matchTprice(printStation.companyId,printOrderItem.productId,printOrderItem.copies)
+            if (tPrice!=0) orderItemFee = tPrice
             totalFee += orderItemFee * printOrderItem.copies
         }
 
