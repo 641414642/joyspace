@@ -50,7 +50,12 @@ data class PrintStationVo(var id: Int? = null,
 data class PrintStationProduct(var id: Int? = null,
                                var name: String? = null,
                                var type: String? = null,
-                               var price: Int? = null)
+                               var price: Int? = null,
+                               var tPriceItems:MutableList<TPriceItemVo>? = null)
+
+data class TPriceItemVo(var minCount:Int? = null,
+                        var maxCount:Int? = null,
+                        var price:Int? = null)
 
 data class CouponVo(var id: Int? = null,
                     var name: String? = null,

@@ -3,9 +3,11 @@ package com.unicolour.joyspace.controller.api.v2
 import com.unicolour.joyspace.dao.PrintStationDao
 import com.unicolour.joyspace.dao.PrintStationProductDao
 import com.unicolour.joyspace.dao.ProductDao
+import com.unicolour.joyspace.dao.TPriceDao
 import com.unicolour.joyspace.dto.PrintStationProduct
 import com.unicolour.joyspace.dto.PrintStationVo
 import com.unicolour.joyspace.dto.ResultCode
+import com.unicolour.joyspace.dto.TPriceItemVo
 import com.unicolour.joyspace.dto.common.RestResponse
 import com.unicolour.joyspace.service.PositionService
 import com.unicolour.joyspace.service.PrintStationService
@@ -28,6 +30,8 @@ class ApiPrintStationRoute {
     private lateinit var positionService:PositionService
     @Autowired
     private lateinit var productDao:ProductDao
+    @Autowired
+    private lateinit var tPriceDao: TPriceDao
 
 
     /**
@@ -52,7 +56,12 @@ class ApiPrintStationRoute {
         val priceMap: Map<Int, Int> = printStationService.getPriceMap(printStation)
         psVo.products = printStationProductDao.findByPrintStationId(printStation.id).map {
             val price = priceMap.getOrDefault(it.productId, it.product.defaultPrice)
-            PrintStationProduct(it.productId, it.product.name, it.product.template.type.toString(), price)
+            val tPrice = tPriceDao.findByCompanyIdAndProductId(printStation.companyId,it.productId)
+            val tPriceItemVoList = mutableListOf<TPriceItemVo>()
+            tPrice?.tPriceItems?.forEach {
+                tPriceItemVoList.add(TPriceItemVo(it.minCount,it.maxCount,it.price))
+            }
+            PrintStationProduct(it.productId, it.product.name, it.product.template.type.toString(), price,tPriceItemVoList)
         }.toMutableList()
         val tProduct = productDao.findOne(9528)
         val tPrice = priceMap.getOrDefault(tProduct.id,tProduct.defaultPrice)
@@ -94,7 +103,12 @@ class ApiPrintStationRoute {
                 val priceMap: Map<Int, Int> = printStationService.getPriceMap(nearest)
                 psVo.products = printStationProductDao.findByPrintStationId(nearest.id).map {
                     val price = priceMap.getOrDefault(it.productId, it.product.defaultPrice)
-                    PrintStationProduct(it.productId, it.product.name, it.product.template.type.toString(), price)
+                    val tPrice = tPriceDao.findByCompanyIdAndProductId(nearest.companyId,it.productId)
+                    val tPriceItemVoList = mutableListOf<TPriceItemVo>()
+                    tPrice?.tPriceItems?.forEach {
+                        tPriceItemVoList.add(TPriceItemVo(it.minCount,it.maxCount,it.price))
+                    }
+                    PrintStationProduct(it.productId, it.product.name, it.product.template.type.toString(), price,tPriceItemVoList)
                 }.toMutableList()
                 val tProduct = productDao.findOne(9528)
                 val tPrice = priceMap.getOrDefault(tProduct.id,tProduct.defaultPrice)
