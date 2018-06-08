@@ -762,7 +762,7 @@ open class PrintOrderServiceImpl : PrintOrderService {
      * 根据梯度规则返回最终价格
      */
     private fun matchTprice(companyId: Int, productId: Int, copies: Int): Int {
-        val tPrice = tPriceDao.findByCompanyIdAndProductId(companyId, productId)
+        val tPrice = tPriceDao.findByCompanyIdAndProductIdAndBeginLessThanAndExpireGreaterThanAndEnabled(companyId, productId, Date(), Date(), true).firstOrNull()
         if (tPrice != null) {
             val tPriceItem = tPrice.tPriceItems.firstOrNull { it.minCount <= copies && it.maxCount >= copies }
             if (tPriceItem != null) return tPriceItem.price

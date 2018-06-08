@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
+import java.util.*
 
 @RestController
 class ApiPrintStationRoute {
@@ -56,7 +57,7 @@ class ApiPrintStationRoute {
         val priceMap: Map<Int, Int> = printStationService.getPriceMap(printStation)
         psVo.products = printStationProductDao.findByPrintStationId(printStation.id).map {
             val price = priceMap.getOrDefault(it.productId, it.product.defaultPrice)
-            val tPrice = tPriceDao.findByCompanyIdAndProductId(printStation.companyId,it.productId)
+            val tPrice = tPriceDao.findByCompanyIdAndProductIdAndBeginLessThanAndExpireGreaterThanAndEnabled(printStation.companyId, it.productId, Date(), Date(), true).firstOrNull()
             val tPriceItemVoList = mutableListOf<TPriceItemVo>()
             tPrice?.tPriceItems?.forEach {
                 tPriceItemVoList.add(TPriceItemVo(it.minCount,it.maxCount,it.price))
@@ -103,7 +104,7 @@ class ApiPrintStationRoute {
                 val priceMap: Map<Int, Int> = printStationService.getPriceMap(nearest)
                 psVo.products = printStationProductDao.findByPrintStationId(nearest.id).map {
                     val price = priceMap.getOrDefault(it.productId, it.product.defaultPrice)
-                    val tPrice = tPriceDao.findByCompanyIdAndProductId(nearest.companyId,it.productId)
+                    val tPrice = tPriceDao.findByCompanyIdAndProductIdAndBeginLessThanAndExpireGreaterThanAndEnabled(nearest.companyId, it.productId, Date(), Date(), true).firstOrNull()
                     val tPriceItemVoList = mutableListOf<TPriceItemVo>()
                     tPrice?.tPriceItems?.forEach {
                         tPriceItemVoList.add(TPriceItemVo(it.minCount,it.maxCount,it.price))
