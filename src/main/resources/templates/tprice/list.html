@@ -55,7 +55,7 @@
 						</td>
 
 						<td>
-							适用范围
+							[店面：全部]
 						</td>
 
 						<td th:if="${tprice.enabled}"><span class="label label-success">启用</span></td>
@@ -72,6 +72,13 @@
 								   th:attr="data-url=@{/event/tprice/show(id=${tprice.id},mode='edit')}"
 								   onclick="return createOrEditCoupon(event, true)"
 								   title="编辑">
+								</i>
+							</a>
+
+							<a href="#">
+								<i class="fa fa-fw fa-trash-o"
+								   th:attr="data-url=@{/event/tprice/enable(id=${tprice.id},mode='enabled')}"
+								   title="启用/禁用">
 								</i>
 							</a>
 						</td>
