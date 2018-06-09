@@ -80,7 +80,7 @@ class TpriceController {
     }
 
     @RequestMapping(path = arrayOf("/event/tprice/show"), method = arrayOf(RequestMethod.GET))
-    fun editTemplate(
+    fun show(
             modelAndView: ModelAndView,
             @RequestParam(name = "id", required = true) id: Int): ModelAndView {
 
@@ -112,36 +112,35 @@ class TpriceController {
 
     @RequestMapping(path = arrayOf("/event/tprice/show"), method = arrayOf(RequestMethod.POST))
     @ResponseBody
-    fun editIdPhotoTemplate(
+    fun edit(
             request: HttpServletRequest,
-
             @RequestParam(name = "name", required = true) name: String,
             @RequestParam(name = "begin", required = true) begin: String,
             @RequestParam(name = "expire", required = true) expire: String,
             @RequestParam(name = "product", required = true) product_id: Int,
             @RequestParam(name = "min", required = true) min1: Int,
-            @RequestParam(name = "min2", required = false) min2: Int,
-            @RequestParam(name = "min3", required = false) min3: Int,
-            @RequestParam(name = "min4", required = false) min4: Int,
-            @RequestParam(name = "min5", required = false) min5: Int,
-
+            @RequestParam(name = "min2", required = true) min2: Int,
+            @RequestParam(name = "min3", required = true) min3: Int,
+            @RequestParam(name = "min4", required = true) min4: Int,
+            @RequestParam(name = "min5", required = true) min5: Int,
             @RequestParam(name = "max1", required = true) max1: Int,
-            @RequestParam(name = "max2", required = false) max2: Int,
-            @RequestParam(name = "max3", required = false) max3: Int,
-            @RequestParam(name = "max4", required = false) max4: Int,
-            @RequestParam(name = "max5", required = false) max5: Int,
-
+            @RequestParam(name = "max2", required = true) max2: Int,
+            @RequestParam(name = "max3", required = true) max3: Int,
+            @RequestParam(name = "max4", required = true) max4: Int,
+            @RequestParam(name = "max5", required = true) max5: Int,
             @RequestParam(name = "price1", required = true) price1: Int,
-            @RequestParam(name = "price2", required = false) price2: Int,
-            @RequestParam(name = "price3", required = false) price3: Int,
-            @RequestParam(name = "price4", required = false) price4: Int,
-            @RequestParam(name = "price5", required = false) price5: Int
+            @RequestParam(name = "price2", required = true) price2: Int,
+            @RequestParam(name = "price3", required = true) price3: Int,
+            @RequestParam(name = "price4", required = true) price4: Int,
+            @RequestParam(name = "price5", required = true) price5: Int
 
     ): Boolean {
 
         if (min1 <= 0 || max1 <= 0 || price1<=0) {
 
+            return false
         }
+
 
         val list = ArrayList<TPriceItem>()
 
@@ -158,7 +157,7 @@ class TpriceController {
             list.add(item1)
         }
 
-        if (min2 >0) {
+        if ((min2 != 0) and (max2 !=0)) {
 
             if ( min2 <= max1){
 
@@ -173,7 +172,7 @@ class TpriceController {
         }
 
 
-        if (min3 >0) {
+        if ((min3 != 0) and (max3 !=0)) {
 
             if ( min3 <= max2){
 
@@ -187,7 +186,7 @@ class TpriceController {
             list.add(item3)
         }
 
-        if (min4 >0) {
+        if ((min4 != 0) and (max4 !=0)) {
 
             if ( min4 <= max3){
 
@@ -200,7 +199,7 @@ class TpriceController {
             list.add(item4)
         }
 
-        if (min5 >0) {
+        if ((min5 != 0) and (max5 !=0)) {
 
             if ( min5 <= max4){
 
