@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta charset="utf-8" />
+    <!-- Bootstrap 3.3.6 -->
+    <link rel="stylesheet" href="../../static/thirdparty/bootstrap/css/bootstrap.min.css" th:href="@{/thirdparty/bootstrap/css/bootstrap.min.css}" />
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="../../static/thirdparty/fontawesome/css/font-awesome.min.css" th:href="@{/thirdparty/fontawesome/css/font-awesome.min.css}" />
+    <!-- Ionicons -->
+    <link rel="stylesheet" href="../../static/thirdparty/ionicons/css/ionicons.min.css" th:href="@{/thirdparty/ionicons/css/ionicons.min.css}" />
+    <!-- Theme style -->
+    <link rel="stylesheet" href="../../static/thirdparty/adminlte/css/AdminLTE.min.css" th:href="@{/thirdparty/adminlte/css/AdminLTE.min.css}" />
+    <!-- AdminLTE Skins. Choose a skin from the css/skins
+         folder instead of downloading all of them to reduce the load. -->
+    <link rel="stylesheet" href="../../static/thirdparty/adminlte/css/skins/_all-skins.min.css" th:href="@{/thirdparty/adminlte/css/skins/_all-skins.min.css}" />
+
+    <link rel="stylesheet" href="../static/css/bootstrap-datepicker3.css" th:href="@{/css/bootstrap-datepicker3.min.css}" />
+
+    <!-- jQuery 2.2.3 -->
+    <script src="../../static/thirdparty/plugins/jQuery/jquery-2.2.3.min.js" th:src="@{/thirdparty/plugins/jQuery/jquery-2.2.3.min.js}"></script>
+    <!-- Bootstrap 3.3.6 -->
+    <script src="../../static/thirdparty/bootstrap/js/bootstrap.min.js" th:src="@{/thirdparty/bootstrap/js/bootstrap.min.js}"></script>
+    <!-- SlimScroll -->
+    <script src="../../static/thirdparty/plugins/slimScroll/jquery.slimscroll.min.js" th:src="@{/thirdparty/plugins/slimScroll/jquery.slimscroll.min.js}"></script>
+    <!-- FastClick -->
+    <script src="../../static/thirdparty/plugins/fastclick/fastclick.js" th:src="@{/thirdparty/plugins/fastclick/fastclick.js}"></script>
+    <!-- AdminLTE App -->
+    <script src="../../static/thirdparty/adminlte/js/app.min.js" th:src="@{/thirdparty/adminlte/js/app.min.js}"></script>
+    <!-- datepicker -->
+    <script src="../../static/js/bootstrap-datepicker.min.js" th:src="@{/js/bootstrap-datepicker.min.js}"></script>
+
+    <script type="text/javascript">
+        $(document).ready(function() {
+            $('#editDialog').modal('show');
+        });
+    </script>
+</head>
+<body>
+<div class="modal fade" role="dialog" id="editDialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content" th:fragment="content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+                <h4 class="modal-title" th:text="${create ? '新建' : '修改'}"></h4>
+            </div>
+            <form id="editCouponForm" target="_blank" th:action="@{/event/tprice/show}" method="post">
+                <input type="hidden" name="id" th:value="${tprice.id}" />
+                <div class="modal-body">
+
+                    <div class="form-group">
+                        <label for="name" class="control-label">名称:</label>
+                        <input type="text" name="name" class="form-control" id="name" th:value="${tprice.name}" />
+                        <span class="help-block"></span>
+                    </div>
+                    <div class="form-group">
+                        <label for="product" class="control-label">产品:</label>
+                        <select name="product" class="form-control" id="product">
+                            <option th:each="product : ${product_list}"
+                                    th:value="${product.id}"
+                                    th:text="${product.name}"
+                                    th:selected="${product.id == tprice.companyId}">
+                            </option>
+                        </select>
+                        <span class="help-block"></span>
+                    </div>
+
+
+                    <div class="form-group">
+                        <label class="control-label">区间价格表:</label>
+                        <table class="table table-bordered" th:classappend="${mode != 'view'} ? 'table-striped' : ''">
+                            <tr>
+                            </tr>
+                            <tr>
+                                <td><input type="text" name="min" class="form-control" placeholder="最小数，必填"/></td>
+                                <td><input type="text" name="max1" class="form-control" placeholder="最大数，必填"/></td>
+                                <td><input type="text" name="price1" class="form-control" placeholder="单价(元)，必填"/></td>
+                            </tr>
+                            <tr>
+                                <td><input type="text" name="min2" class="form-control"/></td>
+                                <td><input type="text" name="max2" class="form-control"/></td>
+                                <td><input type="text" name="price2" class="form-control"/></td>
+                            </tr>
+                            <tr>
+                                <td><input type="text" name="min3" class="form-control"/></td>
+                                <td><input type="text" name="max3" class="form-control"/></td>
+                                <td><input type="text" name="price3" class="form-control"/></td>
+                            </tr>
+                            <tr>
+                                <td><input type="text" name="min4" class="form-control"/></td>
+                                <td><input type="text" name="max4" class="form-control"/></td>
+                                <td><input type="text" name="price4" class="form-control"/></td>
+                            </tr>
+                            <tr>
+                                <td><input type="text" name="min5" class="form-control"/></td>
+                                <td><input type="text" name="max5" class="form-control"/></td>
+                                <td><input type="text" name="price5" class="form-control"/></td>
+                            </tr>
+                        </table>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="begin" class="control-label">有效期:</label>
+                        <div class="input-group input-daterange">
+                            <input type="text" name="begin" id="begin" class="form-control date_picker"
+                                   th:value="${#calendars.format(tprice.begin, 'yyyy-MM-dd')}" />
+                            <div class="input-group-addon">到</div>
+                            <input type="text" name="expire" class="form-control date_picker"
+                                   th:value="${#calendars.format(tprice.expire, 'yyyy-MM-dd')}" />
+                        </div>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-primary">确定</button>
+                        <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+</body>
+</html>
