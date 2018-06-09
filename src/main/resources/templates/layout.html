@@ -196,6 +196,18 @@
 						<li th:class="${viewContent=='coupon_list' ? 'active' : ''}"><a href="#" th:href="@{/coupon/list}"><i class="fa fa-circle-o"></i>优惠券</a></li>
 					</ul>
 				</li>
+
+				<li th:class="${viewCat=='event_mgr' ? 'treeview active' : 'treeview'}" class="treeview">
+					<a href="#">
+						<i class="fa fa-edit"></i> <span>活动管理</span>
+						<span class="pull-right-container">
+              				<i class="fa fa-angle-left pull-right"></i>
+            			</span>
+					</a>
+					<ul class="treeview-menu">
+						<li th:class="${viewContent=='tprice_list' ? 'active' : ''}"><a href="#" th:href="@{/event/tprice/list}"><i class="fa fa-circle-o"></i>梯度收费</a></li>
+					</ul>
+				</li>
 			</ul>
 		</section>
 		<!-- /.sidebar -->
@@ -221,6 +233,7 @@
 		<div th:case="'adSet_list'" th:include="adSet/list :: content"></div>
 		<div th:case="'activation_code_list'" th:include="activationCode/list :: content"></div>
 		<div th:case="'company_wx_account'" th:include="company/wxAccount :: content"></div>
+		<div th:case="'tprice_list'" th:include="tprice/list :: content"></div>
 		<div th:case="*"></div>
 		<!-- /.content -->
 	</div>
