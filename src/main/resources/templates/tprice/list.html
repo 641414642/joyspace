@@ -74,18 +74,17 @@
 								   title="编辑">
 								</i>
 							</a>
-
 							<a href="#">
-								<i class="fa fa-fw fa-trash-o"
-								   th:attr="data-url=@{/event/tprice/enable(id=${tprice.id},mode='enabled')}"
-								   title="启用/禁用">
-								</i>
+							<i class="fa fa-fw fa-trash-o"
+							   th:attr="data-url=@{/event/tprice/enable(id=${tprice.id},mode='enabled')}"
+							   onclick="return tpriceEnabled(event, true)"
+							   title="启用/禁用">
+							</i>
 							</a>
 						</td>
 					</tr>
 				</table>
 			</div>
-
 			<div class="box-footer clearfix" th:include="pager :: content(${pager}, 'pageNoField')">
 			</div>
 		</div>

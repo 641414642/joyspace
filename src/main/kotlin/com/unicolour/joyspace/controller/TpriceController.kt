@@ -100,14 +100,7 @@ class TpriceController {
             tprice.expire = Date.from(now.plusDays(10).atStartOfDay(ZoneId.systemDefault()).toInstant())
         }
 
-        val loginManager = managerService.loginManager
-
-        if (loginManager == null) {
-
-            return modelAndView
-        }
-
-        var product_list = productDao.findAllByCompanyId(loginManager.companyId)
+        var product_list = productDao.findAll()
 
         modelAndView.model["create"] = id <= 0
         modelAndView.model["tprice"] = tprice
@@ -226,5 +219,14 @@ class TpriceController {
         return tPriceService.createtp(name, df.parse(begin), df.parse(expire), product_id, list)
 
     }
+
+    @RequestMapping(path = arrayOf("/event/tprice/enable"), method = arrayOf(RequestMethod.POST))
+    @ResponseBody
+    fun tpriceEnabled(
+            @RequestParam(name = "id", required = true) id: Int): Boolean {
+        return tPriceService.tpriceEnabled(id)
+    }
+
+
 
 }

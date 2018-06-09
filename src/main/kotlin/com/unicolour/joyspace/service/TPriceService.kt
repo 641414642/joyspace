@@ -9,5 +9,8 @@ interface TPriceService {
 
     fun updatetp(name: String,begin: Date, expire: Date, product_id: Int)
 
+    fun tpriceEnabled(id: Int): Boolean
+
+
 }
 

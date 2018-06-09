@@ -85,4 +85,28 @@ open class TPriceServiceImpl : TPriceService {
     }
 
 
+    @Transactional
+    override fun tpriceEnabled(id: Int): Boolean{
+
+        val tprice = tPriceDao.findOne(id)
+
+        if (tprice == null) {
+
+            return false
+        }
+
+        if (tprice.enabled == false){
+
+            tprice.enabled = true
+
+        } else {
+
+            tprice.enabled = false
+            tPriceDao.save(tprice)
+        }
+
+        return true
+    }
+
+
 }
