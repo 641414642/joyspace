@@ -1,7 +1,5 @@
 package com.unicolour.joyspace.service
 
-import com.unicolour.joyspace.model.Company
-import com.unicolour.joyspace.model.TPrice
 import com.unicolour.joyspace.model.TPriceItem
 import java.util.*
 

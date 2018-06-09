@@ -101,7 +101,13 @@ class TpriceController {
         }
 
         val loginManager = managerService.loginManager
-        var product_list = productDao.findAllByCompanyId(loginManager!!.companyId)
+
+        if (loginManager == null) {
+
+            return modelAndView
+        }
+
+        var product_list = productDao.findAllByCompanyId(loginManager.companyId)
 
         modelAndView.model["create"] = id <= 0
         modelAndView.model["tprice"] = tprice
