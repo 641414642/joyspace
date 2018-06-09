@@ -46,38 +46,44 @@
 						<th>操作</th>
 					</tr>
 					<tr th:each="tprice : ${tprice_list}">
-						<td th:text="${tprice.id}"></td>
-						<td th:text="${tprice.name}"></td>
+						<td th:text="${tprice.tPrice.id}"></td>
+						<td th:text="${tprice.tPrice.name}"></td>
 						<td>
-							<span th:if="${tprice.begin != null}" th:text="${#calendars.format(tprice.begin, 'yyyy-MM-dd')}"></span>
+							<span th:if="${tprice.tPrice.begin != null}" th:text="${#calendars.format(tprice.tPrice.begin, 'yyyy-MM-dd')}"></span>
 							<span> ~ </span>
-							<span th:if="${tprice.expire != null}" th:text="${#calendars.format(tprice.expire, 'yyyy-MM-dd')}"></span>
+							<span th:if="${tprice.tPrice.expire != null}" th:text="${#calendars.format(tprice.tPrice.expire, 'yyyy-MM-dd')}"></span>
 						</td>
 
 						<td>
-							[店面：全部]
-							[产品：全部]
+							【店面：全部】
+							【产品：	<span th:text="${tprice.tproduct.name}"></span>】
 						</td>
 
-						<td th:if="${tprice.enabled}"><span class="label label-success">启用</span></td>
-						<td th:unless="${tprice.enabled}"><span class="label label-danger">禁用</span></td>
+						<td th:if="${tprice.tPrice.enabled}"><span class="label label-success">启用</span></td>
+						<td th:unless="${tprice.tPrice.enabled}"><span class="label label-danger">禁用</span></td>
+
 
 						<td>
-							<!--<span th:text="${#numbers.formatDecimal(tprice.CompanyId.Id / 100.0, 1, 'DEFAULT', 2, 'DEFAULT')}"></span>-->
-							<span> || </span>
-							<!--<span th:text="${#numbers.formatDecimal(tprice.discount / 100.0, 1, 'DEFAULT', 2, 'DEFAULT')}"></span>-->
+							<div th:each="tpitem : ${tprice.tprice_item}">
+								<span th:text="${tpitem.minCount}"></span>
+								<span> ~ </span>
+								<span th:text="${tpitem.maxCount}"></span>
+								<span> ￥ </span>
+								<span th:text="${tpitem.price}"></span>
+							</div>
 						</td>
+
 						<td>
 							<a href="#">
 								<i class="fa fa-fw fa-pencil"
-								   th:attr="data-url=@{/event/tprice/show(id=${tprice.id},mode='edit')}"
+								   th:attr="data-url=@{/event/tprice/show(id=${tprice.tPrice.id},mode='edit')}"
 								   onclick="return createOrEditCoupon(event, true)"
 								   title="编辑">
 								</i>
 							</a>
 							<a href="#">
 							<i class="fa fa-fw fa-trash-o"
-							   th:attr="data-url=@{/event/tprice/enable(id=${tprice.id},mode='enabled')}"
+							   th:attr="data-url=@{/event/tprice/enable(id=${tprice.tPrice.id},mode='enabled')}"
 							   onclick="return tpriceEnabled(event, true)"
 							   title="启用/禁用">
 							</i>

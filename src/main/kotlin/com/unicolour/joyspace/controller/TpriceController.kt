@@ -6,21 +6,17 @@ import com.unicolour.joyspace.dao.ProductDao
 import com.unicolour.joyspace.dao.TPriceDao
 import com.unicolour.joyspace.model.*
 import com.unicolour.joyspace.service.*
-//import com.unicolour.joyspace.dao.TPriceItemDao
 import com.unicolour.joyspace.util.Pager
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.*
-import org.springframework.web.multipart.MultipartFile
 import org.springframework.web.servlet.ModelAndView
-import java.security.Timestamp
 import java.text.SimpleDateFormat
 import java.time.LocalDate
 import java.time.ZoneId
 import java.util.*
-import java.util.HashMap
 import java.util.ArrayList
 import javax.servlet.http.HttpServletRequest
 
@@ -33,9 +29,6 @@ class TpriceController {
 
     @Autowired
     lateinit var tPriceDao: TPriceDao
-
-//    @Autowired
-//    lateinit var tPriceItemDao: TPriceItemDao
 
     @Autowired
     lateinit var productDao: ProductDao
@@ -60,18 +53,37 @@ class TpriceController {
             @RequestParam(name = "pageno", required = false, defaultValue = "1") pageno: Int): ModelAndView {
 
         val loginManager = managerService.loginManager
-
         val pageable = PageRequest(pageno - 1, 20, Sort.Direction.DESC, "id")
+
         val tprice_list = if (inputTpriceName == null || inputTpriceName == "")
             tPriceDao.findByCompanyId(loginManager!!.companyId, pageable)
         else
             tPriceDao.findByNameAndCompanyId(inputTpriceName, loginManager!!.companyId, pageable)
 
+        class tprice_items(val tPrice: TPrice,val tproduct: Product, val tprice_item: List<tpriceItem>)
+
+
+        val tprice_lists = tprice_list.map {
+            tprice_items(
+                tPrice = it,
+                    tproduct = productDao.findOne(it.productId),
+                    tprice_item = it.tPriceItems.map { pitem ->
+                tpriceItem(
+                    id = pitem.id,
+                    maxCount = pitem.maxCount,
+                    minCount = pitem.minCount,
+                    price = pitem.price
+
+                    )
+                }
+            )
+        }
+
         val pager = Pager(tprice_list.totalPages, 7, pageno - 1)
 
         modelAndView.model.put("inputTpriceName", inputTpriceName)
         modelAndView.model.put("pager", pager)
-        modelAndView.model.put("tprice_list", tprice_list.content)
+        modelAndView.model.put("tprice_list", tprice_lists)
         modelAndView.model["viewCat"] = "event_mgr"
         modelAndView.model["viewContent"] = "tprice_list"
         modelAndView.viewName = "layout"
@@ -225,6 +237,12 @@ class TpriceController {
             @RequestParam(name = "id", required = true) id: Int): Boolean {
         return tPriceService.tpriceEnabled(id)
     }
+
+
+    class tpriceItem(val id: Int,val maxCount: Int, val minCount: Int, val price: Int)
+
+
+    class productName(val product_name: String)
 
 
 
