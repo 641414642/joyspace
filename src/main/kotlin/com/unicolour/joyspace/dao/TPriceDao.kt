@@ -10,7 +10,7 @@ import org.springframework.data.repository.query.Param
 
 interface TPriceDao : CrudRepository<TPrice, Int> {
 
-    fun findByCompanyIdAndProductIdAndBeginLessThanAndExpireGreaterThanAndEnabled(companyId: Int, productId: Int, begin: Date, expire: Date, enabled: Boolean): List<TPrice>
+    fun findByPositionIdAndProductIdAndBeginLessThanAndExpireGreaterThanAndEnabled(positionId: Int, productId: Int, begin: Date, expire: Date, enabled: Boolean): List<TPrice>
 
     fun findByCompanyId(companyId: Int, pageable: Pageable): Page<TPrice>
 

@@ -16,14 +16,24 @@ class TPrice {
     @NotNull
     var name: String = ""
 
-    //region 店面
-    /** 店面ID */
+    //region 商家
+    /** 商家ID */
     @Column(name = "company_id", insertable = false, updatable = false)
     var companyId: Int? = null
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "company_id")
     var company: Company? = null
+    //endregion
+
+    //region 店面
+    /** 店面ID */
+    @Column(name = "position_id", insertable = false, updatable = false)
+    var positionId: Int? = null
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "position_id")
+    var position: Position? = null
     //endregion
 
     @Column

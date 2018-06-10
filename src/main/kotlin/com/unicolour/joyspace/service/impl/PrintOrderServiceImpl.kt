@@ -763,8 +763,8 @@ open class PrintOrderServiceImpl : PrintOrderService {
     /**
      * 根据梯度规则返回最终价格
      */
-    private fun matchTprice(companyId: Int, productId: Int, copies: Int): Int {
-        val tPrice = tPriceDao.findByCompanyIdAndProductIdAndBeginLessThanAndExpireGreaterThanAndEnabled(companyId, productId, Date(), Date(), true).firstOrNull()
+    private fun matchTprice(positionId: Int, productId: Int, copies: Int): Int {
+        val tPrice = tPriceDao.findByPositionIdAndProductIdAndBeginLessThanAndExpireGreaterThanAndEnabled(positionId, productId, Date(), Date(), true).firstOrNull()
         if (tPrice != null) {
             val tPriceItem = tPrice.tPriceItems.firstOrNull { it.minCount <= copies && it.maxCount >= copies }
             if (tPriceItem != null) return tPriceItem.price
@@ -787,7 +787,7 @@ open class PrintOrderServiceImpl : PrintOrderService {
                 val product = productIdObjMap.computeIfAbsent(printOrderItem.productId, { productId -> productDao.findOne(productId) })
                 product.defaultPrice
             })
-            val tPrice = matchTprice(printStation.companyId,printOrderItem.productId,printOrderItem.copies)
+            val tPrice = matchTprice(printStation.positionId,printOrderItem.productId,printOrderItem.copies)
             if (tPrice!=0) orderItemFee = tPrice
             totalFee += orderItemFee * printOrderItem.copies
         }

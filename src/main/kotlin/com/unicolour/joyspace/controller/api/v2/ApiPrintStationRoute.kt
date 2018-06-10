@@ -57,7 +57,7 @@ class ApiPrintStationRoute {
         val priceMap: Map<Int, Int> = printStationService.getPriceMap(printStation)
         psVo.products = printStationProductDao.findByPrintStationId(printStation.id).map {
             val price = priceMap.getOrDefault(it.productId, it.product.defaultPrice)
-            val tPrice = tPriceDao.findByCompanyIdAndProductIdAndBeginLessThanAndExpireGreaterThanAndEnabled(printStation.companyId, it.productId, Date(), Date(), true).firstOrNull()
+            val tPrice = tPriceDao.findByPositionIdAndProductIdAndBeginLessThanAndExpireGreaterThanAndEnabled(printStation.positionId, it.productId, Date(), Date(), true).firstOrNull()
             val tPriceItemVoList = mutableListOf<TPriceItemVo>()
             tPrice?.tPriceItems?.forEach {
                 tPriceItemVoList.add(TPriceItemVo(it.minCount,it.maxCount,it.price))
@@ -104,7 +104,7 @@ class ApiPrintStationRoute {
                 val priceMap: Map<Int, Int> = printStationService.getPriceMap(nearest)
                 psVo.products = printStationProductDao.findByPrintStationId(nearest.id).map {
                     val price = priceMap.getOrDefault(it.productId, it.product.defaultPrice)
-                    val tPrice = tPriceDao.findByCompanyIdAndProductIdAndBeginLessThanAndExpireGreaterThanAndEnabled(nearest.companyId, it.productId, Date(), Date(), true).firstOrNull()
+                    val tPrice = tPriceDao.findByPositionIdAndProductIdAndBeginLessThanAndExpireGreaterThanAndEnabled(nearest.positionId, it.productId, Date(), Date(), true).firstOrNull()
                     val tPriceItemVoList = mutableListOf<TPriceItemVo>()
                     tPrice?.tPriceItems?.forEach {
                         tPriceItemVoList.add(TPriceItemVo(it.minCount,it.maxCount,it.price))
