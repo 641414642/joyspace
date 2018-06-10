@@ -1,9 +1,7 @@
 package com.unicolour.joyspace.controller
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.unicolour.joyspace.dao.CompanyDao
-import com.unicolour.joyspace.dao.ProductDao
-import com.unicolour.joyspace.dao.TPriceDao
+import com.unicolour.joyspace.dao.*
 import com.unicolour.joyspace.model.*
 import com.unicolour.joyspace.service.*
 import com.unicolour.joyspace.util.Pager
@@ -31,11 +29,16 @@ class TpriceController {
     lateinit var tPriceDao: TPriceDao
 
     @Autowired
+    lateinit var tPriceItemDao: TPriceItemDao
+
+    @Autowired
     lateinit var productDao: ProductDao
 
     @Autowired
     lateinit var managerService: ManagerService
 
+    @Autowired
+    lateinit var positionDao: PositionDao
 
     @Autowired
     lateinit var companyDao: CompanyDao
@@ -53,20 +56,20 @@ class TpriceController {
             @RequestParam(name = "pageno", required = false, defaultValue = "1") pageno: Int): ModelAndView {
 
         val loginManager = managerService.loginManager
-        val pageable = PageRequest(pageno - 1, 20, Sort.Direction.DESC, "id")
-
+        val pageable = PageRequest(pageno - 1, 20, Sort.Direction.ASC, "id")
         val tprice_list = if (inputTpriceName == null || inputTpriceName == "")
-            tPriceDao.findByCompanyId(loginManager!!.companyId, pageable)
+            tPriceDao.findAll(pageable)
         else
-            tPriceDao.findByNameAndCompanyId(inputTpriceName, loginManager!!.companyId, pageable)
+            tPriceDao.findByName(inputTpriceName, pageable)
 
-        class tprice_items(val tPrice: TPrice,val tproduct: Product, val tprice_item: List<tpriceItem>)
+        class tprice_items(val tPrice: TPrice,val tproduct: Product,val tposition: Position, val tprice_item: List<tpriceItem>)
 
 
         val tprice_lists = tprice_list.map {
             tprice_items(
                 tPrice = it,
                     tproduct = productDao.findOne(it.productId),
+                    tposition = positionDao.findOne(it.positionId),
                     tprice_item = it.tPriceItems.map { pitem ->
                 tpriceItem(
                     id = pitem.id,
@@ -101,6 +104,23 @@ class TpriceController {
         if (id > 0) {
 
             tprice = tPriceDao.findOne(id)
+
+            val tpriceItem = tPriceItemDao.findByTPriceId(tprice.id)
+            val list = ArrayList<TPriceItem>()
+            val item = TPriceItem()
+
+            for (nullobj in 0 until 5 - tpriceItem.size){
+
+                item.minCount = 0
+                item.maxCount = 0
+                item.price = 0
+                list.add(item)
+            }
+
+            modelAndView.model["tpitemCount"] =  tpriceItem.size
+            modelAndView.model["nullobj"] = list
+            modelAndView.model["tpitem"] = tpriceItem
+            modelAndView.viewName = "/tprice/edit:: content"
         }
 
         if (tprice == null) {
@@ -110,14 +130,18 @@ class TpriceController {
             val now = LocalDate.now()
             tprice.begin = Date.from(now.atStartOfDay(ZoneId.systemDefault()).toInstant())
             tprice.expire = Date.from(now.plusDays(10).atStartOfDay(ZoneId.systemDefault()).toInstant())
+
+            modelAndView.viewName = "/tprice/create :: content"
         }
 
+        val loginManager = managerService.loginManager
         var product_list = productDao.findAll()
+        val allPositions = positionDao.findByCompanyId(loginManager!!.companyId)
 
-        modelAndView.model["create"] = id <= 0
-        modelAndView.model["tprice"] = tprice
+        modelAndView.model["positions"] = allPositions
         modelAndView.model["product_list"] = product_list
-        modelAndView.viewName = "/tprice/edit :: content"
+        modelAndView.model["tprice"] = tprice
+        modelAndView.model["create"] = id <= 0
 
         return modelAndView
     }
@@ -130,7 +154,7 @@ class TpriceController {
             @RequestParam(name = "begin", required = true) begin: String,
             @RequestParam(name = "expire", required = true) expire: String,
             @RequestParam(name = "product", required = true) product_id: Int,
-            @RequestParam(name = "min", required = true) min1: Int,
+            @RequestParam(name = "min1", required = true) min1: Int,
             @RequestParam(name = "min2", required = true) min2: Int,
             @RequestParam(name = "min3", required = true) min3: Int,
             @RequestParam(name = "min4", required = true) min4: Int,
@@ -144,7 +168,8 @@ class TpriceController {
             @RequestParam(name = "price2", required = true) price2: Int,
             @RequestParam(name = "price3", required = true) price3: Int,
             @RequestParam(name = "price4", required = true) price4: Int,
-            @RequestParam(name = "price5", required = true) price5: Int
+            @RequestParam(name = "price5", required = true) price5: Int,
+            @RequestParam(name = "id", required = true) id: Int
 
     ): Boolean {
 
@@ -162,11 +187,24 @@ class TpriceController {
 
                 return false
             }
+
+            val tpitem_id = request.getParameter("tpitem1")
+
             val item1 = TPriceItem()
             item1.minCount = min1
             item1.maxCount = max1
             item1.price = price1
-            list.add(item1)
+
+
+            if (tpitem_id != null){
+
+                tPriceService.updatetpItem(tpitem_id.toInt(),item1)
+
+            }else{
+
+                list.add(item1)
+            }
+
         }
 
         if ((min2 != 0) and (max2 !=0)) {
@@ -176,11 +214,21 @@ class TpriceController {
                 return false
             }
 
+            val tpitem_id = request.getParameter("tpitem2")
+
             val item2 = TPriceItem()
             item2.minCount = min2
             item2.maxCount = max2
             item2.price = price2
-            list.add(item2)
+
+            if (tpitem_id != null){
+
+                tPriceService.updatetpItem(tpitem_id.toInt(),item2)
+
+            }else{
+
+                list.add(item2)
+            }
         }
 
 
@@ -191,11 +239,22 @@ class TpriceController {
                 return false
             }
 
+            val tpitem_id = request.getParameter("tpitem3")
+
             val item3 = TPriceItem()
             item3.minCount = min3
             item3.maxCount = max3
             item3.price = price3
-            list.add(item3)
+
+            if (tpitem_id != null){
+
+                tPriceService.updatetpItem(tpitem_id.toInt(),item3)
+
+            }else{
+
+                list.add(item3)
+            }
+
         }
 
         if ((min4 != 0) and (max4 !=0)) {
@@ -204,11 +263,22 @@ class TpriceController {
 
                 return false
             }
+
+            val tpitem_id = request.getParameter("tpitem4")
+
             val item4 = TPriceItem()
             item4.minCount = min4
             item4.maxCount = max4
             item4.price = price4
-            list.add(item4)
+
+            if (tpitem_id != null){
+
+                tPriceService.updatetpItem(tpitem_id.toInt(),item4)
+
+            }else{
+
+                list.add(item4)
+            }
         }
 
         if ((min5 != 0) and (max5 !=0)) {
@@ -218,16 +288,37 @@ class TpriceController {
                 return false
             }
 
+            val tpitem_id = request.getParameter("tpitem5")
             val item5 = TPriceItem()
             item5.minCount = min5
             item5.maxCount = max5
             item5.price = price5
-            list.add(item5)
+
+            if (tpitem_id != null){
+
+                tPriceService.updatetpItem(tpitem_id.toInt(),item5)
+
+            }else{
+
+                list.add(item5)
+            }
         }
 
         val df = SimpleDateFormat("yyyy-MM-dd")
 
-        return tPriceService.createtp(name, df.parse(begin), df.parse(expire), product_id, list)
+        if ( id> 0){
+
+            val tprice = tPriceDao.findOne(id)
+            return tPriceService.updatetp(id,name, df.parse(begin), df.parse(expire), product_id, list)
+
+//            val tpriceItem = tPriceItemDao.findByTPriceId(id)
+//            return tPriceService.updatetp(id,name, df.parse(begin), df.parse(expire), product_id, list)
+
+        }else{
+
+            return tPriceService.createtp(name, df.parse(begin), df.parse(expire), product_id, list)
+        }
+
 
     }
 
