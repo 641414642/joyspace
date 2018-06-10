@@ -308,17 +308,12 @@ class TpriceController {
 
         if ( id> 0){
 
-            val tprice = tPriceDao.findOne(id)
             return tPriceService.updatetp(id,name, df.parse(begin), df.parse(expire), product_id, list)
-
-//            val tpriceItem = tPriceItemDao.findByTPriceId(id)
-//            return tPriceService.updatetp(id,name, df.parse(begin), df.parse(expire), product_id, list)
 
         }else{
 
             return tPriceService.createtp(name, df.parse(begin), df.parse(expire), product_id, list)
         }
-
 
     }
 

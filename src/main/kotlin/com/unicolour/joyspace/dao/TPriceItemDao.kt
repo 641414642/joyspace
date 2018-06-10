@@ -12,4 +12,6 @@ interface TPriceItemDao : CrudRepository<TPriceItem, Int> {
     fun findByTPriceId(TPriceId: Int): List<TPriceItem>
 
 
+
+//    fun companyDao.findAll(Sort(Sort.Order(Sort.Direction.ASC, "id")))
 }
