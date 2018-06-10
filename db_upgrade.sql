@@ -97,3 +97,5 @@ ALTER TABLE print_order ADD  COLUMN print_type INTEGER DEFAULT 0  ;
 INSERT INTO product (id, company_id, default_price, name, remark, template_id, sequence, deleted) VALUES (9528, 0, 100, '展会8', '', 1, 9528, false);
 
 alter table template add column deleted boolean default false not null;
+
+alter table printer_type add column default_icc_file_name varchar(100);

@@ -1,8 +1,13 @@
 package com.unicolour.joyspace.dto
 
+import com.fasterxml.jackson.annotation.JsonInclude
+
 class UpdateAndAdSetDTO(
         var version: Int = 0,
-        var adSet: AdSetDTO? = null
+        var adSet: AdSetDTO? = null,
+
+        @get:JsonInclude(JsonInclude.Include.NON_NULL)
+        var defaultIccFileName: String? = null
 )
 
 class AdSetDTO(

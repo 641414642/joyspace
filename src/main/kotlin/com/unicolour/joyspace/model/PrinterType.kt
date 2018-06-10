@@ -33,5 +33,9 @@ class PrinterType {
     @Column
     @NotNull
     var rollPaper: Boolean = false
+
+    /** 此打印机类型的缺省icc文件名 */
+    @Column(length = 100)
+    var defaultIccFileName: String? = null
 }
 
