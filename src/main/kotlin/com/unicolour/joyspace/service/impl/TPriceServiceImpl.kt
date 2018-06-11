@@ -48,7 +48,9 @@ open class TPriceServiceImpl : TPriceService {
         val position = positionDao.findOne(loginManager.companyId)
         val tprice = TPrice()
         val product = productDao.findOne(product_id)
+        val manager = managerDao.findOne(loginManager.managerId)
 
+        tprice.company = manager.company
         tprice.name = name
         tprice.begin = begin
         tprice.position = position

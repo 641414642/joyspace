@@ -69,7 +69,7 @@
 								<span> ~ </span>
 								<span th:text="${tpitem.maxCount}"></span>
 								<span>￥</span>
-								<span th:text="${tpitem.price}"></span>
+								<span th:text="${tpitem.price/100.0}"></span>
 							</div>
 						</td>
 
@@ -82,7 +82,7 @@
 								</i>
 							</a>
 							<a href="#">
-								<i class="fa fa-toggle-on" th:class="${tprice.tPrice.enabled ? 'fa fa-toggle-off' : 'fa fa-toggle-on'}"
+								<i class="fa fa-toggle-on" th:class="${tprice.tPrice.enabled ? 'fa fa-toggle-on' : 'fa fa-toggle-off'}"
 								   th:attr="data-url=@{/event/tprice/enable(id=${tprice.tPrice.id},mode='enabled')}"
 								   onclick="return tpriceEnabled(event)"
 								   title="切换启用状态">

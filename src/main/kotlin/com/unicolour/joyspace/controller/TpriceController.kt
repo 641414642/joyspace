@@ -58,9 +58,9 @@ class TpriceController {
         val loginManager = managerService.loginManager
         val pageable = PageRequest(pageno - 1, 20, Sort.Direction.ASC, "id")
         val tprice_list = if (inputTpriceName == null || inputTpriceName == "")
-            tPriceDao.findAll(pageable)
+            tPriceDao.findByCompanyId(loginManager!!.companyId,pageable)
         else
-            tPriceDao.findByName(inputTpriceName, pageable)
+            tPriceDao.findByNameAndCompanyId(inputTpriceName, loginManager!!.companyId,pageable)
 
         class tprice_items(val tPrice: TPrice,val tproduct: Product,val tposition: Position, val tprice_item: List<tpriceItem>)
 
@@ -135,7 +135,7 @@ class TpriceController {
         }
 
         val loginManager = managerService.loginManager
-        var product_list = productDao.findAll()
+        var product_list = productDao.findByDeleted(false)
         val allPositions = positionDao.findByCompanyId(loginManager!!.companyId)
 
         modelAndView.model["positions"] = allPositions
@@ -164,11 +164,11 @@ class TpriceController {
             @RequestParam(name = "max3", required = true) max3: Int,
             @RequestParam(name = "max4", required = true) max4: Int,
             @RequestParam(name = "max5", required = true) max5: Int,
-            @RequestParam(name = "price1", required = true) price1: Int,
-            @RequestParam(name = "price2", required = true) price2: Int,
-            @RequestParam(name = "price3", required = true) price3: Int,
-            @RequestParam(name = "price4", required = true) price4: Int,
-            @RequestParam(name = "price5", required = true) price5: Int,
+            @RequestParam(name = "price1", required = true) price1: Double,
+            @RequestParam(name = "price2", required = true) price2: Double,
+            @RequestParam(name = "price3", required = true) price3: Double,
+            @RequestParam(name = "price4", required = true) price4: Double,
+            @RequestParam(name = "price5", required = true) price5: Double,
             @RequestParam(name = "id", required = true) id: Int
 
     ): Boolean {
@@ -193,8 +193,7 @@ class TpriceController {
             val item1 = TPriceItem()
             item1.minCount = min1
             item1.maxCount = max1
-            item1.price = price1
-
+            item1.price = (price1 * 100).toInt()
 
             if (tpitem_id != null){
 
@@ -219,7 +218,7 @@ class TpriceController {
             val item2 = TPriceItem()
             item2.minCount = min2
             item2.maxCount = max2
-            item2.price = price2
+            item2.price = (price2 * 100).toInt()
 
             if (tpitem_id != null){
 
@@ -244,7 +243,7 @@ class TpriceController {
             val item3 = TPriceItem()
             item3.minCount = min3
             item3.maxCount = max3
-            item3.price = price3
+            item3.price = (price3 * 100).toInt()
 
             if (tpitem_id != null){
 
@@ -269,7 +268,7 @@ class TpriceController {
             val item4 = TPriceItem()
             item4.minCount = min4
             item4.maxCount = max4
-            item4.price = price4
+            item4.price = (price4 * 100).toInt()
 
             if (tpitem_id != null){
 
@@ -292,7 +291,7 @@ class TpriceController {
             val item5 = TPriceItem()
             item5.minCount = min5
             item5.maxCount = max5
-            item5.price = price5
+            item5.price = (price5 * 100).toInt()
 
             if (tpitem_id != null){
 
