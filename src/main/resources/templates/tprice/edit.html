@@ -92,13 +92,13 @@
 
                             <tr th:each="nullobjItem,status : ${nullobj}">
                                 <td>
-                                    <input type="text" th:name="'min' + ${status.count + tpitemCount}" class="form-control" th:value="${nullobjItem.minCount}"/>
+                                    <input type="text" th:name="'min' + ${status.count + tpitemCount}" class="form-control"/>
                                 </td>
                                 <td>
-                                    <input type="text" th:name="'max' + ${status.count + tpitemCount}" class="form-control" th:value="${nullobjItem.maxCount}"/>
+                                    <input type="text" th:name="'max' + ${status.count + tpitemCount}" class="form-control"/>
                                 </td>
                                 <td>
-                                    <input type="text" th:name="'price' + ${status.count + tpitemCount}" class="form-control" th:value="${nullobjItem.price}"/>
+                                    <input type="text" th:name="'price' + ${status.count + tpitemCount}" class="form-control"/>
                                 </td>
                             </tr>
                         </table>

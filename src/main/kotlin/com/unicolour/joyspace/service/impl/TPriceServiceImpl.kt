@@ -37,7 +37,7 @@ open class TPriceServiceImpl : TPriceService {
 
     @Transactional
     override
-    fun createtp(name: String, begin: Date, expire: Date, product_id: Int,tpriceItem: List<TPriceItem>): Boolean {
+    fun createtp(name: String, begin: Date, expire: Date, product_id: Int,position: Int,tpriceItem: List<TPriceItem>): Boolean {
 
         val loginManager = managerService.loginManager
         if (loginManager == null) {
@@ -45,7 +45,7 @@ open class TPriceServiceImpl : TPriceService {
             return false
         }
 
-        val position = positionDao.findOne(loginManager.companyId)
+        val position = positionDao.findOne(position)
         val tprice = TPrice()
         val product = productDao.findOne(product_id)
         val manager = managerDao.findOne(loginManager.managerId)
@@ -82,7 +82,7 @@ open class TPriceServiceImpl : TPriceService {
 
     @Transactional
     override
-    fun updatetp(id: Int,name: String, begin: Date, expire: Date, product_id: Int,tpriceItem: List<TPriceItem>) : Boolean{
+    fun updatetp(id: Int,name: String, begin: Date, expire: Date, product_id: Int,position: Int,tpriceItem: List<TPriceItem>) : Boolean{
 
         val loginManager = managerService.loginManager
         if (loginManager == null) {
@@ -91,7 +91,7 @@ open class TPriceServiceImpl : TPriceService {
         }
 
         val product = productDao.findOne(product_id)
-        val position = positionDao.findOne(loginManager.companyId)
+        val position = positionDao.findOne(position)
         val tprice = tPriceDao.findOne(id)
 
         tprice.name = name

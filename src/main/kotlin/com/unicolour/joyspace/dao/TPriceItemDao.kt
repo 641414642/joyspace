@@ -7,4 +7,7 @@ interface TPriceItemDao : CrudRepository<TPriceItem, Int> {
 
     fun findByTPriceIdOrderByIdAsc(TPriceId: Int): List<TPriceItem>
 
+    fun deleteById(TPriceItemId: Int)
+
+
 }
