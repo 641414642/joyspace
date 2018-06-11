@@ -73,7 +73,7 @@
                             <option th:each="product : ${product_list}"
                                     th:value="${product.id}"
                                     th:text="${product.name}"
-                                    th:selected="${product.id == tprice.companyId}">
+                                    th:selected="${product.id == tprice.productId}">
                             </option>
                         </select>
                         <span class="help-block"></span>
