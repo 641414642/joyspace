@@ -843,6 +843,84 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </div>
 </div>
 <div class="sect3">
+<h4 id="_领取优惠券_自动发放的">领取优惠券（自动发放的）</h4>
+<div class="ulist">
+<ul>
+<li>
+<p>URL: /v2/user/claimCoupon/auto</p>
+</li>
+<li>
+<p>Method: Get</p>
+</li>
+<li>
+<p>参数:</p>
+</li>
+</ul>
+</div>
+<table class="tableblock frame-all grid-all spread">
+<colgroup>
+<col style="width: 50%;">
+<col style="width: 50%;">
+</colgroup>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">参数名</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">描述</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">sessionId</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">登录返回的sessionId</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">printStationId</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">自助机 id</p></td>
+</tr>
+</tbody>
+</table>
+<div class="ulist">
+<ul>
+<li>
+<p>返回值:</p>
+</li>
+</ul>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>           {
+                "state" : 0,
+                "msg" : null,
+                "result": [
+                    {
+                        "id": 1,                 //优惠券id
+                        "name": "xxxxxxxxxx",    //名称
+                        "code": "xxxxxxx"        //编码
+                        "begin": "yyyy-MM-dd HH",  //生效日期时间，精确到小时
+                        "expire": "yyyy-MM-dd HH", //失效日期时间，精确到小时
+                        "minExpense": 1000,             //使用优惠券所需要的最小金额（分）
+                        "discount": 200,                 //折扣金额（分）
+                        "avaliable": 1,              //1:可用；0：不可用
+                        "maxUsesPerUser": 1, //可使用次数
+                        "positionList":[       //可用的店面名称
+                            "优利炫彩",
+                            "优利炫彩1"
+                        ],
+                        "productTypeList":[     //支持的产品类型名称
+                            "普通照片",
+                            "证件照"
+                        ],
+                        "productList"[         //支持的产品
+                            "5寸照片",
+                            "6寸照片"
+                        ]
+
+                    },
+                    ...
+               ]
+           }</pre>
+</div>
+</div>
+</div>
+<div class="sect3">
 <h4 id="_返回用户优惠券列表">返回用户优惠券列表</h4>
 <div class="ulist">
 <ul>
@@ -894,7 +972,21 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
                         "expire": "yyyy-MM-dd HH", //失效日期时间，精确到小时
                         "minExpense": 1000,             //使用优惠券所需要的最小金额（分）
                         "discount": 200,                 //折扣金额（分）
-                        "isValid": 1              //1:可用；2：不可用
+                        "avaliable": 1,              //1:可用；0：不可用
+                        "maxUsesPerUser": 1, //可使用次数
+                        "positionList":[       //可用的店面名称
+                            "优利炫彩",
+                            "优利炫彩1"
+                        ],
+                        "productTypeList":[     //支持的产品类型名称
+                            "普通照片",
+                            "证件照"
+                        ],
+                        "productList"[         //支持的产品
+                            "5寸照片",
+                            "6寸照片"
+                        ]
+
                     },
                     ...
                ]
@@ -966,7 +1058,21 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
                         "expire": "yyyy-MM-dd HH", //失效日期时间，精确到小时
                         "minExpense": 1000,             //使用优惠券所需要的最小金额（分）
                         "discount": 200,                 //折扣金额（分）
-                        "isValid": 1              //1:可用；2：不可用
+                        "avaliable": 1,              //1:可用；0：不可用
+                        "maxUsesPerUser": 1, //可使用次数
+                        "positionList":[       //可用的店面名称
+                            "优利炫彩",
+                            "优利炫彩1"
+                        ],
+                        "productTypeList":[     //支持的产品类型名称
+                            "普通照片",
+                            "证件照"
+                        ],
+                        "productList"[         //支持的产品
+                            "5寸照片",
+                            "6寸照片"
+                        ]
+
                     },
                     ...
                ]
@@ -1029,6 +1135,21 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
                     "expire": "yyyy-MM-dd HH", //失效日期时间，精确到小时
                     "minExpense": 1000,             //使用优惠券所需要的最小金额（分）
                     "discount": 200,                 //折扣金额（分）
+                    "avaliable": 1,              //1:可用；0：不可用
+                    "maxUsesPerUser": 1, //可使用次数
+                    "positionList":[       //可用的店面名称
+                        "优利炫彩",
+                        "优利炫彩1"
+                    ],
+                    "productTypeList":[     //支持的产品类型名称
+                        "普通照片",
+                        "证件照"
+                    ],
+                    "productList"[         //支持的产品
+                        "5寸照片",
+                        "6寸照片"
+                    ]
+
                 }
            }</pre>
 </div>
@@ -1939,7 +2060,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2018-06-08 23:19:00 +08:00
+Last updated 2018-06-11 18:16:18 +08:00
 </div>
 </div>
 </body>

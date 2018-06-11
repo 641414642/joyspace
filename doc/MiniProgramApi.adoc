@@ -260,6 +260,53 @@
         }
 ----
 
+==== 领取优惠券（自动发放的）
+- URL: /v2/user/claimCoupon/auto
+- Method: Get
+- 参数:
+|==========================================================
+|参数名         |描述
+|sessionId      |登录返回的sessionId
+|printStationId      |自助机 id
+|==========================================================
+
+- 返回值:
+
+----
+           {
+                "state" : 0,
+                "msg" : null,
+                "result": [
+                    {
+                        "id": 1,                 //优惠券id
+                        "name": "xxxxxxxxxx",    //名称
+                        "code": "xxxxxxx"        //编码
+                        "begin": "yyyy-MM-dd HH",  //生效日期时间，精确到小时
+                        "expire": "yyyy-MM-dd HH", //失效日期时间，精确到小时
+                        "minExpense": 1000,             //使用优惠券所需要的最小金额（分）
+                        "discount": 200,                 //折扣金额（分）
+                        "avaliable": 1,              //1:可用；0：不可用
+                        "maxUsesPerUser": 1, //可使用次数
+                        "positionList":[       //可用的店面名称
+                            "优利炫彩",
+                            "优利炫彩1"
+                        ],
+                        "productTypeList":[     //支持的产品类型名称
+                            "普通照片",
+                            "证件照"
+                        ],
+                        "productList"[         //支持的产品
+                            "5寸照片",
+                            "6寸照片"
+                        ]
+
+                    },
+                    ...
+               ]
+           }
+----
+
+
 ==== 返回用户优惠券列表
 - URL: /v2/coupons
 - Method: Get
@@ -284,7 +331,21 @@
                         "expire": "yyyy-MM-dd HH", //失效日期时间，精确到小时
                         "minExpense": 1000,             //使用优惠券所需要的最小金额（分）
                         "discount": 200,                 //折扣金额（分）
-                        "isValid": 1              //1:可用；2：不可用
+                        "avaliable": 1,              //1:可用；0：不可用
+                        "maxUsesPerUser": 1, //可使用次数
+                        "positionList":[       //可用的店面名称
+                            "优利炫彩",
+                            "优利炫彩1"
+                        ],
+                        "productTypeList":[     //支持的产品类型名称
+                            "普通照片",
+                            "证件照"
+                        ],
+                        "productList"[         //支持的产品
+                            "5寸照片",
+                            "6寸照片"
+                        ]
+
                     },
                     ...
                ]
@@ -318,7 +379,21 @@
                         "expire": "yyyy-MM-dd HH", //失效日期时间，精确到小时
                         "minExpense": 1000,             //使用优惠券所需要的最小金额（分）
                         "discount": 200,                 //折扣金额（分）
-                        "isValid": 1              //1:可用；2：不可用
+                        "avaliable": 1,              //1:可用；0：不可用
+                        "maxUsesPerUser": 1, //可使用次数
+                        "positionList":[       //可用的店面名称
+                            "优利炫彩",
+                            "优利炫彩1"
+                        ],
+                        "productTypeList":[     //支持的产品类型名称
+                            "普通照片",
+                            "证件照"
+                        ],
+                        "productList"[         //支持的产品
+                            "5寸照片",
+                            "6寸照片"
+                        ]
+
                     },
                     ...
                ]
@@ -350,6 +425,21 @@
                     "expire": "yyyy-MM-dd HH", //失效日期时间，精确到小时
                     "minExpense": 1000,             //使用优惠券所需要的最小金额（分）
                     "discount": 200,                 //折扣金额（分）
+                    "avaliable": 1,              //1:可用；0：不可用
+                    "maxUsesPerUser": 1, //可使用次数
+                    "positionList":[       //可用的店面名称
+                        "优利炫彩",
+                        "优利炫彩1"
+                    ],
+                    "productTypeList":[     //支持的产品类型名称
+                        "普通照片",
+                        "证件照"
+                    ],
+                    "productList"[         //支持的产品
+                        "5寸照片",
+                        "6寸照片"
+                    ]
+
                 }
            }
 ----
