@@ -56,7 +56,7 @@ class TpriceController {
             @RequestParam(name = "pageno", required = false, defaultValue = "1") pageno: Int): ModelAndView {
 
         val loginManager = managerService.loginManager
-        val pageable = PageRequest(pageno - 1, 20, Sort.Direction.ASC, "id")
+        val pageable = PageRequest(pageno - 1, 20, Sort.Direction.DESC, "id")
         val tprice_list = if (inputTpriceName == null || inputTpriceName == "")
             tPriceDao.findByCompanyId(loginManager!!.companyId,pageable)
         else
@@ -76,7 +76,6 @@ class TpriceController {
                     maxCount = pitem.maxCount,
                     minCount = pitem.minCount,
                     price = pitem.price
-
                     )
                 }
             )
@@ -105,7 +104,7 @@ class TpriceController {
 
             tprice = tPriceDao.findOne(id)
 
-            val tpriceItem = tPriceItemDao.findByTPriceId(tprice.id)
+            val tpriceItem = tPriceItemDao.findByTPriceIdOrderByIdAsc(tprice.id)
             val list = ArrayList<TPriceItem>()
             val item = TPriceItem()
 
