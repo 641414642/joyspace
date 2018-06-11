@@ -64,7 +64,11 @@ data class CouponVo(var id: Int? = null,
                     var expire: Date? = null,
                     var minExpense: Int? = null,
                     var discount: Int? = null,
-                    var available: Int? = null)
+                    var available: Int? = null,
+                    var maxUsesPerUser:Int? = null,
+                    var positionList:List<String>? = null,
+                    var productTypeList:List<String>? = null,
+                    var productList:List<String>? = null)
 
 data class OrderSimpleVo(var orderId: Int? = null,
                          var orderNo: String? = null,

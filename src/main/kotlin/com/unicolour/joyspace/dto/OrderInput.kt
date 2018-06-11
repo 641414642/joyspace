@@ -50,6 +50,11 @@ class CouponInput(
         var couponCode: String = ""
 )
 
+class CouponAutoInput(
+        var sessionId: String = "",
+        var printStationId: Int = 0
+)
+
 class AddressInput(
         var sessionId: String? = null,
         var province: String? = null,

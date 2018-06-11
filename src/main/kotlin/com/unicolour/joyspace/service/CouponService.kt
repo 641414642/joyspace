@@ -121,5 +121,12 @@ interface CouponService {
      */
     fun claimCouponResult(code: String, session: UserLoginSession, user: User?): ClaimCouponResult
 
-    fun summaryCouponIdByOrder(session: UserLoginSession, printStationId: Int, user: User?,fee:Int, invalid: ArrayList<Int>): ArrayList<Int>
+    fun summaryCouponIdByOrder(session: UserLoginSession, printStationId: Int, user: User?, fee: Int, invalid: ArrayList<Int>): ArrayList<Int>
+
+    /**
+     * 返回自动领取的优惠券
+     */
+    fun claimAutoCoupon(session: UserLoginSession, printStationId: Int, user: User?): ArrayList<Int>
+
+
 }
