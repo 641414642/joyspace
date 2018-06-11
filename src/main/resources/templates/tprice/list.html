@@ -55,8 +55,8 @@
 						</td>
 
 						<td>
-							【店面：<span th:text="${tprice.tposition.name}"></span>】
-							【产品：	<span th:text="${tprice.tproduct.name}"></span>】
+							<p th:text="'【店面】' + ${tprice.tposition.name}"></p>
+							<p th:text="'【产品】' + ${tprice.tproduct.name}"></p>
 						</td>
 
 						<td th:if="${tprice.tPrice.enabled}"><span class="label label-success">启用</span></td>
