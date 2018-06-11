@@ -57,6 +57,7 @@ class TPrice {
 
 
     @OneToMany(mappedBy = "tPrice")
+    @OrderBy("id asc")
     lateinit var tPriceItems: List<TPriceItem>
 }
 
