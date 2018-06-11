@@ -31,6 +31,9 @@ open class TPriceServiceImpl : TPriceService {
     @Autowired
     lateinit var objectMapper: ObjectMapper
 
+    @Autowired
+    lateinit var positionDao: PositionDao
+
 
     @Transactional
     override
@@ -42,15 +45,13 @@ open class TPriceServiceImpl : TPriceService {
             return false
         }
 
-        val manager = managerDao.findOne(loginManager.managerId)
+        val position = positionDao.findOne(loginManager.companyId)
         val tprice = TPrice()
-
-
         val product = productDao.findOne(product_id)
 
         tprice.name = name
         tprice.begin = begin
-        tprice.company = manager.company
+        tprice.position = position
         tprice.enabled = true
         tprice.expire = expire
         tprice.product = product
@@ -79,9 +80,45 @@ open class TPriceServiceImpl : TPriceService {
 
     @Transactional
     override
-    fun updatetp(name: String, begin: Date, expire: Date, product_id: Int) {
+    fun updatetp(id: Int,name: String, begin: Date, expire: Date, product_id: Int,tpriceItem: List<TPriceItem>) : Boolean{
 
+        val loginManager = managerService.loginManager
+        if (loginManager == null) {
 
+            return false
+        }
+
+        val product = productDao.findOne(product_id)
+        val position = positionDao.findOne(loginManager.companyId)
+        val tprice = tPriceDao.findOne(id)
+
+        tprice.name = name
+        tprice.begin = begin
+        tprice.position = position
+        tprice.enabled = true
+        tprice.expire = expire
+        tprice.product = product
+
+        tPriceDao.save(tprice)
+
+        for (entry in tpriceItem) {
+
+            val price = entry
+
+            if (price != null) {
+
+                val tpriceItem = TPriceItem()
+
+                tpriceItem.price = entry.price
+                tpriceItem.maxCount = entry.maxCount
+                tpriceItem.minCount = entry.minCount
+                tpriceItem.tPrice = tprice
+
+                tpriceItemDao.save(tpriceItem)
+            }
+        }
+
+        return true
     }
 
 
@@ -108,5 +145,20 @@ open class TPriceServiceImpl : TPriceService {
         return true
     }
 
+
+
+    @Transactional
+    override fun updatetpItem(item_id: Int,item: TPriceItem): Boolean{
+
+        val tpriceItem = tpriceItemDao.findOne(item_id)
+
+        tpriceItem.price = item.price
+        tpriceItem.maxCount = item.maxCount
+        tpriceItem.minCount = item.minCount
+
+        tpriceItemDao.save(tpriceItem)
+
+        return true
+    }
 
 }

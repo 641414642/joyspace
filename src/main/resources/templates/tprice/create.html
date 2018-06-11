@@ -50,7 +50,7 @@
 
                     <div class="form-group">
                         <label for="name" class="control-label">名称:</label>
-                        <input type="text" name="name" class="form-control" id="name" th:value="${tprice.name}" />
+                        <input type="text" name="name" class="form-control" id="name" th:value="${tprice.name}" required="required"/>
                         <span class="help-block"></span>
                     </div>
 
@@ -79,27 +79,40 @@
                         <span class="help-block"></span>
                     </div>
 
-
                     <div class="form-group">
                         <label class="control-label">区间价格表:</label>
                         <table class="table table-bordered" th:classappend="${mode != 'view'} ? 'table-striped' : ''">
-                            <tr th:each="item, status : ${tpitem}">
-                                <input type="hidden" th:name="'tpitem' + ${status.count}" th:value="${item.id}"/>
-                                <td><input type="text" th:name="'min' + ${status.count}" class="form-control" th:value="${item.minCount}" placeholder="最小数，必填"/></td>
-                                <td><input type="text" th:name="'max' + ${status.count}" class="form-control" th:value="${item.maxCount}" placeholder="最大数，必填"/></td>
-                                <td><input type="text" th:name="'price' + ${status.count}" class="form-control" th:value="${item.price}" placeholder="单价(元)，必填"/></td>
+                            <tr>
                             </tr>
 
-                            <tr th:each="nullobjItem,status : ${nullobj}">
-                                <td>
-                                    <input type="text" th:name="'min' + ${status.count + tpitemCount}" class="form-control" th:value="${nullobjItem.minCount}"/>
-                                </td>
-                                <td>
-                                    <input type="text" th:name="'max' + ${status.count + tpitemCount}" class="form-control" th:value="${nullobjItem.maxCount}"/>
-                                </td>
-                                <td>
-                                    <input type="text" th:name="'price' + ${status.count + tpitemCount}" class="form-control" th:value="${nullobjItem.price}"/>
-                                </td>
+                            <tr>
+                            <td><input type="text" name="min1" class="form-control" required="required" placeholder="最小数，必填"/></td>
+                            <td><input type="text" name="max1" class="form-control" required="required" placeholder="最大数，必填"/></td>
+                            <td><input type="text" name="price1" class="form-control" required="required" placeholder="单价(元)，必填"/></td>
+                            </tr>
+
+                            <tr>
+                            <td><input type="text" name="min2" class="form-control" value="0" placeholder="选填"/></td>
+                            <td><input type="text" name="max2" class="form-control" value="0" placeholder="选填"/></td>
+                            <td><input type="text" name="price2" class="form-control" value="0" placeholder="选填"/></td>
+                            </tr>
+
+                            <tr>
+                            <td><input type="text" name="min3" class="form-control" value="0"/></td>
+                            <td><input type="text" name="max3" class="form-control" value="0"/></td>
+                            <td><input type="text" name="price3" class="form-control" value="0"/></td>
+                            </tr>
+
+                            <tr>
+                            <td><input type="text" name="min4" class="form-control" value="0"/></td>
+                            <td><input type="text" name="max4" class="form-control" value="0"/></td>
+                            <td><input type="text" name="price4" class="form-control" value="0"/></td>
+                            </tr>
+
+                            <tr>
+                            <td><input type="text" name="min5" class="form-control" value="0"/></td>
+                            <td><input type="text" name="max5" class="form-control" value="0"/></td>
+                            <td><input type="text" name="price5" class="form-control" value="0"/></td>
                             </tr>
                         </table>
                     </div>

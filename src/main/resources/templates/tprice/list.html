@@ -55,7 +55,7 @@
 						</td>
 
 						<td>
-							【店面：全部】
+							【店面：<span th:text="${tprice.tposition.name}"></span>】
 							【产品：	<span th:text="${tprice.tproduct.name}"></span>】
 						</td>
 
@@ -68,7 +68,7 @@
 								<span th:text="${tpitem.minCount}"></span>
 								<span> ~ </span>
 								<span th:text="${tpitem.maxCount}"></span>
-								<span> ￥ </span>
+								<span>￥</span>
 								<span th:text="${tpitem.price}"></span>
 							</div>
 						</td>
@@ -82,11 +82,11 @@
 								</i>
 							</a>
 							<a href="#">
-							<i class="fa fa-fw fa-trash-o"
-							   th:attr="data-url=@{/event/tprice/enable(id=${tprice.tPrice.id},mode='enabled')}"
-							   onclick="return tpriceEnabled(event, true)"
-							   title="启用/禁用">
-							</i>
+								<i class="fa fa-toggle-on" th:class="${tprice.tPrice.enabled ? 'fa fa-toggle-off' : 'fa fa-toggle-on'}"
+								   th:attr="data-url=@{/event/tprice/enable(id=${tprice.tPrice.id},mode='enabled')}"
+								   onclick="return tpriceEnabled(event)"
+								   title="切换启用状态">
+								</i>
 							</a>
 						</td>
 					</tr>
