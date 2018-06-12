@@ -73,7 +73,7 @@
                             <option th:each="product : ${product_list}"
                                     th:value="${product.id}"
                                     th:text="${product.name}"
-                                    th:selected="${product.id == tprice.companyId}">
+                                    th:selected="${product.id == tprice.productId}">
                             </option>
                         </select>
                         <span class="help-block"></span>
@@ -92,13 +92,13 @@
 
                             <tr th:each="nullobjItem,status : ${nullobj}">
                                 <td>
-                                    <input type="text" th:name="'min' + ${status.count + tpitemCount}" class="form-control" th:value="${nullobjItem.minCount}"/>
+                                    <input type="text" th:name="'min' + ${status.count + tpitemCount}" class="form-control"/>
                                 </td>
                                 <td>
-                                    <input type="text" th:name="'max' + ${status.count + tpitemCount}" class="form-control" th:value="${nullobjItem.maxCount}"/>
+                                    <input type="text" th:name="'max' + ${status.count + tpitemCount}" class="form-control"/>
                                 </td>
                                 <td>
-                                    <input type="text" th:name="'price' + ${status.count + tpitemCount}" class="form-control" th:value="${nullobjItem.price}"/>
+                                    <input type="text" th:name="'price' + ${status.count + tpitemCount}" class="form-control"/>
                                 </td>
                             </tr>
                         </table>

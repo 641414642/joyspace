@@ -373,6 +373,7 @@ open class PrintStationServiceImpl : PrintStationService {
 
         var version = -1
         var adSet: AdSet? = null
+        var newIccFileName:String? = null
 
         val loginSession = getPrintStationLoginSession(sessionId)
         if (loginSession != null) {
@@ -385,6 +386,10 @@ open class PrintStationServiceImpl : PrintStationService {
             if (currentAdSetTime != null && ad != null &&
                     (ad.id != currentAdSetId || ad.updateTime.timeInMillis > currentAdSetTime.time)) {
                 adSet = ad
+            }
+
+            if (currentVersion > 108) {
+                newIccFileName = printerTypeDao.findOne(printStation.printerType)?.defaultIccFileName
             }
         }
 
@@ -401,7 +406,8 @@ open class PrintStationServiceImpl : PrintStationService {
 
         return UpdateAndAdSetDTO(
                 version = version,
-                adSet = adSetService.adSetToDTO(adSet)
+                adSet = adSetService.adSetToDTO(adSet),
+                defaultIccFileName = newIccFileName
         )
     }
 

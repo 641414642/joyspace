@@ -56,7 +56,7 @@ class TpriceController {
             @RequestParam(name = "pageno", required = false, defaultValue = "1") pageno: Int): ModelAndView {
 
         val loginManager = managerService.loginManager
-        val pageable = PageRequest(pageno - 1, 20, Sort.Direction.DESC, "id")
+        val pageable = PageRequest(pageno - 1, 20)
         val tprice_list = if (inputTpriceName == null || inputTpriceName == "")
             tPriceDao.findByCompanyId(loginManager!!.companyId,pageable)
         else
@@ -154,21 +154,10 @@ class TpriceController {
             @RequestParam(name = "expire", required = true) expire: String,
             @RequestParam(name = "product", required = true) product_id: Int,
             @RequestParam(name = "min1", required = true) min1: Int,
-            @RequestParam(name = "min2", required = true) min2: Int,
-            @RequestParam(name = "min3", required = true) min3: Int,
-            @RequestParam(name = "min4", required = true) min4: Int,
-            @RequestParam(name = "min5", required = true) min5: Int,
             @RequestParam(name = "max1", required = true) max1: Int,
-            @RequestParam(name = "max2", required = true) max2: Int,
-            @RequestParam(name = "max3", required = true) max3: Int,
-            @RequestParam(name = "max4", required = true) max4: Int,
-            @RequestParam(name = "max5", required = true) max5: Int,
             @RequestParam(name = "price1", required = true) price1: Double,
-            @RequestParam(name = "price2", required = true) price2: Double,
-            @RequestParam(name = "price3", required = true) price3: Double,
-            @RequestParam(name = "price4", required = true) price4: Double,
-            @RequestParam(name = "price5", required = true) price5: Double,
-            @RequestParam(name = "id", required = true) id: Int
+            @RequestParam(name = "id", required = true) id: Int,
+            @RequestParam(name = "position", required = true) position: Int
 
     ): Boolean {
 
@@ -176,7 +165,6 @@ class TpriceController {
 
             return false
         }
-
 
         val list = ArrayList<TPriceItem>()
 
@@ -202,115 +190,167 @@ class TpriceController {
 
                 list.add(item1)
             }
-
         }
 
-        if ((min2 != 0) and (max2 !=0)) {
+        val min2 = request.getParameter("min2")
+        val max2 = request.getParameter("max2")
+        val price2 = request.getParameter("price2")
+        val tpitem_id2 = request.getParameter("tpitem2")
 
-            if ( min2 <= max1){
+        val min3 = request.getParameter("min3")
+        val max3 = request.getParameter("max3")
+        val price3 = request.getParameter("price3")
+        val tpitem_id3 = request.getParameter("tpitem3")
 
-                return false
-            }
+        val min4 = request.getParameter("min4")
+        val max4 = request.getParameter("max4")
+        val price4 = request.getParameter("price4")
+        val tpitem_id4 = request.getParameter("tpitem4")
 
-            val tpitem_id = request.getParameter("tpitem2")
+        val min5 = request.getParameter("min5")
+        val max5 = request.getParameter("max5")
+        val price5 = request.getParameter("price5")
+        val tpitem_id5 = request.getParameter("tpitem5")
 
-            val item2 = TPriceItem()
-            item2.minCount = min2
-            item2.maxCount = max2
-            item2.price = (price2 * 100).toInt()
+        if (tpitem_id2.isNullOrEmpty()){
 
-            if (tpitem_id != null){
+            if (!price2.isNullOrEmpty() and !min2.isNullOrEmpty() and !max2.isNullOrEmpty()) {
 
-                tPriceService.updatetpItem(tpitem_id.toInt(),item2)
+                if ( min2.toInt() <= max1){
 
-            }else{
+                    return false
+                }
 
+                val item2 = TPriceItem()
+                item2.minCount = min2.toInt()
+                item2.maxCount = max2.toInt()
+                item2.price = (price2.toDouble() * 100).toInt()
                 list.add(item2)
             }
-        }
 
+        }else{
 
-        if ((min3 != 0) and (max3 !=0)) {
+            if (price2.isNullOrEmpty() and min2.isNullOrEmpty() and max2.isNullOrEmpty()) {
 
-            if ( min3 <= max2){
-
-                return false
-            }
-
-            val tpitem_id = request.getParameter("tpitem3")
-
-            val item3 = TPriceItem()
-            item3.minCount = min3
-            item3.maxCount = max3
-            item3.price = (price3 * 100).toInt()
-
-            if (tpitem_id != null){
-
-                tPriceService.updatetpItem(tpitem_id.toInt(),item3)
+                tPriceItemDao.delete(tpitem_id2.toInt())
 
             }else{
 
+                val item2 = TPriceItem()
+                item2.minCount = min2.toInt()
+                item2.maxCount = max2.toInt()
+                item2.price = (price2.toDouble() * 100).toInt()
+                tPriceService.updatetpItem(tpitem_id2.toInt(),item2)
+            }
+        }
+
+        if (tpitem_id3.isNullOrEmpty()){
+
+            if (!price3.isNullOrEmpty() and !min3.isNullOrEmpty() and !max3.isNullOrEmpty()) {
+
+                if ( min3.toInt() >= max3.toInt()){
+
+                    return false
+                }
+
+                val item3 = TPriceItem()
+                item3.minCount = min3.toInt()
+                item3.maxCount = max3.toInt()
+                item3.price = (price3.toDouble() * 100).toInt()
                 list.add(item3)
             }
 
-        }
+        }else{
 
-        if ((min4 != 0) and (max4 !=0)) {
+            if (price3.isNullOrEmpty() and min3.isNullOrEmpty() and max3.isNullOrEmpty()) {
 
-            if ( min4 <= max3){
-
-                return false
-            }
-
-            val tpitem_id = request.getParameter("tpitem4")
-
-            val item4 = TPriceItem()
-            item4.minCount = min4
-            item4.maxCount = max4
-            item4.price = (price4 * 100).toInt()
-
-            if (tpitem_id != null){
-
-                tPriceService.updatetpItem(tpitem_id.toInt(),item4)
+                tPriceItemDao.delete(tpitem_id3.toInt())
 
             }else{
 
+                val item3 = TPriceItem()
+                item3.minCount = min3.toInt()
+                item3.maxCount = max3.toInt()
+                item3.price = (price3.toDouble() * 100).toInt()
+                tPriceService.updatetpItem(tpitem_id3.toInt(),item3)
+            }
+        }
+
+        if (tpitem_id4.isNullOrEmpty()){
+
+            if (!price4.isNullOrEmpty() and !min4.isNullOrEmpty() and !max4.isNullOrEmpty()) {
+
+                if ( min4.toInt() > max4.toInt()){
+
+                    return false
+                }
+
+                val item4 = TPriceItem()
+                item4.minCount = min4.toInt()
+                item4.maxCount = max4.toInt()
+                item4.price = (price4.toDouble() * 100).toInt()
                 list.add(item4)
             }
-        }
 
-        if ((min5 != 0) and (max5 !=0)) {
+        }else{
 
-            if ( min5 <= max4){
+            if (price4.isNullOrEmpty() and min4.isNullOrEmpty() and max4.isNullOrEmpty()) {
 
-                return false
-            }
-
-            val tpitem_id = request.getParameter("tpitem5")
-            val item5 = TPriceItem()
-            item5.minCount = min5
-            item5.maxCount = max5
-            item5.price = (price5 * 100).toInt()
-
-            if (tpitem_id != null){
-
-                tPriceService.updatetpItem(tpitem_id.toInt(),item5)
+                tPriceItemDao.delete(tpitem_id4.toInt())
 
             }else{
 
-                list.add(item5)
+                val item4 = TPriceItem()
+                item4.minCount = min4.toInt()
+                item4.maxCount = max4.toInt()
+                item4.price = (price4.toDouble() * 100).toInt()
+                tPriceService.updatetpItem(tpitem_id4.toInt(),item4)
             }
         }
+
+
+        if (tpitem_id5.isNullOrEmpty()){
+
+            if (!price5.isNullOrEmpty() and !min5.isNullOrEmpty() and !max5.isNullOrEmpty()) {
+
+                if ( min5.toInt() >= max5.toInt()){
+
+                    return false
+                }
+
+                val item5 = TPriceItem()
+                item5.minCount = min5.toInt()
+                item5.maxCount = max5.toInt()
+                item5.price = (price5.toDouble() * 100).toInt()
+                list.add(item5)
+            }
+
+        }else{
+
+            if (price5.isNullOrEmpty() and min5.isNullOrEmpty() and max5.isNullOrEmpty()) {
+
+                tPriceItemDao.delete(tpitem_id5.toInt())
+
+            }else{
+
+                val item5 = TPriceItem()
+                item5.minCount = min5.toInt()
+                item5.maxCount = max5.toInt()
+                item5.price = (price5.toDouble() * 100).toInt()
+                tPriceService.updatetpItem(tpitem_id5.toInt(),item5)
+            }
+        }
+
 
         val df = SimpleDateFormat("yyyy-MM-dd")
 
         if ( id> 0){
 
-            return tPriceService.updatetp(id,name, df.parse(begin), df.parse(expire), product_id, list)
+            return tPriceService.updatetp(id,name, df.parse(begin), df.parse(expire), product_id, position,list)
 
         }else{
 
-            return tPriceService.createtp(name, df.parse(begin), df.parse(expire), product_id, list)
+            return tPriceService.createtp(name, df.parse(begin), df.parse(expire), product_id,position, list)
         }
 
     }

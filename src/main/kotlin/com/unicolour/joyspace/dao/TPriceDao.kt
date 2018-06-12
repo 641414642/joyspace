@@ -17,12 +17,11 @@ interface TPriceDao : PagingAndSortingRepository<TPrice, Int> {
     fun findByName(@Param("name") name: String, pageable: Pageable): Page<TPrice>
 
 
-    @Query("SELECT t FROM TPrice t WHERE t.companyId=:companyId)")
+    @Query("SELECT t FROM TPrice t WHERE t.companyId=:companyId ORDER BY id Desc")
     fun findByCompanyId(@Param("companyId") companyId: Int ,pageable: Pageable): Page<TPrice>
 
 
-
-    @Query("SELECT t FROM TPrice t WHERE t.companyId=:companyId and LOWER(t.name) LIKE LOWER(CONCAT('%', :name, '%'))")
+    @Query("SELECT t FROM TPrice t WHERE t.companyId=:companyId and LOWER(t.name) LIKE LOWER(CONCAT('%', :name, '%')) ORDER BY id Desc")
     fun findByNameAndCompanyId(@Param("name") name: String, @Param("companyId") companyId: Int ,pageable: Pageable): Page<TPrice>
 
 
