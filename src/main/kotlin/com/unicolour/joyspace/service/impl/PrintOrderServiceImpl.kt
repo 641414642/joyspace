@@ -779,15 +779,20 @@ open class PrintOrderServiceImpl : PrintOrderService {
         val priceMap = printStationService.getPriceMap(printStation)
 
         val productIdObjMap: MutableMap<Int, Product> = HashMap()
+        val productIdCopiesMap: MutableMap<Int, Int> = HashMap()
         var totalFee = 0
         var discount = 0
+
+        orderInput.orderItems.forEach { productIdCopiesMap.merge(it.productId, it.copies, { old, value -> old + value }) }
+
 
         for (printOrderItem in orderInput.orderItems) {
             var orderItemFee:Int = priceMap.getOrElse(printOrderItem.productId, {
                 val product = productIdObjMap.computeIfAbsent(printOrderItem.productId, { productId -> productDao.findOne(productId) })
                 product.defaultPrice
             })
-            val tPrice = matchTprice(printStation.positionId,printOrderItem.productId,printOrderItem.copies)
+            val tPrice = matchTprice(printStation.positionId, printOrderItem.productId, productIdCopiesMap[printOrderItem.productId]
+                    ?: printOrderItem.copies)
             if (tPrice!=0) orderItemFee = tPrice
             totalFee += orderItemFee * printOrderItem.copies
         }
