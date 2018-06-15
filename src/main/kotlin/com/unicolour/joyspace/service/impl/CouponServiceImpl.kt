@@ -668,7 +668,30 @@ open class CouponServiceImpl : CouponService {
         if (sessionId.isEmpty()) return false
         val session = userLoginSessionDao.findOne(sessionId) ?: return false
         val user = userDao.findOne(session.userId) ?: return false
-        val userCoupons = userCouponDao.findByUserId(user.id)
+        var userCoupons = userCouponDao.findByUserId(user.id)
+
+
+
+        userCoupons = userCoupons.filter {
+            val coupon = couponDao.findOne(it.couponId)
+            val context = CouponValidateContext(
+                    coupon = coupon,
+                    userCoupon = it)
+
+            val checkResult =
+                    if (coupon == null) {
+                        COUPON_NOT_EXIST
+                    } else {
+                        validateCoupon(context,
+                                this::validateCouponEnabled,
+                                this::validateCouponByTime,
+                                this::validateCouponByMaxUses,
+                                this::validateCouponByMaxUsesPerUser)
+                    }
+            checkResult == VALID
+        }
+
+
         userCoupons.forEach {
             val coupon = couponDao.findOne(it.couponId)
             val result =  coupon.constrains.any { it.constrainsType == CouponConstrainsType.PRODUCT.value && it.value == productId }
