@@ -671,7 +671,8 @@ open class CouponServiceImpl : CouponService {
         val userCoupons = userCouponDao.findByUserId(user.id)
         userCoupons.forEach {
             val coupon = couponDao.findOne(it.couponId)
-            return coupon.constrains.any { it.constrainsType == CouponConstrainsType.PRODUCT.value && it.value == productId }
+            val result =  coupon.constrains.any { it.constrainsType == CouponConstrainsType.PRODUCT.value && it.value == productId }
+            if (result) return true
         }
         return false
     }
