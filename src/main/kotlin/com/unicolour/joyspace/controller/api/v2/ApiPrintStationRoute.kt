@@ -9,6 +9,7 @@ import com.unicolour.joyspace.dto.PrintStationVo
 import com.unicolour.joyspace.dto.ResultCode
 import com.unicolour.joyspace.dto.TPriceItemVo
 import com.unicolour.joyspace.dto.common.RestResponse
+import com.unicolour.joyspace.service.CouponService
 import com.unicolour.joyspace.service.PositionService
 import com.unicolour.joyspace.service.PrintStationService
 import org.slf4j.LoggerFactory
@@ -33,13 +34,16 @@ class ApiPrintStationRoute {
     private lateinit var productDao:ProductDao
     @Autowired
     private lateinit var tPriceDao: TPriceDao
+    @Autowired
+    private lateinit var couponService: CouponService
 
 
     /**
      * 根据二维码查找自助机
      */
     @GetMapping(value = "/v2/printStation/findByQrCode")
-    fun getPrintStationByQrCode(@RequestParam("qrCode") qrcode: String): RestResponse {
+    fun getPrintStationByQrCode(@RequestParam("qrCode") qrcode: String,
+                                @RequestParam("sessionId", required = false) sessionId: String?): RestResponse {
         val printStation = printStationDao.findByWxQrCode(qrcode)
                 ?: return RestResponse.error(ResultCode.PRINT_STATION_NOT_FOUND)
         val psVo = PrintStationVo()
@@ -62,7 +66,8 @@ class ApiPrintStationRoute {
             tPrice?.tPriceItems?.forEach {
                 tPriceItemVoList.add(TPriceItemVo(it.minCount,it.maxCount,it.price))
             }
-            PrintStationProduct(it.productId, it.product.name, it.product.template.type.toString(), price,tPriceItemVoList)
+            val couponSign = couponService.beCouponProduct(sessionId ?: "", it.productId)
+            PrintStationProduct(it.productId, it.product.name, it.product.template.type.toString(), price, tPriceItemVoList, if (couponSign) 1 else 0)
         }.toMutableList()
         val tProduct = productDao.findOne(9528)
         val tPrice = priceMap.getOrDefault(tProduct.id,tProduct.defaultPrice)
@@ -76,7 +81,8 @@ class ApiPrintStationRoute {
      */
     @GetMapping(value = "/v2/printStation/nearest")
     fun getNearest(@RequestParam("longitude") longitude: Double,
-                   @RequestParam("latitude") latitude: Double): RestResponse {
+                   @RequestParam("latitude") latitude: Double,
+                   @RequestParam("sessionId", required = false) sessionId: String?): RestResponse {
 
 
         val addressComponent = positionService.getAddressComponent(longitude, latitude)
@@ -109,7 +115,8 @@ class ApiPrintStationRoute {
                     tPrice?.tPriceItems?.forEach {
                         tPriceItemVoList.add(TPriceItemVo(it.minCount,it.maxCount,it.price))
                     }
-                    PrintStationProduct(it.productId, it.product.name, it.product.template.type.toString(), price,tPriceItemVoList)
+                    val couponSign = couponService.beCouponProduct(sessionId ?: "", it.productId)
+                    PrintStationProduct(it.productId, it.product.name, it.product.template.type.toString(), price, tPriceItemVoList, if (couponSign) 1 else 0)
                 }.toMutableList()
                 val tProduct = productDao.findOne(9528)
                 val tPrice = priceMap.getOrDefault(tProduct.id,tProduct.defaultPrice)

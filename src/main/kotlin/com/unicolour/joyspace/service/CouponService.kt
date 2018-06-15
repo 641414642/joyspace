@@ -128,5 +128,10 @@ interface CouponService {
      */
     fun claimAutoCoupon(session: UserLoginSession, printStationId: Int, user: User?): ArrayList<Int>
 
+    /**
+     * 返回该产品是否有优惠
+     */
+    fun beCouponProduct(sessionId: String, productId: Int): Boolean
+
 
 }

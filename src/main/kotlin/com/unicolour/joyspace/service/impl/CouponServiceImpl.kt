@@ -663,4 +663,16 @@ open class CouponServiceImpl : CouponService {
             return true
         }
     }
+
+    override fun beCouponProduct(sessionId: String, productId: Int): Boolean {
+        if (sessionId.isEmpty()) return false
+        val session = userLoginSessionDao.findOne(sessionId) ?: return false
+        val user = userDao.findOne(session.userId) ?: return false
+        val userCoupons = userCouponDao.findByUserId(user.id)
+        userCoupons.forEach {
+            val coupon = couponDao.findOne(it.couponId)
+            return coupon.constrains.any { it.constrainsType == CouponConstrainsType.PRODUCT.value && it.value == productId }
+        }
+        return false
+    }
 }
