@@ -22,6 +22,8 @@ enum class CouponValidateResult(val desc:String) {
 
     NOT_USABLE_IN_THIS_PRINT_STATION("不能在此自助机使用"),
 
+    NOT_USABLE_IN_THIS_PRODUCT("不能在该产品使用"),
+
     DISABLED("已禁用")
 }
 
@@ -33,7 +35,8 @@ class CouponValidateContext(
         val printStationId: Int = 0,
         val positionId: Int = 0,
         val companyId: Int = 0,
-        val claimMethod: CouponClaimMethod = CouponClaimMethod.SCAN_PRINT_STATION_CODE
+        val claimMethod: CouponClaimMethod = CouponClaimMethod.SCAN_PRINT_STATION_CODE,
+        val productId: Int = 0
 )
 
 interface CouponService {
@@ -88,6 +91,8 @@ interface CouponService {
      * @return
      */
     fun validateCouponByPrintStation(context: CouponValidateContext): CouponValidateResult
+
+    fun validateCouponByProduct(context: CouponValidateContext):CouponValidateResult
 
     fun validateCoupon(context: CouponValidateContext,
                        vararg validateFuns: (CouponValidateContext) -> CouponValidateResult): CouponValidateResult

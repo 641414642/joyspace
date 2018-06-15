@@ -524,6 +524,16 @@ open class CouponServiceImpl : CouponService {
         }
     }
 
+    override fun validateCouponByProduct(context: CouponValidateContext): CouponValidateResult {
+        val coupon = context.coupon
+        val result = coupon.constrains.any { it.constrainsType == CouponConstrainsType.PRODUCT.value && it.value == context.productId }
+        return if (result) {
+            VALID
+        } else {
+            NOT_USABLE_IN_THIS_PRODUCT
+        }
+    }
+
     @Transactional
     override fun createCoupon(name: String, code: String, enabled: Boolean, couponClaimMethod: CouponClaimMethod, maxUses: Int,
                               maxUsesPerUser: Int, minExpense: Int, discount: Int, begin: Date, expire: Date, userRegDays: Int,
@@ -668,15 +678,16 @@ open class CouponServiceImpl : CouponService {
         if (sessionId.isEmpty()) return false
         val session = userLoginSessionDao.findOne(sessionId) ?: return false
         val user = userDao.findOne(session.userId) ?: return false
-        var userCoupons = userCouponDao.findByUserId(user.id)
+        val userCoupons = userCouponDao.findByUserId(user.id)
 
 
 
-        userCoupons = userCoupons.filter {
+        userCoupons.forEach {
             val coupon = couponDao.findOne(it.couponId)
             val context = CouponValidateContext(
                     coupon = coupon,
-                    userCoupon = it)
+                    userCoupon = it,
+                    productId = productId)
 
             val checkResult =
                     if (coupon == null) {
@@ -686,16 +697,10 @@ open class CouponServiceImpl : CouponService {
                                 this::validateCouponEnabled,
                                 this::validateCouponByTime,
                                 this::validateCouponByMaxUses,
-                                this::validateCouponByMaxUsesPerUser)
+                                this::validateCouponByMaxUsesPerUser,
+                                this::validateCouponByProduct)
                     }
-            checkResult == VALID
-        }
-
-
-        userCoupons.forEach {
-            val coupon = couponDao.findOne(it.couponId)
-            val result =  coupon.constrains.any { it.constrainsType == CouponConstrainsType.PRODUCT.value && it.value == productId }
-            if (result) return true
+            if (checkResult == VALID) return true
         }
         return false
     }
