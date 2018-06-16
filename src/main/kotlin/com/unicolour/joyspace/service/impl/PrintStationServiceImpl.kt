@@ -21,6 +21,7 @@ import org.springframework.transaction.support.TransactionTemplate
 import java.awt.Color
 import java.awt.Font
 import java.awt.RenderingHints
+import java.awt.image.BufferedImage
 import java.io.File
 import java.security.KeyFactory
 import java.security.PublicKey
@@ -962,31 +963,37 @@ open class PrintStationServiceImpl : PrintStationService {
         return pTypeRecord
     }
 
-    override fun getPrintStationQrCodeUrl(printStationId: Int): String {
-        val psQrCodeImgFile = File(assetsDir, "printStation/qrCode/$printStationId.png")
-        if (!psQrCodeImgFile.exists()) {
-            psQrCodeImgFile.parentFile.mkdirs()
-            createPrintStationQrCodeImageFile(printStationId, psQrCodeImgFile)
+    override fun getPrintStationQrCodeUrl(printStationId: Int, noBackground: Boolean): String {
+        val qrCodeImgFileName = if (noBackground) {
+            "${printStationId}_nobg.png"
+        } else {
+            "$printStationId.png"
         }
 
-        return "$baseUrl/assets/printStation/qrCode/$printStationId.png"
+        val psQrCodeImgFile = File(assetsDir, "printStation/qrCode/$qrCodeImgFileName")
+
+        if (!psQrCodeImgFile.exists()) {
+            psQrCodeImgFile.parentFile.mkdirs()
+            createPrintStationQrCodeImageFile(printStationId, noBackground, psQrCodeImgFile)
+        }
+
+        return "$baseUrl/assets/printStation/qrCode/$qrCodeImgFileName"
     }
 
-    private fun createPrintStationQrCodeImageFile(printStationId: Int, psQrCodeImgFile: File) {
+    private fun createPrintStationQrCodeImageFile(printStationId: Int, noBackground: Boolean, psQrCodeImgFile: File) {
         val psUrl = getPrintStationUrl(printStationId)
 
-        val qrCodeAreaX = 195
-        val qrCodeAreaY = 368
+        val qrCodeAreaX = if (noBackground) 0 else 195
+        val qrCodeAreaY = if (noBackground) 0 else 368
         val qrCodeAreaSize = 492
 
-        val labelFontSize = 48
-        val labelAreaX = 473
-        val labelAreaY = 1037
-        val labelAreaW = 263
-        val labelAreaH = 71
+        val bgImg =
+                if (noBackground) {
+                    BufferedImage(qrCodeAreaSize, qrCodeAreaSize, BufferedImage.TYPE_INT_RGB)
+                } else {
+                    ImageIO.read(PrintStationServiceImpl::class.java.getResourceAsStream("/static/img/print_station_qr_code_bg.png"))
+                }
 
-
-        val bgImg = ImageIO.read(PrintStationServiceImpl::class.java.getResourceAsStream("/static/img/print_station_qr_code_bg.png"))
         val graphics = bgImg.createGraphics()
 
         val hintMap = EnumMap<EncodeHintType, Any>(EncodeHintType::class.java)
@@ -999,6 +1006,11 @@ open class PrintStationServiceImpl : PrintStationService {
         val matrixWidth = byteMatrix.width
         val matrixHeight = byteMatrix.height
 
+        if (noBackground) {
+            graphics.color = Color.WHITE
+            graphics.fillRect(0, 0, qrCodeAreaSize, qrCodeAreaSize)
+        }
+
         graphics.color = Color.BLACK
         for (x in 0 until matrixWidth) {
             for (y in 0 until matrixHeight) {
@@ -1008,16 +1020,24 @@ open class PrintStationServiceImpl : PrintStationService {
             }
         }
 
-        graphics.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON)
-        graphics.font = Font(Font.SANS_SERIF, Font.BOLD, labelFontSize)
-        val labelFontMetrics = graphics.fontMetrics
-        val labelHei = labelFontMetrics.height
-        val labelWid = labelFontMetrics.stringWidth(printStationId.toString())
+        if (!noBackground) {
+            val labelFontSize = 48
+            val labelAreaX = 473
+            val labelAreaY = 1037
+            val labelAreaW = 263
+            val labelAreaH = 71
 
-        graphics.drawString(printStationId.toString(),
-                labelAreaX + (labelAreaW - labelWid) / 2,
-                labelAreaY + (labelAreaH - labelHei) / 2 + labelFontMetrics.getAscent())
-        graphics.dispose()
+            graphics.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON)
+            graphics.font = Font(Font.SANS_SERIF, Font.BOLD, labelFontSize)
+            val labelFontMetrics = graphics.fontMetrics
+            val labelHei = labelFontMetrics.height
+            val labelWid = labelFontMetrics.stringWidth(printStationId.toString())
+
+            graphics.drawString(printStationId.toString(),
+                    labelAreaX + (labelAreaW - labelWid) / 2,
+                    labelAreaY + (labelAreaH - labelHei) / 2 + labelFontMetrics.getAscent())
+            graphics.dispose()
+        }
 
         ImageIO.write(bgImg, "png", psQrCodeImgFile)
     }
