@@ -341,8 +341,12 @@ class PrintStationController {
 
 
     @GetMapping("/printStation/qrCode/{id}")
-    fun printStationQrCode(@PathVariable("id") id: Int, attributes: RedirectAttributes): RedirectView {
-        val qrCodeImgUrl = printStationService.getPrintStationQrCodeUrl(id)
+    fun printStationQrCode(
+            @PathVariable("id") id: Int,
+            @RequestParam("noBackground", required = false, defaultValue = "false") noBackground: Boolean,
+            attributes: RedirectAttributes
+    ): RedirectView {
+        val qrCodeImgUrl = printStationService.getPrintStationQrCodeUrl(id, noBackground)
         attributes.addFlashAttribute("flashAttribute", "redirectWithRedirectView")
         return RedirectView(qrCodeImgUrl)
     }
