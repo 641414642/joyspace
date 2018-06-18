@@ -11,4 +11,6 @@ interface PrintOrderImageDao : CrudRepository<PrintOrderImage, Int> {
 
 interface PrintOrderProductImageDao : CrudRepository<PrintOrderProductImage, Int>{
     fun findByProductIdAndOrderId(productId: Int, orderId: Int): PrintOrderProductImage?
+
+    fun findFirstByProductIdAndOrderIdOrderByIdDesc(productId: Int,orderId: Int):PrintOrderProductImage?
 }

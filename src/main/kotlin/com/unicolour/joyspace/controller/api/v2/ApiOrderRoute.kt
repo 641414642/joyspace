@@ -188,7 +188,7 @@ class ApiOrderRoute {
 //                    .map { "/assets/product/images/${it.id}.${it.fileType}" }
 //                    .firstOrNull()
 
-            val proImg = printOrderProductImageDao.findByProductIdAndOrderId(product.id, it.id)
+            val proImg = printOrderProductImageDao.findFirstByProductIdAndOrderIdOrderByIdDesc(product.id, it.id)
             val img = proImg?.userImageFile
             val thumbnailImageUrl = if (img != null) imageService.getImageUrl(img) else ""
             val productType = it.printOrderItems.first().productType
@@ -229,7 +229,7 @@ class ApiOrderRoute {
 //                .filter { it.type == ProductImageFileType.THUMB.value }
 //                .map { "/assets/product/images/${it.id}.${it.fileType}" }
 //                .firstOrNull()
-        val proImg = printOrderProductImageDao.findByProductIdAndOrderId(product.id, orderId)
+        val proImg = printOrderProductImageDao.findFirstByProductIdAndOrderIdOrderByIdDesc(product.id, orderId)
         val img = proImg?.userImageFile
         val thumbnailImageUrl = if (img != null) imageService.getImageUrl(img) else ""
         val productType = order.printOrderItems.first().productType
