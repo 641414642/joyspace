@@ -684,15 +684,16 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
                                   "id": 1,                //产品ID
                                   "name": "1寸照片",
                                   "type": 1,              //产品类型 0: 普通照片, 1: 证件照, 2: 模板拼图
-                                  "price": 1            //价格 (分)
+                                  "price": 1,            //价格 (分)
                                   "tPriceItems":[
                                     {
-                                        "price": 1          //价格（分）
-                                        "miniCount":1       //最小张数
+                                        "price": 1,          //价格（分）
+                                        "miniCount":1,       //最小张数
                                         "maxCount":10       //最大张数
                                     }
                                     ...
-                                  ]
+                                  ],
+                                  "couponSign": 0             //有优惠：1 没有优惠：0
                               }
                               ...
                           ]
@@ -756,9 +757,25 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
                     "latitude": xxxx,
                     "positionId": xx,               //店面id
                     "companyId": xx,                //投放商id
-                    "transportation": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",  //交通信息
-                    "distance": xxx,              //距离指定经纬度的距离，单位米
-
+                    "status": x,                    //状态 (0: 正常, 1: 离线, 2: 故障, 3: 打印耗材用完)
+                    "products": [
+                            {
+                                "id": 1,                //产品ID
+                                "name": "1寸照片",
+                                "type": 1,              //产品类型 0: 普通照片, 1: 证件照, 2: 模板拼图
+                                "price": 1,            //价格 (分)
+                                "tPriceItems":[
+                                  {
+                                      "price": 1,          //价格（分）
+                                      "miniCount":1,       //最小张数
+                                      "maxCount":10       //最大张数
+                                  }
+                                  ...
+                                ],
+                                "couponSign: 0             //有优惠：1 没有优惠：0
+                            }
+                            ...
+                    ]}
                 }
         }</pre>
 </div>
@@ -2060,7 +2077,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2018-06-11 18:16:18 +08:00
+Last updated 2018-06-15 14:07:38 +08:00
 </div>
 </div>
 </body>

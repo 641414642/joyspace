@@ -524,6 +524,16 @@ open class CouponServiceImpl : CouponService {
         }
     }
 
+    override fun validateCouponByProduct(context: CouponValidateContext): CouponValidateResult {
+        val coupon = context.coupon
+        val result = coupon.constrains.any { it.constrainsType == CouponConstrainsType.PRODUCT.value && it.value == context.productId }
+        return if (result) {
+            VALID
+        } else {
+            NOT_USABLE_IN_THIS_PRODUCT
+        }
+    }
+
     @Transactional
     override fun createCoupon(name: String, code: String, enabled: Boolean, couponClaimMethod: CouponClaimMethod, maxUses: Int,
                               maxUsesPerUser: Int, minExpense: Int, discount: Int, begin: Date, expire: Date, userRegDays: Int,
@@ -662,5 +672,36 @@ open class CouponServiceImpl : CouponService {
 
             return true
         }
+    }
+
+    override fun beCouponProduct(sessionId: String, productId: Int): Boolean {
+        if (sessionId.isEmpty()) return false
+        val session = userLoginSessionDao.findOne(sessionId) ?: return false
+        val user = userDao.findOne(session.userId) ?: return false
+        val userCoupons = userCouponDao.findByUserId(user.id)
+
+
+
+        userCoupons.forEach {
+            val coupon = couponDao.findOne(it.couponId)
+            val context = CouponValidateContext(
+                    coupon = coupon,
+                    userCoupon = it,
+                    productId = productId)
+
+            val checkResult =
+                    if (coupon == null) {
+                        COUPON_NOT_EXIST
+                    } else {
+                        validateCoupon(context,
+                                this::validateCouponEnabled,
+                                this::validateCouponByTime,
+                                this::validateCouponByMaxUses,
+                                this::validateCouponByMaxUsesPerUser,
+                                this::validateCouponByProduct)
+                    }
+            if (checkResult == VALID) return true
+        }
+        return false
     }
 }
