@@ -36,4 +36,5 @@ class PrintStationTask {
 enum class PrintStationTaskType(val value: Int) {
     PROCESS_PRINT_ORDER(1),
     UPLOAD_LOG(2),
+    DOWNLOAD_IMG(3)
 }

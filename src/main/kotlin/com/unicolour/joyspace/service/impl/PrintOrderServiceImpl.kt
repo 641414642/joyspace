@@ -350,6 +350,7 @@ open class PrintOrderServiceImpl : PrintOrderService {
                 val param = OrderImgProcessParam(x,y,scale,rotate)
                 printOrderImg.processParams = objectMapper.writeValueAsString(param)
                 printOrderImageDao.save(printOrderImg)
+                printStationService.addDownLoadUserImgTask(orderImg.printOrder!!.printStationId, imgInfo.url)
 
                 return checkOrderImageUploaded(orderImg.printOrderId)
             }

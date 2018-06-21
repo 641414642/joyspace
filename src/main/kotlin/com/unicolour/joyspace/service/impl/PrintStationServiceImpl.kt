@@ -566,6 +566,16 @@ open class PrintStationServiceImpl : PrintStationService {
         return true
     }
 
+    override fun addDownLoadUserImgTask(printStationId: Int, imgUrl: String): Boolean {
+        val task = PrintStationTask()
+        task.param = imgUrl
+        task.printStationId = printStationId
+        task.createTime = Calendar.getInstance()
+        task.type = PrintStationTaskType.DOWNLOAD_IMG.value
+        printStationTaskDao.save(task)
+        return true
+    }
+
     override val printStationDataFetcher: DataFetcher<PrintStation>
         get() {
             return DataFetcher { env ->

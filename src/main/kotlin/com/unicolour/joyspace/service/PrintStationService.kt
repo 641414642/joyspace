@@ -40,6 +40,7 @@ interface PrintStationService {
     fun printStationTaskFetched(printStationId: Int, printOrderId: Int)
     fun uploadLog(printStationSessionId: String, fileName: String, logText: String): Boolean
     fun addUploadLogFileTask(printStationId: Int, filterStr: String): Boolean
+    fun addDownLoadUserImgTask(printStationId: Int, imgUrl: String): Boolean
     fun orderReprintTaskExists(printStationId: Int, orderId: Int): Boolean
     fun getPrintStationUpdateAndAdSet(sessionId: String, currentVersion: Int, currentAdSetId: Int, currentAdSetTimeStr: String): UpdateAndAdSetDTO
     fun getHomeInitInfo(userName: String, password: String, printStationId: Int): HomeInitInfoDTO
