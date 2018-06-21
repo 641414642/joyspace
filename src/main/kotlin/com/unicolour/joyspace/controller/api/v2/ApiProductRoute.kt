@@ -188,6 +188,7 @@ class ApiProductRoute {
 
         val product = productDao.findOne(id)
         val template = product.template
+        var idPhotoMaskImageUrl = ""
 
         var mode = 240
         if (template.width * template.height > 19354.8) {
@@ -196,6 +197,7 @@ class ApiProductRoute {
 
         val layerBg = Layer(1, "background")
         if (template.type == com.unicolour.joyspace.model.ProductType.ID_PHOTO.value) {
+            idPhotoMaskImageUrl = "$baseUrl/assets/template/preview/${template.id}_v${template.currentVersion}/mask.png"
             layerBg.images = listOf(Img(1, "sticker", 0.0, 0.0, getPixels(template.width,mode), getPixels(template.height,mode), 0.0, "", "$baseUrl/assets/template/preview/${template.id}_v${template.currentVersion}/template.jpg"))
         }
 
@@ -216,7 +218,7 @@ class ApiProductRoute {
         }
 
         val scene = Scene(1, "", "page", getPixels(template.width,mode), getPixels(template.height,mode), layers = listOf(layerBg, layerUser))
-        val templateVo = TemplateVo(template.id, template.currentVersion, template.name, template.type, listOf(scene))
+        val templateVo = TemplateVo(template.id, template.currentVersion, template.name, template.type, listOf(scene), idPhotoMaskImageUrl)
 
         return RestResponse.ok(templateVo)
     }

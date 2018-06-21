@@ -130,7 +130,8 @@ data class TemplateVo(var id: Int = 0,
                       var version: Int = 0,
                       var name: String = "",
                       var type: Int = 0,
-                      var scenes: List<Scene> = emptyList())
+                      var scenes: List<Scene> = emptyList(),
+                      var idPhotoMaskImageUrl: String = "")
 
 data class Scene(var id: Int = 0,
                  var name: String = "",
