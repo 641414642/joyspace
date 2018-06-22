@@ -50,6 +50,13 @@ class Product {
     @Column
     @NotNull
     var sequence: Int = 0
+
+    /**
+     * 专家精修
+     */
+    @Column
+    @NotNull
+    var refined: Boolean = false
 }
 
 /** 产品类别 */

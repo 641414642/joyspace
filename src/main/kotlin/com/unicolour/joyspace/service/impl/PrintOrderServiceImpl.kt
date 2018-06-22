@@ -434,6 +434,7 @@ open class PrintOrderServiceImpl : PrintOrderService {
                     copies = it.copies,
                     productId = it.productId,
                     productType = it.productType,
+                    refined = if (product.refined) 1 else 0,
                     productVersion = it.productVersion,
                     orderImages = imageDTOs
             )

@@ -60,7 +60,7 @@ open class ProductServiceImpl : ProductService {
     }
 
     @Transactional
-    override fun updateProduct(id: Int, name: String, remark: String, defPrice: Double, templateId: Int): Boolean {
+    override fun updateProduct(id: Int, name: String, remark: String, defPrice: Double, templateId: Int, refined: Int): Boolean {
         val product = productDao.findOne(id)
         if (product != null) {
             val tpl = templateDao.findOne(templateId)
@@ -71,7 +71,7 @@ open class ProductServiceImpl : ProductService {
                 product.defaultPrice = (defPrice * 100).toInt()
                 product.deleted = false
                 product.remark = remark
-
+                product.refined = refined == 1
                 productDao.save(product)
                 return true
             }
@@ -112,7 +112,7 @@ open class ProductServiceImpl : ProductService {
     }
 
     @Transactional
-    override fun createProduct(name: String, remark: String, defPrice: Double, templateId: Int): Product? {
+    override fun createProduct(name: String, remark: String, defPrice: Double, templateId: Int, refined: Int): Product? {
         val loginManager = managerService.loginManager
         val tpl = templateDao.findOne(templateId)
 
@@ -128,7 +128,7 @@ open class ProductServiceImpl : ProductService {
             product.remark = remark
             product.companyId = 0
             product.sequence = productDao.getMaxProductSequence(manager.companyId) + 1
-
+            product.refined = refined == 1
             productDao.save(product)
 
             return product
