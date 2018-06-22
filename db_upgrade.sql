@@ -101,8 +101,10 @@ alter table template add column deleted boolean default false not null;
 alter table printer_type add column default_icc_file_name varchar(100);
 insert into printer_type (name,display_name,resolution,media_alert_thresholds,roll_paper) values ('Any', '无限制', 360, '', false);
 
+
 ALTER TABLE product ADD refined BOOLEAN DEFAULT FALSE  NOT NULL;
 COMMENT ON COLUMN product.refined IS '专家精修';
+
 
 alter table template add column angle_clip DOUBLE default 0.0 not null;
 UPDATE template set angle_clip=0.0;
