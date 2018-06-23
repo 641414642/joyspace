@@ -99,3 +99,4 @@ INSERT INTO product (id, company_id, default_price, name, remark, template_id, s
 alter table template add column deleted boolean default false not null;
 
 alter table printer_type add column default_icc_file_name varchar(100);
+insert into printer_type (name,display_name,resolution,media_alert_thresholds,roll_paper) values ('Any', '无限制', 360, '', false);

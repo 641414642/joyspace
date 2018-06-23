@@ -49,4 +49,10 @@ interface PrintOrderService {
                            startTime: Calendar?, endTime: Calendar?,
                            positionId: Int, printStationId: Int,
                            order: String): List<PrintOrder>
+
+    //更新订单图片状态
+    fun updatePrintOrderImageStatus(sessionId: String, printOrderImageId: Int, status: Int): ResultCode
+
+    //更新订单状态
+    fun updatePrintOrderStatus(sessionId: String, printOrderId: Int, status: String): ResultCode
 }
