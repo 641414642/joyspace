@@ -96,6 +96,34 @@ class ApiPrintOrderController {
         return ResponseEntity.ok(UploadOrderImageResult(allUploaded))
     }
 
+    @PostMapping("/api/order/image/status")
+    @ResponseBody
+    fun updatePrintOrderImageStatus(
+            @RequestParam("sessionId") sessionId: String,
+            @RequestParam("printOrderImageId") printOrderImageId: Int,
+            @RequestParam("status") status: Int): Int {
+        return try {
+            printOrderService.updatePrintOrderImageStatus(sessionId, printOrderImageId, status).value
+        } catch (e: Exception) {
+            e.printStackTrace()
+            ResultCode.OTHER_ERROR.value
+        }
+    }
+
+    @PostMapping("/api/order/status")
+    @ResponseBody
+    fun updatePrintOrderStatus(
+            @RequestParam("sessionId") sessionId: String,
+            @RequestParam("printOrderId") printOrderId: Int,
+            @RequestParam("status") status: String): Int {
+        return try {
+            printOrderService.updatePrintOrderStatus(sessionId, printOrderId, status).value
+        } catch (e: Exception) {
+            e.printStackTrace()
+            ResultCode.OTHER_ERROR.value
+        }
+    }
+
     @RequestMapping("/api/order/status", method = arrayOf(RequestMethod.GET))
     fun printOrderStatus(@RequestParam("sessionId") sessionId: String,
                          @RequestParam("printOrderId") printOrderId: Int) : Any? {
