@@ -91,6 +91,18 @@ class TemplateImageInfo {
     @Column
     var userImage: Boolean = false
 
+    /**
+     * 图片所属层类型
+     */
+    @Column
+    var layerType: Int = LayerType.IMAGE.value
+
+    /**
+     * 类型
+     */
+    @Column
+    var type: Int = TemplateImageType.USER.value
+
     @Column(length = 255)
     var href: String? = null
 
@@ -117,4 +129,25 @@ class TemplateImageInfo {
     @Column
     @NotNull
     var height: Double = 0.0
+
+    /** 旋转角度 */
+    @Column
+    @NotNull
+    var angleClip: Double = 0.0
 }
+
+/** 层类型 */
+enum class LayerType(val value: Int, val dispName: String) {
+    FRONT(0, "前景层"),
+    BACKGROUND(1, "背景层"),
+    IMAGE(2, "图像层"),
+    CONTROL(3, "控制层")
+}
+
+/** 层类型 */
+enum class TemplateImageType(val value: Int, val dispName: String) {
+    USER(0, "用户填图"),
+    STICKER(1, " 模板贴图"),
+    COLOR(2, "色块"),
+}
+

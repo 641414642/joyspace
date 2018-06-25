@@ -72,6 +72,7 @@ open class ProductServiceImpl : ProductService {
                 product.deleted = false
                 product.remark = remark
                 product.refined = refined == 1
+                product.type = tpl.type
                 productDao.save(product)
                 return true
             }
@@ -129,6 +130,7 @@ open class ProductServiceImpl : ProductService {
             product.companyId = 0
             product.sequence = productDao.getMaxProductSequence(manager.companyId) + 1
             product.refined = refined == 1
+            product.type = tpl.type
             productDao.save(product)
 
             return product
