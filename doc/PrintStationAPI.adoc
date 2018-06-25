@@ -39,6 +39,7 @@
             "height":12.5,          //相纸高 单位mm
             "dpi":240,             //像素
             "productType": xxx,   //产品类型  0: 普通照片,  1: 证件照,  2: 模板拼图
+            "refined":1,          //1:精修 0:普通
             "productVersion": "xxx.xxx",    //产品版本号
             "orderImages": [      //订单项中的用户图片列表
                 {
