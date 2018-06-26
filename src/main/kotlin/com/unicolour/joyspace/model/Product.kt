@@ -15,10 +15,6 @@ class Product {
     @NotNull
     var name: String = ""
 
-    /** 类型 */
-    @Column
-    @NotNull
-    var type: Int = ProductType.PHOTO.value
 
     //region 模板
     /** 模板ID */

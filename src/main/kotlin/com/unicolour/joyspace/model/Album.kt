@@ -4,35 +4,36 @@ import java.io.Serializable
 import javax.persistence.*
 import javax.validation.constraints.NotNull
 
-/** 相册 */
-@Entity
-@Table(name = "album")
-class Album : Serializable {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    var id: Int = 0
+///** 相册 */
+//@Entity
+//@Table(name = "album")
+//class Album : Serializable {
+//    @Id
+//    @GeneratedValue(strategy = GenerationType.IDENTITY)
+//    var id: Int = 0
+//
+//    @Column(length = 50)
+//    @NotNull
+//    var name: String = ""
+//
+//
+//    /** 宽度(mm) */
+//    @Column
+//    @NotNull
+//    var width: Double = 0.0
+//
+//    /** 高度(mm) */
+//    @Column
+//    @NotNull
+//    var height: Double = 0.0
+//
+//
+//    @Column
+//    @NotNull
+//    var deleted: Boolean = false
+//
+//}
 
-    @Column(length = 50)
-    @NotNull
-    var name: String = ""
-
-
-    /** 宽度(mm) */
-    @Column
-    @NotNull
-    var width: Double = 0.0
-
-    /** 高度(mm) */
-    @Column
-    @NotNull
-    var height: Double = 0.0
-
-
-    @Column
-    @NotNull
-    var deleted: Boolean = false
-
-}
 
 /** 相册中的单页 */
 @Entity
@@ -57,9 +58,9 @@ class Scene : Serializable {
     var albumId: Int = 0
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "product_id")
+    @JoinColumn(name = "album_id")
     @NotNull
-    lateinit var album: Album
+    lateinit var album: Template
 
 
     /** 模板ID */

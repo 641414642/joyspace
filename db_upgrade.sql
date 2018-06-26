@@ -103,3 +103,8 @@ insert into printer_type (name,display_name,resolution,media_alert_thresholds,ro
 
 ALTER TABLE product ADD refined BOOLEAN DEFAULT FALSE  NOT NULL;
 COMMENT ON COLUMN product.refined IS '专家精修';
+
+alter table template add column angle_clip DOUBLE default 0.0 not null;
+UPDATE template set angle_clip=0.0;
+UPDATE template_image_info set layer_type=2;
+UPDATE template_image_info set type=0;
