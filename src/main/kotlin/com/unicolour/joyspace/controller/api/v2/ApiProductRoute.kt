@@ -78,30 +78,6 @@ class ApiProductRoute {
                           @RequestParam(required = false, value = "printStationId") printStationId: Int?): RestResponse {
         if (type == 2) {
             val products = mutableListOf<ProductVo>()
-//            products.add(ProductVo(9526,
-//                    "展会6",
-//                    960.0,
-//                    1440.0,
-//                    2,
-//                    "模板拼图",
-//                    1,
-//                    "101.6 x 152.4 mm",
-//                    1,
-//                    "",
-//                    100,
-//                    null))
-//            products.add(ProductVo(9527,
-//                    "展会7",
-//                    960.0,
-//                    1440.0,
-//                    2,
-//                    "模板拼图",
-//                    1,
-//                    "101.6 x 152.4 mm",
-//                    1,
-//                    "",
-//                    100,
-//                    null))
             products.add(ProductVo(9528,
                     "美好的一天",
                     1440.0,
@@ -114,18 +90,6 @@ class ApiProductRoute {
                     "",
                     100,
                     "$baseUrl/doc/home_page/9528/thumb.png"))
-//            products.add(ProductVo(9529,
-//                    "展会9",
-//                    960.0,
-//                    1440.0,
-//                    2,
-//                    "模板拼图",
-//                    1,
-//                    "101.6 x 152.4 mm",
-//                    1,
-//                    "",
-//                    100,
-//                    null))
             return RestResponse.ok(products)
         }
         val productType = com.unicolour.joyspace.model.ProductType.values().firstOrNull { it.value == type }
