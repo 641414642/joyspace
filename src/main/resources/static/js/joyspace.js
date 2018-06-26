@@ -290,3 +290,25 @@ $(function() {
         setCookie("sideBarCollapsed", "false", 365);
     })
 });
+
+
+$(function(){
+    $("body").on("change","#templateId",function(event){
+
+        var type = $(this).find("option:selected").attr("type");
+        if (type === "0") {
+            $("#refined").show()
+        } else {
+            $("#refined").find("input").prop( "checked", false )
+            $("#refined").find("input").prop( "value", 0 )
+            $("#refined").hide()
+
+        }
+    });
+
+
+    $("body").on("change",'#refined input', function(){
+        $(this).val($(this).prop("checked")?1 : 0);
+    })
+})
+

@@ -54,7 +54,8 @@
                             <option th:each="tpl : ${templates}"
                                     th:value="${tpl.id}"
                                     th:text="${tpl.name}"
-                                    th:selected="${tpl.id == product.templateId}">
+                                    th:selected="${tpl.id == product.templateId}"
+                                    th:type="${tpl.type}">
                             </option>
                         </select>
                         <span class="help-block"></span>
@@ -68,6 +69,11 @@
                         <label for="remark" class="control-label">备注:</label>
                         <input type="text" name="remark" class="form-control" id="remark" th:value="${product.remark}" />
                         <span class="help-block"></span>
+                    </div>
+                    <div class="checkbox" id="refined">
+                        <label>
+                            <input type="checkbox" name="refined" /> 精编
+                        </label>
                     </div>
                 </div>
                 <div class="modal-footer">
