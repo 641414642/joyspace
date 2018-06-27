@@ -127,14 +127,14 @@
 			<!-- sidebar menu: : style can be found in sidebar.less -->
 			<ul class="sidebar-menu">
 				<!--<li class="header">MAIN NAVIGATION</li>-->
-				<li th:class="${viewCat=='system_mgr' ? 'treeview active' : 'treeview'}" class="treeview">
+				<li th:class="${viewCat=='system_mgr' ? 'treeview active' : 'treeview'}" class="treeview" sec:authorize="hasAnyRole('ROLE_SUPERADMIN','ROLE_ADMIN')">
 					<a href="#">
 						<i class="fa fa-dashboard"></i> <span>系统管理</span>
 						<span class="pull-right-container">
 	              			<i class="fa fa-angle-left pull-right"></i>
 						</span>
 					</a>
-					<ul class="treeview-menu">
+					<ul class="treeview-menu" >
 						<li th:class="${viewContent=='manager_list' ? 'active' : ''}"><a href="#" th:href="@{/manager/list}"><i class="fa fa-circle-o"></i>管理员列表</a></li>
 						<!--<li><a href="#"><i class="fa fa-circle-o"></i>会员列表</a></li>-->
 						<li th:class="${viewContent=='company_list' ? 'active' : ''}" sec:authorize="hasRole('ROLE_SUPERADMIN')"><a href="#" th:href="@{/company/list}"><i class="fa fa-circle-o"></i>投放商列表</a></li>
@@ -156,7 +156,7 @@
 						<li><a href="#"><i class="fa fa-circle-o"></i>店铺支付方式列表</a></li>
 					</ul>
 				</li>*/-->
-				<li th:class="${viewCat=='product_mgr' ? 'treeview active' : 'treeview'}" class="treeview">
+				<li th:class="${viewCat=='product_mgr' ? 'treeview active' : 'treeview'}" class="treeview" sec:authorize="hasAnyRole('ROLE_SUPERADMIN','ROLE_ADMIN')">
 					<a href="#">
 						<i class="fa fa-pie-chart"></i>
 						<span>产品管理</span>
@@ -179,13 +179,13 @@
             			</span>
 					</a>
 					<ul class="treeview-menu">
-						<li th:class="${viewContent=='position_list' ? 'active' : ''}"><a href="#" th:href="@{/position/list}"><i class="fa fa-circle-o"></i>店面</a></li>
-						<li th:class="${viewContent=='printStation_list' ? 'active' : ''}"><a href="#" th:href="@{/printStation/list}"><i class="fa fa-circle-o"></i>自助机</a></li>
+						<li th:class="${viewContent=='position_list' ? 'active' : ''}" sec:authorize="hasAnyRole('ROLE_SUPERADMIN','ROLE_ADMIN')"><a href="#" th:href="@{/position/list}"><i class="fa fa-circle-o"></i>店面</a></li>
+						<li th:class="${viewContent=='printStation_list' ? 'active' : ''}" sec:authorize="hasAnyRole('ROLE_SUPERADMIN','ROLE_ADMIN')"><a href="#" th:href="@{/printStation/list}"><i class="fa fa-circle-o"></i>自助机</a></li>
 						<li sec:authorize="hasRole('ROLE_SUPERADMIN')" th:class="${viewContent=='adSet_list' ? 'active' : ''}"><a href="#" th:href="@{/adSet/list}"><i class="fa fa-circle-o"></i>广告</a></li>
-						<li th:class="${viewContent=='printOrder_list' ? 'active' : ''}"><a href="#" th:href="@{/printOrder/list}"><i class="fa fa-circle-o"></i>订单</a></li>
+						<li th:class="${viewContent=='printOrder_list' ? 'active' : ''}" ><a href="#" th:href="@{/printOrder/list}"><i class="fa fa-circle-o"></i>订单</a></li>
 					</ul>
 				</li>
-				<li th:class="${viewCat=='coupon_mgr' ? 'treeview active' : 'treeview'}" class="treeview">
+				<li th:class="${viewCat=='coupon_mgr' ? 'treeview active' : 'treeview'}" class="treeview" sec:authorize="hasAnyRole('ROLE_SUPERADMIN','ROLE_ADMIN')">
 					<a href="#">
 						<i class="fa fa-edit"></i> <span>优惠券管理</span>
 						<span class="pull-right-container">
@@ -197,7 +197,7 @@
 					</ul>
 				</li>
 
-				<li th:class="${viewCat=='event_mgr' ? 'treeview active' : 'treeview'}" class="treeview">
+				<li th:class="${viewCat=='event_mgr' ? 'treeview active' : 'treeview'}" class="treeview" sec:authorize="hasAnyRole('ROLE_SUPERADMIN','ROLE_ADMIN')">
 					<a href="#">
 						<i class="fa fa-edit"></i> <span>活动管理</span>
 						<span class="pull-right-container">
