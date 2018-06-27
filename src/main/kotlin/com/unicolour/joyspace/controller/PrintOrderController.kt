@@ -147,8 +147,9 @@ class PrintOrderController {
             @RequestParam(name = "pageno", required = false, defaultValue = "1") pageno: Int): ModelAndView {
 
         val isSuperAdmin = managerService.loginManagerHasRole("ROLE_SUPERADMIN")
+        val isEpson = managerService.loginManagerHasRole("ROLE_EPSON")
 
-        val companyId = if (isSuperAdmin) {
+        val companyId = if (isSuperAdmin || isEpson) {
                 inputCompanyId
             } else {
                 managerService.loginManager!!.companyId
@@ -207,7 +208,7 @@ class PrintOrderController {
 
             val dateFormat = SimpleDateFormat("yyyy-MM-dd")
 
-            if (isSuperAdmin) {
+            if (isSuperAdmin || isEpson) {
                 modelAndView.model["companies"] = companyDao.findAll(Sort(Sort.Order(Sort.Direction.ASC, "id")))
                 modelAndView.model["inputCompanyId"] = inputCompanyId
             }

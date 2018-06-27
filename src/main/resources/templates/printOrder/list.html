@@ -149,7 +149,7 @@
 					<input type="hidden" name="partial" value="false" />
 					<input type="hidden" name="query" value="true" />
 					<div class="form-inline">
-						<th:block sec:authorize="hasRole('ROLE_SUPERADMIN')">
+						<th:block sec:authorize="hasAnyRole('ROLE_SUPERADMIN','ROLE_EPSON')">
 							<label class="form-label" for="inputCompanyId">投放商</label>
 							<select name="inputCompanyId" class="form-control" id="inputCompanyId" style="margin-right: 10px">
 								<option value="0">&lt;所有投放商&gt;</option>
