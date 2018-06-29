@@ -17,7 +17,7 @@ class PrintOrderDaoImpl : PrintOrderCustomQuery  {
     lateinit var em: EntityManager
 
     override fun printOrderStat(companyId: Int, startTime: Calendar?, endTime: Calendar?,
-                                payed: Boolean?, printStationIds: List<Int>): PrintOrderStatDTO {
+                                payed: Boolean?, printed: Boolean?, printStationIds: List<Int>): PrintOrderStatDTO {
         val cb = em.criteriaBuilder
         val cq = cb.createTupleQuery()
 
@@ -30,7 +30,7 @@ class PrintOrderDaoImpl : PrintOrderCustomQuery  {
                 cb.sum(orderRoot.get("pageCount"))
         )
 
-        where(companyId, printStationIds, startTime, endTime, payed, cb, cq, orderRoot)
+        where(companyId, printStationIds, startTime, endTime, payed, printed, cb, cq, orderRoot)
 
         val query = em.createQuery(cq)
         val result = query.singleResult
@@ -56,7 +56,7 @@ class PrintOrderDaoImpl : PrintOrderCustomQuery  {
 
         cq.select(orderRoot)
 
-        where(companyId, printStationIds, startTime, endTime, null, cb, cq, orderRoot)
+        where(companyId, printStationIds, startTime, endTime, null, null, cb, cq, orderRoot)
 
         orderBy(cb, sort, cq, orderRoot)
 
@@ -76,8 +76,8 @@ class PrintOrderDaoImpl : PrintOrderCustomQuery  {
         cq.select(orderRoot)
         cqCount.select(cb.count(orderCountRoot))
 
-        where(companyId, printStationIds, startTime, endTime, null, cb, cq, orderRoot)
-        where(companyId, printStationIds, startTime, endTime, null, cb, cqCount, orderRoot)
+        where(companyId, printStationIds, startTime, endTime, null, null, cb, cq, orderRoot)
+        where(companyId, printStationIds, startTime, endTime, null, null, cb, cqCount, orderRoot)
 
         orderBy(cb, pageable.sort, cq, orderRoot)
 
@@ -107,6 +107,7 @@ class PrintOrderDaoImpl : PrintOrderCustomQuery  {
     private fun where(companyId: Int, printStationIds: List<Int>,
                       startTime: Calendar?, endTime: Calendar?,
                       payed: Boolean?,
+                      printed: Boolean?,
                       cb: CriteriaBuilder, cq: CriteriaQuery<*>, root: Root<PrintOrder>) {
 
         val conditions = ArrayList<Predicate>()
@@ -121,6 +122,10 @@ class PrintOrderDaoImpl : PrintOrderCustomQuery  {
 
         if (payed != null) {
             conditions.add(cb.equal(root.get<Boolean>("payed"), payed))
+        }
+
+        if (printed != null) {
+            conditions.add(cb.equal(root.get<Boolean>("printedOnPrintStation"), payed))
         }
 
         if (companyId > 0) {

@@ -1142,6 +1142,7 @@ open class PrintOrderServiceImpl : PrintOrderService {
                 startTime = startTime,
                 endTime = endTime,
                 payed = true,
+                printed = true,
                 printStationIds = printStationIds)
     }
 
