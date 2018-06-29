@@ -135,6 +135,7 @@ data class TemplateVo(var id: Int = 0,
 
 data class Scene(var id: Int = 0,
                  var name: String = "",
+                 var index: Int = 0,
                  var type: String = "",
                  var width: Double = 0.0,
                  var height: Double = 0.0,
@@ -142,7 +143,7 @@ data class Scene(var id: Int = 0,
 
 data class Layer(var id: Int = 0,
                  var type: String = "",
-                 var images: List<Img> = emptyList())
+                 var images: MutableList<Img> = mutableListOf())
 
 data class Img(var id: Int = 0,
                var type: String = "",
