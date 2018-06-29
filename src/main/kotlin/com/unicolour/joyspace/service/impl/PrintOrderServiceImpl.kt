@@ -386,26 +386,8 @@ open class PrintOrderServiceImpl : PrintOrderService {
 
         order.printOrderItems.forEach {
             val product = productDao.findOne(it.productId)
-            var width = product.template.width
-            var height = product.template.height
-            when (product.id) {
-                9526 -> {
-                    width = 101.6
-                    height = 152.4
-                }
-                9527 -> {
-                    width = 101.6
-                    height = 152.4
-                }
-                9528 -> {
-                    width = 152.4
-                    height = 101.6
-                }
-                9529 -> {
-                    width = 101.6
-                    height = 152.4
-                }
-            }
+            val width = product.template.width
+            val height = product.template.height
             var dpi = 240
             if (width * height > 19354.8) dpi = 180
 
