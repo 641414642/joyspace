@@ -118,7 +118,8 @@ class ApiOrderRoute {
         val printOrder = printOrderDao.findOne(printOrderId)
         if (printOrder != null && printOrder.userId == session.userId) {
             val orderItemVoList = printOrder.printOrderItems.map {
-                OrderItemS(listOf(ImageS(it.status)))
+                val images = it.orderImages.map { ImageS(it.status) }
+                OrderItemS(images)
             }
             return RestResponse.ok(OrderStatusVo(orderItemVoList))
         } else {
@@ -139,7 +140,7 @@ class ApiOrderRoute {
                              @RequestParam("rotate",required = false) rotate: Double?,
                              @RequestParam("image") imgFile: MultipartFile?): ResponseEntity<UploadOrderImageResult> {
 
-        val allUploaded = printOrderService.uploadOrderImage(sessionId, orderItemId, imgFile, x ?: 0.0, y ?: 0.0, scale ?: 0.0, rotate ?: 0.0)
+        val allUploaded = printOrderService.uploadOrderImage(sessionId, orderItemId,name, imgFile, x ?: 0.0, y ?: 0.0, scale ?: 0.0, rotate ?: 0.0)
         return ResponseEntity.ok(UploadOrderImageResult(allUploaded))
     }
 

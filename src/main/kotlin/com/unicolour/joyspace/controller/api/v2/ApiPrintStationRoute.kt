@@ -31,8 +31,6 @@ class ApiPrintStationRoute {
     @Autowired
     private lateinit var positionService:PositionService
     @Autowired
-    private lateinit var productDao:ProductDao
-    @Autowired
     private lateinit var tPriceDao: TPriceDao
     @Autowired
     private lateinit var couponService: CouponService
@@ -118,9 +116,6 @@ class ApiPrintStationRoute {
                     val couponSign = couponService.beCouponProduct(sessionId ?: "", it.productId)
                     PrintStationProduct(it.productId, it.product.name, it.product.template.type.toString(), price, tPriceItemVoList, if (couponSign) 1 else 0)
                 }.toMutableList()
-                val tProduct = productDao.findOne(9528)
-                val tPrice = priceMap.getOrDefault(tProduct.id,tProduct.defaultPrice)
-                psVo.products!!.add(PrintStationProduct(9528,tProduct.name,"2",tPrice))
                 return RestResponse.ok(psVo)
             }
         }

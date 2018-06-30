@@ -40,16 +40,6 @@ class ApiProductRoute {
 
     @Value("\${com.unicolour.joyspace.baseUrl}")
     private lateinit var baseUrl: String
-    @Value("classpath:static/doc/home_page/9526/test.json")
-    private lateinit var json_9526: Resource
-    @Value("classpath:static/doc/home_page/9527/test.json")
-    private lateinit var json_9527: Resource
-    @Value("classpath:static/doc/home_page/9528/test.json")
-    private lateinit var json_9528: Resource
-    @Value("classpath:static/doc/home_page/9529/test.json")
-    private lateinit var json_9529: Resource
-    @Value("classpath:static/doc/home_page/9528/test_mm.json")
-    private lateinit var json_9528_mm: Resource
 
 
     /**

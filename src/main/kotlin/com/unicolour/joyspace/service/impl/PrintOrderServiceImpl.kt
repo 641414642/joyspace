@@ -216,22 +216,22 @@ open class PrintOrderServiceImpl : PrintOrderService {
 
             orderItems.add(newOrderItem)
 
-            val orderImg = PrintOrderImage()
-            orderImg.orderId = newOrder.id
-            orderImg.orderItemId = newOrderItem.id
-            orderImg.name = ""
-            orderImg.userImageFile = null
-            orderImg.processParams = null
-            orderImg.status = PrintOrderImageStatus.CREATED.value
-            printOrderImageDao.save(orderImg)
-            orderImages.add(orderImg)
+//            val orderImg = PrintOrderImage()
+//            orderImg.orderId = newOrder.id
+//            orderImg.orderItemId = newOrderItem.id
+//            orderImg.name = ""
+//            orderImg.userImageFile = null
+//            orderImg.processParams = null
+//            orderImg.status = PrintOrderImageStatus.CREATED.value
+//            printOrderImageDao.save(orderImg)
+//            orderImages.add(orderImg)
 
 //            val tplVerSplit = orderItemInput.productVersion.split('.')
 //            val tplId = tplVerSplit[0].toInt()
 //            val tplVer = tplVerSplit[1].toInt()
 
-//            val tplImages = templateImageInfoDao.findByTemplateIdAndTemplateVersion(tplId, tplVer)
-//            for (tplImg in tplImages.filter { it.userImage }.distinctBy { it.name }) {
+            val tplImages = templateImageInfoDao.findByTemplateIdAndTemplateVersion(product.template.id, product.template.currentVersion)
+            for (tplImg in tplImages.filter { it.userImage }.distinctBy { it.name }) {
 //                var userImgId = 0
 //                var processParams: String? = null
 //                val orderItemImages = orderItemInput.images
@@ -250,19 +250,19 @@ open class PrintOrderServiceImpl : PrintOrderService {
 //                        processParams = objectMapper.writeValueAsString(ImageProcessParams(orderItemImg))
 //                    }
 //                }
-//
-//                val orderImg = PrintOrderImage()
-//                orderImg.orderId = newOrder.id
-//                orderImg.orderItemId = newOrderItem.id
-//                orderImg.name = tplImg.name
-//                orderImg.userImageFile = if (userImgId == 0) null else userImageFileDao.findOne(userImgId)
-//                orderImg.processParams = processParams
-//                orderImg.status = PrintOrderImageStatus.CREATED.value
-//
-//                printOrderImageDao.save(orderImg)
-//
-//                orderImages.add(orderImg)
-//            }
+
+                val orderImg = PrintOrderImage()
+                orderImg.orderId = newOrder.id
+                orderImg.orderItemId = newOrderItem.id
+                orderImg.name = tplImg.name
+                orderImg.userImageFile = null
+                orderImg.processParams = null
+                orderImg.status = PrintOrderImageStatus.CREATED.value
+
+                printOrderImageDao.save(orderImg)
+
+                orderImages.add(orderImg)
+            }
         }
 
         //修改优惠券使用次数
@@ -332,20 +332,20 @@ open class PrintOrderServiceImpl : PrintOrderService {
 
 
     @Transactional
-    override fun uploadOrderImage(sessionId: String, orderItemId: Int, imgFile: MultipartFile?, x: Double, y: Double, scale: Double, rotate: Double): Boolean {
+    override fun uploadOrderImage(sessionId: String, orderItemId: Int, name: String, imgFile: MultipartFile?, x: Double, y: Double, scale: Double, rotate: Double): Boolean {
         val imgInfo = imageService.uploadImage(sessionId, imgFile)
         if (imgInfo.errcode == 0) {
             val orderImg = printOrderItemDao.findOne(orderItemId)
-            val printOrderImg = printOrderImageDao.findByOrderItemIdAndName(orderItemId,"")
+            val printOrderImg = printOrderImageDao.findByOrderItemIdAndName(orderItemId,name)
             if (orderImg == null || printOrderImg == null) {
                 throw ProcessException(2, "没有此item图片")
             }
             else {
-                orderImg.userImageFile = userImageFileDao.findOne(imgInfo.imageId)
-                orderImg.status = PrintOrderImageStatus.UPLOADED.value
-
-                printOrderItemDao.save(orderImg)
-                printOrderImg.userImageFile = orderImg.userImageFile
+//                orderImg.userImageFile = userImageFileDao.findOne(imgInfo.imageId)
+//                orderImg.status = PrintOrderImageStatus.UPLOADED.value
+//
+//                printOrderItemDao.save(orderImg)
+                printOrderImg.userImageFile = userImageFileDao.findOne(imgInfo.imageId)
                 printOrderImg.status = PrintOrderImageStatus.UPLOADED.value
                 val param = OrderImgProcessParam(x,y,scale,rotate)
                 printOrderImg.processParams = objectMapper.writeValueAsString(param)
@@ -364,7 +364,7 @@ open class PrintOrderServiceImpl : PrintOrderService {
     //检查是否所有订单图片都已上传，如果都上传了返回true并修改订单状态
     @Synchronized
     private fun checkOrderImageUploaded(orderId: Int) : Boolean {
-        val missingImageCount = printOrderItemDao.countByPrintOrderIdAndUserImageFileIdIsNull(orderId)  //userImageFileId is null 表示此订单图片还没有上传
+        val missingImageCount = printOrderImageDao.countByOrderIdAndUserImageFileIdIsNull(orderId)  //userImageFileId is null 表示此订单图片还没有上传
         if (missingImageCount == 0L) {
             val order = printOrderDao.findOne(orderId)
             order.imageFileUploaded = true
