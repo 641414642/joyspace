@@ -38,6 +38,9 @@ class PrintStation {
     @NotNull
     lateinit var printerType: String
 
+    @Column(length = 255)
+    var printerModel: String? = null
+
     //region 店面
     /** 店面ID */
     @Column(name = "company_id", insertable = false, updatable = false)

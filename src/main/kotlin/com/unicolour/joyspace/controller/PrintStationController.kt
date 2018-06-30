@@ -537,4 +537,14 @@ class PrintStationController {
     ): Boolean {
         return printStationService.recordPrinterStat(sessionId, printerSn, printerType, printerName, mediaCounter, errorCode)
     }
+
+
+    @PostMapping("/printStation/printerInfo", consumes = arrayOf(MediaType.APPLICATION_JSON_UTF8_VALUE))
+    @ResponseBody
+    fun updatePrintStationPrinterInfo(
+            @RequestParam("sessionId") sessionId: String,
+            @RequestBody printerInfo: PrinterInfoDTO
+    ): Boolean {
+        return printStationService.updatePrintStationPrinterInfo(sessionId, printerInfo)
+    }
 }
