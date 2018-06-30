@@ -47,4 +47,5 @@ interface PrintStationService {
 
     fun recordPrinterStat(sessionId: String, printerSn: String, printerType: String, printerName: String, mediaCounter: Int, errorCode: Int): Boolean
     fun getPrintStationQrCodeUrl(printStationId: Int, noBackground: Boolean): String
+    fun updatePrintStationPrinterInfo(sessionId: String, printerInfo: PrinterInfoDTO): Boolean
 }

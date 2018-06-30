@@ -1,5 +1,6 @@
 package com.unicolour.joyspace.service.impl
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.google.zxing.BarcodeFormat
 import com.google.zxing.EncodeHintType
 import com.google.zxing.qrcode.QRCodeWriter
@@ -99,6 +100,9 @@ open class PrintStationServiceImpl : PrintStationService {
 
     @Autowired
     lateinit var adSetService: AdSetService
+
+    @Autowired
+    lateinit var objectMapper: ObjectMapper
 
     private val dateTimeFormat: ThreadLocal<SimpleDateFormat> = ThreadLocal.withInitial { SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS") }
 
@@ -804,6 +808,27 @@ open class PrintStationServiceImpl : PrintStationService {
 
         File(logDir, fileName).writeText(logText)
 
+        return true
+    }
+
+    override fun updatePrintStationPrinterInfo(sessionId: String, printerInfo: PrinterInfoDTO): Boolean {
+        val session = getPrintStationLoginSession(sessionId)
+        if (session == null) {
+            return false
+        }
+
+        val printStation = printStationDao.findOne(session.printStationId)
+        if (printStation == null) {
+            return false
+        }
+
+        printStation.printerModel = printerInfo.model
+        printStationDao.save(printStation)
+
+        val printerInfoDir = File(assetsDir, "printStation/printerInfo")
+        printerInfoDir.mkdirs()
+
+        objectMapper.writeValue(File(printerInfoDir, "${session.printStationId}.json"), printerInfo)
         return true
     }
 
