@@ -24,7 +24,8 @@ class CreateOrderRequestResult(
 
 class OrderItemRet(
         var id: Int = 0,
-        var productId: Int = 0
+        var productId: Int = 0,
+        var copies: Int = 0
 )
 
 class UploadOrderImageResult(

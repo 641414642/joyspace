@@ -54,7 +54,7 @@ class ApiOrderRoute {
                 printOrderDao.save(order)
             }
 
-            val orderItems = order.printOrderItems.map { OrderItemRet(it.id, it.productId) }
+            val orderItems = order.printOrderItems.map { OrderItemRet(it.id, it.productId, it.copies) }
             return RestResponse.ok(CreateOrderRequestResult(order.id, order.orderNo, null, orderItems, order.totalFee, order.discount))
         } catch (e: ProcessException) {
             e.printStackTrace()
@@ -80,7 +80,7 @@ class ApiOrderRoute {
                 printOrderDao.save(order)
             }
             val params = printOrderService.startPayment(orderInput.orderId)
-            val orderItems = order.printOrderItems.map { OrderItemRet(it.id, it.productId) }
+            val orderItems = order.printOrderItems.map { OrderItemRet(it.id, it.productId, it.copies) }
             return RestResponse.ok(CreateOrderRequestResult(order.id, order.orderNo, params, orderItems, order.totalFee, order.discount))
         } catch (e: ProcessException) {
             e.printStackTrace()
