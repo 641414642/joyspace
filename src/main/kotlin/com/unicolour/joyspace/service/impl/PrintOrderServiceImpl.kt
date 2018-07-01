@@ -131,6 +131,8 @@ open class PrintOrderServiceImpl : PrintOrderService {
 
     @Autowired
     lateinit var tPriceDao: TPriceDao
+    @Autowired
+    lateinit var sceneDao: SceneDao
 
     //小程序appid
     @Value("\${com.unicolour.wxAppId}")
@@ -216,52 +218,12 @@ open class PrintOrderServiceImpl : PrintOrderService {
 
             orderItems.add(newOrderItem)
 
-//            val orderImg = PrintOrderImage()
-//            orderImg.orderId = newOrder.id
-//            orderImg.orderItemId = newOrderItem.id
-//            orderImg.name = ""
-//            orderImg.userImageFile = null
-//            orderImg.processParams = null
-//            orderImg.status = PrintOrderImageStatus.CREATED.value
-//            printOrderImageDao.save(orderImg)
-//            orderImages.add(orderImg)
-
-//            val tplVerSplit = orderItemInput.productVersion.split('.')
-//            val tplId = tplVerSplit[0].toInt()
-//            val tplVer = tplVerSplit[1].toInt()
-
-            val tplImages = templateImageInfoDao.findByTemplateIdAndTemplateVersion(product.template.id, product.template.currentVersion)
-            for (tplImg in tplImages.filter { it.userImage }.distinctBy { it.name }) {
-//                var userImgId = 0
-//                var processParams: String? = null
-//                val orderItemImages = orderItemInput.images
-//                if (orderItemImages != null) {
-//                    val orderItemImg = orderItemImages.find { it.name == tplImg.name }
-//                    if (orderItemImg != null) {
-//                        userImgId = orderItemImg.imageId
-//
-//                        val userImgFile = userImageFileDao.findOne(userImgId)
-//                        if (userImgFile != null) {
-//                            if (userImgFile.userId != session.userId) {
-//                                throw ProcessException(3, "图片不属于指定用户")
-//                            }
-//                        }
-//
-//                        processParams = objectMapper.writeValueAsString(ImageProcessParams(orderItemImg))
-//                    }
-//                }
-
-                val orderImg = PrintOrderImage()
-                orderImg.orderId = newOrder.id
-                orderImg.orderItemId = newOrderItem.id
-                orderImg.name = tplImg.name
-                orderImg.userImageFile = null
-                orderImg.processParams = null
-                orderImg.status = PrintOrderImageStatus.CREATED.value
-
-                printOrderImageDao.save(orderImg)
-
-                orderImages.add(orderImg)
+            if (product.template.type == com.unicolour.joyspace.model.ProductType.ALBUM.value) {
+                sceneDao.findByAlbumIdAndDeletedOrderByIndex(product.templateId, false).forEach {
+                    saveOrderImage(it.name, it.template, newOrder.id, newOrderItem.id, orderImages)
+                }
+            } else {
+                saveOrderImage("", product.template, newOrder.id, newOrderItem.id, orderImages)
             }
         }
 
@@ -281,6 +243,24 @@ open class PrintOrderServiceImpl : PrintOrderService {
         }
 
         return newOrder
+    }
+
+    private fun saveOrderImage(sceneName:String,template: Template, newOrderId: Int, newOrderItemId: Int, orderImages: ArrayList<PrintOrderImage>) {
+        val tplImages = templateImageInfoDao.findByTemplateIdAndTemplateVersion(template.id, template.currentVersion)
+        for (tplImg in tplImages.filter { it.userImage }.distinctBy { it.name }) {
+
+            val orderImg = PrintOrderImage()
+            orderImg.orderId = newOrderId
+            orderImg.orderItemId = newOrderItemId
+            orderImg.name = sceneName.plus(",").plus(tplImg.name)
+            orderImg.userImageFile = null
+            orderImg.processParams = null
+            orderImg.status = PrintOrderImageStatus.CREATED.value
+
+            printOrderImageDao.save(orderImg)
+
+            orderImages.add(orderImg)
+        }
     }
 
     private fun createOrderNo(): String {

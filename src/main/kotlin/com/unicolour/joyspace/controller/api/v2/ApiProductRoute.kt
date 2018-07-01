@@ -125,6 +125,7 @@ class ApiProductRoute {
                 val scene = getScene(it.template).second
                 scene.name = it.name
                 scene.index = it.index
+                scene.id=it.id
                 scene
             }
             TemplateVo(template.id, template.currentVersion, template.name, template.type, sceneList)
@@ -149,6 +150,7 @@ class ApiProductRoute {
                 val scene = getSceneInMM(it.template)
                 scene.name = it.name
                 scene.index = it.index
+                scene.id=it.id
                 scene
             }
             TemplateVo(template.id, template.currentVersion, template.name, template.type, sceneList)
