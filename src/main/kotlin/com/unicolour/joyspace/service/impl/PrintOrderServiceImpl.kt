@@ -220,10 +220,10 @@ open class PrintOrderServiceImpl : PrintOrderService {
 
             if (product.template.type == com.unicolour.joyspace.model.ProductType.ALBUM.value) {
                 sceneDao.findByAlbumIdAndDeletedOrderByIndex(product.templateId, false).forEach {
-                    saveOrderImage(it.name, it.template, newOrder.id, newOrderItem.id, orderImages)
+                    saveOrderImage(it.id.toString(), it.template, newOrder.id, newOrderItem.id, orderImages)
                 }
             } else {
-                saveOrderImage("", product.template, newOrder.id, newOrderItem.id, orderImages)
+                saveOrderImage(product.template.id.toString(), product.template, newOrder.id, newOrderItem.id, orderImages)
             }
         }
 
@@ -245,14 +245,14 @@ open class PrintOrderServiceImpl : PrintOrderService {
         return newOrder
     }
 
-    private fun saveOrderImage(sceneName:String,template: Template, newOrderId: Int, newOrderItemId: Int, orderImages: ArrayList<PrintOrderImage>) {
+    private fun saveOrderImage(sceneId: String, template: Template, newOrderId: Int, newOrderItemId: Int, orderImages: ArrayList<PrintOrderImage>) {
         val tplImages = templateImageInfoDao.findByTemplateIdAndTemplateVersion(template.id, template.currentVersion)
         for (tplImg in tplImages.filter { it.userImage }.distinctBy { it.name }) {
 
             val orderImg = PrintOrderImage()
             orderImg.orderId = newOrderId
             orderImg.orderItemId = newOrderItemId
-            orderImg.name = sceneName.plus(",").plus(tplImg.name)
+            orderImg.name = sceneId.plus("_").plus(tplImg.id)
             orderImg.userImageFile = null
             orderImg.processParams = null
             orderImg.status = PrintOrderImageStatus.CREATED.value
