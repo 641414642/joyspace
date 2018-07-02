@@ -50,6 +50,7 @@
 						<th>投放商</th>
 						<th>店面</th>
 						<th>分账比例</th>
+						<th>指定打印机类型</th>
 						<th>打印机型号</th>
 						<th>打印机状态</th>
 						<th>在线状态</th>
@@ -63,6 +64,7 @@
 						<td th:text="${ps.printStation.company?.name}"></td>
 						<td th:text="${ps.printStation.position.name}"></td>
 						<td th:text="${#numbers.formatDecimal(ps.printStation.transferProportion / 10.0, 1, 'DEFAULT', 1, 'DEFAULT') + '%'}"></td>
+						<td th:text="${ps.printStation.printerModel}"></td>
 						<td th:text="${ps.printerTypeDisp}"></td>
 						<td>
 							<th:block th:switch="${ps.printStation.status}">

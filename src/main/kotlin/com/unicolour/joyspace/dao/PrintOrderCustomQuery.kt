@@ -17,5 +17,5 @@ interface PrintOrderCustomQuery {
                          printStationIds: List<Int>): List<PrintOrder>
 
     fun printOrderStat(companyId: Int, startTime: Calendar?, endTime: Calendar?,
-                       payed: Boolean?, printStationIds: List<Int>): PrintOrderStatDTO
+                       payed: Boolean?, printed: Boolean?, printStationIds: List<Int>): PrintOrderStatDTO
 }

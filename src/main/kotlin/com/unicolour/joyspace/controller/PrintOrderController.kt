@@ -196,7 +196,7 @@ class PrintOrderController {
 
         val turnOver = orderStat.totalAmount - orderStat.totalDiscount
 
-        modelAndView.model["orderCount"] = printOrders.totalElements
+        modelAndView.model["orderCount"] = orderStat.orderCount
         modelAndView.model["photoCopies"] = orderStat.printPageCount
         modelAndView.model["turnOver"] = "${turnOver/100}.${String.format("%02d", turnOver%100)}"
 
