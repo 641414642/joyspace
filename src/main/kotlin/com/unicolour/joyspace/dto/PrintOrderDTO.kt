@@ -11,6 +11,7 @@ class PrintOrderItemDTO(
         var copies: Int = 1,
         var productId: Int = 0,
         var productType: Int = 0,
+        var productName: String = "",
         var productVersion: String = "",
         var refined: Int = 0,
         //用户图片
