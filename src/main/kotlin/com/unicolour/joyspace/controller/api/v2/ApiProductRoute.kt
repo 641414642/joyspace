@@ -72,13 +72,15 @@ class ApiProductRoute {
         val productType = com.unicolour.joyspace.model.ProductType.values().firstOrNull { it.value == type }
         val templateIds = templateService.queryTemplates(productType, "", true, "id asc").map { it.id }
         var products = productDao.findByTemplateIdInAndDeletedOrderBySequence(templateIds, false)
-        if (printStationId != null) {
-            products = products.filter {
-                printStationProductDao.existsByPrintStationIdAndProductId(printStationId, it.id)
-            }
-        } else {
-            products = products.filter {
-                printStationProductDao.existsByPrintStationIdAndProductId(1, it.id)
+        if (productType == com.unicolour.joyspace.model.ProductType.ID_PHOTO || productType == com.unicolour.joyspace.model.ProductType.PHOTO) {
+            products = if (printStationId != null) {
+                products.filter {
+                    printStationProductDao.existsByPrintStationIdAndProductId(printStationId, it.id)
+                }
+            } else {
+                products.filter {
+                    printStationProductDao.existsByPrintStationIdAndProductId(1, it.id)
+                }
             }
         }
         val productVoList = products.map {
@@ -191,7 +193,7 @@ class ApiProductRoute {
                     width = getPixels(templateImage.width, mode),
                     height = getPixels(templateImage.height, mode),
                     angleClip = templateImage.angleClip,
-                    resourceURL = "$baseUrl/assets/template/preview/${template.id}_v${template.currentVersion}/${templateImage.href}"
+                    resourceURL = if (templateImage.href.isNullOrEmpty()) "" else "$baseUrl/assets/template/preview/${template.id}_v${template.currentVersion}/${templateImage.href}"
             )
             when (templateImage.layerType) {
                 LayerType.BACKGROUND.value -> layerBg.images.add(image)
@@ -247,7 +249,7 @@ class ApiProductRoute {
                     width = templateImage.width,
                     height = templateImage.height,
                     angleClip = templateImage.angleClip,
-                    resourceURL = "$baseUrl/assets/template/preview/${template.id}_v${template.currentVersion}/${templateImage.href}"
+                    resourceURL = if (templateImage.href.isNullOrEmpty()) "" else "$baseUrl/assets/template/preview/${template.id}_v${template.currentVersion}/${templateImage.href}"
             )
             when (templateImage.layerType) {
                 LayerType.BACKGROUND.value -> layerBg.images.add(image)
