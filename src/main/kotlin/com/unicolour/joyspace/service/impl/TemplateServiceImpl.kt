@@ -495,6 +495,8 @@ open class TemplateServiceImpl : TemplateService {
                     }
 
             tplImg.userImage = (desc == "UserImage" || desc == "用户图片")
+            tplImg.layerType = LayerType.IMAGE.value
+            tplImg.type = TemplateImageType.USER.value
             tplImages.add(tplImg)
         })
 
