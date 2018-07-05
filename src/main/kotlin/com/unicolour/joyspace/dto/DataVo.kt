@@ -158,3 +158,6 @@ data class Img(var id: Int = 0,
 data class OrderStatusVo(var orderItems: List<OrderItemS>? = null)
 data class OrderItemS(var images: List<ImageS>? = null)
 data class ImageS(var status:Int? = null)
+
+data class DeleteAddress(var sessionId: String? = null,
+                         var id: Int? = null)
