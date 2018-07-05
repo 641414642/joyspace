@@ -8,6 +8,8 @@ import org.springframework.web.multipart.MultipartFile
 interface ProductService {
     fun getProductsOfPrintStation(printStationId: Int) : List<PrintStationProduct>
 
+    fun getProductsOfPrintStationAndCommonProduct(printStationId: Int) : List<Product>
+
     fun createProduct(name: String, remark: String, defPrice: Double, templateId: Int, refined: Int) : Product?
 
     fun updateProduct(id: Int, name: String, remark: String, defPrice: Double, templateId: Int, refined: Int): Boolean

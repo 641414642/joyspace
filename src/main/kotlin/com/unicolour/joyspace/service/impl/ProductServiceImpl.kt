@@ -5,6 +5,7 @@ import com.unicolour.joyspace.model.*
 import com.unicolour.joyspace.service.ManagerService
 import com.unicolour.joyspace.service.PrintStationService
 import com.unicolour.joyspace.service.ProductService
+import com.unicolour.joyspace.service.TemplateService
 import graphql.schema.DataFetcher
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
@@ -53,10 +54,21 @@ open class ProductServiceImpl : ProductService {
 
     @Autowired
     lateinit var printStationService: PrintStationService
+    @Autowired
+    lateinit var templateService: TemplateService
 
     override fun getProductsOfPrintStation(printStationId: Int): List<PrintStationProduct> {
         val products = printStationProductDao.findByPrintStationId(printStationId)
         return products.filter { !it.product.deleted }.sortedBy { it.product.sequence }
+    }
+
+    override fun getProductsOfPrintStationAndCommonProduct(printStationId: Int): List<Product> {
+        val products = printStationProductDao.findByPrintStationId(printStationId).filter { !it.product.deleted }.sortedBy { it.product.sequence }.map { it.product }
+        val temTemplateIds = templateService.queryTemplates(ProductType.TEMPLATE, "", true, "id asc").map { it.id }
+        val temProducts = productDao.findByTemplateIdInAndDeletedOrderBySequence(temTemplateIds, false)
+        val albumTemplateIds = templateService.queryTemplates(ProductType.ALBUM, "", true, "id asc").map { it.id }
+        val albumProducts = productDao.findByTemplateIdInAndDeletedOrderBySequence(albumTemplateIds, false)
+        return products.plus(temProducts).plus(albumProducts)
     }
 
     @Transactional
