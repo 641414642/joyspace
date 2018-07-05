@@ -2,7 +2,6 @@ package com.unicolour.joyspace.controller.api.v2
 
 import com.unicolour.joyspace.dao.PrintStationDao
 import com.unicolour.joyspace.dao.PrintStationProductDao
-import com.unicolour.joyspace.dao.ProductDao
 import com.unicolour.joyspace.dao.TPriceDao
 import com.unicolour.joyspace.dto.PrintStationProduct
 import com.unicolour.joyspace.dto.PrintStationVo
@@ -12,6 +11,7 @@ import com.unicolour.joyspace.dto.common.RestResponse
 import com.unicolour.joyspace.service.CouponService
 import com.unicolour.joyspace.service.PositionService
 import com.unicolour.joyspace.service.PrintStationService
+import com.unicolour.joyspace.service.ProductService
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.GetMapping
@@ -34,6 +34,8 @@ class ApiPrintStationRoute {
     private lateinit var tPriceDao: TPriceDao
     @Autowired
     private lateinit var couponService: CouponService
+    @Autowired
+    private lateinit var productService: ProductService
 
 
     /**
@@ -57,15 +59,15 @@ class ApiPrintStationRoute {
         psVo.imgUrl = ""
 
         val priceMap: Map<Int, Int> = printStationService.getPriceMap(printStation)
-        psVo.products = printStationProductDao.findByPrintStationId(printStation.id).map {
-            val price = priceMap.getOrDefault(it.productId, it.product.defaultPrice)
-            val tPrice = tPriceDao.findByPositionIdAndProductIdAndBeginLessThanAndExpireGreaterThanAndEnabled(printStation.positionId, it.productId, Date(), Date(), true).firstOrNull()
+        psVo.products = productService.getProductsOfPrintStationAndCommonProduct(printStation.id).map {
+            val price = priceMap.getOrDefault(it.id, it.defaultPrice)
+            val tPrice = tPriceDao.findByPositionIdAndProductIdAndBeginLessThanAndExpireGreaterThanAndEnabled(printStation.positionId, it.id, Date(), Date(), true).firstOrNull()
             val tPriceItemVoList = mutableListOf<TPriceItemVo>()
             tPrice?.tPriceItems?.forEach {
                 tPriceItemVoList.add(TPriceItemVo(it.minCount,it.maxCount,it.price))
             }
-            val couponSign = couponService.beCouponProduct(sessionId ?: "", it.productId)
-            PrintStationProduct(it.productId, it.product.name, it.product.template.type.toString(), price, tPriceItemVoList, if (couponSign) 1 else 0)
+            val couponSign = couponService.beCouponProduct(sessionId ?: "", it.id)
+            PrintStationProduct(it.id, it.name, it.template.type.toString(), price, tPriceItemVoList, if (couponSign) 1 else 0)
         }.toMutableList()
 //        val tProduct = productDao.findOne(9528)
 //        val tPrice = priceMap.getOrDefault(tProduct.id,tProduct.defaultPrice)
@@ -106,15 +108,15 @@ class ApiPrintStationRoute {
                 psVo.imgUrl = ""
 
                 val priceMap: Map<Int, Int> = printStationService.getPriceMap(nearest)
-                psVo.products = printStationProductDao.findByPrintStationId(nearest.id).map {
-                    val price = priceMap.getOrDefault(it.productId, it.product.defaultPrice)
-                    val tPrice = tPriceDao.findByPositionIdAndProductIdAndBeginLessThanAndExpireGreaterThanAndEnabled(nearest.positionId, it.productId, Date(), Date(), true).firstOrNull()
+                psVo.products = productService.getProductsOfPrintStationAndCommonProduct(nearest.id).map {
+                    val price = priceMap.getOrDefault(it.id, it.defaultPrice)
+                    val tPrice = tPriceDao.findByPositionIdAndProductIdAndBeginLessThanAndExpireGreaterThanAndEnabled(nearest.positionId, it.id, Date(), Date(), true).firstOrNull()
                     val tPriceItemVoList = mutableListOf<TPriceItemVo>()
                     tPrice?.tPriceItems?.forEach {
                         tPriceItemVoList.add(TPriceItemVo(it.minCount,it.maxCount,it.price))
                     }
-                    val couponSign = couponService.beCouponProduct(sessionId ?: "", it.productId)
-                    PrintStationProduct(it.productId, it.product.name, it.product.template.type.toString(), price, tPriceItemVoList, if (couponSign) 1 else 0)
+                    val couponSign = couponService.beCouponProduct(sessionId ?: "", it.id)
+                    PrintStationProduct(it.id, it.name, it.template.type.toString(), price, tPriceItemVoList, if (couponSign) 1 else 0)
                 }.toMutableList()
                 return RestResponse.ok(psVo)
             }
