@@ -57,7 +57,7 @@ class ApiProductRoute {
         producTypes.add(ProductType(0, "普通照片", "智能手机照片高质量打印", "$baseUrl/doc/home_page/product_type_0.png"))
         producTypes.add(ProductType(1, "证件照", "支持多种尺寸，自动排版", "$baseUrl/doc/home_page/product_type_1.png"))
         producTypes.add(ProductType(2, "模版", "多种精美模板 随心定制", "$baseUrl/doc/home_page/product_type_2.png"))
-        //producTypes.add(ProductType(3, "相册", "生活也许是一本书","$baseUrl/doc/home_page/product_type_3.png"))
+        producTypes.add(ProductType(3, "相册", "生活也许是一本书","$baseUrl/doc/home_page/product_type_3.png"))
         val homePage = HomePageVo(advers, producTypes)
         return RestResponse.ok(homePage)
     }
