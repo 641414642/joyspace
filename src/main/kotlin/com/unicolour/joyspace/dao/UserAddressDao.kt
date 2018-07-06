@@ -11,7 +11,7 @@ interface UserAddressDao : CrudRepository<Address, Int> {
     fun findByUserIdAndDeleted(userId: Int, deleted: Boolean): List<Address>
 
     @Modifying
-    @Query("update Address a set a.default = false where a.userId = :userId and a.id != :id")
+    @Query("update Address a set a.defalut = false where a.userId = :userId and a.id != :id")
     fun updateDefault(@Param(value = "userId") userId: Int, @Param(value = "id") id: Int)
 
     @Modifying
