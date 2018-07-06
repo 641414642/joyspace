@@ -181,14 +181,6 @@ open class TemplateServiceImpl : TemplateService {
         val previewTplFile = File(previewTplDir, "template.svg")
         previewTplFile.writeText(tplSvg)
 
-        //转 jpeg
-        val svgConverter = SVGConverter()
-        svgConverter.setSources(arrayOf(previewTplFile.absolutePath))
-        svgConverter.destinationType = DestinationType.JPEG
-        svgConverter.quality = 0.9f
-        svgConverter.dst = previewTplDir
-        svgConverter.backgroundColor = Color.WHITE
-        svgConverter.execute()
 
         val previewImgDir = File(previewTplDir, "images")
         previewImgDir.mkdirs()
@@ -206,6 +198,15 @@ open class TemplateServiceImpl : TemplateService {
         else {
             oldMaskImgFile?.copyTo(maskFile)
         }
+
+        //转 jpeg
+        val svgConverter = SVGConverter()
+        svgConverter.setSources(arrayOf(previewTplFile.absolutePath))
+        svgConverter.destinationType = DestinationType.JPEG
+        svgConverter.quality = 0.9f
+        svgConverter.dst = previewTplDir
+        svgConverter.backgroundColor = Color.WHITE
+        svgConverter.execute()
 
         //production zip file
         val productionTplPackFile = File(assetsDir, "template/production/${tpl.id}_v${tpl.currentVersion}_${tpl.uuid}.zip")
