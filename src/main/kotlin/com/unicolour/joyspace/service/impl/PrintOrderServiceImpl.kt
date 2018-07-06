@@ -5,6 +5,7 @@ import com.unicolour.joyspace.dao.*
 import com.unicolour.joyspace.dto.*
 import com.unicolour.joyspace.exception.ProcessException
 import com.unicolour.joyspace.model.*
+import com.unicolour.joyspace.model.ProductType
 import com.unicolour.joyspace.service.*
 import graphql.schema.DataFetcher
 import graphql.schema.DataFetchingEnvironment
@@ -247,8 +248,8 @@ open class PrintOrderServiceImpl : PrintOrderService {
 
     private fun saveOrderImage(sceneId: String, template: Template, newOrderId: Int, newOrderItemId: Int, orderImages: ArrayList<PrintOrderImage>) {
         val tplImages = templateImageInfoDao.findByTemplateIdAndTemplateVersion(template.id, template.currentVersion)
-        for (tplImg in tplImages.filter { it.userImage }.distinctBy { it.name }) {
-
+        if (template.type == ProductType.ID_PHOTO.value) {
+            val tplImg = tplImages.filter { it.userImage }.sortedBy { it.id }.first()
             val orderImg = PrintOrderImage()
             orderImg.orderId = newOrderId
             orderImg.orderItemId = newOrderItemId
@@ -256,10 +257,20 @@ open class PrintOrderServiceImpl : PrintOrderService {
             orderImg.userImageFile = null
             orderImg.processParams = null
             orderImg.status = PrintOrderImageStatus.CREATED.value
-
             printOrderImageDao.save(orderImg)
-
             orderImages.add(orderImg)
+        } else {
+            for (tplImg in tplImages.filter { it.userImage }) {
+                val orderImg = PrintOrderImage()
+                orderImg.orderId = newOrderId
+                orderImg.orderItemId = newOrderItemId
+                orderImg.name = sceneId.plus("_").plus(tplImg.id)
+                orderImg.userImageFile = null
+                orderImg.processParams = null
+                orderImg.status = PrintOrderImageStatus.CREATED.value
+                printOrderImageDao.save(orderImg)
+                orderImages.add(orderImg)
+            }
         }
     }
 
