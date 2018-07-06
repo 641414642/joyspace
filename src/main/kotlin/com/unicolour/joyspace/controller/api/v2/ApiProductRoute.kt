@@ -185,7 +185,7 @@ class ApiProductRoute {
             )
         }
         val templateImages = templateImageInfoDao.findByTemplateIdAndTemplateVersion(template.id, template.currentVersion)
-        templateImages.forEach { templateImage ->
+        templateImages.sortedBy { it.id }.forEach { templateImage ->
             val image = Img(id = templateImage.id,
                     type = TemplateImageType.values().first { it.value == templateImage.type }.name.toLowerCase(),
                     x = getPixels(templateImage.x, mode),
@@ -241,7 +241,7 @@ class ApiProductRoute {
             )
         }
         val templateImages = templateImageInfoDao.findByTemplateIdAndTemplateVersion(template.id, template.currentVersion)
-        templateImages.forEach { templateImage ->
+        templateImages.sortedBy { it.id }.forEach { templateImage ->
             val image = Img(id = templateImage.id,
                     type = TemplateImageType.values().first { it.value == templateImage.type }.name.toLowerCase(),
                     x = templateImage.x,
