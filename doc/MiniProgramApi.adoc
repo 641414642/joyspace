@@ -161,7 +161,8 @@
                       "latitude": 39.95392,           //自助机位置维度
                       "positionId": xx,               //店面id
                       "companyId": xx,                //投放商id
-                      "status": x,                    //状态 (0: 正常, 1: 离线, 2: 故障, 3: 打印耗材用完)
+                      "status": x,                    //状态 (0: 正常, 1: 打印机脱机, 2：打印耗材用完 )
+                      "online": 1,                    //在线状态：1：在线   0：离线
                       "products": [
                               {
                                   "id": 1,                //产品ID
@@ -209,7 +210,8 @@
                     "latitude": xxxx,
                     "positionId": xx,               //店面id
                     "companyId": xx,                //投放商id
-                    "status": x,                    //状态 (0: 正常, 1: 离线, 2: 故障, 3: 打印耗材用完)
+                    "status": x,                    //状态 (0: 正常, 1: 打印机脱机, 2：打印耗材用完 )
+                    "online": 1,                    //在线状态：1：在线   0：离线
                     "products": [
                             {
                                 "id": 1,                //产品ID

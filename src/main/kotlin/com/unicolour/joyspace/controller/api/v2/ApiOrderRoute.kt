@@ -8,6 +8,7 @@ import com.unicolour.joyspace.model.PrintOrderImageStatus
 import com.unicolour.joyspace.model.PrintOrderProductImage
 import com.unicolour.joyspace.service.ImageService
 import com.unicolour.joyspace.service.PrintOrderService
+import com.unicolour.joyspace.service.PrintStationService
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.ResponseEntity
@@ -40,6 +41,8 @@ class ApiOrderRoute {
     private lateinit var userImageFileDao: UserImageFileDao
     @Autowired
     private lateinit var printOrderProductImageDao: PrintOrderProductImageDao
+    @Autowired
+    private lateinit var printStationService: PrintStationService
 
     /**
      * 创建订单
@@ -250,17 +253,7 @@ class ApiOrderRoute {
                     1)
         }
 
-        val psVo = PrintStationVo()
-        psVo.id = printStation.id
-        psVo.address = printStation.addressNation + printStation.addressProvince + printStation.addressCity + printStation.addressDistrict + printStation.addressStreet
-        psVo.longitude = printStation.position.longitude
-        psVo.latitude = printStation.position.latitude
-        psVo.wxQrCode = printStation.wxQrCode
-        psVo.positionId = printStation.positionId.toString()
-        psVo.companyId = printStation.companyId.toString()
-        psVo.status = printStation.status
-        psVo.name = printStation.name
-        psVo.imgUrl = ""
+        val psVo = printStationService.toPrintStationVo(printStation)
         var addressVo: AddressVo? = null
         if (order.printType == 1) {
             addressVo = AddressVo()
