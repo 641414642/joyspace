@@ -103,3 +103,6 @@ insert into printer_type (name,display_name,resolution,media_alert_thresholds,ro
 
 ALTER TABLE product ADD refined BOOLEAN DEFAULT FALSE  NOT NULL;
 COMMENT ON COLUMN product.refined IS '专家精修';
+
+insert into icc_config (printer_model, os_name, icc_file_name) values ('CY', null, 'UNI-CY-WIN-PPG-HOME-b104-1500-20180608-4.icm');
+insert into icc_config (printer_model, os_name, icc_file_name) values ('EPSON SL-D700', null, 'UNI-D700-WIN-PDPPG-HOME-b104-1500-20180608-4.icm');

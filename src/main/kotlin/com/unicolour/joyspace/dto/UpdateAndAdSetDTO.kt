@@ -7,7 +7,10 @@ class UpdateAndAdSetDTO(
         var adSet: AdSetDTO? = null,
 
         @get:JsonInclude(JsonInclude.Include.NON_NULL)
-        var defaultIccFileName: String? = null
+        var defaultIccFileName: String? = null,
+
+        @get:JsonInclude(JsonInclude.Include.NON_NULL)
+        var iccConfigs: List<IccConfigDTO>? = null
 )
 
 class AdSetDTO(
@@ -27,4 +30,10 @@ class AdSetImageFileDTO(
         var duration: Int = 0,
         var sequence: Int = 0,
         var url: String = ""
+)
+
+class IccConfigDTO(
+        var printerModel: String = "",
+        var osName: String? = null,
+        var iccFileName: String = ""
 )

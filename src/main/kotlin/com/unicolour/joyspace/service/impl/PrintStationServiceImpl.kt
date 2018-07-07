@@ -90,6 +90,9 @@ open class PrintStationServiceImpl : PrintStationService {
     lateinit var printerTypeDao: PrinterTypeDao
 
     @Autowired
+    lateinit var iccConfigDao: IccConfigDao
+
+    @Autowired
     lateinit var passwordEncoder: PasswordEncoder
 
     @Autowired
@@ -379,6 +382,7 @@ open class PrintStationServiceImpl : PrintStationService {
         var version = -1
         var adSet: AdSet? = null
         var newIccFileName:String? = null
+        var iccConfigs: List<IccConfigDTO>? = null
 
         val loginSession = getPrintStationLoginSession(sessionId)
         if (loginSession != null) {
@@ -393,8 +397,21 @@ open class PrintStationServiceImpl : PrintStationService {
                 adSet = ad
             }
 
-            if (currentVersion > 108) {
+            if (currentVersion in 109..125) {
                 newIccFileName = printerTypeDao.findOne(printStation.printerType)?.defaultIccFileName
+            }
+            else if (currentVersion > 125) {
+                iccConfigs = iccConfigDao.findAll().map {
+                    IccConfigDTO(
+                            printerModel = it.printerModel,
+                            osName = it.osName,
+                            iccFileName = it.iccFileName
+                    )
+                }
+
+                if (iccConfigs.isEmpty()) {
+                    iccConfigs = null
+                }
             }
         }
 
@@ -412,7 +429,8 @@ open class PrintStationServiceImpl : PrintStationService {
         return UpdateAndAdSetDTO(
                 version = version,
                 adSet = adSetService.adSetToDTO(adSet),
-                defaultIccFileName = newIccFileName
+                defaultIccFileName = newIccFileName,
+                iccConfigs = iccConfigs
         )
     }
 
