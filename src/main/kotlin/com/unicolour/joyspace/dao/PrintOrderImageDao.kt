@@ -7,6 +7,7 @@ import org.springframework.data.repository.CrudRepository
 interface PrintOrderImageDao : CrudRepository<PrintOrderImage, Int> {
     fun findByOrderItemIdAndName(orderItemId: Int, name: String) : PrintOrderImage?
     fun countByOrderIdAndUserImageFileIdIsNull(orderItemId: Int) : Long
+    fun countByOrderIdAndUserImageFileIdIsNotNull(orderItemId: Int) : Long
 }
 
 interface PrintOrderProductImageDao : CrudRepository<PrintOrderProductImage, Int>{
