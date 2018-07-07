@@ -1015,6 +1015,28 @@ open class PrintStationServiceImpl : PrintStationService {
         return "$baseUrl/assets/printStation/qrCode/$qrCodeImgFileName"
     }
 
+    override fun toPrintStationVo(printStation: PrintStation): PrintStationVo {
+        val psVo = PrintStationVo()
+        psVo.id = printStation.id
+        psVo.address = printStation.addressNation + printStation.addressProvince + printStation.addressCity + printStation.addressDistrict + printStation.addressStreet
+        psVo.longitude = printStation.position.longitude
+        psVo.latitude = printStation.position.latitude
+        psVo.wxQrCode = printStation.wxQrCode
+        psVo.positionId = printStation.positionId.toString()
+        psVo.companyId = printStation.companyId.toString()
+        psVo.status = printStation.status
+        psVo.name = printStation.name
+        psVo.imgUrl = ""
+        val session = printStationLoginSessionDao.findByPrintStationId(printStation.id)
+        psVo.online = 0
+        val time = Calendar.getInstance()
+        time.add(Calendar.SECOND, 3600 - 30)
+        if (session != null && session.expireTime.timeInMillis > time.timeInMillis) {    //自助机30秒之内访问过后台
+            psVo.online = 1
+        }
+        return psVo
+    }
+
     private fun createPrintStationQrCodeImageFile(printStationId: Int, noBackground: Boolean, psQrCodeImgFile: File) {
         val psUrl = getPrintStationUrl(printStationId)
 

@@ -46,18 +46,7 @@ class ApiPrintStationRoute {
                                 @RequestParam("sessionId", required = false) sessionId: String?): RestResponse {
         val printStation = printStationDao.findByWxQrCode(qrcode)
                 ?: return RestResponse.error(ResultCode.PRINT_STATION_NOT_FOUND)
-        val psVo = PrintStationVo()
-        psVo.id = printStation.id
-        psVo.address = printStation.addressNation + printStation.addressProvince + printStation.addressCity + printStation.addressDistrict + printStation.addressStreet
-        psVo.longitude = printStation.position.longitude
-        psVo.latitude = printStation.position.latitude
-        psVo.wxQrCode = printStation.wxQrCode
-        psVo.positionId = printStation.positionId.toString()
-        psVo.companyId = printStation.companyId.toString()
-        psVo.status = printStation.status
-        psVo.name = printStation.name
-        psVo.imgUrl = ""
-
+        val psVo = printStationService.toPrintStationVo(printStation)
         val priceMap: Map<Int, Int> = printStationService.getPriceMap(printStation)
         psVo.products = productService.getProductsOfPrintStationAndCommonProduct(printStation.id).map {
             val price = priceMap.getOrDefault(it.id, it.defaultPrice)
@@ -95,18 +84,7 @@ class ApiPrintStationRoute {
             if (nearest == null) {
                 return RestResponse.error(ResultCode.PRINT_STATION_NOT_FOUND)
             } else {
-                val psVo = PrintStationVo()
-                psVo.id = nearest.id
-                psVo.address = nearest.addressNation + nearest.addressProvince + nearest.addressCity + nearest.addressDistrict + nearest.addressStreet
-                psVo.longitude = nearest.position.longitude
-                psVo.latitude = nearest.position.latitude
-                psVo.wxQrCode = nearest.wxQrCode
-                psVo.positionId = nearest.positionId.toString()
-                psVo.companyId = nearest.companyId.toString()
-                psVo.status = nearest.status
-                psVo.name = nearest.name
-                psVo.imgUrl = ""
-
+                val psVo = printStationService.toPrintStationVo(nearest)
                 val priceMap: Map<Int, Int> = printStationService.getPriceMap(nearest)
                 psVo.products = productService.getProductsOfPrintStationAndCommonProduct(nearest.id).map {
                     val price = priceMap.getOrDefault(it.id, it.defaultPrice)
@@ -140,18 +118,7 @@ class ApiPrintStationRoute {
 
         val printStations = printStationDao.findByAddressNation("中国")
         val resultList = printStations.map { printStation ->
-            val psVo = PrintStationVo()
-            psVo.id = printStation.id
-            psVo.address = printStation.addressNation + printStation.addressProvince + printStation.addressCity + printStation.addressDistrict + printStation.addressStreet
-            psVo.longitude = printStation.position.longitude
-            psVo.latitude = printStation.position.latitude
-            psVo.wxQrCode = printStation.wxQrCode
-            psVo.positionId = printStation.positionId.toString()
-            psVo.companyId = printStation.companyId.toString()
-            psVo.status = printStation.status
-            psVo.name = printStation.name
-            psVo.imgUrl = ""
-            psVo
+            printStationService.toPrintStationVo(printStation)
         }
 
 

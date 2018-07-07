@@ -683,7 +683,8 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
                       "latitude": 39.95392,           //自助机位置维度
                       "positionId": xx,               //店面id
                       "companyId": xx,                //投放商id
-                      "status": x,                    //状态 (0: 正常, 1: 离线, 2: 故障, 3: 打印耗材用完)
+                      "status": x,                    //状态 (0: 正常, 1: 打印机脱机, 2：打印耗材用完 )
+                      "online": 1,                    //在线状态：1：在线   0：离线
                       "products": [
                               {
                                   "id": 1,                //产品ID
@@ -762,7 +763,8 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
                     "latitude": xxxx,
                     "positionId": xx,               //店面id
                     "companyId": xx,                //投放商id
-                    "status": x,                    //状态 (0: 正常, 1: 离线, 2: 故障, 3: 打印耗材用完)
+                    "status": x,                    //状态 (0: 正常, 1: 打印机脱机, 2：打印耗材用完 )
+                    "online": 1,                    //在线状态：1：在线   0：离线
                     "products": [
                             {
                                 "id": 1,                //产品ID
@@ -2137,7 +2139,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2018-07-07 21:33:27 +08:00
+Last updated 2018-07-07 22:25:17 +08:00
 </div>
 </div>
 </body>

@@ -44,6 +44,7 @@ data class PrintStationVo(var id: Int? = null,
                           var positionId: String? = null,
                           var companyId: String? = null,
                           var status: Int? = null,
+                          var online: Int? = null,
                           var products: MutableList<PrintStationProduct>? = null,
                           var imgUrl: String? = null)
 
