@@ -138,9 +138,10 @@ class ApiOrderRoute {
                              @RequestParam("y",required = false) y: Double?,
                              @RequestParam("scale",required = false) scale: Double?,
                              @RequestParam("rotate",required = false) rotate: Double?,
+                             @RequestParam("totalCount") totalCount: Int?,
                              @RequestParam("image") imgFile: MultipartFile?): ResponseEntity<UploadOrderImageResult> {
 
-        val allUploaded = printOrderService.uploadOrderImage(sessionId, orderItemId,name, imgFile, x ?: 0.0, y ?: 0.0, scale ?: 0.0, rotate ?: 0.0)
+        val allUploaded = printOrderService.uploadOrderImage(sessionId, orderItemId, name, imgFile, x ?: 0.0, y ?: 0.0, scale ?: 0.0, rotate ?: 0.0, totalCount ?: 0)
         return ResponseEntity.ok(UploadOrderImageResult(allUploaded))
     }
 

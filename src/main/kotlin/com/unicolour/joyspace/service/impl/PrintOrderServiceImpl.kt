@@ -311,7 +311,7 @@ open class PrintOrderServiceImpl : PrintOrderService {
                 orderImg.status = PrintOrderImageStatus.UPLOADED.value
 
                 printOrderImageDao.save(orderImg)
-                return checkOrderImageUploaded(orderImg.orderId)
+                return checkOrderImageUploaded(orderImg.orderId, 0)
             }
         }
         else {
@@ -323,7 +323,7 @@ open class PrintOrderServiceImpl : PrintOrderService {
 
 
     @Transactional
-    override fun uploadOrderImage(sessionId: String, orderItemId: Int, name: String, imgFile: MultipartFile?, x: Double, y: Double, scale: Double, rotate: Double): Boolean {
+    override fun uploadOrderImage(sessionId: String, orderItemId: Int, name: String, imgFile: MultipartFile?, x: Double, y: Double, scale: Double, rotate: Double, totalCount: Int): Boolean {
         val imgInfo = imageService.uploadImage(sessionId, imgFile)
         if (imgInfo.errcode == 0) {
             val orderImg = printOrderItemDao.findOne(orderItemId)
@@ -343,7 +343,7 @@ open class PrintOrderServiceImpl : PrintOrderService {
                 printOrderImageDao.save(printOrderImg)
                 printStationService.addDownLoadUserImgTask(orderImg.printOrder!!.printStationId, imgInfo.url)
 
-                return checkOrderImageUploaded(orderImg.printOrderId)
+                return checkOrderImageUploaded(orderImg.printOrderId, totalCount)
             }
         }
         else {
@@ -354,9 +354,9 @@ open class PrintOrderServiceImpl : PrintOrderService {
 
     //检查是否所有订单图片都已上传，如果都上传了返回true并修改订单状态
     @Synchronized
-    private fun checkOrderImageUploaded(orderId: Int) : Boolean {
-        val missingImageCount = printOrderImageDao.countByOrderIdAndUserImageFileIdIsNull(orderId)  //userImageFileId is null 表示此订单图片还没有上传
-        if (missingImageCount == 0L) {
+    private fun checkOrderImageUploaded(orderId: Int, totalCount: Int) : Boolean {
+        val imageCount = printOrderImageDao.countByOrderIdAndUserImageFileIdIsNotNull(orderId)  //userImageFileId is null 表示此订单图片还没有上传
+        return if (totalCount != 0 && imageCount == totalCount.toLong()) {
             val order = printOrderDao.findOne(orderId)
             order.imageFileUploaded = true
             order.updateTime = Calendar.getInstance()
@@ -365,10 +365,10 @@ open class PrintOrderServiceImpl : PrintOrderService {
                 //0元单直接生成打印任务
                 printStationService.createPrintStationTask(order.printStationId, PrintStationTaskType.PROCESS_PRINT_ORDER, order.id.toString())
             }
-            return true
+            true
         }
         else {
-            return false
+            false
         }
     }
 
@@ -383,7 +383,7 @@ open class PrintOrderServiceImpl : PrintOrderService {
             if (width * height > 19354.8) dpi = 180
 
             val imageDTOs = ArrayList<PrintOrderImageDTO>()
-            it.orderImages.forEach { img ->
+            it.orderImages.filter { it.userImageFile != null }.forEach { img ->
                 val userImgFile = img.userImageFile!!
                 val param = objectMapper.readValue(img.processParams, OrderImgProcessParam::class.java)
                 param.dpi = dpi
