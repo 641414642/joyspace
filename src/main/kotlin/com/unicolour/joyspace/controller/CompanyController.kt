@@ -2,6 +2,8 @@ package com.unicolour.joyspace.controller
 
 import com.unicolour.joyspace.dao.CompanyDao
 import com.unicolour.joyspace.dao.CompanyWxAccountDao
+import com.unicolour.joyspace.dao.ManagerDao
+import com.unicolour.joyspace.dao.VerifyCodeDao
 import com.unicolour.joyspace.dto.CommonRequestResult
 import com.unicolour.joyspace.dto.ResultCode
 import com.unicolour.joyspace.exception.ProcessException
@@ -20,6 +22,8 @@ import org.springframework.web.bind.annotation.RequestMethod
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.ResponseBody
 import org.springframework.web.servlet.ModelAndView
+import java.time.Duration
+import java.time.Instant
 
 @Controller
 class CompanyController {
@@ -45,6 +49,12 @@ class CompanyController {
 
     @Autowired
     lateinit var managerService: ManagerService
+
+    @Autowired
+    lateinit var verifyCodeDao: VerifyCodeDao
+
+    @Autowired
+    lateinit var managerDao: ManagerDao
 
     @RequestMapping("/company/list")
     fun companyList(
@@ -127,6 +137,91 @@ class CompanyController {
             return CommonRequestResult(ResultCode.OTHER_ERROR.value, msg)
         }
     }
+
+
+    @RequestMapping(path = arrayOf("/company/register"), method = arrayOf(RequestMethod.POST))
+    @ResponseBody
+    fun registerCompany(
+            @RequestParam(name = "name", required = true) name: String,
+            @RequestParam(name = "username", required = true) username: String,
+            @RequestParam(name = "fullname", required = true) fullname: String,
+            @RequestParam(name = "phone", required = true) phone: String,
+            @RequestParam(name = "email", required = true) email: String,
+            @RequestParam(name = "password", required = true) password: String,
+            @RequestParam(name = "verifyCode", required = true) verifyCode: String
+    ): CommonRequestResult {
+
+        return try {
+            val now = Instant.now()
+            val verifyCodeObj = verifyCodeDao.findOne(phone)
+            if (verifyCodeObj == null ||
+                    verifyCodeObj.code != verifyCode ||
+                    Duration.between(verifyCodeObj.sendTime.toInstant(), now).seconds > 60 * 10) {  //超过10分钟
+                throw ProcessException(ResultCode.INVALID_VERIFY_CODE)
+            }
+            companyService.createCompany(name.trim(), null, username.trim(), fullname, phone, email, password)
+            verifyCodeDao.delete(verifyCodeObj)
+            CommonRequestResult()
+        } catch (e: ProcessException) {
+            CommonRequestResult(e.errcode, e.message)
+        } catch (e: Exception) {
+            val msg = "注册失败"
+            CommonRequestResult(ResultCode.OTHER_ERROR.value, msg)
+        }
+    }
+
+
+    @RequestMapping(path = arrayOf("/company/sendVerifyCode"), method = arrayOf(RequestMethod.POST))
+    @ResponseBody
+    fun sendVerifyCode(
+            @RequestParam(name = "phone", required = true) phone: String
+    ): CommonRequestResult {
+
+        return try {
+            companyService.sendVerifyCode(phone)
+            CommonRequestResult()
+        } catch (e: ProcessException) {
+            CommonRequestResult(e.errcode, e.message)
+        } catch (e: Exception) {
+            val msg = "发送验证码失败"
+            CommonRequestResult(ResultCode.OTHER_ERROR.value, msg)
+        }
+    }
+
+
+    @RequestMapping(path = arrayOf("/company/resetPassword"), method = arrayOf(RequestMethod.POST))
+    @ResponseBody
+    fun resetPassword(
+            @RequestParam(name = "username", required = true) username: String,
+            @RequestParam(name = "phone", required = true) phone: String,
+            @RequestParam(name = "password", required = true) password: String,
+            @RequestParam(name = "verifyCode", required = true) verifyCode: String
+    ): CommonRequestResult {
+
+        return try {
+            val now = Instant.now()
+            val verifyCodeObj = verifyCodeDao.findOne(phone)
+            if (verifyCodeObj == null ||
+                    verifyCodeObj.code != verifyCode ||
+                    Duration.between(verifyCodeObj.sendTime.toInstant(), now).seconds > 60 * 10) {  //超过10分钟
+                throw ProcessException(ResultCode.INVALID_VERIFY_CODE)
+            }
+            val manager = managerDao.findByUserName(username)
+            if (manager == null || !manager.isEnabled) throw ProcessException(ResultCode.USER_NOT_FOUND)
+            managerService.resetPassword(manager.id, password)
+            CommonRequestResult()
+        } catch (e: ProcessException) {
+            CommonRequestResult(e.errcode, e.message)
+        } catch (e: Exception) {
+            val msg = "重置密码失败"
+            CommonRequestResult(ResultCode.OTHER_ERROR.value, msg)
+        }
+    }
+
+
+
+
+
 
     @RequestMapping("/company/wxAccountList", method = arrayOf(RequestMethod.GET))
     fun companyWxAccountList(modelAndView: ModelAndView): ModelAndView {
