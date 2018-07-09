@@ -3,33 +3,6 @@ function createOrEditProduct(event) {
     return showPostFormModal(event, 'editProductForm', null, true);
 }
 
-//预览广告图片
-function previewImage(input) {
-  if (input.files && input.files[0]) {
-    var reader = new FileReader();
-
-    reader.onload = function(e) {
-      $(input).parent()
-        .css('background-image', 'url(' + e.target.result + ')')
-        .css('background-size', 'cover')
-    }
-
-    reader.readAsDataURL(input.files[0]);
-  }
-}
-
-//添加编辑广告
-function createOrEditAdSet(event) {
-    $('#modalTemplate').removeClass().addClass("modal fade");
-    showModal(event, function() {
-         $('.ad_img_chooser').change(function() {
-            previewImage(this)
-            $(this).closest('tr').next().show()
-         });
-     });
-    return false;
-}
-
 //上传产品图片文件
 function manageProductImageFiles(event) {
     $('#modalTemplate').removeClass().addClass("modal fade");

@@ -30,10 +30,6 @@ class AdSet {
 
     @OneToMany(mappedBy = "adSet")
     lateinit var imageFiles: List<AdImageFile>
-
-    @NotNull
-    @Column
-    var publicResource: Boolean = false
 }
 
 /** 广告图片 */
@@ -73,6 +69,10 @@ class AdImageFile {
     @Column
     @NotNull
     var sequence: Int = 0
+
+    @NotNull
+    @Column
+    var enabled: Boolean = false
 
     /** 属于哪个广告集 */
     @Column(name = "ad_set_id", insertable = false, updatable = false)

@@ -3,24 +3,22 @@ package com.unicolour.joyspace.service.impl
 import com.unicolour.joyspace.dao.AdImageFileDao
 import com.unicolour.joyspace.dao.AdSetDao
 import com.unicolour.joyspace.dto.AdSetDTO
+import com.unicolour.joyspace.dto.AdSetImageDTO
 import com.unicolour.joyspace.dto.AdSetImageFileDTO
 import com.unicolour.joyspace.model.AdImageFile
 import com.unicolour.joyspace.model.AdSet
 import com.unicolour.joyspace.service.AdSetService
+import com.unicolour.joyspace.service.ImageService
 import com.unicolour.joyspace.service.ManagerService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
-import java.io.BufferedReader
+import org.springframework.web.multipart.MultipartFile
 import java.io.File
-import java.io.IOException
-import java.io.InputStreamReader
 import java.text.SimpleDateFormat
 import java.util.*
-import java.util.regex.Pattern
-import javax.servlet.http.Part
 import javax.transaction.Transactional
-import kotlin.collections.HashMap
+import kotlin.collections.ArrayList
 
 @Component
 open class AdSetServiceImpl : AdSetService {
@@ -39,10 +37,22 @@ open class AdSetServiceImpl : AdSetService {
     @Autowired
     lateinit var managerService : ManagerService
 
+    @Autowired
+    lateinit var imageServcie : ImageService
+
     private val dateTimeFormat: ThreadLocal<SimpleDateFormat> = ThreadLocal.withInitial { SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS") }
 
     override fun getAdImageUrl(adImageFile: AdImageFile): String {
         return "$baseUrl/assets/ad/${adImageFile.adSet.id}/images/${adImageFile.fileName}.${adImageFile.fileType}"
+    }
+
+    override fun getAdThumbImageUrl(adImageFile: AdImageFile): String {
+        val thumbFile = File(assetsDir, "/ad/${adImageFile.adSetId}/images/${adImageFile.fileName}.thumb.jpg")
+        if (!thumbFile.exists()) {
+            val file = File(assetsDir, "/ad/${adImageFile.adSetId}/images/${adImageFile.fileName}.${adImageFile.fileType}")
+            imageServcie.createThumbnailImageFile(file, "50x37^", thumbFile)
+        }
+        return "$baseUrl/assets/ad/${adImageFile.adSet.id}/images/${adImageFile.fileName}.thumb.jpg"
     }
 
     override fun adSetToDTO(adSet: AdSet?): AdSetDTO? {
@@ -53,7 +63,7 @@ open class AdSetServiceImpl : AdSetService {
                     id = adSet.id,
                     name = adSet.name,
                     updateTime = dateTimeFormat.get().format(Date(adSet.updateTime.timeInMillis)),
-                    imageFiles = adSet.imageFiles.map {
+                    imageFiles = adSet.imageFiles.filter { it.enabled }.map {
                         AdSetImageFileDTO(
                                 id = it.id,
                                 fileName = it.fileName,
@@ -70,63 +80,94 @@ open class AdSetServiceImpl : AdSetService {
         }
     }
 
-    private fun saveAdImageFiles(imgFiles: List<Pair<Part, Int>>, adSet: AdSet, seq: Int) {
-        var seq1 = seq
-        for (imgFile in imgFiles) {
-            val uuid = UUID.randomUUID().toString().replace("-", "")
-            val file = File(assetsDir, "/ad/${adSet.id}/images/${uuid}")
-            file.parentFile.mkdirs()
+    private fun saveAdImageFiles(imgFiles: List<AdSetImageDTO>, adSet: AdSet) {
+        val imgFileIdSet = imgFiles.map { it.adImgId }.filter { it > 0 }.toSet()
+        val imgFileToDelete = adSet.imageFiles.filter { !imgFileIdSet.contains(it.id) }
 
-            imgFile.first.write(file.absolutePath)
+        var seq1 = 1
 
-            val pb = ProcessBuilder("magick", "identify", file.absolutePath)
+        for (imgFileDTO in imgFiles) {
+            val adSetImagesDir = File(assetsDir, "/ad/${adSet.id}/images")
+            adSetImagesDir.mkdirs()
 
-            val process = pb.start()
+            if (imgFileDTO.adImgId > 0) {
+                val adImgFile = adImageFileDao.findOne(imgFileDTO.adImgId)
 
-            var retStr = ""
-            BufferedReader(InputStreamReader(process.inputStream)).use { reader ->
-                retStr = reader.readText()
-            }
+                if (adImgFile != null && adImgFile.adSetId == adSet.id) {
+                    adImgFile.sequence = seq1++
+                    adImgFile.duration = imgFileDTO.duration
+                    adImgFile.enabled = imgFileDTO.enabled
 
-            val retCode = process.waitFor()
+                    if (imgFileDTO.uploadFileName != "") {
+                        val uploadFile = File(assetsDir, "/ad/images/${imgFileDTO.uploadFileName}")
+                        val uploadThumbFile = File(assetsDir, "/ad/images/${imgFileDTO.uploadFileName}.thumb.jpg")
 
-            if (retCode != 0) {
-                file.delete()
-                throw IOException("not valid image file")
-            } else {
-                val patternStr = Pattern.quote(file.absolutePath) + "\\s(\\w+)\\s(\\d+)x(\\d+)\\s.*"
-                val pattern = Pattern.compile(patternStr)
-                val matcher = pattern.matcher(retStr)
+                        val dimensionAndType = imageServcie.getImageFileDimensionAndType(uploadFile)
 
-                matcher.find()
+                        val uuid = UUID.randomUUID().toString().replace("-", "")
 
-                var imgType = matcher.group(1).toLowerCase()
-                if (imgType == "jpeg") {
-                    imgType = "jpg"
+                        adImgFile.fileName = uuid
+                        adImgFile.fileType = dimensionAndType.type
+                        adImgFile.width = dimensionAndType.width
+                        adImgFile.height = dimensionAndType.height
+
+                        val file = File(assetsDir, "/ad/${adSet.id}/images/$uuid.${dimensionAndType.type}")
+                        val thumbFile = File(assetsDir, "/ad/${adSet.id}/images/$uuid.thumb.jpg")
+
+                        uploadFile.renameTo(file)
+                        uploadThumbFile.renameTo(thumbFile)
+                    }
+
+                    adImageFileDao.save(adImgFile)
                 }
-                val imgWid = matcher.group(2).toInt()
-                val imgHei = matcher.group(3).toInt()
-
-                val adImageFile = AdImageFile()
-                adImageFile.adSet = adSet
-                adImageFile.fileName = uuid
-                adImageFile.description = ""
-                adImageFile.duration = imgFile.second
-                adImageFile.fileType = imgType
-                adImageFile.width = imgWid
-                adImageFile.height = imgHei
-                adImageFile.sequence = seq1++
-
-                val fileWithExt = File(file.parent, "${file.name}.$imgType")
-                file.renameTo(fileWithExt)
-
-                adImageFileDao.save(adImageFile)
             }
+            else if (imgFileDTO.uploadFileName == "") {
+                continue
+            }
+            else {
+                val uploadFile = File(assetsDir, "/ad/images/${imgFileDTO.uploadFileName}")
+                val uploadThumbFile = File(assetsDir, "/ad/images/${imgFileDTO.uploadFileName}.thumb.jpg")
+
+                val dimensionAndType = imageServcie.getImageFileDimensionAndType(uploadFile)
+
+                val uuid = UUID.randomUUID().toString().replace("-", "")
+
+                val adImgFile = AdImageFile()
+                adImgFile.adSet = adSet
+                adImgFile.fileName = uuid
+                adImgFile.description = ""
+                adImgFile.duration = imgFileDTO.duration
+                adImgFile.enabled = imgFileDTO.enabled
+                adImgFile.fileType = dimensionAndType.type
+                adImgFile.width = dimensionAndType.width
+                adImgFile.height = dimensionAndType.height
+                adImgFile.sequence = seq1++
+
+                val file = File(assetsDir, "/ad/${adSet.id}/images/$uuid.${dimensionAndType.type}")
+                val thumbFile = File(assetsDir, "/ad/${adSet.id}/images/$uuid.thumb.jpg")
+
+                uploadFile.renameTo(file)
+                uploadThumbFile.renameTo(thumbFile)
+
+                adImageFileDao.save(adImgFile)
+            }
+        }
+
+        //删除已经不存在的id对应的图片
+        imgFileToDelete.forEach {
+            val file = File(assetsDir, "/ad/${adSet.id}/images/${it.fileName}.${it.fileType}")
+            val thumbFile = File(assetsDir, "/ad/${adSet.id}/images/${it.fileName}.thumb.jpg")
+
+            file.delete()
+            thumbFile.delete()
+
+            adImageFileDao.delete(it.id)
         }
     }
 
     @Transactional
-    override fun createAdSet(name: String, publicResource: Boolean, imgFiles: List<Pair<Part, Int>>) {
+    override fun createAdSet(name: String, publicResource: Boolean, imgFiles: List<AdSetImageDTO>) {
+        val isSuperAdmin = managerService.loginManagerHasRole("ROLE_SUPERADMIN")
         val loginManager = managerService.loginManager
         val now = Calendar.getInstance()
 
@@ -134,36 +175,50 @@ open class AdSetServiceImpl : AdSetService {
         adSet.name = name
         adSet.createTime = now
         adSet.updateTime = now
-        adSet.companyId = loginManager!!.companyId
-        adSet.publicResource = publicResource
+        adSet.companyId = if (publicResource && isSuperAdmin) 0 else loginManager!!.companyId
+        adSet.imageFiles = ArrayList()
 
         adSetDao.save(adSet)
 
-        saveAdImageFiles(imgFiles, adSet, 1)
+        saveAdImageFiles(imgFiles, adSet)
     }
 
     @Transactional
-    override fun updateAdSet(id: Int, name: String, publicResource: Boolean, imgFiles: List<Pair<Part, Int>>, adSetIdDurationMap: HashMap<Int, Int>): Boolean {
+    override fun updateAdSet(id: Int, name: String, publicResource: Boolean, imgFiles: List<AdSetImageDTO>): Boolean {
+        val isSuperAdmin = managerService.loginManagerHasRole("ROLE_SUPERADMIN")
+        val loginManager = managerService.loginManager
         val adSet = adSetDao.findOne(id)
-        if (adSet == null) {
-            return false
+        return if (adSet == null) {
+            false
         }
         else {
             adSet.name = name
             adSet.updateTime = Calendar.getInstance()
-            adSet.publicResource = publicResource
+            adSet.companyId = if (publicResource && isSuperAdmin) 0 else adSet.companyId
 
             adSetDao.save(adSet)
 
-            saveAdImageFiles(imgFiles, adSet, adSet.imageFiles.map { it.sequence }.max() ?: 0 + 1)
+            saveAdImageFiles(imgFiles, adSet)
 
-            adSetIdDurationMap.forEach { k, v ->
-                val adImg = adImageFileDao.findOne(k)
-                adImg.duration = v
-                adImageFileDao.save(adImg)
-            }
+            true
+        }
+    }
 
-            return true
+    override fun uploadAdSetImageFile(imageFile: MultipartFile?): Array<String>? {
+        return if (imageFile != null) {
+            val uuid = UUID.randomUUID().toString()
+            val file = File(assetsDir, "/ad/images/$uuid")
+            val thumbFile = File(assetsDir, "/ad/images/$uuid.thumb.jpg")
+            file.parentFile.mkdirs()
+
+            imageFile.transferTo(file)
+
+            imageServcie.createThumbnailImageFile(file, "50x37^", thumbFile)
+
+            arrayOf(uuid, "$baseUrl/assets/ad/images/${thumbFile.name}")
+        }
+        else {
+            null
         }
     }
 }

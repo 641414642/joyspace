@@ -2,6 +2,7 @@ package com.unicolour.joyspace.service.impl
 
 import com.unicolour.joyspace.dao.*
 import com.unicolour.joyspace.dto.CommonRequestResult
+import com.unicolour.joyspace.dto.ImageFileDimensionAndType
 import com.unicolour.joyspace.dto.ImageInfo
 import com.unicolour.joyspace.model.UserImageFile
 import com.unicolour.joyspace.service.ImageService
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Service
 import org.springframework.web.multipart.MultipartFile
 import java.io.BufferedReader
 import java.io.File
+import java.io.IOException
 import java.io.InputStreamReader
 import java.util.*
 import java.util.regex.Pattern
@@ -214,6 +216,45 @@ class ImageServiceImpl : ImageService {
     override fun getImageFileUrl(userImgFile: UserImageFile): String {
         val file = File(assetsDir, "/user/${userImgFile.userId}/${userImgFile.sessionId}/${userImgFile.fileName}.${userImgFile.type}")
         return file.toURI().toURL().toExternalForm()
+    }
+
+    override fun getImageFileDimensionAndType(imageFile: File): ImageFileDimensionAndType {
+        val pb = ProcessBuilder("magick", "identify", imageFile.absolutePath)
+
+        val process = pb.start()
+
+        var retStr = ""
+        BufferedReader(InputStreamReader(process.inputStream)).use { reader ->
+            retStr = reader.readText()
+        }
+
+        val retCode = process.waitFor()
+
+        if (retCode != 0) {
+            imageFile.delete()
+            throw IOException("not valid image file")
+        } else {
+            val patternStr = Pattern.quote(imageFile.absolutePath) + "\\s(\\w+)\\s(\\d+)x(\\d+)\\s.*"
+            val pattern = Pattern.compile(patternStr)
+            val matcher = pattern.matcher(retStr)
+
+            matcher.find()
+
+            var imgType = matcher.group(1).toLowerCase()
+            if (imgType == "jpeg") {
+                imgType = "jpg"
+            }
+            val imgWid = matcher.group(2).toInt()
+            val imgHei = matcher.group(3).toInt()
+
+            return ImageFileDimensionAndType(width = imgWid, height = imgHei, type = imgType)
+        }
+    }
+
+    override fun createThumbnailImageFile(srcImgFile: File, geometry: String, thumbImgFile: File) {
+        val pb = ProcessBuilder("magick", "convert", "-resize", geometry, srcImgFile.absolutePath, thumbImgFile.absolutePath)
+        val process = pb.start()
+        process.waitFor()
     }
 }
 
