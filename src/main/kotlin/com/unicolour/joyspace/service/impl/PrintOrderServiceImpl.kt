@@ -741,12 +741,12 @@ open class PrintOrderServiceImpl : PrintOrderService {
     private fun getUntransferedPrintOrders(companyId: Int): List<PrintOrder> {
         val orderList = printOrderDao.findByCompanyIdAndPayedIsTrueAndTransferedIsFalse(companyId)
         val notTransferedOrders = ArrayList<PrintOrder>()
-        val now = System.currentTimeMillis()
+//        val now = System.currentTimeMillis()
 
         for (printOrder in orderList) {
-            if (printOrder.createTime.timeInMillis < now - 1000 * 60 * 60 * 24) {  //过滤掉1天前的订单（临时)
-                continue
-            }
+//            if (printOrder.createTime.timeInMillis < now - 1000 * 60 * 60 * 24) {  //过滤掉1天前的订单（临时)
+//                continue
+//            }
 
             val transferRecordItem = wxEntTransferRecordItemDao.findByPrintOrderId(printOrder.id)
             if (transferRecordItem == null) {
