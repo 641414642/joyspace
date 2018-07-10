@@ -2,12 +2,11 @@ package com.unicolour.joyspace.service.impl
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.unicolour.joyspace.dao.*
-import com.unicolour.joyspace.dto.IDPhotoParam
-import com.unicolour.joyspace.dto.ImageParam
-import com.unicolour.joyspace.dto.PreviewParam
-import com.unicolour.joyspace.dto.TemplatePreviewResult
+import com.unicolour.joyspace.dto.*
 import com.unicolour.joyspace.exception.NoPermissionException
 import com.unicolour.joyspace.model.*
+import com.unicolour.joyspace.model.ProductType
+import com.unicolour.joyspace.model.Scene
 import com.unicolour.joyspace.service.ImageService
 import com.unicolour.joyspace.service.ManagerService
 import com.unicolour.joyspace.service.PrintStationService
@@ -89,6 +88,9 @@ open class TemplateServiceImpl : TemplateService {
 
     @Autowired
     lateinit var objectMapper: ObjectMapper
+
+    @Autowired
+    lateinit var sceneDao: SceneDao
 
     private fun toMM(value:String) : Double {
         if (value.endsWith("mm")) {
@@ -330,11 +332,132 @@ open class TemplateServiceImpl : TemplateService {
 
             templateDao.save(tpl)
 
-            saveTemplateFiles(tpl, templateFile)
+            saveTemplateOrAlbumFiles(tpl, templateFile)
         }
         else {
             throw NoPermissionException("Login required")
         }
+    }
+
+
+    private fun saveTemplateOrAlbumFiles(tpl: Template, templateFile: MultipartFile) {
+        val productionTplPackFile = File(assetsDir, "template/production/${tpl.id}_v${tpl.currentVersion}_${tpl.uuid}.zip")
+        productionTplPackFile.parentFile.mkdirs()
+
+        templateFile.inputStream.use {
+            Files.copy(it, productionTplPackFile.toPath(), StandardCopyOption.REPLACE_EXISTING)
+        }
+
+        val tplDir = File(assetsDir, "template/preview/${tpl.id}_v${tpl.currentVersion}")
+        val previewImgDir = File(tplDir, "images")
+        previewImgDir.mkdirs()
+
+        ZipInputStream(productionTplPackFile.inputStream()).use {
+            var entry: ZipEntry? = it.nextEntry
+            while (entry != null) {
+                if (!entry.isDirectory) {
+                    var isTplJsonFile = false
+                    var fileName = entry.name
+                    if (fileName.toLowerCase().endsWith(".json")) {
+                        fileName = "template.json"
+                        isTplJsonFile = true
+                    }
+                    if (isTplJsonFile) {
+                        val targetFile = File(tplDir, fileName)
+                        targetFile.parentFile.mkdirs()
+                        targetFile.outputStream().use { out -> it.copyTo(out) }
+                        generateTemplateInfo(tpl, targetFile)
+                    } else if (isImgFile(fileName)) {
+                        fileName = fileName.substringAfterLast("/")
+                        val targetFile = File(previewImgDir, fileName)
+                        targetFile.parentFile.mkdirs()
+                        targetFile.outputStream().use { out -> it.copyTo(out) }
+                    }
+                }
+                entry = it.nextEntry
+            }
+        }
+    }
+
+    private fun generateTemplateInfo(template: Template, tplSvgFile: File) {
+        val templateVo = objectMapper.readValue(tplSvgFile, TemplateVo::class.java)
+        if (templateVo.scenes.size > 1) {
+            //相册
+            val tplImages = ArrayList<TemplateImageInfo>()
+            val albumImagesPath = "${assetsDir}template/preview/${template.id}_v${template.currentVersion}/images"
+            template.type = ProductType.ALBUM.value
+            template.name = templateVo.name
+            templateVo.scenes.forEachIndexed { index, it ->
+                val tpl = Template()
+                tpl.currentVersion = 1
+                tpl.minImageCount = 0
+                tpl.name = it.name
+                tpl.type = ProductType.SCENE.value
+                tpl.width = it.width
+                tpl.height = it.height
+                tpl.uuid = UUID.randomUUID().toString().replace("-", "")
+                tpl.deleted = false
+                templateDao.save(tpl)
+                val tplDir = File(assetsDir, "template/preview/${tpl.id}_v${tpl.currentVersion}")
+                tplDir.mkdirs()
+                val previewImgDir = File(tplDir, "images")
+                previewImgDir.mkdirs()
+                val scene = Scene()
+                scene.album = template
+                scene.template = tpl
+                scene.name = tpl.name
+                scene.index = index
+                scene.deleted = false
+                sceneDao.save(scene)
+                it.layers.forEach { layer ->
+                    layer.images.forEach {
+                        val tplImg = TemplateImageInfo()
+                        tplImg.templateId = tpl.id
+                        tplImg.templateVersion = tpl.currentVersion
+                        tplImg.width = it.width
+                        tplImg.height = it.height
+                        tplImg.x = it.x
+                        tplImg.y = it.y
+                        tplImg.href = if (it.resourceURL.isEmpty()) "" else "images/".plus(it.resourceURL)
+                        tplImg.layerType = LayerType.valueOf(layer.type.toUpperCase()).value
+                        tplImg.type = TemplateImageType.valueOf(it.type.toUpperCase()).value
+                        tplImg.userImage = tplImg.type == TemplateImageType.USER.value
+                        tplImages.add(tplImg)
+                        val albumImgFile = File(albumImagesPath,it.resourceURL)
+                        val tplImgFile = File(tplDir, tplImg.href)
+                        albumImgFile.copyTo(tplImgFile)
+                    }
+                }
+            }
+            templateDao.save(template)
+            templateImageInfoDao.save(tplImages)
+        } else {
+            //模板拼图
+            val tplImages = ArrayList<TemplateImageInfo>()
+            template.type = ProductType.TEMPLATE.value
+            template.name = templateVo.name
+            templateVo.scenes.forEach {
+                it.layers.forEach { layer ->
+                    layer.images.forEach {
+                        val tplImg = TemplateImageInfo()
+                        tplImg.templateId = template.id
+                        tplImg.templateVersion = template.currentVersion
+                        tplImg.width = it.width
+                        tplImg.height = it.height
+                        tplImg.x = it.x
+                        tplImg.y = it.y
+                        tplImg.href = if (it.resourceURL.isEmpty()) "" else "images/".plus(it.resourceURL)
+                        tplImg.layerType = LayerType.valueOf(layer.type.toUpperCase()).value
+                        tplImg.type = TemplateImageType.valueOf(it.type.toUpperCase()).value
+                        tplImg.userImage = tplImg.type == TemplateImageType.USER.value
+                        tplImages.add(tplImg)
+                    }
+                }
+            }
+            templateDao.save(template)
+            templateImageInfoDao.save(tplImages)
+        }
+
     }
 
     private fun saveTemplateFiles(tpl: Template, templateFile: MultipartFile) {

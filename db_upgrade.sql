@@ -109,8 +109,8 @@ insert into icc_config (printer_model, os_name, icc_file_name) values ('CY', nul
 insert into icc_config (printer_model, os_name, icc_file_name) values ('EPSON SL-D700', null, 'UNI-D700-WIN-PDPPG-HOME-b104-1500-20180608-4.icm');
 
 
-alter table template add column angle_clip DOUBLE default 0.0 not null;
-UPDATE template set angle_clip=0.0;
+alter table template_image_info add column angle_clip DOUBLE default 0.0 not null;
+UPDATE template_image_info set angle_clip=0.0;
 UPDATE template_image_info set layer_type=2;
 UPDATE template_image_info set type=0;
 
