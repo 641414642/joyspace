@@ -384,7 +384,7 @@ open class TemplateServiceImpl : TemplateService {
         if (templateVo.scenes.size > 1) {
             //相册
             val tplImages = ArrayList<TemplateImageInfo>()
-            val albumImagesPath = "${assetsDir}template/preview/${template.id}_v${template.currentVersion}/images"
+            val albumImagesPath = "$assetsDir/template/preview/${template.id}_v${template.currentVersion}/images"
             template.type = ProductType.ALBUM.value
             template.name = templateVo.name
             templateVo.scenes.forEachIndexed { index, it ->
@@ -423,9 +423,11 @@ open class TemplateServiceImpl : TemplateService {
                         tplImg.type = TemplateImageType.valueOf(it.type.toUpperCase()).value
                         tplImg.userImage = tplImg.type == TemplateImageType.USER.value
                         tplImages.add(tplImg)
-                        val albumImgFile = File(albumImagesPath,it.resourceURL)
-                        val tplImgFile = File(tplDir, tplImg.href)
-                        albumImgFile.copyTo(tplImgFile)
+                        if (!tplImg.href.isNullOrEmpty()) {
+                            val albumImgFile = File(albumImagesPath,it.resourceURL)
+                            val tplImgFile = File(tplDir, tplImg.href)
+                            albumImgFile.copyTo(tplImgFile)
+                        }
                     }
                 }
             }
