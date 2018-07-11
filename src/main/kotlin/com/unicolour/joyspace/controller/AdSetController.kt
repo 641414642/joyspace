@@ -48,9 +48,6 @@ class AdSetController {
         val pageable = PageRequest(pageno - 1, 20, Sort.Direction.DESC, "id")
         val adSets = adSetDao.queryAdSets(pageable, companyId, name ?: "", true)
 
-        class AdImageFileInfo(val id: Int, val duration: Int, val url: String)
-        class AdSetInfo(val adSet: AdSet, val adImageFiles: List<AdImageFileInfo>, val editable:Boolean, val companyName: String)
-
         val companyIdNameMap = HashMap<Int, String>()
         val ads = adSets.map {
             AdSetInfo(
@@ -62,7 +59,9 @@ class AdSetController {
                         AdImageFileInfo(
                                 id = imgFile.id,
                                 url = adSetService.getAdThumbImageUrl(imgFile),
-                                duration = imgFile.duration
+                                duration = imgFile.duration,
+                                width = imgFile.width,
+                                height = imgFile.height
                         )
                     },
                     editable = isSuperAdmin || it.companyId == loginManager!!.companyId
@@ -194,4 +193,34 @@ class AdSetController {
 
         return modelAndView
     }
+
+    @GetMapping("/adSet/preview/{adSetId}")
+    fun previewAdSet(modelAndView: ModelAndView, @PathVariable("adSetId") adSetId: Int): ModelAndView {
+        val loginManager = managerService.loginManager
+        val isSuperAdmin = managerService.loginManagerHasRole("ROLE_SUPERADMIN")
+
+        val adSet = adSetDao.findOne(adSetId)
+        if (adSet == null || adSet.companyId > 0 && adSet.companyId != loginManager!!.companyId && !isSuperAdmin) {
+            modelAndView.viewName = "empty"
+        }
+        else {
+            modelAndView.model["adName"] = adSet.name
+            modelAndView.model["adImages"] = adSet.imageFiles.sortedBy { it.sequence }.map { imgFile ->
+                AdImageFileInfo(
+                        id = imgFile.id,
+                        url = adSetService.getAdImageUrl(imgFile),
+                        duration = imgFile.duration,
+                        width = imgFile.width,
+                        height = imgFile.height
+                )
+            }
+
+            modelAndView.viewName = "/adSet/preview"
+        }
+
+        return modelAndView
+    }
 }
+
+internal class AdImageFileInfo(val id: Int, val duration: Int, val url: String, val width: Int, val height: Int)
+internal class AdSetInfo(val adSet: AdSet, val adImageFiles: List<AdImageFileInfo>, val editable:Boolean, val companyName: String)
