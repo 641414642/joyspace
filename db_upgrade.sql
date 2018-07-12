@@ -118,6 +118,5 @@ UPDATE template_image_info set angle_clip=0.0;
 UPDATE template_image_info set layer_type=2;
 UPDATE template_image_info set type=0;
 
---todo 所有自助机默认支持模板拼图和相册 (后台还无法录入)
 
 ALTER TABLE address ADD deleted BOOLEAN default false NOT NULL;
