@@ -193,7 +193,7 @@ class PrintStationController {
 
         modelAndView.model["printStation"] = printStation
         modelAndView.model["positions"] = positionDao.findByCompanyId(companyId)
-        modelAndView.model["adSets"] = adSetDao.findByCompanyIdOrPublicResourceIsTrue(companyId)
+        modelAndView.model["adSets"] = adSetDao.queryAdSets(companyId, "", true)
         modelAndView.model["photo_products"] = products.filter { it.productType == ProductType.PHOTO.value }
         modelAndView.model["template_products"] = products.filter { it.productType == ProductType.TEMPLATE.value }
         modelAndView.model["id_photo_products"] = products.filter { it.productType == ProductType.ID_PHOTO.value }

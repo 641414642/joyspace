@@ -108,6 +108,10 @@ COMMENT ON COLUMN product.refined IS '专家精修';
 insert into icc_config (printer_model, os_name, icc_file_name) values ('CY', null, 'UNI-CY-WIN-PPG-HOME-b104-1500-20180608-4.icm');
 insert into icc_config (printer_model, os_name, icc_file_name) values ('EPSON SL-D700', null, 'UNI-D700-WIN-PDPPG-HOME-b104-1500-20180608-4.icm');
 
+alter table ad_set drop column public_resource;
+update ad_set set company_id = 0;
+alter table ad_image_file add column enabled boolean default true not null;
+
 
 alter table template_image_info add column angle_clip DOUBLE default 0.0 not null;
 UPDATE template_image_info set angle_clip=0.0;

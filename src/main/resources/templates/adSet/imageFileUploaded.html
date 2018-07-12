@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<meta charset="utf-8" />
+	<script th:inline="javascript">
+	/*<![CDATA[*/
+		var tempAdSetImgFileName = [[${tempAdSetImgFileName}]];
+		var thumbUrl = [[${thumbUrl}]];
+		parent.displayNewImgRow(tempAdSetImgFileName, thumbUrl);
+	/*]]>*/
+	</script>
+</head>
+<body>
+</body>
+</html>

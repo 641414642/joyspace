@@ -1,7 +1,9 @@
 package com.unicolour.joyspace.controller
 
-import com.unicolour.joyspace.dao.*
-import com.unicolour.joyspace.model.*
+import com.unicolour.joyspace.dao.AdSetDao
+import com.unicolour.joyspace.dao.CompanyDao
+import com.unicolour.joyspace.dto.AdSetImageDTO
+import com.unicolour.joyspace.model.AdSet
 import com.unicolour.joyspace.service.AdSetService
 import com.unicolour.joyspace.service.ManagerService
 import com.unicolour.joyspace.util.Pager
@@ -9,11 +11,10 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Controller
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RequestMethod
-import org.springframework.web.bind.annotation.RequestParam
-import org.springframework.web.bind.annotation.ResponseBody
+import org.springframework.web.bind.annotation.*
+import org.springframework.web.multipart.MultipartFile
 import org.springframework.web.servlet.ModelAndView
+import java.nio.charset.StandardCharsets
 import java.util.*
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.Part
@@ -31,6 +32,9 @@ class AdSetController {
     @Autowired
     lateinit var adSetService: AdSetService
 
+    @Autowired
+    lateinit var companyDao: CompanyDao
+
     @RequestMapping("/adSet/list")
     fun adSetList(
             modelAndView: ModelAndView,
@@ -38,25 +42,29 @@ class AdSetController {
             @RequestParam(name = "pageno", required = false, defaultValue = "1") pageno: Int): ModelAndView {
 
         val loginManager = managerService.loginManager
+        val isSuperAdmin = managerService.loginManagerHasRole("ROLE_SUPERADMIN")
+        val companyId = if (isSuperAdmin) null else loginManager!!.companyId
 
         val pageable = PageRequest(pageno - 1, 20, Sort.Direction.DESC, "id")
-        val adSets = if (name == null || name == "")
-            adSetDao.findByCompanyId(loginManager!!.companyId, pageable)
-        else
-            adSetDao.findByNameIgnoreCaseAndCompanyId(name, loginManager!!.companyId, pageable)
+        val adSets = adSetDao.queryAdSets(pageable, companyId, name ?: "", true)
 
-        class AdSetInfo(val adSet: AdSet, val adImageFiles: List<AdImageFileInfo>)
-
+        val companyIdNameMap = HashMap<Int, String>()
         val ads = adSets.map {
             AdSetInfo(
                     adSet = it,
-                    adImageFiles = it.imageFiles.map { imgFile ->
+                    companyName = if (it.companyId <= 0) "" else companyIdNameMap.computeIfAbsent(it.companyId, { companyId ->
+                       companyDao.findOne(companyId)?.name ?: ""
+                    }),
+                    adImageFiles = it.imageFiles.sortedBy { it.sequence }.map { imgFile ->
                         AdImageFileInfo(
                                 id = imgFile.id,
-                                url = adSetService.getAdImageUrl(imgFile),
-                                duration = imgFile.duration
+                                url = adSetService.getAdThumbImageUrl(imgFile),
+                                duration = imgFile.duration,
+                                width = imgFile.width,
+                                height = imgFile.height
                         )
-                    }
+                    },
+                    editable = isSuperAdmin || it.companyId == loginManager!!.companyId
             )
         }
         modelAndView.model.put("inputAdSetName", name)
@@ -79,17 +87,30 @@ class AdSetController {
             @RequestParam(name = "id", required = true) id: Int): ModelAndView {
         val loginManager = managerService.loginManager
 
+        val rows = ArrayList<AdSetImageDTO>()
+
         var adSet: AdSet? = null
-        var imageFiles: List<AdImageFileInfo> = emptyList()
+        var index = 0
         if (id > 0) {
             adSet = adSetDao.findOne(id)
-            imageFiles = adSet.imageFiles.map {
-                AdImageFileInfo(
-                        id = it.id,
-                        url = adSetService.getAdImageUrl(it),
-                        duration = it.duration
+            rows.addAll(adSet.imageFiles.sortedBy { it.sequence }.map {
+                AdSetImageDTO(
+                        index = index++,
+                        adImgId = it.id,
+                        url = adSetService.getAdThumbImageUrl(it),
+                        duration = it.duration,
+                        enabled = it.enabled
                 )
-            }
+            })
+        }
+
+        for (i in index..99) {
+            rows.add(AdSetImageDTO(
+                    index = index++,
+                    adImgId = 0,
+                    url = "",
+                    duration = 5
+            ))
         }
 
         if (adSet == null) {
@@ -101,15 +122,23 @@ class AdSetController {
             adSet.updateTime = now
             adSet.imageFiles = emptyList()
             adSet.companyId = loginManager!!.companyId
-            adSet.publicResource = true
         }
 
-        modelAndView.model.put("create", id <= 0)
-        modelAndView.model.put("adSet", adSet)
-        modelAndView.model.put("adImageFiles", imageFiles)
+        modelAndView.model["create"] = id <= 0
+        modelAndView.model["adSet"] = adSet
+        modelAndView.model["rows"] = rows
         modelAndView.viewName = "/adSet/edit :: content"
 
         return modelAndView
+    }
+
+    private fun readPartValue(part: Part): String? {
+        return if (part.size == 0L) {
+            null
+        }
+        else {
+            part.inputStream.readBytes().toString(StandardCharsets.UTF_8)
+        }
     }
 
     @RequestMapping(path = arrayOf("/adSet/edit"), method = arrayOf(RequestMethod.POST))
@@ -121,41 +150,77 @@ class AdSetController {
             @RequestParam(name = "publicResource", required = false, defaultValue = "false") publicResource: Boolean,
             @RequestParam(name = "name", required = true) name: String): ModelAndView {
 
-        val adImageFiles = ArrayList<Pair<Part, Int>>()
-        for (i in 1 .. 100) {
-            val imgFile = request.getPart("imageFile$i")
-            if (imgFile.size > 0) {
-                val duration = request.getPart("duration$i")
-                if (duration.size > 0) {
-                    val durationVal = duration.inputStream.use { it.reader().readText().toInt() }
-                    if (durationVal > 0) {
-                        adImageFiles.add(imgFile to durationVal)
-                    }
-                }
+        val adImageFiles = ArrayList<AdSetImageDTO>()
+        for (i in 0..99) {
+            val adImgIdPart = request.getPart("adImgId_$i")
+            val durationPart = request.getPart("duration_$i")
+            val uploadFileNamePart = request.getPart("uploadFileName_$i")
+            val sequencePart = request.getPart("sequence_$i")
+            val enabledPart = request.getPart("enabled_$i")
+
+            if (adImgIdPart != null && durationPart != null && uploadFileNamePart != null && sequencePart != null) {
+                adImageFiles += AdSetImageDTO(
+                        index = i,
+                        adImgId = readPartValue(adImgIdPart)?.toInt() ?: 0,
+                        duration = readPartValue(durationPart)?.toInt() ?: 0,
+                        uploadFileName = readPartValue(uploadFileNamePart) ?: "",
+                        sequence = readPartValue(sequencePart)?.toInt() ?: 0,
+                        enabled = if (enabledPart == null) false else readPartValue(enabledPart) == "on"
+                )
             }
         }
+        adImageFiles.sortBy { it.sequence }
 
         if (id <= 0) {
             adSetService.createAdSet(name, publicResource, adImageFiles)
         } else {
-            val adSetIdDurationMap = HashMap<Int, Int>()
-            val adSet = adSetDao.findOne(id)
-            adSet.imageFiles.forEach {
-                val duration = request.getPart("duration_${it.id}")
-                if (duration.size > 0) {
-                    val durationVal = duration.inputStream.use { it.reader().readText().toInt() }
-                    if (durationVal > 0) {
-                        adSetIdDurationMap[it.id] = durationVal
-                    }
-                }
-            }
-
-            adSetService.updateAdSet(id, name, publicResource, adImageFiles, adSetIdDurationMap)
+            adSetService.updateAdSet(id, name, publicResource, adImageFiles)
         }
 
         modelAndView.viewName = "adSet/adSetEditCompleted"
         return modelAndView
     }
+
+    @PostMapping("/adSet/uploadImageFile")
+    fun uplaodAdSetImage(modelAndView: ModelAndView, @RequestParam("imageFile") imageFile: MultipartFile?): ModelAndView {
+        val fileNameAndThumbUrl = adSetService.uploadAdSetImageFile(imageFile)
+
+        if (fileNameAndThumbUrl != null) {
+            modelAndView.viewName = "/adSet/imageFileUploaded"
+            modelAndView.model["tempAdSetImgFileName"] = fileNameAndThumbUrl[0]
+            modelAndView.model["thumbUrl"] = fileNameAndThumbUrl[1]
+        }
+
+        return modelAndView
+    }
+
+    @GetMapping("/adSet/preview/{adSetId}")
+    fun previewAdSet(modelAndView: ModelAndView, @PathVariable("adSetId") adSetId: Int): ModelAndView {
+        val loginManager = managerService.loginManager
+        val isSuperAdmin = managerService.loginManagerHasRole("ROLE_SUPERADMIN")
+
+        val adSet = adSetDao.findOne(adSetId)
+        if (adSet == null || adSet.companyId > 0 && adSet.companyId != loginManager!!.companyId && !isSuperAdmin) {
+            modelAndView.viewName = "empty"
+        }
+        else {
+            modelAndView.model["adName"] = adSet.name
+            modelAndView.model["adImages"] = adSet.imageFiles.sortedBy { it.sequence }.map { imgFile ->
+                AdImageFileInfo(
+                        id = imgFile.id,
+                        url = adSetService.getAdImageUrl(imgFile),
+                        duration = imgFile.duration,
+                        width = imgFile.width,
+                        height = imgFile.height
+                )
+            }
+
+            modelAndView.viewName = "/adSet/preview"
+        }
+
+        return modelAndView
+    }
 }
 
-class AdImageFileInfo(val id: Int, val duration: Int, val url: String)
+internal class AdImageFileInfo(val id: Int, val duration: Int, val url: String, val width: Int, val height: Int)
+internal class AdSetInfo(val adSet: AdSet, val adImageFiles: List<AdImageFileInfo>, val editable:Boolean, val companyName: String)

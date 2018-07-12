@@ -470,14 +470,15 @@ open class PrintStationServiceImpl : PrintStationService {
             printStation.addressStreet = printStation.position.addressStreet
             printStation.printerType = printerType
 
+            if (adSetId > 0) {
+                printStation.adSet = adSetDao.findOne(adSetId)
+            }
+            else if (adSetId == 0) {
+                printStation.adSet = null
+            }
+
             if (managerService.loginManagerHasRole("ROLE_SUPERADMIN")) {
                 printStation.transferProportion = transferProportion
-                if (adSetId > 0) {
-                    printStation.adSet = adSetDao.findOne(adSetId)
-                }
-                else if (adSetId == 0) {
-                    printStation.adSet = null
-                }
             }
 
             printStationDao.save(printStation)
