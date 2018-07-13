@@ -86,27 +86,25 @@ class TemplateController {
         modelAndView.model["create"] = id <= 0
         modelAndView.model["template"] = template
 
-        if (type == ProductType.ID_PHOTO.value) {
-            val idPhotoParam =
-                    if (id > 0 && !template.tplParam.isNullOrBlank()) {
-                        try {
-                            objectMapper.readValue(template.tplParam, IDPhotoParam::class.java)
-                        } catch (e: Exception) {
+        when (type) {
+            ProductType.ID_PHOTO.value -> {
+                val idPhotoParam =
+                        if (id > 0 && !template.tplParam.isNullOrBlank()) {
+                            try {
+                                objectMapper.readValue(template.tplParam, IDPhotoParam::class.java)
+                            } catch (e: Exception) {
+                                IDPhotoParam()
+                            }
+                        } else {
                             IDPhotoParam()
                         }
-                    }
-                    else {
-                        IDPhotoParam()
-                    }
 
-            modelAndView.model["idPhotoParam"] = idPhotoParam
-            modelAndView.viewName = "/template/idPhotoEdit :: content"
-        }
-        else if (type == ProductType.PHOTO.value) {
-            modelAndView.viewName = "/template/photoEdit :: content"
-        }
-        else {
-            modelAndView.viewName = "/template/edit :: content"
+                modelAndView.model["idPhotoParam"] = idPhotoParam
+                modelAndView.viewName = "/template/idPhotoEdit :: content"
+            }
+            ProductType.PHOTO.value -> modelAndView.viewName = "/template/photoEdit :: content"
+            ProductType.TEMPLATE.value -> modelAndView.viewName = "/template/edit :: content"
+            ProductType.ALBUM.value -> modelAndView.viewName = "/template/albumEdit :: content"
         }
 
         return modelAndView
@@ -126,6 +124,28 @@ class TemplateController {
             success = true
         } else {
             success = templateService.updateTemplate(id, name, ProductType.TEMPLATE, templateFile)
+        }
+
+        modelAndView.model["success"] = success
+        modelAndView.viewName = "/template/templateFileUploaded"
+
+        return modelAndView
+    }
+
+    @RequestMapping(path = arrayOf("/template/editAlbum"), method = arrayOf(RequestMethod.POST))
+    fun editAlbum(
+            modelAndView: ModelAndView,
+            @RequestParam(name = "id", required = true) id: Int,
+            @RequestParam(name = "name", required = true) name: String,
+            @RequestParam("templateFile") templateFile: MultipartFile?
+    ): ModelAndView {
+
+        val success: Boolean
+        if (id <= 0) {
+            templateService.createTemplate(name, ProductType.ALBUM, templateFile!!)
+            success = true
+        } else {
+            success = templateService.updateTemplate(id, name, ProductType.ALBUM, templateFile)
         }
 
         modelAndView.model["success"] = success

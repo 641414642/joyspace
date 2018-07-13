@@ -386,7 +386,7 @@ open class TemplateServiceImpl : TemplateService {
             val tplImages = ArrayList<TemplateImageInfo>()
             val albumImagesPath = "$assetsDir/template/preview/${template.id}_v${template.currentVersion}/images"
             template.type = ProductType.ALBUM.value
-            template.name = templateVo.name
+//            template.name = templateVo.name
             templateVo.scenes.forEachIndexed { index, it ->
                 val tpl = Template()
                 tpl.currentVersion = 1
@@ -426,6 +426,7 @@ open class TemplateServiceImpl : TemplateService {
                         if (!tplImg.href.isNullOrEmpty()) {
                             val albumImgFile = File(albumImagesPath,it.resourceURL)
                             val tplImgFile = File(tplDir, tplImg.href)
+                            if (tplImgFile.exists())
                             albumImgFile.copyTo(tplImgFile)
                         }
                     }
@@ -437,7 +438,7 @@ open class TemplateServiceImpl : TemplateService {
             //模板拼图
             val tplImages = ArrayList<TemplateImageInfo>()
             template.type = ProductType.TEMPLATE.value
-            template.name = templateVo.name
+//            template.name = templateVo.name
             templateVo.scenes.forEach {
                 it.layers.forEach { layer ->
                     layer.images.forEach {
@@ -532,7 +533,7 @@ open class TemplateServiceImpl : TemplateService {
                 tpl.currentVersion++
                 templateDao.save(tpl)
 
-                saveTemplateFiles(tpl, templateFile)
+                saveTemplateOrAlbumFiles(tpl, templateFile)
 
                 true
             } else {
