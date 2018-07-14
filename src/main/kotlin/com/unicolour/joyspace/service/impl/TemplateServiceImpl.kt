@@ -424,10 +424,9 @@ open class TemplateServiceImpl : TemplateService {
                         tplImg.userImage = tplImg.type == TemplateImageType.USER.value
                         tplImages.add(tplImg)
                         if (!tplImg.href.isNullOrEmpty()) {
-                            val albumImgFile = File(albumImagesPath,it.resourceURL)
+                            val albumImgFile = File(albumImagesPath, it.resourceURL)
                             val tplImgFile = File(tplDir, tplImg.href)
-                            if (tplImgFile.exists())
-                            albumImgFile.copyTo(tplImgFile)
+                            if (!tplImgFile.exists()) albumImgFile.copyTo(tplImgFile)
                         }
                     }
                 }
