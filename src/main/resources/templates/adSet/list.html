@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 	<meta charset="utf-8" />
@@ -39,15 +39,22 @@
 				<table class="table table-bordered table-striped">
 					<tr>
 						<th style="width:80px">ID</th>
-						<th style="width:150px">名称</th>
+						<th style="width:50px"></th>
+						<th style="width:250px">名称</th>
+						<th sec:authorize="hasRole('ROLE_SUPERADMIN')" style="width:150px">投放商</th>
 						<th>图片</th>
 						<th style="width:150px">操作</th>
 					</tr>
 					<tr th:each="ad : ${adSets}">
 						<td th:text="${ad.adSet.id}" valign="middle" style="vertical-align:middle"></td>
+						<td style="vertical-align:middle">
+							<span th:if="${ad.adSet.companyId==0}" class="label label-success">公用</span>
+						</td>
 						<td valign="middle" style="vertical-align:middle">
 							<span th:text="${ad.adSet.name}"></span>
-							<span th:if="${ad.adSet.publicResource}" class="label label-success">公用</span>
+						</td>
+						<td sec:authorize="hasRole('ROLE_SUPERADMIN')" valign="middle" style="vertical-align:middle">
+							<span th:text="${ad.companyName}"></span>
 						</td>
 						<td style="font-size:0">
 							<div class="ad_img_block" th:each="adImageFile : ${ad.adImageFiles}" style="margin-right:5px">
@@ -57,12 +64,15 @@
 							</div>
 						</td>
 						<td valign="middle" style="vertical-align:middle">
-							<a href="#" style="margin-right:5px">
+							<a href="#" style="margin-right:5px" th:if="${ad.editable}">
 								<i class="fa fa-fw fa-pencil"
 								   th:attr="data-url=@{/adSet/edit(id=${ad.adSet.id},mode='edit')}"
 								   onclick="return createOrEditAdSet(event, true)"
 								   title="编辑">
 								</i>
+							</a>
+							<a href="#" style="margin-right:5px" th:href="@{'/adSet/preview/' + ${ad.adSet.id}}" target="_blank">
+								<i class="fa fa-fw fa-eye" title="预览" />
 							</a>
 						</td>
 					</tr>
@@ -74,7 +84,7 @@
 		</div>
 	</section>
 
-	<script src="../../static/js/product.js" th:src="@{/js/product.js}"></script>
+	<script src="../../static/js/adset.js" th:src="@{/js/adset.js}"></script>
 </div>
 </body>
 </html>

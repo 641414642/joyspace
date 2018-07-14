@@ -91,7 +91,7 @@ class PrintStationActivationCodeController {
     fun createActivationCode(modelAndView: ModelAndView): ModelAndView {
         val loginManager = managerService.loginManager
 
-        val adSets = adSetDao.findByCompanyIdOrPublicResourceIsTrue(loginManager!!.companyId)  //公用广告
+        val adSets = adSetDao.queryAdSets(null, "", true)
         modelAndView.model["adSets"] = adSets
         modelAndView.model["defAdSetId"] = adSets.firstOrNull()?.id ?: 0
         modelAndView.model["printerTypes"] = printerTypeDao.findAll()
@@ -109,7 +109,7 @@ class PrintStationActivationCodeController {
         val loginManager = managerService.loginManager
         modelAndView.model["code"] = printStationActivationCodeDao.findOne(id)
 
-        val adSets = adSetDao.findByCompanyIdOrPublicResourceIsTrue(loginManager!!.companyId)  //公用广告
+        val adSets = adSetDao.queryAdSets(null, "", true)
         modelAndView.model["adSets"] = adSets
         modelAndView.model["defAdSetId"] = adSets.firstOrNull()?.id ?: 0
         modelAndView.model["printerTypes"] = printerTypeDao.findAll()

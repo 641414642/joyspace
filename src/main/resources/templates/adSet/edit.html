@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <meta charset="utf-8" />
@@ -45,62 +45,82 @@
                 <h4 class="modal-title" th:text="${create ? '新建' : '修改'}"></h4>
                 <iframe name="target_iframe" src="about:blank" th:src="@{/empty}" style="display:none"/>
             </div>
-            <form id="editAdSetForm" target="target_iframe" th:action="@{/adSet/edit}" method="post" enctype="multipart/form-data">
+            <div class="modal-body">
+                <form id="editAdSetForm" target="target_iframe" th:action="@{/adSet/edit}" method="post" enctype="multipart/form-data">
                 <input type="hidden" name="id" th:value="${adSet.id}" />
-                <div class="modal-body">
-                    <div class="form-group">
-                        <label for="name" class="control-label">名称:</label>
-                        <input type="text" name="name" class="form-control" id="name" th:value="${adSet.name}" />
-                        <span class="help-block"></span>
-                    </div>
-                    <div class="form-group">
-                        <div style="display:inline-block;" class="checkbox">
-                            <label>
-                                <input type="checkbox" th:checked="${adSet.publicResource==true}" name="publicResource"/>
-                                公用
-                            </label>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label class="control-label">图片列表:</label>
-                        <table id="adImageTable" class="table table-bordered table-striped">
-                            <tr>
-                                <th style="width:120px">图片</th>
-                                <th>播放持续时间(秒)</th>
-                            </tr>
-                            <tr th:each="adImage : ${adImageFiles}">
-                                <td style="font-size:0">
-                                    <div class="ad_img_block">
-                                        <a th:href="${adImage.url}" target="_blank">
-                                            <div class="ad_img_display" th:style="'background-image: url(' + ${adImage.url} + ')'"></div>
-                                        </a>
-                                    </div>
-                                </td>
-                                <td>
-                                    <input type="text" th:name="${'duration_' + adImage.id}" th:value="${adImage.duration}" style="width:50px" />
-                                </td>
-                            </tr>
-                            <tr th:each="index : ${#numbers.sequence(1, 100)}" th:style="'display:' + ${index==1 ? '' : 'none'}">
-                                <td style="font-size:0">
-                                    <div class="ad_img_block">
-                                        <div class="ad_img_display upload">
-                                            <input class="ad_img_chooser" type="file" accept="image/jpeg,image/png" th:name="${'imageFile' + index}" />
-                                        </div>
-                                        <span>&nbsp;</span>
-                                    </div>
-                                </td>
-                                <td valign="middle" style="vertical-align:middle">
-                                    <input type="text" th:name="${'duration' + index}" value="5" style="width:50px" />
-                                </td>
-                            </tr>
-                        </table>
+                <div class="form-group">
+                    <label for="name" class="control-label">名称:</label>
+                    <input type="text" name="name" class="form-control" id="name" th:value="${adSet.name}" />
+                    <span class="help-block"></span>
+                </div>
+                <div class="form-group" sec:authorize="hasRole('ROLE_SUPERADMIN')">
+                    <div style="display:inline-block;" class="checkbox">
+                        <label>
+                            <input type="checkbox" th:checked="${adSet.companyId==0}" name="publicResource"/>
+                            公用
+                        </label>
                     </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="submit" class="btn btn-primary">确定</button>
-                    <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                <div class="form-group">
+                    <label class="control-label">图片列表:</label>
+                    <table id="adImageTable" class="table table-bordered table-striped">
+                        <tr class="header_row">
+                            <th style="width:120px">图片</th>
+                            <th>播放持续时间(秒)</th>
+                            <th>显示</th>
+                            <th></th>
+                        </tr>
+                        <tr th:each="row : ${rows}" th:style="'display:' + ${row.adImgId > 0 ? '' : 'none'}">
+                            <td style="font-size:0">
+                                <div class="ad_img_block">
+                                    <div class="ad_img_display" th:style="'background-image: url(' + ${row.url} + ')'"></div>
+                                </div>
+                            </td>
+                            <td style="vertical-align: middle">
+                                <input type="text" th:name="${'duration_' + row.index}" th:value="${row.duration}" style="width:50px" />
+                                <input type="hidden" th:name="${'adImgId_' + row.index}" th:value="${row.adImgId}" />
+                                <input type="hidden" th:name="${'uploadFileName_' + row.index}" value="" />
+                                <input type="hidden" th:name="${'sequence_' + row.index}" />
+                            </td>
+                            <td style="vertical-align: middle">
+                                <div style="display:inline-block;margin:0" class="checkbox">
+                                    <label>
+                                        <input type="checkbox" th:checked="${row.enabled}" th:name="${'enabled_' + row.index}"/>
+                                    </label>
+                                </div>
+                            </td>
+                            <td style="vertical-align: middle">
+                                <a href="#" style="margin-right:5px" class="up">
+                                    <i class="fa fa-fw fa-arrow-up" title="上移"></i>
+                                </a>
+                                <a href="#" style="margin-right:5px" class="down">
+                                    <i class="fa fa-fw fa-arrow-down" title="下移"></i>
+                                </a>
+                                <a href="#" style="margin-right:5px" class="delete">
+                                    <i class="fa fa-trash-o" title="删除"></i>
+                                </a>
+                            </td>
+                        </tr>
+                    </table>
                 </div>
-            </form>
+                </form>
+
+                <iframe name="upload_target_iframe" src="about:blank" th:src="@{/empty}" style="display:none"></iframe>
+                <div style="padding: 8px">
+                    <div class="ad_img_block" id="adImgUpload">
+                        <form id="uploadAdImgForm" target="upload_target_iframe" method="post" th:action="@{/adSet/uploadImageFile}" enctype="multipart/form-data">
+                            <div class="ad_img_display upload">
+                                <input id="adImgFileInput" style="margin:0; padding:0; cursor:pointer; opacity:0; width:100%; height:100%;" type="file" accept="image/jpeg,image/png" name="imageFile" />
+                            </div>
+                            <span>&nbsp;</span>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="submit" class="btn btn-primary" onclick="submitAdSetImgEditForm()">确定</button>
+                <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+            </div>
         </div>
     </div>
 </div>
