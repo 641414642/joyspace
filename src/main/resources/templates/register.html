@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title>悦印 | 注册</title>
+    <!-- Tell the browser to be responsive to screen width -->
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport" />
+
+    <link rel="icon" type="image/ico" href="../static/img/joyspace.ico" th:href="@{/img/joyspace.ico}" />
+
+    <!-- Bootstrap 3.3.6 -->
+    <link rel="stylesheet" href="../static/thirdparty/bootstrap/css/bootstrap.min.css" th:href="@{/thirdparty/bootstrap/css/bootstrap.min.css}" />
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="../static/thirdparty/fontawesome/css/font-awesome.min.css" th:href="@{/thirdparty/fontawesome/css/font-awesome.min.css}" />
+    <!-- Ionicons -->
+    <link rel="stylesheet" href="../static/thirdparty/ionicons/css/ionicons.min.css" th:href="@{/thirdparty/ionicons/css/ionicons.min.css}" />
+    <!-- Theme style -->
+    <link rel="stylesheet" href="../static/thirdparty/adminlte/css/AdminLTE.min.css" th:href="@{/thirdparty/adminlte/css/AdminLTE.min.css}" />
+    <!-- iCheck -->
+    <link rel="stylesheet" href="../static/thirdparty/plugins/iCheck/square/blue.css" th:href="@{/thirdparty/plugins/iCheck/square/blue.css}" />
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+    <script src="/thirdparty/html5shiv/html5shiv.min.js"></script>
+    <script src="/thirdparty/respond/respond.min.js"></script>
+    <![endif]-->
+</head>
+<body class="hold-transition login-page">
+<div class="login-box">
+    <div class="login-logo">
+        <b>悦印</b>
+    </div>
+    <!-- /.login-logo -->
+    <div class="login-box-body">
+        <p class="login-box-msg">悦印系统后台系统管理</p>
+
+        <form action="/company/register" method="post">
+            <div class="form-group has-feedback none-empty">
+                <input type="text" name="name" class="form-control" placeholder="单位名称">
+                <label class="control-label"></label>
+            </div>
+            <div class="form-group has-feedback none-empty">
+                <input type="text" name="username" class="form-control" placeholder="账号">
+                <label class="control-label"></label>
+            </div>
+            <div class="form-group input-group has-feedback none-empty">
+                <input type="tel" name="phone" class="form-control" placeholder="手机号">
+                <div class="input-group-addon">
+                    <a href="javascript:;" id="verifyCodeButton">获取验证码</a>
+                </div>
+            </div>
+            <div class="form-group has-feedback none-empty">
+                <input type="text" name="verifyCode" class="form-control" placeholder="验证码">
+                <label class="control-label"></label>
+            </div>
+            <div class="form-group has-feedback none-empty">
+                <input type="password" id="password" name="password" class="form-control" placeholder="密码">
+                <label class="control-label"></label>
+            </div>
+            <div class="form-group has-feedback none-empty">
+                <input type="password" id="password-confirm" class="form-control" placeholder="确认密码">
+                <label class="control-label" for="password-confirm"></label>
+            </div>
+            <div class="form-group">
+                <button type="submit" id="submit-button" class="btn btn-primary btn-block btn-flat">注册</button>
+            </div>
+        </form>
+    </div>
+    <br />
+    <div th:if="${errorMsg != null}"  class="alert alert-danger alert-dismissible">
+        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+        <span th:text="${errorMsg}">用户名或密码错误!</span>
+    </div>
+
+    <!-- /.login-box-body -->
+</div>
+<!-- /.login-box -->
+
+<!-- jQuery 2.2.3 -->
+<script th:src="@{/thirdparty/plugins/jQuery/jquery-2.2.3.min.js}" src="../static/thirdparty/plugins/jQuery/jquery-2.2.3.min.js"></script>
+<!-- Bootstrap 3.3.6 -->
+<script th:src="@{/thirdparty/bootstrap/js/bootstrap.min.js}" src="../static/thirdparty/bootstrap/js/bootstrap.min.js"></script>
+<!-- iCheck -->
+<script th:src="@{/thirdparty/plugins/iCheck/icheck.min.js}" src="../static/thirdparty/plugins/iCheck/icheck.min.js"></script>
+<script>
+    $(function () {
+        $('input').iCheck({
+            checkboxClass: 'icheckbox_square-blue',
+            radioClass: 'iradio_square-blue',
+            increaseArea: '20%' // optional
+        });
+    });
+
+    var telNumberInput = $('input[name="phone"]');
+    var verifyCodeButton = $("#verifyCodeButton");
+
+    let markErrorPassword = function(error) {
+        if (error) {
+            $('#password-confirm').parent().addClass('has-error');
+            $('#password-confirm').parent().find('label').html('确认密码不一致')
+        } else {
+            $('#password-confirm').parent().removeClass('has-error');
+            $('#password-confirm').parent().find('label').html('')
+        }
+    }
+
+    $('.none-empty').each(function(){
+        let $this = $(this);
+        let $input = $this.find('input');
+        let $label = $this.find('label');
+
+        $input.on('focus',function() {
+            $label.html('')
+            $this.removeClass('has-error')
+        });
+
+        $input.on('blur',function() {
+            if ($input.val().length == 0) {
+                $label.html('此项不能为空')
+                $this.addClass('has-error')
+            }
+        });
+    })
+
+    var waitingVerifyCode = false;
+
+    // verifyCodeButton
+    verifyCodeButton.click(function(){
+        if (waitingVerifyCode) {return}
+        var telNumber = telNumberInput.val();
+        if (!telNumber || telNumber.length == 0) {
+            alert('请输入电话号码')
+            return ;
+        }
+        $.ajax({
+            url: '/company/sendVerifyCode',
+            method: 'post',
+            success: function(result) {
+                runCountDown()
+            }, error: function(err) {
+
+            }
+        })
+    });
+
+    let countDownInterval = null
+    let runCountDown = function() {
+        if (waitingVerifyCode) {return }
+        waitingVerifyCode = true;
+        var countDownNumner = 30
+        countDownInterval = setInterval(function(){
+            if (countDownNumner == 0) {
+                clearInterval(countDownInterval);
+                verifyCodeButton.removeClass('disabled')
+                verifyCodeButton.html("获取验证码")
+                waitingVerifyCode = false;
+                return ;
+            }
+            verifyCodeButton.addClass('disabled');
+            verifyCodeButton.html(countDownNumner+'秒');
+            countDownNumner--;
+        }, 1000)
+    }
+
+
+    $('#submit-button').on('click',function() {
+        $('.none-empty').each(function(){
+            let $this = $(this);
+            let $input = $this.find('input');
+            let $label = $this.find('label');
+            if ($input.val().length == 0) {
+                $label.html('此项不能为空')
+                $this.addClass('has-error')
+            }
+        });
+        if ($('.has-error').length == 0) {
+            $(this).submit()
+        } else {
+            return false;
+        }
+    })
+
+    $('#password-confirm').on('focus',function() {
+        markErrorPassword(false)
+    })
+    $('#password-confirm').on("blur",function() {
+        let password = $('#password');
+        let passwordConfirm = $('#password-confirm');
+
+        if (passwordConfirm.val() != password.val()) {
+            markErrorPassword(true)
+        }
+    })
+</script>
+</body>
+</html>
