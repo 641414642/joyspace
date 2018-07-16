@@ -24,4 +24,13 @@ class LoginController {
     companion object {
         private val logger = LoggerFactory.getLogger(LoginController::class.java)
     }
+
+    @RequestMapping("/register")
+    fun register(@RequestParam(name = "error", required = false) error: String?): ModelAndView {
+        return ModelAndView("register")
+    }
+    @RequestMapping("/forget")
+    fun forget(@RequestParam(name = "error", required = false) error: String?): ModelAndView {
+        return ModelAndView("forget")
+    }
 }
