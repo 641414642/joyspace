@@ -36,7 +36,7 @@
     <div class="login-box-body">
         <p class="login-box-msg">悦印系统后台系统管理</p>
 
-        <form action="/company/resetPassword" method="post">
+        <form action="/company/resetPassword" method="post" id="forget-form">
             <div class="form-group has-feedback none-empty">
                 <input type="text" name="username" class="form-control" placeholder="账号" />
                 <label class="control-label"></label>
@@ -140,10 +140,10 @@
             },
             dataType: 'json',
             success: function(result) {
-                if (result.code == 0) {
-                    runCountDown()    
+                if (result.errcode == 0) {
+                    runCountDown()
                 } else {
-                    alert(result.message)
+                    alert(result.errmsg)
                 }
             }, error: function(err) {
                 alert(err)
@@ -155,7 +155,7 @@
     let runCountDown = function() {
         if (waitingVerifyCode) {return }
         waitingVerifyCode = true;
-        var countDownNumner = 30
+        var countDownNumner = 60
         countDownInterval = setInterval(function(){
             if (countDownNumner == 0) {
                 clearInterval(countDownInterval);
@@ -182,10 +182,24 @@
             }
         });
         if ($('.has-error').length == 0) {
-            $(this).submit()
-        } else {
-            return false;
+            let form = $("#forget-form");
+            $.ajax({
+                url: form.attr("action"),
+                method: 'POST',
+                data: form.serialize(),
+                dataType: 'json',
+                success: function(result) {
+                    if (result.errcode == 0) {
+                        location.href = "/login"
+                    } else {
+                        alert(result.errmsg)
+                    }
+                }, error: function(err) {
+                    alert(err)
+                }
+            })
         }
+        return false;
     })
 
     $('#password-confirm').on('focus',function() {

@@ -36,7 +36,7 @@
     <div class="login-box-body">
         <p class="login-box-msg">悦印系统后台系统管理</p>
 
-        <form action="/company/register" method="post">
+        <form action="/company/register" method="post" id="register-form">
             <div class="form-group has-feedback none-empty">
                 <input type="text" name="name" class="form-control" placeholder="单位名称" />
                 <label class="control-label"></label>
@@ -45,6 +45,11 @@
                 <input type="text" name="username" class="form-control" placeholder="账号" />
                 <label class="control-label"></label>
             </div>
+            <div class="form-group has-feedback none-empty">
+                <input type="text" name="email" class="form-control" placeholder="E-mail" />
+                <label class="control-label"></label>
+            </div>
+            <input type="hidden" name="fullname" value="管理员" />
             <div class="form-group input-group has-feedback none-empty">
                 <input type="tel" name="phone" class="form-control" placeholder="手机号" />
                 <div class="input-group-addon">
@@ -142,10 +147,10 @@
             },
             dataType: 'json',
             success: function(result) {
-                if (result.code == 0) {
+                if (result.errcode == 0) {
                     runCountDown()
                 } else {
-                    alert(result.message)
+                    alert(result.errmsg)
                 }
             }, error: function(err) {
                 alert(err)
@@ -157,7 +162,7 @@
     let runCountDown = function() {
         if (waitingVerifyCode) {return }
         waitingVerifyCode = true;
-        var countDownNumner = 30
+        var countDownNumner = 60
         countDownInterval = setInterval(function(){
             if (countDownNumner == 0) {
                 clearInterval(countDownInterval);
@@ -184,10 +189,24 @@
             }
         });
         if ($('.has-error').length == 0) {
-            $(this).submit()
-        } else {
-            return false;
+            let form = $("#register-form");
+            $.ajax({
+                url: form.attr("action"),
+                data: form.serialize(),
+                method: 'POST',
+                dataType: 'json',
+                success: function(result) {
+                    if (result.errcode == 0) {
+                        location.href = "/login"
+                    } else {
+                        alert(result.errmsg)
+                    }
+                }, error: function(err) {
+                    alert(err)
+                }
+            })
         }
+        return false;
     })
 
     $('#password-confirm').on('focus',function() {
