@@ -38,29 +38,29 @@
 
         <form action="/company/register" method="post">
             <div class="form-group has-feedback none-empty">
-                <input type="text" name="name" class="form-control" placeholder="单位名称">
+                <input type="text" name="name" class="form-control" placeholder="单位名称" />
                 <label class="control-label"></label>
             </div>
             <div class="form-group has-feedback none-empty">
-                <input type="text" name="username" class="form-control" placeholder="账号">
+                <input type="text" name="username" class="form-control" placeholder="账号" />
                 <label class="control-label"></label>
             </div>
             <div class="form-group input-group has-feedback none-empty">
-                <input type="tel" name="phone" class="form-control" placeholder="手机号">
+                <input type="tel" name="phone" class="form-control" placeholder="手机号" />
                 <div class="input-group-addon">
                     <a href="javascript:;" id="verifyCodeButton">获取验证码</a>
                 </div>
             </div>
             <div class="form-group has-feedback none-empty">
-                <input type="text" name="verifyCode" class="form-control" placeholder="验证码">
+                <input type="text" name="verifyCode" class="form-control" placeholder="验证码" />
                 <label class="control-label"></label>
             </div>
             <div class="form-group has-feedback none-empty">
-                <input type="password" id="password" name="password" class="form-control" placeholder="密码">
+                <input type="password" id="password" name="password" class="form-control" placeholder="密码" />
                 <label class="control-label"></label>
             </div>
             <div class="form-group has-feedback none-empty">
-                <input type="password" id="password-confirm" class="form-control" placeholder="确认密码">
+                <input type="password" id="password-confirm" class="form-control" placeholder="确认密码" />
                 <label class="control-label" for="password-confirm"></label>
             </div>
             <div class="form-group">
@@ -136,11 +136,19 @@
         }
         $.ajax({
             url: '/company/sendVerifyCode',
-            method: 'post',
+            method: 'POST',
+            data: {
+                phone: telNumber
+            },
+            dataType: 'json',
             success: function(result) {
-                runCountDown()
+                if (result.code == 0) {
+                    runCountDown()    
+                } else {
+                    alert(result.message)
+                }
             }, error: function(err) {
-
+                alert(err)
             }
         })
     });
