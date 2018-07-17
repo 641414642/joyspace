@@ -208,6 +208,7 @@ class CompanyController {
             }
             val manager = managerDao.findByUserName(username)
             if (manager == null || !manager.isEnabled) throw ProcessException(ResultCode.USER_NOT_FOUND)
+            if (verifyCodeObj.phoneNumber != manager.cellPhone && verifyCodeObj.phoneNumber != manager.phone) throw ProcessException(ResultCode.USER_NOT_FOUND_FOR_THIS_PHONE_NUMBER)
             managerService.resetPassword(manager.id, password)
             CommonRequestResult()
         } catch (e: ProcessException) {
