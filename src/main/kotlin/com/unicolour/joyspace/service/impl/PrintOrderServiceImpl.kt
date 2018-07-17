@@ -671,44 +671,67 @@ open class PrintOrderServiceImpl : PrintOrderService {
     //订单金额和手续费计算结果 (各变量单位都是分)
     private class OrdersAmountAndTransferFeeCalcResult(
             val totalAmount: Int,                        //总金额(扣除手续费之前的)
+            val totalSharing: Int,                       //总分成金额 (总转账金额)
             val totalTransferFee: Int,                   //总手续费
-            val orderIdToTransferFeeMap: Map<Int, Int>)   //订单id -> 订单手续费
-    {
-        //总的转账金额
-        val totalTransferAmount: Int
-            get() = totalAmount - totalTransferFee
-    }
+            val orderIdToTransferFeeMap: Map<Int, Int>,  //订单id -> 订单手续费
+            val orderIdToSharingMap: Map<Int, Int>       //订单id -> 订单分成
+    )
 
     //计算多个订单的转账金额，手续费以及其中每个订单的手续费
     private fun calcOrdersAmountAndTransferFee(orders: List<PrintOrder>) : OrdersAmountAndTransferFeeCalcResult{
         if (orders.isEmpty()) {
-            return OrdersAmountAndTransferFeeCalcResult(0, 0, emptyMap())
+            return OrdersAmountAndTransferFeeCalcResult(0, 0, 0, emptyMap(), emptyMap())
         }
 
-        val orderIdToTransferFeeMap = HashMap<Int, Int>()
-        var totalAmount = 0   //总金额
+        val orderTransferProportion = orders[0].transferProportion / 1000.0         //订单分账比例
+
+        assert(orderTransferProportion > 0 && orderTransferProportion <= 1)
+
+        val orderIdToTransferFeeMap = HashMap<Int, Int>()      //订单id -> 订单手续费
+        val orderIdToSharingMap = HashMap<Int, Int>()          //订单id -> 订单分成
+        var totalAmount = 0           //总金额
 
         var orderTransferFeeAddUp = 0   //每个订单单独计算的手续费的累加结果
+        var orderSharingAddUp = 0       //每个订单单独计算的分成的累加结果
+
         for (order in orders) {
-            val orderAmount = order.totalFee - order.discount
+            val orderAmount = order.totalFee - order.discount                       //订单金额
             totalAmount += orderAmount
 
-            val orderTransferFee = (orderAmount.toDouble() * wxPayTransferCharge + 0.5).toInt()
+            val orderTransferFee = (orderAmount.toDouble() * wxPayTransferCharge + 0.5).toInt()             //订单手续费
+            val orderSharing = ((orderAmount - orderTransferFee) * orderTransferProportion + 0.5).toInt()   //订单分成
+
             orderIdToTransferFeeMap[order.id] = orderTransferFee
+            orderIdToSharingMap[order.id] = orderSharing
 
             orderTransferFeeAddUp += orderTransferFee
+            orderSharingAddUp += orderSharing
         }
 
-        val totalTransferFee:Int = Math.ceil(totalAmount.toDouble() * wxPayTransferCharge).toInt()  //根据订单总金额计算的手续费
-        if (totalTransferFee != orderTransferFeeAddUp) {
-            val maxAmountOrder = orders.maxBy { it.totalFee - it.discount }
-            if (maxAmountOrder != null && orderIdToTransferFeeMap.containsKey(maxAmountOrder.id)) {
-                orderIdToTransferFeeMap[maxAmountOrder.id] =
-                        totalTransferFee - (orderTransferFeeAddUp - orderIdToTransferFeeMap[maxAmountOrder.id]!!)
+        val totalTransferFee:Int = Math.ceil(totalAmount.toDouble() * wxPayTransferCharge).toInt()     //根据订单总金额计算的手续费
+        val totalSharing = ((totalAmount - totalTransferFee) * orderTransferProportion + 0.5).toInt()  //总分成金额
+
+        val maxAmountOrder = orders.maxBy { it.totalFee - it.discount }
+
+        if (maxAmountOrder != null) {
+            val maxAmountOrderId = maxAmountOrder.id
+
+            if (totalTransferFee != orderTransferFeeAddUp) {
+                orderIdToTransferFeeMap[maxAmountOrderId] = totalTransferFee - (orderTransferFeeAddUp - orderIdToTransferFeeMap[maxAmountOrderId]!!)
+            }
+
+            if (totalSharing != orderSharingAddUp) {
+                orderIdToSharingMap[maxAmountOrderId] = totalSharing - (orderSharingAddUp - orderIdToSharingMap[maxAmountOrderId]!!)
             }
         }
 
-        return OrdersAmountAndTransferFeeCalcResult(totalAmount, totalTransferFee, orderIdToTransferFeeMap)
+        return OrdersAmountAndTransferFeeCalcResult(
+                totalAmount = totalAmount,
+                totalSharing = totalSharing,
+                totalTransferFee = totalTransferFee,
+                orderIdToTransferFeeMap = orderIdToTransferFeeMap,
+                orderIdToSharingMap = orderIdToSharingMap
+        )
     }
 
     private fun createTradeNo(): String {
@@ -732,7 +755,7 @@ open class PrintOrderServiceImpl : PrintOrderService {
         synchronized(this, {
             transactionTemplate.execute {
                 val record = WxEntTransferRecord()
-                record.amount = orderAmountAndFee.totalTransferAmount
+                record.amount = orderAmountAndFee.totalSharing
                 record.companyId = account.companyId
                 record.transferTime = Calendar.getInstance()
                 record.tradeNo = createTradeNo()
@@ -746,7 +769,7 @@ open class PrintOrderServiceImpl : PrintOrderService {
                     if (transferRecordItem == null) {
                         val recordItem = WxEntTransferRecordItem()
                         recordItem.charge = orderAmountAndFee.orderIdToTransferFeeMap[order.id]!!
-                        recordItem.amount = order.totalFee - order.discount - recordItem.charge
+                        recordItem.amount = orderAmountAndFee.orderIdToSharingMap[order.id]!!
                         recordItem.printOrderId = order.id
                         recordItem.recordId = record.id
 
@@ -794,7 +817,7 @@ open class PrintOrderServiceImpl : PrintOrderService {
                     val notTransferedOrders = getUntransferedPrintOrders(company.id)
                     val ordersAmountAndFee = calcOrdersAmountAndTransferFee(notTransferedOrders)
 
-                    if (ordersAmountAndFee.totalTransferAmount > 100) {
+                    if (ordersAmountAndFee.totalSharing > 100) {
                         startWxEntTransfer(notTransferedOrders, ordersAmountAndFee)
                         Thread.sleep(5000)
                     }
@@ -1025,13 +1048,13 @@ open class PrintOrderServiceImpl : PrintOrderService {
     /** 检查是否可以开始微信转账给投放商, 如果金额不够，检查是否可以和之前未转账的订单一起批量转，如果可以的话开始转账 */
     private fun checkStartWxEntTransfer(printOrder: PrintOrder) {
         val orderAmountAndFee = calcOrdersAmountAndTransferFee(Collections.singletonList(printOrder))
-        if (!printOrder.transfered && orderAmountAndFee.totalTransferAmount > 100) {
+        if (!printOrder.transfered && orderAmountAndFee.totalSharing > 100) {
             startWxEntTransfer(Collections.singletonList(printOrder), orderAmountAndFee)
         } else {
             val notTransferedOrders = getUntransferedPrintOrders(printOrder.companyId)
             val batchOrdersAmountAndFee = calcOrdersAmountAndTransferFee(notTransferedOrders)
 
-            if (batchOrdersAmountAndFee.totalTransferAmount > 100) {
+            if (batchOrdersAmountAndFee.totalSharing > 100) {
                 startWxEntTransfer(notTransferedOrders, batchOrdersAmountAndFee)
             }
         }
