@@ -110,3 +110,5 @@ insert into icc_config (printer_model, os_name, icc_file_name) values ('EPSON SL
 alter table ad_set drop column public_resource;
 update ad_set set company_id = 0;
 alter table ad_image_file add column enabled boolean default true not null;
+
+alter table company drop column wei_xin_pay_config_id;

@@ -79,7 +79,6 @@ open class CompanyServiceImpl : CompanyService {
         company.name = name
         company.createTime = Calendar.getInstance()
         company.defaultPriceList = defPriceList
-        company.weiXinPayConfig = null
 
         companyDao.save(company)
 

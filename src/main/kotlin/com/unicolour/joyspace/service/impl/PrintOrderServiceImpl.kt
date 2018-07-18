@@ -904,18 +904,6 @@ open class PrintOrderServiceImpl : PrintOrderService {
 
     override fun startPayment(orderId: Int): WxPayParams {
         val order = printOrderDao.findOne(orderId)
-        val company = companyDao.findOne(order.companyId)
-        val wxPayConfig = company.weiXinPayConfig
-
-        var appId: String = wxAppId
-        var mchId: String = wxMchId
-        var payKey: String = wxPayKey
-
-        if (wxPayConfig != null && wxPayConfig.appId != null && wxPayConfig.mchId != null && wxPayConfig.keyVal != null) {
-            appId = wxPayConfig.appId!!
-            mchId = wxPayConfig.mchId!!
-            payKey = wxPayConfig.keyVal!!
-        }
 
         val user = userDao.findOne(order.userId)
         val openId: String = user?.wxOpenId ?: ""
@@ -937,10 +925,10 @@ open class PrintOrderServiceImpl : PrintOrderService {
         wxPayRecordDao.save(wxPayRecord)
 
 
-        val requestBody = getPaymentRequestParams(payKey, TreeMap(hashMapOf<String, String>(
-                "appid" to appId,
+        val requestBody = getPaymentRequestParams(wxPayKey, TreeMap(hashMapOf<String, String>(
+                "appid" to wxAppId,
                 "body" to "优利绚彩-照片打印",
-                "mch_id" to mchId,
+                "mch_id" to wxMchId,
                 "nonce_str" to nonceStr,
                 "notify_url" to notifyUrl,
                 "openid" to openId,
@@ -968,7 +956,7 @@ open class PrintOrderServiceImpl : PrintOrderService {
             val result = wxUnifyOrderResultUnmarshaller.unmarshal(StringReader(resultStr)) as WxUnifyOrderResult
 
             if (result.return_code == "SUCCESS" && result.result_code == "SUCCESS") {
-                return createWxPayParams(payKey, result, nonceStr)
+                return createWxPayParams(wxPayKey, result, nonceStr)
             }
             else {
                 logger.error("微信支付调用失败--info ： ${objectMapper.writeValueAsString(result)}")
