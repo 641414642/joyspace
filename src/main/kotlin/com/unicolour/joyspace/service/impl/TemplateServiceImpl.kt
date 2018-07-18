@@ -92,25 +92,14 @@ open class TemplateServiceImpl : TemplateService {
     @Autowired
     lateinit var sceneDao: SceneDao
 
-    private fun toMM(value:String) : Double {
-        if (value.endsWith("mm")) {
-            return value.substring(0, value.length-2).toDouble()
-        }
-        else if (value.endsWith("pt")) {
-            return value.substring(0, value.length-2).toDouble() / 72.0 * 25.4
-        }
-        else if (value.endsWith("pc")) {
-            return value.substring(0, value.length-2).toDouble() / 72.0 * 25.4 * 12.0
-        }
-        else if (value.endsWith("cm")) {
-            return value.substring(0, value.length-2).toDouble() * 10
-        }
-        else if (value.endsWith("in")) {
-            return value.substring(0, value.length-2).toDouble() * 25.4
-        }
-        else {  //缺省作为mm处理
-            return value.substring(0, value.length).toDouble()
-        }
+    private fun toMM(value: String): Double = when {
+        value.endsWith("mm") -> value.substring(0, value.length - 2).toDouble()
+        value.endsWith("pt") -> value.substring(0, value.length - 2).toDouble() / 72.0 * 25.4
+        value.endsWith("pc") -> value.substring(0, value.length - 2).toDouble() / 72.0 * 25.4 * 12.0
+        value.endsWith("cm") -> value.substring(0, value.length - 2).toDouble() * 10
+        value.endsWith("in") -> value.substring(0, value.length - 2).toDouble() * 25.4
+        value.endsWith("px") -> value.substring(0, value.length - 2).toDouble() / 360 * 25.4
+        else -> value.substring(0, value.length).toDouble() //缺省作为mm处理
     }
 
     @Transactional
@@ -176,12 +165,21 @@ open class TemplateServiceImpl : TemplateService {
     private fun saveIDPhotoTemplate(tplWidth: Double, tplHeight: Double, idPhotoParam: IDPhotoParam, tpl: Template, maskImageFile: MultipartFile?, oldMaskImgFile: File?) {
         val tplSvg = createIDPhotoTemplateSVG(tplWidth, tplHeight, idPhotoParam, "images/UserImagePlaceHolder.png")
 
+        val placeHolderImg = "data:image/png;base64,${Base64.getEncoder().encode(TemplateServiceImpl::class.java.getResourceAsStream("/IdPhotoPlaceHolder.jpeg").readBytes())}"
+        val thumbSvg = createIDPhotoTemplateSVG(tplWidth,tplHeight,idPhotoParam.copy(gridLineWidth = 0.0),placeHolderImg)
+
+
         //preview files
         val previewTplDir = File(assetsDir, "template/preview/${tpl.id}_v${tpl.currentVersion}")
         previewTplDir.mkdirs()
 
         val previewTplFile = File(previewTplDir, "template.svg")
         previewTplFile.writeText(tplSvg)
+
+        //缩略图生成
+        val thumbFile = File(previewTplDir, "thumb.svg")
+        thumbFile.writeText(thumbSvg)
+        svgConvert(thumbFile, previewTplDir)
 
 
         val previewImgDir = File(previewTplDir, "images")
@@ -201,14 +199,7 @@ open class TemplateServiceImpl : TemplateService {
             oldMaskImgFile?.copyTo(maskFile)
         }
 
-        //转 jpeg
-        val svgConverter = SVGConverter()
-        svgConverter.setSources(arrayOf(previewTplFile.absolutePath))
-        svgConverter.destinationType = DestinationType.JPEG
-        svgConverter.quality = 0.9f
-        svgConverter.dst = previewTplDir
-        svgConverter.backgroundColor = Color.WHITE
-        svgConverter.execute()
+        svgConvert(previewTplFile, previewTplDir)
 
         //production zip file
         val productionTplPackFile = File(assetsDir, "template/production/${tpl.id}_v${tpl.currentVersion}_${tpl.uuid}.zip")
@@ -239,6 +230,17 @@ open class TemplateServiceImpl : TemplateService {
 
         //模板图片信息
         updateTemplateInfo(tpl, previewTplFile)
+    }
+
+    private fun svgConvert(sourceFile: File, dstFile: File) {
+        //转 jpeg
+        val svgConverter = SVGConverter()
+        svgConverter.setSources(arrayOf(sourceFile.absolutePath))
+        svgConverter.destinationType = DestinationType.JPEG
+        svgConverter.quality = 0.9f
+        svgConverter.dst = dstFile
+        svgConverter.backgroundColor = Color.WHITE
+        svgConverter.execute()
     }
 
     private fun createIDPhotoTemplateSVG(tplW: Double, tplH: Double, param: IDPhotoParam, placeHolderImg: String): String {
@@ -380,21 +382,20 @@ open class TemplateServiceImpl : TemplateService {
     }
 
     private fun generateTemplateInfo(template: Template, tplSvgFile: File) {
-        val templateVo = objectMapper.readValue(tplSvgFile, TemplateVo::class.java)
-        if (templateVo.scenes.size > 1) {
+        val templateBo = objectMapper.readValue(tplSvgFile, TemplateBo::class.java)
+        if (templateBo.scenes.size > 1) {
             //相册
             val tplImages = ArrayList<TemplateImageInfo>()
             val albumImagesPath = "$assetsDir/template/preview/${template.id}_v${template.currentVersion}/images"
             template.type = ProductType.ALBUM.value
-//            template.name = templateVo.name
-            templateVo.scenes.forEachIndexed { index, it ->
+            templateBo.scenes.forEachIndexed { index, it ->
                 val tpl = Template()
                 tpl.currentVersion = 1
                 tpl.minImageCount = 0
                 tpl.name = it.name
                 tpl.type = ProductType.SCENE.value
-                tpl.width = it.width
-                tpl.height = it.height
+                tpl.width = toMM(it.width)
+                tpl.height = toMM(it.height)
                 tpl.uuid = UUID.randomUUID().toString().replace("-", "")
                 tpl.deleted = false
                 templateDao.save(tpl)
@@ -414,10 +415,10 @@ open class TemplateServiceImpl : TemplateService {
                         val tplImg = TemplateImageInfo()
                         tplImg.templateId = tpl.id
                         tplImg.templateVersion = tpl.currentVersion
-                        tplImg.width = it.width
-                        tplImg.height = it.height
-                        tplImg.x = it.x
-                        tplImg.y = it.y
+                        tplImg.width = toMM(it.width)
+                        tplImg.height = toMM(it.height)
+                        tplImg.x = toMM(it.x)
+                        tplImg.y = toMM(it.y)
                         tplImg.href = if (it.resourceURL.isEmpty()) "" else "images/".plus(it.resourceURL)
                         tplImg.layerType = LayerType.valueOf(layer.type.toUpperCase()).value
                         tplImg.type = TemplateImageType.valueOf(it.type.toUpperCase()).value
@@ -438,16 +439,16 @@ open class TemplateServiceImpl : TemplateService {
             val tplImages = ArrayList<TemplateImageInfo>()
             template.type = ProductType.TEMPLATE.value
 //            template.name = templateVo.name
-            templateVo.scenes.forEach {
+            templateBo.scenes.forEach {
                 it.layers.forEach { layer ->
                     layer.images.forEach {
                         val tplImg = TemplateImageInfo()
                         tplImg.templateId = template.id
                         tplImg.templateVersion = template.currentVersion
-                        tplImg.width = it.width
-                        tplImg.height = it.height
-                        tplImg.x = it.x
-                        tplImg.y = it.y
+                        tplImg.width = toMM(it.width)
+                        tplImg.height = toMM(it.height)
+                        tplImg.x = toMM(it.x)
+                        tplImg.y = toMM(it.y)
                         tplImg.href = if (it.resourceURL.isEmpty()) "" else "images/".plus(it.resourceURL)
                         tplImg.layerType = LayerType.valueOf(layer.type.toUpperCase()).value
                         tplImg.type = TemplateImageType.valueOf(it.type.toUpperCase()).value
@@ -1158,7 +1159,11 @@ open class TemplateServiceImpl : TemplateService {
 
 
     private fun savePhotoTemplate(tplWidth: Double, tplHeight: Double, tpl: Template) {
-        val tplSvg = createPhotoTemplateSVG(tplWidth, tplHeight)
+        val tplSvg = createPhotoTemplateSVG(tplWidth, tplHeight, "images/UserImagePlaceHolder.png")
+
+        val placeHolderImg = "data:image/png;base64,${Base64.getEncoder().encode(TemplateServiceImpl::class.java.getResourceAsStream("/PhotoPlaceHolder.jpeg").readBytes())}"
+        val thumbSvg = createPhotoTemplateSVG(tplWidth, tplHeight, placeHolderImg)
+
 
         //preview files
         val previewTplDir = File(assetsDir, "template/preview/${tpl.id}_v${tpl.currentVersion}")
@@ -1166,6 +1171,11 @@ open class TemplateServiceImpl : TemplateService {
 
         val previewTplFile = File(previewTplDir, "template.svg")
         previewTplFile.writeText(tplSvg)
+
+        //缩略图生成
+        val thumbFile = File(previewTplDir, "thumb.svg")
+        thumbFile.writeText(thumbSvg)
+        svgConvert(thumbFile, previewTplDir)
 
         val previewImgDir = File(previewTplDir, "images")
         previewImgDir.mkdirs()
@@ -1196,7 +1206,7 @@ open class TemplateServiceImpl : TemplateService {
         updateTemplateInfo(tpl, previewTplFile)
     }
 
-    private fun createPhotoTemplateSVG(tplW: Double, tplH: Double): String =
+    private fun createPhotoTemplateSVG(tplW: Double, tplH: Double, placeHolderImg: String): String =
 """<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <svg
    xmlns:svg="http://www.w3.org/2000/svg"
@@ -1210,7 +1220,7 @@ open class TemplateServiceImpl : TemplateService {
      x="0"
      y="0"
      id="image"
-     xlink:href="images/UserImagePlaceHolder.png"
+     xlink:href="$placeHolderImg"
      preserveAspectRatio="none"
      height="$tplH"
      width="$tplW">

@@ -162,3 +162,32 @@ data class ImageS(var status:Int? = null)
 
 data class DeleteAddress(var sessionId: String? = null,
                          var id: Int? = null)
+
+data class TemplateBo(var id: Int = 0,
+                      var version: Double = 0.0,
+                      var name: String = "",
+                      var type: Int = 0,
+                      var scenes: List<SceneBo> = emptyList(),
+                      var idPhotoMaskImageUrl: String = "")
+
+data class SceneBo(var id: Int = 0,
+                 var name: String = "",
+                 var index: Int = 0,
+                 var type: String = "",
+                 var width: String = "",
+                 var height: String = "",
+                 var layers: List<LayerBo> = emptyList())
+
+data class LayerBo(var id: Int = 0,
+                 var type: String = "",
+                 var images: MutableList<ImgBo> = mutableListOf())
+
+data class ImgBo(var id: Int = 0,
+               var type: String = "",
+               var x: String = "",
+               var y: String = "",
+               var width: String = "",
+               var height: String = "",
+               var angleClip: Double = 0.0,
+               var bgcolor: String = "",
+               var resourceURL: String = "")

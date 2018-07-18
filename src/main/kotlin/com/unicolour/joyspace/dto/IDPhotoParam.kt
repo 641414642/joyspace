@@ -1,6 +1,6 @@
 package com.unicolour.joyspace.dto
 
-class IDPhotoParam(
+data class IDPhotoParam(
         var elementWidth: Double = 0.0,
         var elementHeight: Double = 0.0,
         var columnCount: Int = 0,
