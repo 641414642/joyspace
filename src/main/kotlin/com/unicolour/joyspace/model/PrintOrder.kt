@@ -75,7 +75,7 @@ class PrintOrder {
 
     //分账比例 x 1000
     @Column(name = "transfer_proportion")
-    var transferProportion: Int = 1
+    var transferProportion: Int = 1000
 
     //是否已经转账给投放商
     @Column
