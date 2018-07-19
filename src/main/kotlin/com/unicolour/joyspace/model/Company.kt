@@ -38,6 +38,11 @@ class CompanyWxAccount {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     var id: Int = 0
 
+    //关联的公众号id
+    @Column
+    @NotNull
+    var wxMpAccountId: Int = 0
+
     //属于哪个投放商
     @Column
     @NotNull

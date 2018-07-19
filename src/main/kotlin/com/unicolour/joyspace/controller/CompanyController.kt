@@ -2,6 +2,7 @@ package com.unicolour.joyspace.controller
 
 import com.unicolour.joyspace.dao.CompanyDao
 import com.unicolour.joyspace.dao.CompanyWxAccountDao
+import com.unicolour.joyspace.dao.WxMpAccountDao
 import com.unicolour.joyspace.dto.CommonRequestResult
 import com.unicolour.joyspace.dto.ResultCode
 import com.unicolour.joyspace.exception.ProcessException
@@ -10,6 +11,7 @@ import com.unicolour.joyspace.model.Manager
 import com.unicolour.joyspace.service.CompanyService
 import com.unicolour.joyspace.service.ManagerService
 import com.unicolour.joyspace.util.Pager
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.data.domain.PageRequest
@@ -23,16 +25,15 @@ import org.springframework.web.servlet.ModelAndView
 
 @Controller
 class CompanyController {
+    companion object {
+        val logger = LoggerFactory.getLogger(CompanyController::class.java)
+    }
 
     @Value("\${com.unicolour.joyspace.baseUrl}")
     lateinit var baseUrl: String
 
-    //微信支付关联的公众号QrCode 和 appId
-    @Value("\${com.unicolour.wxmpQrCode}")
-    lateinit var wxmpQrCode: String
-
-    @Value("\${com.unicolour.wxmpAppId}")
-    lateinit var wxmpAppId: String
+    @Autowired
+    lateinit var wxMpAccountDao: WxMpAccountDao
 
     @Autowired
     lateinit var companyDao: CompanyDao
@@ -144,6 +145,13 @@ class CompanyController {
 
     @RequestMapping("/company/startAddWxAccount", method = arrayOf(RequestMethod.GET))
     fun startAddWxAccount(modelAndView: ModelAndView): ModelAndView {
+        val activeWxMpAccount = wxMpAccountDao.findFirstByActiveIsTrue()
+        if (activeWxMpAccount == null) {
+            logger.warn("No active WxMpAccount, cannot start add wx account")
+            modelAndView.viewName = "empty"
+            return modelAndView
+        }
+
         val loginManager = managerService.loginManager
         val verifyCode = companyService.startAddCompanyWxAccount()
 
@@ -153,9 +161,9 @@ class CompanyController {
             modelAndView.viewName = "/messageDialog :: content"
         }
         else {
-            modelAndView.model["wxmpQrCode"] = wxmpQrCode
+            modelAndView.model["wxmpQrCode"] = activeWxMpAccount.qrCode
             modelAndView.model["qrcode"] = "https://open.weixin.qq.com/connect/oauth2/authorize" +
-                    "?appid=$wxmpAppId" +
+                    "?appid=${activeWxMpAccount.appId}" +
                     "&redirect_uri=$baseUrl/company/wxAccountAddConfirm" +
                     "&response_type=code" +
                     "&scope=snsapi_userinfo"

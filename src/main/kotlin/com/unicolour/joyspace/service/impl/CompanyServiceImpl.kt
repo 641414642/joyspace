@@ -1,13 +1,10 @@
 package com.unicolour.joyspace.service.impl
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.unicolour.joyspace.dao.CompanyDao
-import com.unicolour.joyspace.dao.CompanyWxAccountDao
-import com.unicolour.joyspace.dao.ManagerDao
-import com.unicolour.joyspace.dao.WxEntTransferRecordDao
+import com.unicolour.joyspace.dao.*
+import com.unicolour.joyspace.dto.ResultCode
 import com.unicolour.joyspace.dto.WxGetAccessTokenResult
 import com.unicolour.joyspace.dto.WxGetUserInfoResult
-import com.unicolour.joyspace.dto.ResultCode
 import com.unicolour.joyspace.exception.ProcessException
 import com.unicolour.joyspace.model.Company
 import com.unicolour.joyspace.model.CompanyWxAccount
@@ -16,7 +13,6 @@ import com.unicolour.joyspace.service.CompanyService
 import com.unicolour.joyspace.service.ManagerService
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
@@ -32,12 +28,8 @@ open class CompanyServiceImpl : CompanyService {
         val logger = LoggerFactory.getLogger(CompanyServiceImpl::class.java)
     }
 
-    //微信支付关联的公众号appId和appSecret
-    @Value("\${com.unicolour.wxmpAppId}")
-    lateinit var wxmpAppId: String
-
-    @Value("\${com.unicolour.wxmpAppSecret}")
-    lateinit var wxmpAppSecret: String
+    @Autowired
+    lateinit var wxMpAccountDao: WxMpAccountDao
 
     @Autowired
     lateinit var companyDao: CompanyDao
@@ -146,6 +138,12 @@ open class CompanyServiceImpl : CompanyService {
 
     @Transactional
     override fun addCompanyWxAccount(code: String, realname: String, phoneNumber: String, verifyCode: String) {
+        val activeWxMpAccount = wxMpAccountDao.findFirstByActiveIsTrue()
+        if (activeWxMpAccount == null) {
+            logger.warn("No active WxMpAccount, cannot add wx account")
+            throw ProcessException(ResultCode.ADD_WX_ACCOUNT_FAILED)
+        }
+
         val account = companyWxAccountDao.findByVerifyCode(verifyCode.toUpperCase())
         if (account == null) {
             throw ProcessException(ResultCode.INVALID_VERIFY_CODE)
@@ -161,8 +159,8 @@ open class CompanyServiceImpl : CompanyService {
                 null,
                 String::class.java,
                 mapOf(
-                        "appid" to wxmpAppId,
-                        "secret" to wxmpAppSecret,
+                        "appid" to activeWxMpAccount.appId,
+                        "secret" to activeWxMpAccount.wxAppSecret,
                         "code" to code
                 )
         )
@@ -181,6 +179,7 @@ open class CompanyServiceImpl : CompanyService {
                 if (userInfo != null) {
                     account.enabled = true
                     account.createTime = Calendar.getInstance()
+                    account.wxMpAccountId = activeWxMpAccount.id
                     account.avatar = userInfo.headimgurl
                     account.name = realname
                     account.openId = result.openid

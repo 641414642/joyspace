@@ -132,6 +132,9 @@ open class PrintOrderServiceImpl : PrintOrderService {
     @Autowired
     lateinit var tPriceDao: TPriceDao
 
+    @Autowired
+    lateinit var wxMpAccountDao: WxMpAccountDao
+
     //小程序appid
     @Value("\${com.unicolour.wxAppId}")
     lateinit var wxAppId: String
@@ -141,10 +144,6 @@ open class PrintOrderServiceImpl : PrintOrderService {
 
     @Value("\${com.unicolour.wxPayKey}")
     lateinit var wxPayKey: String
-
-    //微信支付关联的公众号appid
-    @Value("\${com.unicolour.wxmpAppId}")
-    lateinit var wxmpAppId: String
 
     private lateinit var wxUnifyOrderResultUnmarshaller: Unmarshaller
     private lateinit var wxPayNotifyUnmarshaller: Unmarshaller
@@ -748,7 +747,13 @@ open class PrintOrderServiceImpl : PrintOrderService {
     private fun startWxEntTransfer(orders: List<PrintOrder>, orderAmountAndFee: OrdersAmountAndTransferFeeCalcResult) {
         val account = companyService.getAvailableWxAccount(orders[0].companyId)
         if (account == null) {
-            logger.info("No available WxAccount for companyId=${orders[0].companyId}")
+            logger.warn("No available WxAccount for companyId=${orders[0].companyId}")
+            return
+        }
+
+        val wxMpAccount = wxMpAccountDao.findOne(account.wxMpAccountId)
+        if (wxMpAccount == null) {
+            logger.warn("WxMpAccount with id of ${account.wxMpAccountId} not found")
             return
         }
 
@@ -783,7 +788,7 @@ open class PrintOrderServiceImpl : PrintOrderService {
                     }
                 }
 
-                doWxEntTransfer(record, orders)
+                doWxEntTransfer(wxMpAccount, record, orders)
             }
         })
     }
@@ -1079,7 +1084,7 @@ open class PrintOrderServiceImpl : PrintOrderService {
         return buf.toString()
     }
 
-    private fun doWxEntTransfer(record: WxEntTransferRecord, orders: List<PrintOrder>) {
+    private fun doWxEntTransfer(wxMpAccount: WxMpAccount, record: WxEntTransferRecord, orders: List<PrintOrder>) {
         logger.info("Start WxEntTransfer for companyId=${record.companyId}, receiverOpenId=${record.receiverOpenId}, amount=${record.amount}")
 
         var nonceStr: String = BigInteger(32 * 8, secureRandom).toString(36).toUpperCase()
@@ -1095,7 +1100,7 @@ open class PrintOrderServiceImpl : PrintOrderService {
         }
 
         val params = TreeMap(hashMapOf(
-                "mch_appid" to wxmpAppId,
+                "mch_appid" to wxMpAccount.appId,
                 "mchid" to wxMchId,
                 "nonce_str" to nonceStr,
                 "partner_trade_no" to record.tradeNo,
