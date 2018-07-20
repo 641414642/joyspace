@@ -143,19 +143,6 @@
 						<li th:class="${viewContent=='printStation_allList' ? 'active' : ''}" sec:authorize="hasRole('ROLE_SUPERADMIN')"><a href="#" th:href="@{/printStation/allList}"><i class="fa fa-circle-o"></i>自助机</a></li>
 					</ul>
 				</li>
-<!--/*				<li sec:authorize="hasRole('ROLE_SUPERADMIN')" th:class="${viewCat=='pay_mgr' ? 'treeview active' : 'treeview'}" class="treeview">
-					<a href="../widgets.html">
-						<i class="fa fa-th"></i> <span>支付管理</span>
-						<span class="pull-right-container">
-              				<i class="fa fa-angle-left pull-right"></i>
-            			</span>
-					</a>
-					<ul class="treeview-menu">
-						<li th:class="${viewContent=='wxpay_list' ? 'active' : ''}"><a href="#" th:href="@{/wx_pay/list}"><i class="fa fa-circle-o"></i>微信支付列表</a></li>
-						<li th:class="${viewContent=='alipay_list' ? 'active' : ''}"><a href="#" th:href="@{/ali_pay/list}"><i class="fa fa-circle-o"></i>支付宝支付列表</a></li>
-						<li><a href="#"><i class="fa fa-circle-o"></i>店铺支付方式列表</a></li>
-					</ul>
-				</li>*/-->
 				<li th:class="${viewCat=='product_mgr' ? 'treeview active' : 'treeview'}" class="treeview" sec:authorize="hasAnyRole('ROLE_SUPERADMIN','ROLE_ADMIN')">
 					<a href="#">
 						<i class="fa fa-pie-chart"></i>
@@ -219,8 +206,6 @@
 	<div class="content-wrapper" th:switch="${viewContent}">
 		<div th:case="'manager_list'" th:include="manager/list :: content"></div>
 		<div th:case="'manager'" th:include="manager/list :: content"></div>
-		<div th:case="'wxpay_list'" th:include="pay/wxpay_list :: content"></div>
-		<div th:case="'alipay_list'" th:include="pay/alipay_list :: content"></div>
 		<div th:case="'company_list'" th:include="company/list :: content"></div>
 		<div th:case="'priceList_list'" th:include="priceList/list :: content"></div>
 		<div th:case="'template_list'" th:include="template/list :: content"></div>

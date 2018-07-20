@@ -120,3 +120,8 @@ UPDATE template_image_info set type=0;
 
 
 ALTER TABLE address ADD deleted BOOLEAN default false NOT NULL;
+
+
+alter table company drop column wei_xin_pay_config_id;
+
+alter table company_wx_account add column wx_mp_account_id integer default 1;

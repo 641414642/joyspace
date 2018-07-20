@@ -135,6 +135,9 @@ open class PrintOrderServiceImpl : PrintOrderService {
     @Autowired
     lateinit var sceneDao: SceneDao
 
+    @Autowired
+    lateinit var wxMpAccountDao: WxMpAccountDao
+
     //小程序appid
     @Value("\${com.unicolour.wxAppId}")
     lateinit var wxAppId: String
@@ -144,10 +147,6 @@ open class PrintOrderServiceImpl : PrintOrderService {
 
     @Value("\${com.unicolour.wxPayKey}")
     lateinit var wxPayKey: String
-
-    //微信支付关联的公众号appid
-    @Value("\${com.unicolour.wxmpAppId}")
-    lateinit var wxmpAppId: String
 
     private lateinit var wxUnifyOrderResultUnmarshaller: Unmarshaller
     private lateinit var wxPayNotifyUnmarshaller: Unmarshaller
@@ -721,7 +720,13 @@ open class PrintOrderServiceImpl : PrintOrderService {
     private fun startWxEntTransfer(orders: List<PrintOrder>, orderAmountAndFee: OrdersAmountAndTransferFeeCalcResult) {
         val account = companyService.getAvailableWxAccount(orders[0].companyId)
         if (account == null) {
-            logger.info("No available WxAccount for companyId=${orders[0].companyId}")
+            logger.warn("No available WxAccount for companyId=${orders[0].companyId}")
+            return
+        }
+
+        val wxMpAccount = wxMpAccountDao.findOne(account.wxMpAccountId)
+        if (wxMpAccount == null) {
+            logger.warn("WxMpAccount with id of ${account.wxMpAccountId} not found")
             return
         }
 
@@ -756,7 +761,7 @@ open class PrintOrderServiceImpl : PrintOrderService {
                     }
                 }
 
-                doWxEntTransfer(record, orders)
+                doWxEntTransfer(wxMpAccount, record, orders)
             }
         })
     }
@@ -877,18 +882,6 @@ open class PrintOrderServiceImpl : PrintOrderService {
 
     override fun startPayment(orderId: Int): WxPayParams {
         val order = printOrderDao.findOne(orderId)
-        val company = companyDao.findOne(order.companyId)
-        val wxPayConfig = company.weiXinPayConfig
-
-        var appId: String = wxAppId
-        var mchId: String = wxMchId
-        var payKey: String = wxPayKey
-
-        if (wxPayConfig != null && wxPayConfig.appId != null && wxPayConfig.mchId != null && wxPayConfig.keyVal != null) {
-            appId = wxPayConfig.appId!!
-            mchId = wxPayConfig.mchId!!
-            payKey = wxPayConfig.keyVal!!
-        }
 
         val user = userDao.findOne(order.userId)
         val openId: String = user?.wxOpenId ?: ""
@@ -910,10 +903,10 @@ open class PrintOrderServiceImpl : PrintOrderService {
         wxPayRecordDao.save(wxPayRecord)
 
 
-        val requestBody = getPaymentRequestParams(payKey, TreeMap(hashMapOf<String, String>(
-                "appid" to appId,
+        val requestBody = getPaymentRequestParams(wxPayKey, TreeMap(hashMapOf<String, String>(
+                "appid" to wxAppId,
                 "body" to "优利绚彩-照片打印",
-                "mch_id" to mchId,
+                "mch_id" to wxMchId,
                 "nonce_str" to nonceStr,
                 "notify_url" to notifyUrl,
                 "openid" to openId,
@@ -941,7 +934,7 @@ open class PrintOrderServiceImpl : PrintOrderService {
             val result = wxUnifyOrderResultUnmarshaller.unmarshal(StringReader(resultStr)) as WxUnifyOrderResult
 
             if (result.return_code == "SUCCESS" && result.result_code == "SUCCESS") {
-                return createWxPayParams(payKey, result, nonceStr)
+                return createWxPayParams(wxPayKey, result, nonceStr)
             }
             else {
                 logger.error("微信支付调用失败--info ： ${objectMapper.writeValueAsString(result)}")
@@ -1064,7 +1057,7 @@ open class PrintOrderServiceImpl : PrintOrderService {
         return buf.toString()
     }
 
-    private fun doWxEntTransfer(record: WxEntTransferRecord, orders: List<PrintOrder>) {
+    private fun doWxEntTransfer(wxMpAccount: WxMpAccount, record: WxEntTransferRecord, orders: List<PrintOrder>) {
         logger.info("Start WxEntTransfer for companyId=${record.companyId}, receiverOpenId=${record.receiverOpenId}, amount=${record.amount}")
 
         var nonceStr: String = BigInteger(32 * 8, secureRandom).toString(36).toUpperCase()
@@ -1080,7 +1073,7 @@ open class PrintOrderServiceImpl : PrintOrderService {
         }
 
         val params = TreeMap(hashMapOf(
-                "mch_appid" to wxmpAppId,
+                "mch_appid" to wxMpAccount.appId,
                 "mchid" to wxMchId,
                 "nonce_str" to nonceStr,
                 "partner_trade_no" to record.tradeNo,

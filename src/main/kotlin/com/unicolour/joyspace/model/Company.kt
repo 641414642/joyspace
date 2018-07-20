@@ -28,16 +28,6 @@ class Company {
     @JoinColumn(name = "default_price_list_id")
     var defaultPriceList: PriceList? = null
     //endregion
-
-    //region 微信支付参数
-    /** 微信支付参数ID */
-    @Column(name = "wei_xin_pay_config_id", insertable = false, updatable = false)
-    var weiXinPayConfigId: Int? = null
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "wei_xin_pay_config_id")
-    var weiXinPayConfig: WeiXinPayConfig? = null
-    //endregion
 }
 
 //收款帐户信息
@@ -47,6 +37,11 @@ class CompanyWxAccount {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     var id: Int = 0
+
+    //关联的公众号id
+    @Column
+    @NotNull
+    var wxMpAccountId: Int = 0
 
     //属于哪个投放商
     @Column
