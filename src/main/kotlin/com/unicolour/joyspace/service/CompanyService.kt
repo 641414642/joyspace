@@ -3,7 +3,6 @@ package com.unicolour.joyspace.service
 import com.unicolour.joyspace.model.Company
 import com.unicolour.joyspace.model.CompanyWxAccount
 import com.unicolour.joyspace.model.PriceList
-import javax.transaction.Transactional
 
 interface CompanyService {
     fun createCompany(name: String, defPriceList: PriceList?,
@@ -29,4 +28,6 @@ interface CompanyService {
     fun moveCompanyWxAccount(id: Int, up: Boolean): Boolean
 
     fun toggleCompanyWxAccount(id: Int): Boolean
+
+    fun sendVerifyCode(phoneNumber: String): Boolean
 }

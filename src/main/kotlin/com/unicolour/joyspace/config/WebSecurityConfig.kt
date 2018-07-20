@@ -38,7 +38,12 @@ open class WebSecurityConfig : WebSecurityConfigurerAdapter() {
                 "/v2/**",
                 "/doc/**",
                 "/printStation/LLWDtNhzLW.txt",
-                "/LLWDtNhzLW.txt")
+                "/LLWDtNhzLW.txt",
+                "/register",
+                "/forget",
+                "/company/sendVerifyCode",
+                "/company/register",
+                "/company/resetPassword")
 
         http.csrf().disable()
                 .authorizeRequests()

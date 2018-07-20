@@ -9,16 +9,21 @@ import com.unicolour.joyspace.exception.ProcessException
 import com.unicolour.joyspace.model.Company
 import com.unicolour.joyspace.model.CompanyWxAccount
 import com.unicolour.joyspace.model.PriceList
+import com.unicolour.joyspace.model.VerifyCode
 import com.unicolour.joyspace.service.CompanyService
 import com.unicolour.joyspace.service.ManagerService
+import com.unicolour.joyspace.service.SmsService
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
+import org.springframework.transaction.support.TransactionTemplate
 import org.springframework.web.client.RestTemplate
 import java.math.BigInteger
 import java.security.SecureRandom
+import java.time.Duration
+import java.time.Instant
 import java.util.*
 import javax.transaction.Transactional
 
@@ -55,6 +60,11 @@ open class CompanyServiceImpl : CompanyService {
     @Autowired
     lateinit var objectMapper: ObjectMapper
 
+    @Autowired
+    lateinit var verifyCodeDao: VerifyCodeDao
+
+    @Autowired
+    lateinit var smsService: SmsService
     @Transactional
     override fun createCompany(name: String, defPriceList: PriceList?,
                                username: String,
@@ -304,6 +314,47 @@ open class CompanyServiceImpl : CompanyService {
         }
         else {
             return false
+        }
+    }
+
+    @Transactional
+    override fun sendVerifyCode(phoneNumber: String): Boolean {
+        val smsTpl = "【优利绚彩】验证码为:%s,请勿向任何人提供您收到的短信验证码。"
+        val now = Instant.now()
+        var verifyCode = verifyCodeDao.findOne(phoneNumber)
+        if (verifyCode != null) {
+            val interval = Duration.between(verifyCode.sendTime.toInstant(), now);
+            if (interval.seconds < 60) {
+                throw ProcessException(ResultCode.RETRY_LATER)
+            } else {
+                verifyCode.code = String.format("%06d", secureRandom.nextInt(1000000))
+                verifyCode.sendTime = Calendar.getInstance()
+                verifyCodeDao.save(verifyCode)
+
+                val sendResult = smsService.send(phoneNumber, String.format(smsTpl, verifyCode.code))
+                return if (sendResult.first != 3) {
+                    logger.error("Send SMS error, PhoneNumber: $phoneNumber, ResponseCode: ${sendResult.first}, ResponseId: ${sendResult.second}")
+                    false
+                } else {
+                    logger.info("Send SMS success, PhoneNumber: $phoneNumber, ResponseCode: ${sendResult.first}, ResponseId: ${sendResult.second}")
+                    true
+                }
+            }
+        } else {
+            verifyCode = VerifyCode()
+            verifyCode.phoneNumber = phoneNumber
+            verifyCode.code = String.format("%06d", secureRandom.nextInt(1000000))
+            verifyCode.sendTime = Calendar.getInstance()
+            verifyCodeDao.save(verifyCode)
+
+            val sendResult = smsService.send(phoneNumber, String.format(smsTpl, verifyCode.code))
+            return if (sendResult.first != 3) {
+                logger.error("Send SMS error, PhoneNumber: $phoneNumber, ResponseCode: ${sendResult.first}, ResponseId: ${sendResult.second}")
+                false
+            } else {
+                logger.info("Send SMS success, PhoneNumber: $phoneNumber, ResponseCode: ${sendResult.first}, ResponseId: ${sendResult.second}")
+                true
+            }
         }
     }
 }
