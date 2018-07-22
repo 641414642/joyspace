@@ -69,7 +69,7 @@ open class TemplateServiceImpl : TemplateService {
     lateinit var userImageFileDao: UserImageFileDao
 
     @Autowired
-    lateinit var imageService : ImageService
+    lateinit var imageService: ImageService
 
     @Autowired
     lateinit var transactionTemplate: TransactionTemplate
@@ -149,13 +149,11 @@ open class TemplateServiceImpl : TemplateService {
         }
     }
 
-    override fun previewIDPhotoTemplate(tplWidth: Double, tplHeight: Double, idPhotoParam: IDPhotoParam, maskImageFile: MultipartFile?): String
-    {
+    override fun previewIDPhotoTemplate(tplWidth: Double, tplHeight: Double, idPhotoParam: IDPhotoParam, maskImageFile: MultipartFile?): String {
         val placeHolderImg =
                 if (maskImageFile == null || maskImageFile.isEmpty) {
                     "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAFElEQVR42mNoaGj4TwxmGFVIX4UApMX5nRlpusUAAAAASUVORK5CYII="
-                }
-                else {
+                } else {
                     "data:image/png;base64,${Base64.getEncoder().encode(maskImageFile.bytes)}"
                 }
 
@@ -166,7 +164,7 @@ open class TemplateServiceImpl : TemplateService {
         val tplSvg = createIDPhotoTemplateSVG(tplWidth, tplHeight, idPhotoParam, "images/UserImagePlaceHolder.png")
 
         val placeHolderImg = "data:image/png;base64,${Base64.getEncoder().encodeToString(TemplateServiceImpl::class.java.getResourceAsStream("/IdPhotoPlaceHolder.png").readBytes())}"
-        val thumbSvg = createIDPhotoTemplateSVG(tplWidth,tplHeight,idPhotoParam.copy(gridLineWidth = 0.0),placeHolderImg)
+        val thumbSvg = createIDPhotoTemplateSVG(tplWidth, tplHeight, idPhotoParam.copy(gridLineWidth = 0.0), placeHolderImg)
 
 
         //preview files
@@ -194,8 +192,7 @@ open class TemplateServiceImpl : TemplateService {
         val maskFile = File(previewTplDir, "mask.png")
         if (maskImageFile != null && !maskImageFile.isEmpty) {
             maskImageFile.transferTo(maskFile)
-        }
-        else {
+        } else {
             oldMaskImgFile?.copyTo(maskFile)
         }
 
@@ -220,8 +217,7 @@ open class TemplateServiceImpl : TemplateService {
                 it.putNextEntry(ZipEntry("mask.png"))
                 placeHolderImgFile.inputStream().use { input -> input.copyTo(it) }
                 it.closeEntry()
-            }
-            else if (oldMaskImgFile != null) {
+            } else if (oldMaskImgFile != null) {
                 it.putNextEntry(ZipEntry("mask.png"))
                 oldMaskImgFile.inputStream().use { input -> input.copyTo(it) }
                 it.closeEntry()
@@ -257,7 +253,7 @@ open class TemplateServiceImpl : TemplateService {
         val offsetY = (tplH - row * h - (row - 1) * vGap) / 2.0
 
         var tpl =
-"""<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+                """<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <svg
    xmlns:svg="http://www.w3.org/2000/svg"
    xmlns="http://www.w3.org/2000/svg"
@@ -275,7 +271,7 @@ open class TemplateServiceImpl : TemplateService {
                 val y = offsetY + (h + vGap) * r
 
                 tpl +=
-"""<image
+                        """<image
      x="$x"
      y="$y"
      id="image_${r}_$c"
@@ -296,20 +292,35 @@ open class TemplateServiceImpl : TemplateService {
         if (lineWidth > 0) {
             for (rIndex in 0 until row) {
                 val y = offsetY + (h + vGap) * rIndex
-                tpl += """<line x1="0" y1="${y - lineWidth / 2}" x2="$tplW" y2="${y - lineWidth / 2}" style="stroke:rgb(140,140,140);stroke-width:$lineWidth" />"""
-                tpl += """<line x1="0" y1="${y + h + lineWidth / 2}" x2="$tplW" y2="${y + h + lineWidth / 2}" style="stroke:rgb(140,140,140);stroke-width:$lineWidth" />"""
+                val d = offsetX + w * col + hGap * (col - 1)
+                tpl += """<line x1="0" y1="${y - lineWidth / 2}" x2="4" y2="${y - lineWidth / 2}" style="stroke:rgb(155,155,155);stroke-width:$lineWidth" />"""
+                tpl += """<line x1="${(offsetX - 9).satisfyPositive()}" y1="${y - lineWidth / 2}" x2="${offsetX + 3}" y2="${y - lineWidth / 2}" style="stroke:rgb(155,155,155);stroke-width:$lineWidth" />"""
+                tpl += """<line x1="${d - 3}" y1="${y - lineWidth / 2}" x2="${(d + 9).satisfyPositive(tplW)}" y2="${y - lineWidth / 2}" style="stroke:rgb(155,155,155);stroke-width:$lineWidth" />"""
+                tpl += """<line x1="${tplW - 4}" y1="${y - lineWidth / 2}" x2="$tplW" y2="${y - lineWidth / 2}" style="stroke:rgb(155,155,155);stroke-width:$lineWidth" />"""
+
+                tpl += """<line x1="0" y1="${y + h + lineWidth / 2}" x2="4" y2="${y + h + lineWidth / 2}" style="stroke:rgb(155,155,155);stroke-width:$lineWidth" />"""
+                tpl += """<line x1="${(offsetX - 9).satisfyPositive()}" y1="${y + h + lineWidth / 2}" x2="${offsetX + 3}" y2="${y + h + lineWidth / 2}" style="stroke:rgb(155,155,155);stroke-width:$lineWidth" />"""
+                tpl += """<line x1="${d - 3}" y1="${y + h + lineWidth / 2}" x2="${(d + 9).satisfyPositive(tplW)}" y2="${y + h + lineWidth / 2}" style="stroke:rgb(155,155,155);stroke-width:$lineWidth" />"""
+                tpl += """<line x1="${tplW - 4}" y1="${y + h + lineWidth / 2}" x2="$tplW" y2="${y + h + lineWidth / 2}" style="stroke:rgb(155,155,155);stroke-width:$lineWidth" />"""
             }
             for (cIndex in 0 until col) {
                 val x = offsetX + (w + hGap) * cIndex
-                tpl += """<line x1="${x - lineWidth / 2}" y1="0" x2="${x - lineWidth / 2}" y2="$tplH" style="stroke:rgb(140,140,140);stroke-width:$lineWidth" />"""
-                tpl += """<line x1="${x + w + lineWidth / 2}" y1="0" x2="${x + w + lineWidth / 2}" y2="$tplH" style="stroke:rgb(140,140,140);stroke-width:$lineWidth" />"""
+                val d = offsetY + h * row + vGap * (row - 1)
+                tpl += """<line x1="${x - lineWidth / 2}" y1="${(offsetY - 9).satisfyPositive()}" x2="${x - lineWidth / 2}" y2="${offsetY + 3}" style="stroke:rgb(155,155,155);stroke-width:$lineWidth" />"""
+                tpl += """<line x1="${x - lineWidth / 2}" y1="${d - 3}" x2="${x - lineWidth / 2}" y2="${(d + 9).satisfyPositive(tplH)}" style="stroke:rgb(155,155,155);stroke-width:$lineWidth" />"""
+
+                tpl += """<line x1="${x + w + lineWidth / 2}" y1="${(offsetY - 9).satisfyPositive()}" x2="${x + w + lineWidth / 2}" y2="${offsetY + 3}" style="stroke:rgb(155,155,155);stroke-width:$lineWidth" />"""
+                tpl += """<line x1="${x + w + lineWidth / 2}" y1="${d - 3}" x2="${x + w + lineWidth / 2}" y2="${(d + 9).satisfyPositive(tplH)}" style="stroke:rgb(155,155,155);stroke-width:$lineWidth" />"""
             }
         }
 
         tpl += "</svg>"
-
         return tpl
     }
+
+    private fun Double.satisfyPositive(): Double = if (this > 0) this else 0.0
+    private fun Double.satisfyPositive(max: Double): Double = if (this > max) max else this
+
 
     @Transactional
     override fun createTemplate(name: String, type: ProductType, templateFile: MultipartFile) {
@@ -335,8 +346,7 @@ open class TemplateServiceImpl : TemplateService {
             templateDao.save(tpl)
 
             saveTemplateOrAlbumFiles(tpl, templateFile)
-        }
-        else {
+        } else {
             throw NoPermissionException("Login required")
         }
     }
@@ -490,8 +500,7 @@ open class TemplateServiceImpl : TemplateService {
 
                     if (isTplSvgFile) {
                         updateTemplateInfo(tpl, targetFile)
-                    }
-                    else if (tpl.type == ProductType.TEMPLATE.value && isImgFile(fileName)) {   //模板拼图, 缩小图片
+                    } else if (tpl.type == ProductType.TEMPLATE.value && isImgFile(fileName)) {   //模板拼图, 缩小图片
                         val pb = ProcessBuilder("magick", "mogrify", "-resize", "500x500>", targetFile.absolutePath)    //如果宽度或高度大于1000， 才缩小图片
                         val process = pb.start()
                         val retCode = process.waitFor()
@@ -527,8 +536,7 @@ open class TemplateServiceImpl : TemplateService {
             templateDao.save(tpl)
 
             return true
-        }
-        else {
+        } else {
             return if (tpl != null) {
                 tpl.currentVersion++
                 templateDao.save(tpl)
@@ -562,13 +570,12 @@ open class TemplateServiceImpl : TemplateService {
     private fun visitImageNodes(node: GraphicsNode, callback: (ImageNode) -> Unit) {
         if (node is ImageNode) {
             callback(node)
-        }
-        else if (node is CompositeGraphicsNode) {
+        } else if (node is CompositeGraphicsNode) {
             node.children.forEach { visitImageNodes(it as GraphicsNode, callback) }
         }
     }
 
-    private fun round(value: Double, places: Int) : Double {
+    private fun round(value: Double, places: Int): Double {
         var bd = BigDecimal(value)
         bd = bd.setScale(places, RoundingMode.HALF_UP)
         return bd.toDouble()
@@ -634,8 +641,7 @@ open class TemplateServiceImpl : TemplateService {
         templateImageInfoDao.save(tplImages)
     }
 
-    private fun calcNodeTransform(gn: GraphicsNode): AffineTransform
-    {
+    private fun calcNodeTransform(gn: GraphicsNode): AffineTransform {
         val ctm = AffineTransform()
         var node: GraphicsNode? = gn
         while (node != null && node !is CanvasGraphicsNode) {
@@ -648,7 +654,7 @@ open class TemplateServiceImpl : TemplateService {
         return ctm
     }
 
-    private fun eachImageElement(doc: Document, imgEleCallback: (imgEle:Element, title: String, desc: String) -> Unit) {
+    private fun eachImageElement(doc: Document, imgEleCallback: (imgEle: Element, title: String, desc: String) -> Unit) {
         val imgElements = doc.getElementsByTagName("image")
 
         for (i in 0 until imgElements.length) {
@@ -664,8 +670,7 @@ open class TemplateServiceImpl : TemplateService {
                     if (child is Element) {
                         if (child.tagName == "title") {
                             title = child.textContent
-                        }
-                        else if (child.tagName == "desc") {
+                        } else if (child.tagName == "desc") {
                             desc = child.textContent
                         }
                     }
@@ -721,8 +726,7 @@ open class TemplateServiceImpl : TemplateService {
 
         if (session == null) {
             return TemplatePreviewResult(1, "用户未登录")
-        }
-        else {
+        } else {
             val product = productDao.findOne(previewParam.productId)
             val tplVerSplit = previewParam.productVersion.split('.')
             val tplId = tplVerSplit[0].toInt()
@@ -731,8 +735,7 @@ open class TemplateServiceImpl : TemplateService {
             val userImgFiles = previewParam.images.map { userImageFileDao.findOne(it.imageId) }
             if (userImgFiles.any { it == null }) {
                 return TemplatePreviewResult(2, "没有找到指定ID对应的图片")
-            }
-            else if (userImgFiles.any { it.userId != session.userId }) {
+            } else if (userImgFiles.any { it.userId != session.userId }) {
                 return TemplatePreviewResult(3, "不是此用户的图片")
             }
 
@@ -763,7 +766,7 @@ open class TemplateServiceImpl : TemplateService {
 
             val imgEleUrlMap = HashMap<Element, String>()
 
-            eachImageElement(doc, {imgEle, title, desc ->
+            eachImageElement(doc, { imgEle, title, desc ->
                 if (desc == "UserImage" || desc == "用户图片") {
                     var found = false
                     val prevImg = previewParam.images.firstOrNull { it.name == title }
@@ -772,8 +775,7 @@ open class TemplateServiceImpl : TemplateService {
                         if (userImgFile != null) {
                             if (userImgFile.thumbnail != null) {
                                 userImgFile = userImgFile.thumbnail
-                            }
-                            else if (userImgFile.width > 1000 || userImgFile.height > 1000) {
+                            } else if (userImgFile.width > 1000 || userImgFile.height > 1000) {
                                 val newImgFile = imageService.createThumbnail(previewParam.sessionId, userImgFile, 1000, 1000)
                                 if (newImgFile != null) {
                                     userImgFile = newImgFile
@@ -781,7 +783,7 @@ open class TemplateServiceImpl : TemplateService {
                             }
 
                             val userImgUrl = imageService.getImageUrl(userImgFile!!)
-                            val userImgFileUrl =  imageService.getImageFileUrl(userImgFile)
+                            val userImgFileUrl = imageService.getImageFileUrl(userImgFile)
 
                             val newImgEle = replaceImageElementWithPattern(defsElement!!, imgEle, userImgFileUrl, userImgFile.width, userImgFile.height, prevImg)
                             found = true
@@ -793,8 +795,7 @@ open class TemplateServiceImpl : TemplateService {
                     if (!found) {
                         imgEle.setAttributeNS(X_LINK_NAMESPACE, "xlink:href", "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAHWlUWHRDb21tZW50AAAAAABDcmVhdGVkIHdpdGggR0lNUGQuZQcAAAANSURBVAjXY+jo6PgPAAXMApjJRsHmAAAAAElFTkSuQmCC")
                     }
-                }
-                else {
+                } else {
                     val imgSrc = imgEle.getAttributeNS(X_LINK_NAMESPACE, "href")
                     if (!imgSrc.startsWith("data:")) {
                         val imgFileUrl = File(assetsDir, "/template/preview/${tplId}_v$tplVer/$imgSrc").toURI().toURL().toExternalForm()
@@ -880,13 +881,11 @@ open class TemplateServiceImpl : TemplateService {
                 val loginSession = printStationService.getPrintStationLoginSession(sessionId)
                 if (loginSession == null) {
                     throw org.springframework.security.access.AccessDeniedException("PrintStation login session invalid")
-                }
-                else {
+                } else {
                     val template = templateDao.findOne(templateId)
                     if (template == null) {
                         null
-                    }
-                    else {
+                    } else {
                         "$baseUrl/assets/template/production/${template.id}_v${templateVersion}_${template.uuid}.zip"
                     }
                 }
@@ -899,8 +898,7 @@ open class TemplateServiceImpl : TemplateService {
                 val loginSession = printStationService.getPrintStationLoginSession(sessionId)
                 if (loginSession == null) {
                     emptyList<Template>()
-                }
-                else {
+                } else {
                     templateDao.findAll().toList()
                 }
             }
@@ -1028,8 +1026,8 @@ open class TemplateServiceImpl : TemplateService {
         transform.translate(w / 2.0, h / 2.0)   //坐标原点移到图片框中心位置
 
         //用户平移
-        val horTranslate:Double = translateToMM(imageParam.horTranslate, w)
-        val verTranslate:Double = translateToMM(imageParam.verTranslate, h)
+        val horTranslate: Double = translateToMM(imageParam.horTranslate, w)
+        val verTranslate: Double = translateToMM(imageParam.verTranslate, h)
         if (horTranslate != 0.0 || verTranslate != 0.0) {
             transform.translate(horTranslate, verTranslate)
         }
@@ -1075,7 +1073,7 @@ open class TemplateServiceImpl : TemplateService {
         return patternImgElement
     }
 
-    private fun translateToMM(translateStr: String?, sizeInMM: Double) : Double {
+    private fun translateToMM(translateStr: String?, sizeInMM: Double): Double {
         return when {
             translateStr.isNullOrBlank() -> 0.0
             translateStr!!.endsWith("mm") -> translateStr.substring(0, translateStr.length - 2).toDouble()
@@ -1161,7 +1159,7 @@ open class TemplateServiceImpl : TemplateService {
     private fun savePhotoTemplate(tplWidth: Double, tplHeight: Double, tpl: Template) {
         val tplSvg = createPhotoTemplateSVG(tplWidth, tplHeight, "images/UserImagePlaceHolder.png")
 
-        val placeHolderImg = "data:image/png;base64,${Base64.getEncoder().encode(TemplateServiceImpl::class.java.getResourceAsStream("/PhotoPlaceHolder.jpeg").readBytes())}"
+        val placeHolderImg = "data:image/png;base64,${Base64.getEncoder().encodeToString(TemplateServiceImpl::class.java.getResourceAsStream("/PhotoPlaceHolder.jpeg").readBytes())}"
         val thumbSvg = createPhotoTemplateSVG(tplWidth, tplHeight, placeHolderImg)
 
 
@@ -1207,7 +1205,7 @@ open class TemplateServiceImpl : TemplateService {
     }
 
     private fun createPhotoTemplateSVG(tplW: Double, tplH: Double, placeHolderImg: String): String =
-"""<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+            """<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <svg
    xmlns:svg="http://www.w3.org/2000/svg"
    xmlns="http://www.w3.org/2000/svg"
