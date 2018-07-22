@@ -165,7 +165,7 @@ open class TemplateServiceImpl : TemplateService {
     private fun saveIDPhotoTemplate(tplWidth: Double, tplHeight: Double, idPhotoParam: IDPhotoParam, tpl: Template, maskImageFile: MultipartFile?, oldMaskImgFile: File?) {
         val tplSvg = createIDPhotoTemplateSVG(tplWidth, tplHeight, idPhotoParam, "images/UserImagePlaceHolder.png")
 
-        val placeHolderImg = "data:image/png;base64,${Base64.getEncoder().encode(TemplateServiceImpl::class.java.getResourceAsStream("/IdPhotoPlaceHolder.jpeg").readBytes())}"
+        val placeHolderImg = "data:image/png;base64,${Base64.getEncoder().encodeToString(TemplateServiceImpl::class.java.getResourceAsStream("/IdPhotoPlaceHolder.png").readBytes())}"
         val thumbSvg = createIDPhotoTemplateSVG(tplWidth,tplHeight,idPhotoParam.copy(gridLineWidth = 0.0),placeHolderImg)
 
 
@@ -296,13 +296,13 @@ open class TemplateServiceImpl : TemplateService {
         if (lineWidth > 0) {
             for (rIndex in 0 until row) {
                 val y = offsetY + (h + vGap) * rIndex
-                tpl += """<line x1="0" y1="${y - lineWidth / 2}" x2="$tplW" y2="${y - lineWidth / 2}" style="stroke:rgb(140,140,140);stroke-width:${lineWidth}mm" />"""
-                tpl += """<line x1="0" y1="${y + h + lineWidth / 2}" x2="$tplW" y2="${y + h + lineWidth / 2}" style="stroke:rgb(140,140,140);stroke-width:${lineWidth}mm" />"""
+                tpl += """<line x1="0" y1="${y - lineWidth / 2}" x2="$tplW" y2="${y - lineWidth / 2}" style="stroke:rgb(140,140,140);stroke-width:$lineWidth" />"""
+                tpl += """<line x1="0" y1="${y + h + lineWidth / 2}" x2="$tplW" y2="${y + h + lineWidth / 2}" style="stroke:rgb(140,140,140);stroke-width:$lineWidth" />"""
             }
             for (cIndex in 0 until col) {
                 val x = offsetX + (w + hGap) * cIndex
-                tpl += """<line x1="${x - lineWidth / 2}" y1="0" x2="${x - lineWidth / 2}" y2="$tplH" style="stroke:rgb(140,140,140);stroke-width:${lineWidth}mm" />"""
-                tpl += """<line x1="${x + w + lineWidth / 2}" y1="0" x2="${x + w + lineWidth / 2}" y2="$tplH" style="stroke:rgb(140,140,140);stroke-width:${lineWidth}mm" />"""
+                tpl += """<line x1="${x - lineWidth / 2}" y1="0" x2="${x - lineWidth / 2}" y2="$tplH" style="stroke:rgb(140,140,140);stroke-width:$lineWidth" />"""
+                tpl += """<line x1="${x + w + lineWidth / 2}" y1="0" x2="${x + w + lineWidth / 2}" y2="$tplH" style="stroke:rgb(140,140,140);stroke-width:$lineWidth" />"""
             }
         }
 

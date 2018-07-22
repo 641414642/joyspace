@@ -15,11 +15,11 @@ import com.unicolour.joyspace.service.TemplateService
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.core.io.Resource
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
+import java.io.File
 import java.math.BigDecimal
 
 @RestController
@@ -40,6 +40,8 @@ class ApiProductRoute {
 
     @Value("\${com.unicolour.joyspace.baseUrl}")
     private lateinit var baseUrl: String
+    @Value("\${com.unicolour.joyspace.assetsDir}")
+    private lateinit var assetsDir: String
 
 
     /**
@@ -92,10 +94,16 @@ class ApiProductRoute {
                 val templateImage = templateImageInfoDao.findByTemplateIdAndTemplateVersion(tpl.id, tpl.currentVersion).first()
                 displaySize = String.format("%1$.0f x %2$.0f mm", templateImage.width, templateImage.height)
             }
-            val thumbnailImageUrl = it.imageFiles
+            var thumbnailImageUrl = it.imageFiles
                     .filter { it.type == ProductImageFileType.THUMB.value }
                     .map { "$baseUrl/assets/product/images/${it.id}.${it.fileType}" }
                     .firstOrNull()
+            if (thumbnailImageUrl.isNullOrEmpty()) {
+                if (tpl.type == com.unicolour.joyspace.model.ProductType.ID_PHOTO.value || tpl.type == com.unicolour.joyspace.model.ProductType.PHOTO.value) {
+                    val thumbFile = File(assetsDir, "template/preview/${tpl.id}_v${tpl.currentVersion}/thumb.jpg")
+                    if (thumbFile.exists()) thumbnailImageUrl = "$baseUrl/assets/template/preview/${tpl.id}_v${tpl.currentVersion}/thumb.jpg"
+                }
+            }
             var mode = 240
             if (it.template.width * it.template.height > 19354.8) mode = 180
             ProductVo(it.id,
