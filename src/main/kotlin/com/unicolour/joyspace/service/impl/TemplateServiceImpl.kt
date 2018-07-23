@@ -314,62 +314,40 @@ open class TemplateServiceImpl : TemplateService {
         var tpl1 = tpl
         for (rIndex in 0 until row) {
             val y = offsetY + (h + vGap) * rIndex
-            val d = offsetX + w * col + hGap * (col - 1)
-            tpl1 += """<line x1="0" y1="${y - lineWidth / 2}" x2="2" y2="${y - lineWidth / 2}" style="stroke:rgb(155,155,155);stroke-width:$lineWidth" />"""
-//            tpl1 += """<line x1="${(offsetX - 9).satisfyPositive()}" y1="${y - lineWidth / 2}" x2="${offsetX + 3}" y2="${y - lineWidth / 2}" style="stroke:rgb(155,155,155);stroke-width:$lineWidth" />"""
-//            tpl1 += """<line x1="${d - 3}" y1="${y - lineWidth / 2}" x2="${(d + 9).satisfyPositive(tplW)}" y2="${y - lineWidth / 2}" style="stroke:rgb(155,155,155);stroke-width:$lineWidth" />"""
-            tpl1 += """<line x1="${tplW - 2}" y1="${y - lineWidth / 2}" x2="$tplW" y2="${y - lineWidth / 2}" style="stroke:rgb(155,155,155);stroke-width:$lineWidth" />"""
-//
-            tpl1 += """<line x1="0" y1="${y + h + lineWidth / 2}" x2="2" y2="${y + h + lineWidth / 2}" style="stroke:rgb(155,155,155);stroke-width:$lineWidth" />"""
-//            tpl1 += """<line x1="${(offsetX - 9).satisfyPositive()}" y1="${y + h + lineWidth / 2}" x2="${offsetX + 3}" y2="${y + h + lineWidth / 2}" style="stroke:rgb(155,155,155);stroke-width:$lineWidth" />"""
-//            tpl1 += """<line x1="${d - 3}" y1="${y + h + lineWidth / 2}" x2="${(d + 9).satisfyPositive(tplW)}" y2="${y + h + lineWidth / 2}" style="stroke:rgb(155,155,155);stroke-width:$lineWidth" />"""
-            tpl1 += """<line x1="${tplW - 2}" y1="${y + h + lineWidth / 2}" x2="$tplW" y2="${y + h + lineWidth / 2}" style="stroke:rgb(155,155,155);stroke-width:$lineWidth" />"""
-
-
+            tpl1 += """<line x1="0" y1="${y - lineWidth / 2}" x2="4" y2="${y - lineWidth / 2}" style="stroke:rgb(155,155,155);stroke-width:$lineWidth" />"""
+            tpl1 += """<line x1="${tplW - 4}" y1="${y - lineWidth / 2}" x2="$tplW" y2="${y - lineWidth / 2}" style="stroke:rgb(155,155,155);stroke-width:$lineWidth" />"""
+            tpl1 += """<line x1="0" y1="${y + h + lineWidth / 2}" x2="4" y2="${y + h + lineWidth / 2}" style="stroke:rgb(155,155,155);stroke-width:$lineWidth" />"""
+            tpl1 += """<line x1="${tplW - 4}" y1="${y + h + lineWidth / 2}" x2="$tplW" y2="${y + h + lineWidth / 2}" style="stroke:rgb(155,155,155);stroke-width:$lineWidth" />"""
             for (cIndex in 0 until col) {
-                tpl1 += """<line x1="${(offsetX + (cIndex * (w + hGap)) - 3.0.satisfyPositive(hGap)).satisfyPositive()}" y1="${y - lineWidth / 2}" x2="${offsetX + (cIndex * (w + hGap)) + 3}" y2="${y - lineWidth / 2}" style="stroke:rgb(155,155,155);stroke-width:$lineWidth" />"""
-
-                tpl1 += """<line x1="${(offsetX + (cIndex * (w + hGap)) - 3.0.satisfyPositive(hGap)).satisfyPositive()}" y1="${y + h + lineWidth / 2}" x2="${offsetX + (cIndex * (w + hGap)) + 3}" y2="${y + h + lineWidth / 2}" style="stroke:rgb(155,155,155);stroke-width:$lineWidth" />"""
-
-                tpl1 += """<line x1="${offsetX + (cIndex * (w + hGap)) + w - 3.0}" y1="${y - lineWidth / 2}" x2="${(offsetX + (cIndex * (w + hGap)) + w + 3.0.satisfyPositive(hGap)).satisfyPositive(tplW)}" y2="${y - lineWidth / 2}" style="stroke:rgb(155,155,155);stroke-width:$lineWidth" />"""
-
-                tpl1 += """<line x1="${offsetX + (cIndex * (w + hGap)) + w - 3.0}" y1="${y + h + lineWidth / 2}" x2="${(offsetX + (cIndex * (w + hGap)) + w + 3.0.satisfyPositive(hGap)).satisfyPositive(tplW)}" y2="${y + h + lineWidth / 2}" style="stroke:rgb(155,155,155);stroke-width:$lineWidth" />"""
+                val cornerX = offsetX + (cIndex * (w + hGap))
+                tpl1 += """<line x1="${(cornerX - 4.0.sp(hGap/2)).sp()}" y1="${y - lineWidth / 2}" x2="${cornerX + 2}" y2="${y - lineWidth / 2}" style="stroke:rgb(155,155,155);stroke-width:$lineWidth" />"""
+                tpl1 += """<line x1="${(cornerX - 4.0.sp(hGap/2)).sp()}" y1="${y + h + lineWidth / 2}" x2="${cornerX + 2}" y2="${y + h + lineWidth / 2}" style="stroke:rgb(155,155,155);stroke-width:$lineWidth" />"""
+                tpl1 += """<line x1="${cornerX + w - 2.0}" y1="${y - lineWidth / 2}" x2="${(cornerX + w + 4.0.sp(hGap/2)).sp(tplW)}" y2="${y - lineWidth / 2}" style="stroke:rgb(155,155,155);stroke-width:$lineWidth" />"""
+                tpl1 += """<line x1="${cornerX + w - 2.0}" y1="${y + h + lineWidth / 2}" x2="${(cornerX + w + 4.0.sp(hGap/2)).sp(tplW)}" y2="${y + h + lineWidth / 2}" style="stroke:rgb(155,155,155);stroke-width:$lineWidth" />"""
             }
-
-
-
-
         }
         for (cIndex in 0 until col) {
             val x = offsetX + (w + hGap) * cIndex
-//            val d = offsetY + h * row + vGap * (row - 1)
-//            tpl1 += """<line x1="${x - lineWidth / 2}" y1="${(offsetY - 9).satisfyPositive()}" x2="${x - lineWidth / 2}" y2="${offsetY + 3}" style="stroke:rgb(155,155,155);stroke-width:$lineWidth" />"""
-//            tpl1 += """<line x1="${x - lineWidth / 2}" y1="${d - 3}" x2="${x - lineWidth / 2}" y2="${(d + 9).satisfyPositive(tplH)}" style="stroke:rgb(155,155,155);stroke-width:$lineWidth" />"""
-//
-//            tpl1 += """<line x1="${x + w + lineWidth / 2}" y1="${(offsetY - 9).satisfyPositive()}" x2="${x + w + lineWidth / 2}" y2="${offsetY + 3}" style="stroke:rgb(155,155,155);stroke-width:$lineWidth" />"""
-//            tpl1 += """<line x1="${x + w + lineWidth / 2}" y1="${d - 3}" x2="${x + w + lineWidth / 2}" y2="${(d + 9).satisfyPositive(tplH)}" style="stroke:rgb(155,155,155);stroke-width:$lineWidth" />"""
-            tpl1 += """<line x1="${x - lineWidth / 2}" y1="${tplH - 2}" x2="${x - lineWidth / 2}" y2="$tplH" style="stroke:rgb(155,155,155);stroke-width:$lineWidth" />"""
-            tpl1 += """<line x1="${x - lineWidth / 2}" y1="0" x2="${x - lineWidth / 2}" y2="2" style="stroke:rgb(155,155,155);stroke-width:$lineWidth" />"""
-            tpl1 += """<line x1="${x + w + lineWidth / 2}" y1="0" x2="${x + w + lineWidth / 2}" y2="2" style="stroke:rgb(155,155,155);stroke-width:$lineWidth" />"""
-            tpl1 += """<line x1="${x + w + lineWidth / 2}" y1="${tplH - 2}" x2="${x + w + lineWidth / 2}" y2="$tplH" style="stroke:rgb(155,155,155);stroke-width:$lineWidth" />"""
-
-
+            tpl1 += """<line x1="${x - lineWidth / 2}" y1="${tplH - 4}" x2="${x - lineWidth / 2}" y2="$tplH" style="stroke:rgb(155,155,155);stroke-width:$lineWidth" />"""
+            tpl1 += """<line x1="${x - lineWidth / 2}" y1="0" x2="${x - lineWidth / 2}" y2="4" style="stroke:rgb(155,155,155);stroke-width:$lineWidth" />"""
+            tpl1 += """<line x1="${x + w + lineWidth / 2}" y1="0" x2="${x + w + lineWidth / 2}" y2="4" style="stroke:rgb(155,155,155);stroke-width:$lineWidth" />"""
+            tpl1 += """<line x1="${x + w + lineWidth / 2}" y1="${tplH - 4}" x2="${x + w + lineWidth / 2}" y2="$tplH" style="stroke:rgb(155,155,155);stroke-width:$lineWidth" />"""
             for (rIndex in 0 until row) {
-                tpl1 += """<line x1="${x - lineWidth / 2}" y1="${(offsetY + (rIndex * (h + vGap)) - 3.0.satisfyPositive(vGap)).satisfyPositive()}" x2="${x - lineWidth / 2}" y2="${offsetY + (rIndex * (h + vGap)) + 3}" style="stroke:rgb(155,155,155);stroke-width:$lineWidth" />"""
-
-                tpl1 += """<line x1="${x + w + lineWidth / 2}" y1="${(offsetY + (rIndex * (h + vGap)) - 3.0.satisfyPositive(vGap)).satisfyPositive()}" x2="${x + w + lineWidth / 2}" y2="${offsetY + (rIndex * (h + vGap)) + 3}" style="stroke:rgb(155,155,155);stroke-width:$lineWidth" />"""
-
-                tpl1 += """<line x1="${x - lineWidth / 2}" y1="${offsetY + (rIndex * (h + vGap)) + h - 3}" x2="${x - lineWidth / 2}" y2="${(offsetY + (rIndex * (h + vGap)) + h + 3.0.satisfyPositive(vGap)).satisfyPositive(tplH)}" style="stroke:rgb(155,155,155);stroke-width:$lineWidth" />"""
-
-                tpl1 += """<line x1="${x + w + lineWidth / 2}" y1="${offsetY + (rIndex * (h + vGap)) + h - 3}" x2="${x + w + lineWidth / 2}" y2="${(offsetY + (rIndex * (h + vGap)) + h + 3.0.satisfyPositive(vGap)).satisfyPositive(tplH)}" style="stroke:rgb(155,155,155);stroke-width:$lineWidth" />"""
+                val cornerY = offsetY + (rIndex * (h + vGap))
+                tpl1 += """<line x1="${x - lineWidth / 2}" y1="${(cornerY - 4.0.sp(vGap/2)).sp()}" x2="${x - lineWidth / 2}" y2="${cornerY + 2}" style="stroke:rgb(155,155,155);stroke-width:$lineWidth" />"""
+                tpl1 += """<line x1="${x + w + lineWidth / 2}" y1="${(cornerY - 4.0.sp(vGap/2)).sp()}" x2="${x + w + lineWidth / 2}" y2="${cornerY + 2}" style="stroke:rgb(155,155,155);stroke-width:$lineWidth" />"""
+                tpl1 += """<line x1="${x - lineWidth / 2}" y1="${cornerY + h - 2}" x2="${x - lineWidth / 2}" y2="${(cornerY + h + 4.0.sp(vGap/2)).sp(tplH)}" style="stroke:rgb(155,155,155);stroke-width:$lineWidth" />"""
+                tpl1 += """<line x1="${x + w + lineWidth / 2}" y1="${cornerY + h - 2}" x2="${x + w + lineWidth / 2}" y2="${(cornerY + h + 4.0.sp(vGap/2)).sp(tplH)}" style="stroke:rgb(155,155,155);stroke-width:$lineWidth" />"""
             }
-
         }
         return tpl1
     }
 
-    private fun Double.satisfyPositive(): Double = if (this > 0) this else 0.0
-    private fun Double.satisfyPositive(max: Double): Double = if (this > max) max else this
+    /**
+     * satisfyPositive
+     */
+    private fun Double.sp(): Double = if (this > 0) this else 0.0
+    private fun Double.sp(max: Double): Double = if (this > max) max else this
 
 
     @Transactional
