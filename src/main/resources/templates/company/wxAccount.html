@@ -31,42 +31,44 @@
 						<th>姓名</th>
 						<th>电话</th>
 						<th>微信昵称</th>
+						<th>关联公众号</th>
 						<th>创建时间</th>
 						<th>状态</th>
 						<th>操作</th>
 					</tr>
-					<tr th:each="account : ${accounts}">
-						<td th:text="${account.name}"></td>
-						<td th:text="${account.phoneNumber}"></td>
-						<td th:text="${account.nickName}"></td>
-						<td th:text="${account.createTime == null ? '' : #calendars.format(account.createTime, 'yyyy-MM-dd HH:mm')}"></td>
-						<td th:if="${account.enabled}"><span class="label label-success">启用</span></td>
-						<td th:unless="${account.enabled}"><span class="label label-danger">禁用</span></td>
+					<tr th:each="wrapper : ${accounts}">
+						<td th:text="${wrapper.account.name}"></td>
+						<td th:text="${wrapper.account.phoneNumber}"></td>
+						<td th:text="${wrapper.account.nickName}"></td>
+						<td th:text="${wrapper.wxMpAccount == null ? '' : wrapper.wxMpAccount.name}"></td>
+						<td th:text="${wrapper.account.createTime == null ? '' : #calendars.format(wrapper.account.createTime, 'yyyy-MM-dd HH:mm')}"></td>
+						<td th:if="${wrapper.account.enabled}"><span class="label label-success">启用</span></td>
+						<td th:unless="${wrapper.account.enabled}"><span class="label label-danger">禁用</span></td>
 						<td valign="middle" style="vertical-align:middle">
 							<a href="#" style="margin-right:5px">
 								<i class="fa fa-trash-o"
-								   th:attr="data-id=${account.id},data-name=${account.name}"
+								   th:attr="data-id=${wrapper.account.id},data-name=${wrapper.account.name}"
 								   onclick="return deleteCompanyWxAccount(event)"
 								   title="删除">
 								</i>
 							</a>
 							<a href="#" style="margin-right:5px">
 								<i class="fa fa-fw fa-arrow-up"
-								   th:attr="data-url=@{/company/moveWxAccount(id=${account.id},up='true')}"
+								   th:attr="data-url=@{/company/moveWxAccount(id=${wrapper.account.id},up='true')}"
 								   onclick="return moveWxAccount(event)"
 								   title="上移">
 								</i>
 							</a>
 							<a href="#" style="margin-right:5px">
 								<i class="fa fa-fw fa-arrow-down"
-								   th:attr="data-url=@{/company/moveWxAccount(id=${account.id},up='false')}"
+								   th:attr="data-url=@{/company/moveWxAccount(id=${wrapper.account.id},up='false')}"
 								   onclick="return moveWxAccount(event)"
 								   title="下移">
 								</i>
 							</a>
 							<a href="#">
-								<i class="fa fa-toggle-on" th:class="${account.enabled ? 'fa fa-toggle-off' : 'fa fa-toggle-on'}"
-								   th:attr="data-url=@{/company/toggleWxAccount(id=${account.id})}"
+								<i class="fa fa-toggle-on" th:class="${wrapper.account.enabled ? 'fa fa-toggle-off' : 'fa fa-toggle-on'}"
+								   th:attr="data-url=@{/company/toggleWxAccount(id=${wrapper.account.id})}"
 								   onclick="return toggleWxAccount(event)"
 								   title="切换启用状态">
 								</i>
