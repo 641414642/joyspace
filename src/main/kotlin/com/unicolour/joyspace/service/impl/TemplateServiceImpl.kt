@@ -290,7 +290,7 @@ open class TemplateServiceImpl : TemplateService {
 
         val lineWidth = param.gridLineWidth
         if (lineWidth > 0) {
-            tpl = generateLine(row, offsetY, h, vGap, offsetX, w, col, hGap, tpl, lineWidth, tplW, tplH)
+            tpl = generateLine(row, offsetY, h, vGap, offsetX, w, col, hGap, tpl, if (lineWidth < 0.15) 0.15 else lineWidth, tplW, tplH)
         }
         tpl += "</svg>"
         return tpl
