@@ -290,22 +290,66 @@ open class TemplateServiceImpl : TemplateService {
 
         val lineWidth = param.gridLineWidth
         if (lineWidth > 0) {
-            for (rIndex in 0 until row) {
-                val y = offsetY + (h + vGap) * rIndex
-                tpl += """<line x1="0" y1="${y - lineWidth / 2}" x2="$tplW" y2="${y - lineWidth / 2}" style="stroke:rgb(140,140,140);stroke-width:${lineWidth}mm" />"""
-                tpl += """<line x1="0" y1="${y + h + lineWidth / 2}" x2="$tplW" y2="${y + h + lineWidth / 2}" style="stroke:rgb(140,140,140);stroke-width:${lineWidth}mm" />"""
-            }
+            tpl = generateLine(row, offsetY, h, vGap, offsetX, w, col, hGap, tpl, lineWidth, tplW, tplH)
+        }
+        tpl += "</svg>"
+        return tpl
+
+
+    }
+
+    /**
+     * @param row 证件照排版行数
+     * @param col 证件照排版列数
+     * @param offsetY 左上角第一张头像的偏移量 Y
+     * @param offsetX 左上角第一张头像的偏移量 X
+     * @param tplW 模板宽度
+     * @param tplH 模板高度
+     * @param h 头像高度
+     * @param w 头像宽度
+     * @param vGap 头像间垂直间隙
+     * @param hGap 头像间水平间隙
+     * @param tpl 模板 String
+     * @param lineWidth 裁切线宽度
+     */
+    private fun generateLine(row: Int, offsetY: Double, h: Double, vGap: Double, offsetX: Double, w: Double, col: Int, hGap: Double, tpl: String, lineWidth: Double, tplW: Double, tplH: Double): String {
+        var tpl1 = tpl
+        for (rIndex in 0 until row) {
+            val y = offsetY + (h + vGap) * rIndex
+            tpl1 += """<line x1="0" y1="${y - lineWidth / 2}" x2="4" y2="${y - lineWidth / 2}" style="stroke:rgb(155,155,155);stroke-width:$lineWidth" />"""
+            tpl1 += """<line x1="${tplW - 4}" y1="${y - lineWidth / 2}" x2="$tplW" y2="${y - lineWidth / 2}" style="stroke:rgb(155,155,155);stroke-width:$lineWidth" />"""
+            tpl1 += """<line x1="0" y1="${y + h + lineWidth / 2}" x2="4" y2="${y + h + lineWidth / 2}" style="stroke:rgb(155,155,155);stroke-width:$lineWidth" />"""
+            tpl1 += """<line x1="${tplW - 4}" y1="${y + h + lineWidth / 2}" x2="$tplW" y2="${y + h + lineWidth / 2}" style="stroke:rgb(155,155,155);stroke-width:$lineWidth" />"""
             for (cIndex in 0 until col) {
-                val x = offsetX + (w + hGap) * cIndex
-                tpl += """<line x1="${x - lineWidth / 2}" y1="0" x2="${x - lineWidth / 2}" y2="$tplH" style="stroke:rgb(140,140,140);stroke-width:${lineWidth}mm" />"""
-                tpl += """<line x1="${x + w + lineWidth / 2}" y1="0" x2="${x + w + lineWidth / 2}" y2="$tplH" style="stroke:rgb(140,140,140);stroke-width:${lineWidth}mm" />"""
+                val cornerX = offsetX + (cIndex * (w + hGap))
+                tpl1 += """<line x1="${(cornerX - 4.0.sp(hGap/2)).sp()}" y1="${y - lineWidth / 2}" x2="${cornerX + 2}" y2="${y - lineWidth / 2}" style="stroke:rgb(155,155,155);stroke-width:$lineWidth" />"""
+                tpl1 += """<line x1="${(cornerX - 4.0.sp(hGap/2)).sp()}" y1="${y + h + lineWidth / 2}" x2="${cornerX + 2}" y2="${y + h + lineWidth / 2}" style="stroke:rgb(155,155,155);stroke-width:$lineWidth" />"""
+                tpl1 += """<line x1="${cornerX + w - 2.0}" y1="${y - lineWidth / 2}" x2="${(cornerX + w + 4.0.sp(hGap/2)).sp(tplW)}" y2="${y - lineWidth / 2}" style="stroke:rgb(155,155,155);stroke-width:$lineWidth" />"""
+                tpl1 += """<line x1="${cornerX + w - 2.0}" y1="${y + h + lineWidth / 2}" x2="${(cornerX + w + 4.0.sp(hGap/2)).sp(tplW)}" y2="${y + h + lineWidth / 2}" style="stroke:rgb(155,155,155);stroke-width:$lineWidth" />"""
             }
         }
-
-        tpl += "</svg>"
-
-        return tpl
+        for (cIndex in 0 until col) {
+            val x = offsetX + (w + hGap) * cIndex
+            tpl1 += """<line x1="${x - lineWidth / 2}" y1="${tplH - 4}" x2="${x - lineWidth / 2}" y2="$tplH" style="stroke:rgb(155,155,155);stroke-width:$lineWidth" />"""
+            tpl1 += """<line x1="${x - lineWidth / 2}" y1="0" x2="${x - lineWidth / 2}" y2="4" style="stroke:rgb(155,155,155);stroke-width:$lineWidth" />"""
+            tpl1 += """<line x1="${x + w + lineWidth / 2}" y1="0" x2="${x + w + lineWidth / 2}" y2="4" style="stroke:rgb(155,155,155);stroke-width:$lineWidth" />"""
+            tpl1 += """<line x1="${x + w + lineWidth / 2}" y1="${tplH - 4}" x2="${x + w + lineWidth / 2}" y2="$tplH" style="stroke:rgb(155,155,155);stroke-width:$lineWidth" />"""
+            for (rIndex in 0 until row) {
+                val cornerY = offsetY + (rIndex * (h + vGap))
+                tpl1 += """<line x1="${x - lineWidth / 2}" y1="${(cornerY - 4.0.sp(vGap/2)).sp()}" x2="${x - lineWidth / 2}" y2="${cornerY + 2}" style="stroke:rgb(155,155,155);stroke-width:$lineWidth" />"""
+                tpl1 += """<line x1="${x + w + lineWidth / 2}" y1="${(cornerY - 4.0.sp(vGap/2)).sp()}" x2="${x + w + lineWidth / 2}" y2="${cornerY + 2}" style="stroke:rgb(155,155,155);stroke-width:$lineWidth" />"""
+                tpl1 += """<line x1="${x - lineWidth / 2}" y1="${cornerY + h - 2}" x2="${x - lineWidth / 2}" y2="${(cornerY + h + 4.0.sp(vGap/2)).sp(tplH)}" style="stroke:rgb(155,155,155);stroke-width:$lineWidth" />"""
+                tpl1 += """<line x1="${x + w + lineWidth / 2}" y1="${cornerY + h - 2}" x2="${x + w + lineWidth / 2}" y2="${(cornerY + h + 4.0.sp(vGap/2)).sp(tplH)}" style="stroke:rgb(155,155,155);stroke-width:$lineWidth" />"""
+            }
+        }
+        return tpl1
     }
+
+    /**
+     * satisfyPositive
+     */
+    private fun Double.sp(): Double = if (this > 0) this else 0.0
+    private fun Double.sp(max: Double): Double = if (this > max) max else this
 
     @Transactional
     override fun createTemplate(name: String, type: ProductType, templateFile: MultipartFile) {
