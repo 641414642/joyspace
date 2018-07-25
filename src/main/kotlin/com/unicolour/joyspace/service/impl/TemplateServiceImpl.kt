@@ -69,7 +69,7 @@ open class TemplateServiceImpl : TemplateService {
     lateinit var userImageFileDao: UserImageFileDao
 
     @Autowired
-    lateinit var imageService: ImageService
+    lateinit var imageService : ImageService
 
     @Autowired
     lateinit var transactionTemplate: TransactionTemplate
@@ -290,10 +290,12 @@ open class TemplateServiceImpl : TemplateService {
 
         val lineWidth = param.gridLineWidth
         if (lineWidth > 0) {
-            tpl = generateLine(row, offsetY, h, vGap, offsetX, w, col, hGap, tpl, lineWidth, tplW, tplH)
+            tpl = generateLine(row, offsetY, h, vGap, offsetX, w, col, hGap, tpl, if (lineWidth < 0.15) 0.15 else lineWidth, tplW, tplH)
         }
         tpl += "</svg>"
         return tpl
+
+
     }
 
     /**
@@ -348,7 +350,6 @@ open class TemplateServiceImpl : TemplateService {
      */
     private fun Double.sp(): Double = if (this > 0) this else 0.0
     private fun Double.sp(max: Double): Double = if (this > max) max else this
-
 
     @Transactional
     override fun createTemplate(name: String, type: ProductType, templateFile: MultipartFile) {
@@ -794,7 +795,7 @@ open class TemplateServiceImpl : TemplateService {
 
             val imgEleUrlMap = HashMap<Element, String>()
 
-            eachImageElement(doc, { imgEle, title, desc ->
+            eachImageElement(doc, {imgEle, title, desc ->
                 if (desc == "UserImage" || desc == "用户图片") {
                     var found = false
                     val prevImg = previewParam.images.firstOrNull { it.name == title }
@@ -909,11 +910,13 @@ open class TemplateServiceImpl : TemplateService {
                 val loginSession = printStationService.getPrintStationLoginSession(sessionId)
                 if (loginSession == null) {
                     throw org.springframework.security.access.AccessDeniedException("PrintStation login session invalid")
-                } else {
+                }
+                else {
                     val template = templateDao.findOne(templateId)
                     if (template == null) {
                         null
-                    } else {
+                    }
+                    else {
                         "$baseUrl/assets/template/production/${template.id}_v${templateVersion}_${template.uuid}.zip"
                     }
                 }
@@ -926,7 +929,8 @@ open class TemplateServiceImpl : TemplateService {
                 val loginSession = printStationService.getPrintStationLoginSession(sessionId)
                 if (loginSession == null) {
                     emptyList<Template>()
-                } else {
+                }
+                else {
                     templateDao.findAll().toList()
                 }
             }
@@ -1054,8 +1058,8 @@ open class TemplateServiceImpl : TemplateService {
         transform.translate(w / 2.0, h / 2.0)   //坐标原点移到图片框中心位置
 
         //用户平移
-        val horTranslate: Double = translateToMM(imageParam.horTranslate, w)
-        val verTranslate: Double = translateToMM(imageParam.verTranslate, h)
+        val horTranslate:Double = translateToMM(imageParam.horTranslate, w)
+        val verTranslate:Double = translateToMM(imageParam.verTranslate, h)
         if (horTranslate != 0.0 || verTranslate != 0.0) {
             transform.translate(horTranslate, verTranslate)
         }
@@ -1101,7 +1105,7 @@ open class TemplateServiceImpl : TemplateService {
         return patternImgElement
     }
 
-    private fun translateToMM(translateStr: String?, sizeInMM: Double): Double {
+    private fun translateToMM(translateStr: String?, sizeInMM: Double) : Double {
         return when {
             translateStr.isNullOrBlank() -> 0.0
             translateStr!!.endsWith("mm") -> translateStr.substring(0, translateStr.length - 2).toDouble()
