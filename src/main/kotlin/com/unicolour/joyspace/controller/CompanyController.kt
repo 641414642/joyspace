@@ -7,7 +7,9 @@ import com.unicolour.joyspace.dto.CommonRequestResult
 import com.unicolour.joyspace.dto.ResultCode
 import com.unicolour.joyspace.exception.ProcessException
 import com.unicolour.joyspace.model.Company
+import com.unicolour.joyspace.model.CompanyWxAccount
 import com.unicolour.joyspace.model.Manager
+import com.unicolour.joyspace.model.WxMpAccount
 import com.unicolour.joyspace.service.CompanyService
 import com.unicolour.joyspace.service.ManagerService
 import com.unicolour.joyspace.util.Pager
@@ -133,7 +135,14 @@ class CompanyController {
     fun companyWxAccountList(modelAndView: ModelAndView): ModelAndView {
         val loginManager = managerService.loginManager
 
-        val accounts = companyWxAccountDao.getCompanyWxAccounts(loginManager!!.companyId)
+        class WxAccountWrapper(val account: CompanyWxAccount, val wxMpAccount: WxMpAccount?)
+
+        val accounts = companyWxAccountDao.getCompanyWxAccounts(loginManager!!.companyId).map {
+            WxAccountWrapper(
+                    account = it,
+                    wxMpAccount = wxMpAccountDao.findOne(it.wxMpAccountId)
+            )
+        }
         modelAndView.model["accounts"] = accounts
 
         modelAndView.model["viewCat"] = "system_mgr"
