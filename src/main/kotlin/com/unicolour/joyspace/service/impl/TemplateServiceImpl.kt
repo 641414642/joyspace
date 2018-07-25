@@ -477,9 +477,10 @@ open class TemplateServiceImpl : TemplateService {
             //模板拼图
             val tplImages = ArrayList<TemplateImageInfo>()
             template.type = ProductType.TEMPLATE.value
-//            template.name = templateVo.name
-            templateBo.scenes.forEach {
-                it.layers.forEach { layer ->
+            templateBo.scenes.forEach { sceneBo ->
+                template.width = toMM(sceneBo.width)
+                template.height = toMM(sceneBo.height)
+                sceneBo.layers.forEach { layer ->
                     layer.images.forEach {
                         val tplImg = TemplateImageInfo()
                         tplImg.templateId = template.id
