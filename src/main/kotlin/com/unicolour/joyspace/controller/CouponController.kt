@@ -163,7 +163,7 @@ class CouponController {
 
     @RequestMapping(path = arrayOf("/coupon/edit"), method = arrayOf(RequestMethod.POST))
     @ResponseBody
-    fun editCoupon(
+    fun editCoupon(modelAndView: ModelAndView,
             request: HttpServletRequest,
             @RequestParam(name = "id", required = true) id: Int,
             @RequestParam(name = "name", required = true) name: String,
@@ -180,7 +180,15 @@ class CouponController {
             @RequestParam(name = "productIds", required = true) productIds: String,
             @RequestParam(name = "positionIds", required = true) positionIds: String,
             @RequestParam(name = "printStationIds", required = true) printStationIds: String
-    ): Boolean {
+    ): ModelAndView {
+        couponDao.findFirstByCodeIgnoreCaseOrderByBeginDesc(code)?.let {
+            modelAndView.model["title"] = "提示"
+            modelAndView.model["message"] = "已有该代码的优惠券"
+            modelAndView.viewName = "/messageDialog :: content"
+            return modelAndView
+        }
+        val couponCode = if (code.isEmpty() && claimMethod == 2) getRandomStr(8) else code
+
         val enabled = !(disabled != null && disabled)
 
         val selectedProductTypes = ProductType.values()
@@ -205,16 +213,22 @@ class CouponController {
         val df = SimpleDateFormat("yyyy-MM-dd")
         val couponClaimMethod = CouponClaimMethod.values().find{ it.value == claimMethod }
         if (id <= 0) {
-            couponService.createCoupon(name, code, enabled, couponClaimMethod!!, maxUses, maxUsesPerUser,
+            couponService.createCoupon(name, couponCode, enabled, couponClaimMethod!!, maxUses, maxUsesPerUser,
                     (minExpense * 100).toInt(), (discount * 100).toInt(),
                     df.parse(begin), df.parse(expire), userRegDays,
                     selectedProductTypes, selectedProductIds, selectedPositionIds, selectedPrintStationIds)
-            return true
         } else {
-            return couponService.updateCoupon(id, name, code, enabled, couponClaimMethod!!, maxUses, maxUsesPerUser,
+            couponService.updateCoupon(id, name, couponCode, enabled, couponClaimMethod!!, maxUses, maxUsesPerUser,
                     (minExpense * 100).toInt(), (discount * 100).toInt(),
                     df.parse(begin), df.parse(expire), userRegDays,
                     selectedProductTypes, selectedProductIds, selectedPositionIds, selectedPrintStationIds)
         }
+        return modelAndView
     }
+}
+
+fun getRandomStr(outputStrLength: Long): String {
+    val source = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890"
+    return Random().ints(outputStrLength, 0, source.length).toArray()
+            .asSequence().map(source::get).joinToString("")
 }
