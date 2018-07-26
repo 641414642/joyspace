@@ -61,7 +61,9 @@ class ApiProductRoute {
         advers.add(Advert("ad_4", "轮播图", "", "$baseUrl/doc/home_page/4.png"))
         advers.add(Advert("ad_5", "轮播图", "", "$baseUrl/doc/home_page/5.png"))
         val producTypes = mutableListOf<ProductType>()
-        producTypes.add(ProductType(0, "普通照片", "智能手机照片高质量打印","$baseUrl/doc/home_page/product_type_0.png"))
+        if (beSupportProductType(com.unicolour.joyspace.model.ProductType.PHOTO, printStationId)) {
+            producTypes.add(ProductType(0, "普通照片", "智能手机照片高质量打印", "$baseUrl/doc/home_page/product_type_0.png"))
+        }
         if (beSupportProductType(com.unicolour.joyspace.model.ProductType.ID_PHOTO, printStationId)) {
             producTypes.add(ProductType(1, "证件照", "支持多种尺寸，自动排版","$baseUrl/doc/home_page/product_type_1.png"))
         }

@@ -3,12 +3,11 @@ package com.unicolour.joyspace.controller
 import com.unicolour.joyspace.dao.CouponDao
 import com.unicolour.joyspace.dao.PositionDao
 import com.unicolour.joyspace.dao.PrintStationDao
-import com.unicolour.joyspace.dao.ProductDao
-import com.unicolour.joyspace.dto.PositionItem
-import com.unicolour.joyspace.dto.PrintStationItem
-import com.unicolour.joyspace.dto.ProductItem
-import com.unicolour.joyspace.dto.ProductTypeItem
-import com.unicolour.joyspace.model.*
+import com.unicolour.joyspace.dto.*
+import com.unicolour.joyspace.model.Coupon
+import com.unicolour.joyspace.model.CouponClaimMethod
+import com.unicolour.joyspace.model.CouponConstrainsType
+import com.unicolour.joyspace.model.ProductType
 import com.unicolour.joyspace.service.CouponService
 import com.unicolour.joyspace.service.ManagerService
 import com.unicolour.joyspace.service.ProductService
@@ -163,8 +162,7 @@ class CouponController {
 
     @RequestMapping(path = arrayOf("/coupon/edit"), method = arrayOf(RequestMethod.POST))
     @ResponseBody
-    fun editCoupon(modelAndView: ModelAndView,
-            request: HttpServletRequest,
+    fun editCoupon(request: HttpServletRequest,
             @RequestParam(name = "id", required = true) id: Int,
             @RequestParam(name = "name", required = true) name: String,
             @RequestParam(name = "code", required = true) code: String,
@@ -180,14 +178,11 @@ class CouponController {
             @RequestParam(name = "productIds", required = true) productIds: String,
             @RequestParam(name = "positionIds", required = true) positionIds: String,
             @RequestParam(name = "printStationIds", required = true) printStationIds: String
-    ): ModelAndView {
-        couponDao.findFirstByCodeIgnoreCaseOrderByBeginDesc(code)?.let {
-            modelAndView.model["title"] = "提示"
-            modelAndView.model["message"] = "已有该代码的优惠券"
-            modelAndView.viewName = "/messageDialog :: content"
-            return modelAndView
-        }
+    ): CommonRequestResult {
         val couponCode = if (code.isEmpty() && claimMethod == 2) getRandomStr(8) else code
+        couponDao.findFirstByCodeIgnoreCaseOrderByBeginDesc(couponCode)?.let {
+            return CommonRequestResult(12138,"已有该代码的优惠券")
+        }
 
         val enabled = !(disabled != null && disabled)
 
@@ -223,7 +218,7 @@ class CouponController {
                     df.parse(begin), df.parse(expire), userRegDays,
                     selectedProductTypes, selectedProductIds, selectedPositionIds, selectedPrintStationIds)
         }
-        return modelAndView
+        return CommonRequestResult()
     }
 }
 
