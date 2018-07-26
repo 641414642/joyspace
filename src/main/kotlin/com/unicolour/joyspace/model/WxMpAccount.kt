@@ -28,6 +28,10 @@ class WxMpAccount {
 
     @Column(length = 100)
     @NotNull
+    var mchId: String = ""
+
+    @Column(length = 100)
+    @NotNull
     var wxAppSecret: String = ""
 
     @NotNull
