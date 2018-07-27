@@ -228,28 +228,6 @@ class PrintStationController {
                 positionId, (proportion * 10).toInt(), printerType, adSetId, selectedProductIds)
     }
 
-    @GetMapping("/printStation/editPassword")
-    fun editPrintStationPassword(
-            modelAndView: ModelAndView,
-            @RequestParam(name = "id", required = true) id: Int
-    ): ModelAndView {
-        val printStation: PrintStation = printStationDao.findOne(id)
-
-        modelAndView.model["printStation"] = printStation
-        modelAndView.viewName = "/printStation/editPassword :: content"
-
-        return modelAndView
-    }
-
-    @PostMapping("/printStation/editPassword")
-    @ResponseBody
-    fun editPrintStationPassword(
-            @RequestParam(name = "id", required = true) id: Int,
-            @RequestParam(name = "printStationPassword", required = true) printStationPassword: String
-    ): Boolean {
-        return printStationService.updatePrintStationPassword(id, printStationPassword)
-    }
-
     @RequestMapping(path = arrayOf("/printStation/activate"), method = arrayOf(RequestMethod.GET))
     fun activatePrintStation(
             @RequestParam(name = "allCompany", required = false, defaultValue = "false") allCompany: Boolean,
@@ -297,7 +275,6 @@ class PrintStationController {
             request: HttpServletRequest,
             @RequestParam(name = "code", required = true) code: String,
             @RequestParam(name = "printStationName", required = true) printStationName: String,
-            @RequestParam(name = "printStationPassword", required = true) printStationPassword: String,
             @RequestParam(name = "positionId", required = true) positionId: Int,
             @RequestParam(name = "productIds", required = true) productIds: String
     ): CommonRequestResult {
@@ -308,7 +285,7 @@ class PrintStationController {
                     .filter { !request.getParameter("product_${it}").isNullOrBlank() }
                     .map { it.toInt() }
                     .toSet()
-            printStationService.activatePrintStation(null, code, printStationName, printStationPassword, positionId, selectedProductIds, "")
+            printStationService.activatePrintStation(null, code, printStationName, positionId, selectedProductIds, "")
             return CommonRequestResult()
         } catch (e: ProcessException) {
             return CommonRequestResult(e.errcode, e.message)
@@ -437,35 +414,6 @@ class PrintStationController {
             @RequestParam("currentAdSetTime") currentAdSetTime: String
     ): UpdateAndAdSetDTO {
         return printStationService.getPrintStationUpdateAndAdSet(sessionId, currentVersion, currentAdSetId, currentAdSetTime)
-    }
-
-    @PostMapping("/printStation/login")
-    @ResponseBody
-    fun printStationLogin(
-            @RequestParam("printStationId") printStationId: Int,
-            @RequestParam("password") password: String,
-            @RequestParam("version", required = false, defaultValue = "-1") version: Int,
-            @RequestParam("uuid") uuid: String,
-            @RequestParam("apiVersion", required = false, defaultValue = "1") apiVersion: Int
-    ): Any {
-        logger.info("PrintStation login, id=$printStationId, version=$version, uuid=$uuid");
-        val result = printStationService.login(printStationId,
-                password,
-                if (version > 0) version else null,
-                uuid)
-
-        logger.info("PrintStation login, result = $result")
-        return if (apiVersion > 1) {
-            result
-        }
-        else {
-            PrintStationLoginResultOld(
-                    result = result.result,
-                    sessionId = result.sessionId,
-                    printerType = result.printerType.name,
-                    resolution = result.printerType.resolution
-            )
-        }
     }
 
     @PostMapping("/printStation/loginWithKey")

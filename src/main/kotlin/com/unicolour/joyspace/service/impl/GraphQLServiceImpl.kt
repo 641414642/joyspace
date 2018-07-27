@@ -66,7 +66,7 @@ class GraphQLServiceImpl : GraphQLService {
 
     fun buildRuntimeWiring(): RuntimeWiring {
         return RuntimeWiring.newRuntimeWiring()
-                .type("QueryType", { typeWiring ->
+                .type("QueryType") { typeWiring ->
                     typeWiring.dataFetcher("printStation", printStationService.printStationDataFetcher)
                     typeWiring.dataFetcher("findPrintStationsByDistance", printStationService.byDistanceDataFetcher)
                     typeWiring.dataFetcher("findPrintStationsByCity", printStationService.byCityDataFetcher)
@@ -77,8 +77,8 @@ class GraphQLServiceImpl : GraphQLService {
                     typeWiring.dataFetcher("getPrintOrders", printOrderService.printStationPrintOrdersDataFetcher)
                     typeWiring.dataFetcher("getTemplateFileUrl", templateService.templateFileUrlDataFetcher)
                     typeWiring.dataFetcher("templates", templateService.templatesDataFetcher)
-                })
-                .type("MutationType", { typeWiring ->
+                }
+                .type("MutationType") { typeWiring ->
                     typeWiring.dataFetcher("login", userService.loginDataFetcher)
                     typeWiring.dataFetcher("sendVerifyCode", userService.sendVerifyCodeDataFetcher)
                     typeWiring.dataFetcher("userRegister", userService.userRegisterDataFetcher)
@@ -86,22 +86,21 @@ class GraphQLServiceImpl : GraphQLService {
                     typeWiring.dataFetcher("resetPassword", userService.resetPasswordDataFetcher)
                     typeWiring.dataFetcher("userCouponList", couponService.userCouponListDataFetcher)
                     typeWiring.dataFetcher("claimCoupon", couponService.claimCouponDataFetcher)
-                    typeWiring.dataFetcher("printStationLogin", printStationService.loginDataFetcher)
                     typeWiring.dataFetcher("printOrderDownloaded", printOrderService.printerOrderDownloadedDataFetcher)
                     typeWiring.dataFetcher("printOrderPrinted", printOrderService.printerOrderPrintedDataFetcher)
                     typeWiring.dataFetcher("updatePrintOrderImageStatus", printOrderService.updatePrintOrderImageStatusDataFetcher)
-                })
-                .type("RequestResult", { typeWiring ->
-                    typeWiring.dataFetcher("description", { environment ->
+                }
+                .type("RequestResult") { typeWiring ->
+                    typeWiring.dataFetcher("description") { environment ->
                         val result = environment.getSource<GraphQLRequestResult>()
                         val language = environment.getArgument<String>("language")
                         when (language) {
                             "en" -> result.resultCode.descEn
                             else -> result.resultCode.desc
                         }
-                    })
-                })
-                .type("Product", { typeWiring ->
+                    }
+                }
+                .type("Product") { typeWiring ->
                     typeWiring.dataFetcher("type", productService.getDataFetcher("type"))
                     typeWiring.dataFetcher("typeInt", productService.getDataFetcher("typeInt"))
                     typeWiring.dataFetcher("templateWidth", productService.getDataFetcher("templateWidth"))
@@ -120,11 +119,11 @@ class GraphQLServiceImpl : GraphQLService {
                     typeWiring.dataFetcher("name", productService.getDataFetcher("name"))
                     typeWiring.dataFetcher("version", productService.getDataFetcher("version"))
                     typeWiring.dataFetcher("templateUrl", productService.getDataFetcher("templateUrl"))
-                })
-                .type("TemplateImage", { typeWiring ->
+                }
+                .type("TemplateImage") { typeWiring ->
                     typeWiring.dataFetcher("url", templateService.getTemplateImageDataFetcher("url"))
-                })
-                .type("PrintStation", { typeWiring ->
+                }
+                .type("PrintStation") { typeWiring ->
                     typeWiring.dataFetcher("name", printStationService.getDataFetcher("name"))
                     typeWiring.dataFetcher("address", printStationService.getDataFetcher("address"))
                     typeWiring.dataFetcher("latitude", printStationService.getDataFetcher("latitude"))
@@ -133,28 +132,28 @@ class GraphQLServiceImpl : GraphQLService {
                     typeWiring.dataFetcher("transportation", printStationService.getDataFetcher("transportation"))
                     typeWiring.dataFetcher("distance", printStationService.getDataFetcher("distance"))
                     typeWiring.dataFetcher("products", printStationService.getDataFetcher("products"))
-                })
-                .type("PrintOrderItem", { typeWiring ->
+                }
+                .type("PrintOrderItem") { typeWiring ->
                     typeWiring.dataFetcher("imageFiles", printOrderService.imageFilesDataFetcher)
-                })
-                .type("PrintOrder", { typeWiring ->
+                }
+                .type("PrintOrder") { typeWiring ->
                     typeWiring.dataFetcher("wxUserNickName", printOrderService.wxUserNickNameDataFetcher)
-                })
-                .type("UserImageFile", { typeWiring ->
+                }
+                .type("UserImageFile") { typeWiring ->
                     typeWiring.dataFetcher("url", imageService.getImageFileUrlDataFetcher())
-                })
-                .type("AdSet", { typeWiring ->
-                    typeWiring.dataFetcher("updateTime", { env ->
+                }
+                .type("AdSet") { typeWiring ->
+                    typeWiring.dataFetcher("updateTime") { env ->
                         env.getSource<AdSet>().updateTime.formatWithMillisecond()
-                    })
-                })
-                .type("AdImageFile", { typeWiring ->
-                    typeWiring.dataFetcher("url", { env ->
+                    }
+                }
+                .type("AdImageFile") { typeWiring ->
+                    typeWiring.dataFetcher("url") { env ->
                         val imageFile = env.getSource<AdImageFile>()
                         adSetService.getAdImageUrl(imageFile)
-                    })
-                })
-                .type("Coupon", { typeWiring ->
+                    }
+                }
+                .type("Coupon") { typeWiring ->
                     typeWiring.dataFetcher("printStationIdList", couponService.getDataFetcher("printStationIdList"))
                     typeWiring.dataFetcher("positionIdList", couponService.getDataFetcher("positionIdList"))
                     typeWiring.dataFetcher("companyIdList", couponService.getDataFetcher("companyIdList"))
@@ -162,7 +161,7 @@ class GraphQLServiceImpl : GraphQLService {
                     typeWiring.dataFetcher("productTypeList", couponService.getDataFetcher("productTypeList"))
                     typeWiring.dataFetcher("begin", couponService.getDataFetcher("begin"))
                     typeWiring.dataFetcher("expire", couponService.getDataFetcher("expire"))
-                })
+                }
                 .build()
     }
 }

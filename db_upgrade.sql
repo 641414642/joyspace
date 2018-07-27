@@ -115,3 +115,5 @@ alter table company drop column wei_xin_pay_config_id;
 
 alter table company_wx_account add column wx_mp_account_id integer default 1;
 alter table wx_mp_account add column mch_id varchar(100) default '' not null;
+
+alter table print_station drop column password;
