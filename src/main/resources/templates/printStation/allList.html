@@ -47,11 +47,12 @@
 					<tr>
 						<th>ID</th>
 						<th>名称</th>
-						<th>投放商</th>
-						<th>店面</th>
+						<th style="width:200px">投放商</th>
+						<th style="width:200px">店面</th>
 						<th>分账比例</th>
 						<th>指定打印机类型</th>
 						<th>打印机型号</th>
+						<th>纸张</th>
 						<th>打印机状态</th>
 						<th>在线状态</th>
 						<th>软件版本</th>
@@ -65,7 +66,14 @@
 						<td th:text="${ps.printStation.position.name}"></td>
 						<td th:text="${#numbers.formatDecimal(ps.printStation.transferProportion / 10.0, 1, 'DEFAULT', 1, 'DEFAULT') + '%'}"></td>
 						<td th:text="${ps.printerTypeDisp}"></td>
-						<td th:text="${ps.printStation.printerModel}"></td>
+						<td>
+							<th:block th:if="${ps.printStation.rollPaper != null}">
+								<span style="vertical-align:middle" th:if="${ps.printStation.rollPaper == true}" class="label label-warning" title="卷纸">卷</span>
+								<span style="vertical-align:middle" th:if="${ps.printStation.rollPaper == false}" class="label label-primary" title="单张纸">单</span>
+							</th:block>
+							<span style="vertical-align:middle" th:text="${ps.printStation.printerModel}"></span>
+						</td>
+						<td style="white-space:nowrap" th:text="${ps.paperSizeDisp}"></td>
 						<td>
 							<th:block th:switch="${ps.printStation.status}">
 								<span th:case="0" class="label label-success">正常</span>

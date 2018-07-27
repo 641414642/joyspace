@@ -29,9 +29,7 @@ import org.springframework.web.servlet.view.RedirectView
 import org.springframework.web.servlet.mvc.support.RedirectAttributes
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
-
-
-
+import java.text.DecimalFormat
 
 
 @Controller
@@ -79,7 +77,7 @@ class PrintStationController {
     @Value("\${com.unicolour.joyspace.baseUrl}")
     lateinit var baseUrl: String
 
-    class PrintStationInfo(val printStation: PrintStation, val online: Boolean, val printerTypeDisp: String)
+    class PrintStationInfo(val printStation: PrintStation, val online: Boolean, val printerTypeDisp: String, val paperSizeDisp: String)
 
     @RequestMapping("/printStation/list")
     fun printStationList(
@@ -119,7 +117,8 @@ class PrintStationController {
             }
 
             val printerTypeDisp = printerNameDispMap[it.printerType] ?: ""
-            PrintStationInfo(it, online, printerTypeDisp)
+            val paperSizeDisp = getPaperSizeDisplay(it)
+            PrintStationInfo(it, online, printerTypeDisp, paperSizeDisp)
         }
 
         modelAndView.model["inputPositionId"] = inputPositionId
@@ -161,7 +160,8 @@ class PrintStationController {
             }
 
             val printerTypeDisp = printerNameDispMap[it.printerType] ?: ""
-            PrintStationInfo(it, online, printerTypeDisp)
+            val paperSizeDisp = getPaperSizeDisplay(it)
+            PrintStationInfo(it, online, printerTypeDisp, paperSizeDisp)
         }
 
         modelAndView.model["inputCompanyId"] = inputCompanyId
@@ -170,6 +170,18 @@ class PrintStationController {
         modelAndView.viewName = "layout"
 
         return modelAndView
+    }
+
+    private fun getPaperSizeDisplay(printStation: PrintStation): String {
+        return if (printStation.paperWidth == null || printStation.paperLength == null) {
+            ""
+        } else {
+            val fmt = DecimalFormat("0.#")
+            val widInInch = printStation.paperWidth!! / 25.4
+            val heiInInch = printStation.paperLength!! / 25.4
+
+            fmt.format(widInInch) + " x " + fmt.format(heiInInch)
+        }
     }
 
     @RequestMapping(path = arrayOf("/printStation/edit"), method = arrayOf(RequestMethod.GET))

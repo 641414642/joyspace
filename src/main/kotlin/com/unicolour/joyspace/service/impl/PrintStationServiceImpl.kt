@@ -447,6 +447,10 @@ open class PrintStationServiceImpl : PrintStationService {
         printStation.addressCity = printStation.position.addressCity
         printStation.addressDistrict = printStation.position.addressDistrict
         printStation.addressStreet = printStation.position.addressStreet
+        printStation.printerModel = null
+        printStation.rollPaper = null
+        printStation.paperWidth = null
+        printStation.paperLength = null
         printStation.status = PrintStationStatus.NORMAL.value
 
         if (uuid.isNotEmpty()) {
@@ -748,6 +752,11 @@ open class PrintStationServiceImpl : PrintStationService {
         }
 
         printStation.printerModel = printerInfo.model
+        printStation.rollPaper = printerInfo.rollPaper
+        val curPaperSize = printerInfo.paperSizes.firstOrNull { it.current }
+        printStation.paperWidth = curPaperSize?.paperWidth
+        printStation.paperLength = curPaperSize?.paperLength
+
         printStationDao.save(printStation)
 
         val printerInfoDir = File(assetsDir, "printStation/printerInfo")
