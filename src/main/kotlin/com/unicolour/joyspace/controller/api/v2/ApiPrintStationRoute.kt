@@ -8,6 +8,7 @@ import com.unicolour.joyspace.dto.PrintStationVo
 import com.unicolour.joyspace.dto.ResultCode
 import com.unicolour.joyspace.dto.TPriceItemVo
 import com.unicolour.joyspace.dto.common.RestResponse
+import com.unicolour.joyspace.model.PrintStation
 import com.unicolour.joyspace.service.CouponService
 import com.unicolour.joyspace.service.PositionService
 import com.unicolour.joyspace.service.PrintStationService
@@ -42,9 +43,10 @@ class ApiPrintStationRoute {
      * 根据二维码查找自助机
      */
     @GetMapping(value = "/v2/printStation/findByQrCode")
-    fun getPrintStationByQrCode(@RequestParam("qrCode") qrcode: String,
+    fun getPrintStationByQrCode(@RequestParam(value = "qrCode", required = false) qrcode: String?,
+                                @RequestParam(value = "id", required = false) id: Int?,
                                 @RequestParam("sessionId", required = false) sessionId: String?): RestResponse {
-        val printStation = printStationDao.findByWxQrCode(qrcode)
+        val printStation = findPrintStation(id, qrcode ?: "")
                 ?: return RestResponse.error(ResultCode.PRINT_STATION_NOT_FOUND)
         val psVo = printStationService.toPrintStationVo(printStation)
         val priceMap: Map<Int, Int> = printStationService.getPriceMap(printStation)
@@ -62,6 +64,12 @@ class ApiPrintStationRoute {
 //        val tPrice = priceMap.getOrDefault(tProduct.id,tProduct.defaultPrice)
 //        psVo.products!!.add(PrintStationProduct(9528,tProduct.name,"2",tPrice))
         return RestResponse.ok(psVo)
+    }
+
+    private fun findPrintStation(id: Int?, qrCode: String): PrintStation? = if (id != null) {
+        printStationDao.findOne(id)
+    } else {
+        printStationDao.findByWxQrCode(qrCode.substringBefore("?"))
     }
 
 

@@ -78,8 +78,12 @@ function createOrEditCoupon(event) {
                     url: frm.attr('action'),
                     data: frm.serialize(),
                     success: function (data) {
-                        $('#modalTemplate').modal('hide');
-                        window.location.reload();
+                        if (data.errcode == 12138) {
+                            showFormGroupErrMsg("code", data.errmsg)
+                        } else {
+                            $('#modalTemplate').modal('hide');
+                            window.location.reload();
+                        }
                     }
                 });
             //}

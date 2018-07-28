@@ -3,12 +3,11 @@ package com.unicolour.joyspace.controller
 import com.unicolour.joyspace.dao.CouponDao
 import com.unicolour.joyspace.dao.PositionDao
 import com.unicolour.joyspace.dao.PrintStationDao
-import com.unicolour.joyspace.dao.ProductDao
-import com.unicolour.joyspace.dto.PositionItem
-import com.unicolour.joyspace.dto.PrintStationItem
-import com.unicolour.joyspace.dto.ProductItem
-import com.unicolour.joyspace.dto.ProductTypeItem
-import com.unicolour.joyspace.model.*
+import com.unicolour.joyspace.dto.*
+import com.unicolour.joyspace.model.Coupon
+import com.unicolour.joyspace.model.CouponClaimMethod
+import com.unicolour.joyspace.model.CouponConstrainsType
+import com.unicolour.joyspace.model.ProductType
 import com.unicolour.joyspace.service.CouponService
 import com.unicolour.joyspace.service.ManagerService
 import com.unicolour.joyspace.service.ProductService
@@ -163,8 +162,7 @@ class CouponController {
 
     @RequestMapping(path = arrayOf("/coupon/edit"), method = arrayOf(RequestMethod.POST))
     @ResponseBody
-    fun editCoupon(
-            request: HttpServletRequest,
+    fun editCoupon(request: HttpServletRequest,
             @RequestParam(name = "id", required = true) id: Int,
             @RequestParam(name = "name", required = true) name: String,
             @RequestParam(name = "code", required = true) code: String,
@@ -180,7 +178,12 @@ class CouponController {
             @RequestParam(name = "productIds", required = true) productIds: String,
             @RequestParam(name = "positionIds", required = true) positionIds: String,
             @RequestParam(name = "printStationIds", required = true) printStationIds: String
-    ): Boolean {
+    ): CommonRequestResult {
+        val couponCode = if (code.isEmpty() && claimMethod == 2) getRandomStr(8) else code
+        couponDao.findFirstByCodeIgnoreCaseOrderByBeginDesc(couponCode)?.let {
+            return CommonRequestResult(12138,"已有该代码的优惠券")
+        }
+
         val enabled = !(disabled != null && disabled)
 
         val selectedProductTypes = ProductType.values()
@@ -205,16 +208,22 @@ class CouponController {
         val df = SimpleDateFormat("yyyy-MM-dd")
         val couponClaimMethod = CouponClaimMethod.values().find{ it.value == claimMethod }
         if (id <= 0) {
-            couponService.createCoupon(name, code, enabled, couponClaimMethod!!, maxUses, maxUsesPerUser,
+            couponService.createCoupon(name, couponCode, enabled, couponClaimMethod!!, maxUses, maxUsesPerUser,
                     (minExpense * 100).toInt(), (discount * 100).toInt(),
                     df.parse(begin), df.parse(expire), userRegDays,
                     selectedProductTypes, selectedProductIds, selectedPositionIds, selectedPrintStationIds)
-            return true
         } else {
-            return couponService.updateCoupon(id, name, code, enabled, couponClaimMethod!!, maxUses, maxUsesPerUser,
+            couponService.updateCoupon(id, name, couponCode, enabled, couponClaimMethod!!, maxUses, maxUsesPerUser,
                     (minExpense * 100).toInt(), (discount * 100).toInt(),
                     df.parse(begin), df.parse(expire), userRegDays,
                     selectedProductTypes, selectedProductIds, selectedPositionIds, selectedPrintStationIds)
         }
+        return CommonRequestResult()
     }
+}
+
+fun getRandomStr(outputStrLength: Long): String {
+    val source = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890"
+    return Random().ints(outputStrLength, 0, source.length).toArray()
+            .asSequence().map(source::get).joinToString("")
 }

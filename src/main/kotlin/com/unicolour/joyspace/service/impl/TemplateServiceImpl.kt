@@ -290,10 +290,12 @@ open class TemplateServiceImpl : TemplateService {
 
         val lineWidth = param.gridLineWidth
         if (lineWidth > 0) {
-            tpl = generateLine(row, offsetY, h, vGap, offsetX, w, col, hGap, tpl, lineWidth, tplW, tplH)
+            tpl = generateLine(row, offsetY, h, vGap, offsetX, w, col, hGap, tpl, if (lineWidth < 0.15) 0.15 else lineWidth, tplW, tplH)
         }
         tpl += "</svg>"
         return tpl
+
+
     }
 
     /**
@@ -348,7 +350,6 @@ open class TemplateServiceImpl : TemplateService {
      */
     private fun Double.sp(): Double = if (this > 0) this else 0.0
     private fun Double.sp(max: Double): Double = if (this > max) max else this
-
 
     @Transactional
     override fun createTemplate(name: String, type: ProductType, templateFile: MultipartFile) {

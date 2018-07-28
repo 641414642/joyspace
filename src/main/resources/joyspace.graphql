@@ -61,8 +61,6 @@ type MutationType {
     claimCoupon(sessionId: String!, couponCode: String!): ClaimCouponResult!
 
     ###############################自助机调用的接口######################################
-    #自助机登录
-    printStationLogin(printStationId: Int!, password: String!, version: Int, uuid: String) : PrintStationLoginRequestResult!
 
     #更新订单状态为已下载
     printOrderDownloaded(sessionId: String!, printOrderId: Int!) : RequestResult!

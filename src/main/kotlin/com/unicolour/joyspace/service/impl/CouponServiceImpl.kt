@@ -336,7 +336,7 @@ open class CouponServiceImpl : CouponService {
         }
 
     override fun claimCouponResult(code: String, session: UserLoginSession, user: User?): ClaimCouponResult {
-        val coupon = couponDao.findByCodeIgnoreCase(code)
+        val coupon = couponDao.findFirstByCodeIgnoreCaseOrderByBeginDesc(code)
         return if (coupon == null) {
             ClaimCouponResult(1, "您输入的信息不正确，请核对后再次输入", coupon)
         } else {

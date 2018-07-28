@@ -5,7 +5,6 @@ import com.unicolour.joyspace.model.*
 import graphql.schema.DataFetcher
 
 interface PrintStationService {
-    fun login(printStationId: Int, password: String, version: Int?, uuid: String): PrintStationLoginResult
     fun loginWithKey(printStationId: Int, signStr: String, version: Int?): PrintStationLoginResult
     fun initPublicKey(printStationId: Int, uuid: String, pubKeyStr: String): Int
 
@@ -14,11 +13,8 @@ interface PrintStationService {
     fun updatePrintStation(id: Int, printStationName: String, positionId: Int, transferProportion: Int,
                            printerType: String, adSetId: Int, selectedProductIds: Set<Int>): Boolean
 
-    fun updatePrintStationPassword(id: Int, printStationPassword: String): Boolean
     fun updatePrintStationStatus(printStationSessionId: String, status: PrintStationStatus, additionalInfo: String): Boolean
-    fun activatePrintStation(manager: Manager?, code: String, name:String, password: String,
-                             positionId: Int, selectedProductIds: Set<Int>, uuid: String)
-    val loginDataFetcher: DataFetcher<PrintStationLoginResultOld>
+    fun activatePrintStation(manager: Manager?, code: String, name:String, positionId: Int, selectedProductIds: Set<Int>, uuid: String)
 
     val printStationDataFetcher: DataFetcher<PrintStation>
     val nearestDataFetcher: DataFetcher<PrintStationFindResultSingle>

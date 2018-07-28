@@ -32,14 +32,20 @@ class PrintStation {
     lateinit var position: Position
 
     @Column(length = 128)
-    lateinit var password: String
-
-    @Column(length = 128)
     @NotNull
-    lateinit var printerType: String
+    lateinit var printerType: String     //允许的打印机类型
 
     @Column(length = 255)
-    var printerModel: String? = null
+    var printerModel: String? = null     //具体的打印机型号
+
+    @Column
+    var paperWidth: Double? = null       //当前的纸宽
+
+    @Column
+    var paperLength: Double? = null      //当前的纸长
+
+    @Column
+    var rollPaper: Boolean? = false      //是否是卷纸
 
     //region 店面
     /** 店面ID */

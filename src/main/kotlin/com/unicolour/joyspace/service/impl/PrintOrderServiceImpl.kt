@@ -9,6 +9,13 @@ import com.unicolour.joyspace.model.ProductType
 import com.unicolour.joyspace.service.*
 import graphql.schema.DataFetcher
 import graphql.schema.DataFetchingEnvironment
+import org.apache.http.client.HttpClient
+import org.apache.http.client.methods.HttpPost
+import org.apache.http.conn.ssl.TrustSelfSignedStrategy
+import org.apache.http.entity.ContentType
+import org.apache.http.entity.StringEntity
+import org.apache.http.impl.client.HttpClients
+import org.apache.http.ssl.SSLContextBuilder
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
@@ -29,6 +36,7 @@ import java.io.StringReader
 import java.math.BigInteger
 import java.net.URL
 import java.nio.charset.StandardCharsets
+import java.security.KeyStore
 import java.security.MessageDigest
 import java.security.SecureRandom
 import java.text.SimpleDateFormat
@@ -1074,7 +1082,7 @@ open class PrintOrderServiceImpl : PrintOrderService {
 
         val params = TreeMap(hashMapOf(
                 "mch_appid" to wxMpAccount.appId,
-                "mchid" to wxMchId,
+                "mchid" to wxMpAccount.mchId,
                 "nonce_str" to nonceStr,
                 "partner_trade_no" to record.tradeNo,
                 "openid" to record.receiverOpenId,
@@ -1087,19 +1095,15 @@ open class PrintOrderServiceImpl : PrintOrderService {
 
         val requestBody = getPaymentRequestParams(wxPayKey, params)
 
-        val headers = HttpHeaders()
-        headers.set(HttpHeaders.CONTENT_TYPE, "text/xml;charset=UTF-8")
 
-        val request = HttpEntity<String>(requestBody, headers)
-        val response = restTemplate.exchange(
-                "https://api.mch.weixin.qq.com/mmpaymkttransfers/promotion/transfers",
-                HttpMethod.POST,
-                request,
-                Resource::class.java)
+        val post = HttpPost("https://api.mch.weixin.qq.com/mmpaymkttransfers/promotion/transfers")
+        post.entity = StringEntity(requestBody, ContentType.create("text/xml", StandardCharsets.UTF_8))
 
+        val httpClient = createEntTransferHttpClient(wxMpAccount.mchId)
+        val response = httpClient.execute(post)
 
-        InputStreamReader(response.body.inputStream, StandardCharsets.UTF_8).use {
-            val resultStr = String(response.body.inputStream.readBytes(), StandardCharsets.UTF_8)
+        InputStreamReader(response.entity.content, StandardCharsets.UTF_8).use {
+            val resultStr = it.readText()
             println(resultStr)
 
             val result = wxEnterprisePayResultUnmarshaller.unmarshal(StringReader(resultStr)) as WxEnterprisePayResult
@@ -1115,6 +1119,26 @@ open class PrintOrderServiceImpl : PrintOrderService {
         }
 
         throw ProcessException(1, "Failed WxEntTransfer for companyId=${record.companyId}, receiverOpenId=${record.receiverOpenId}, amount=${record.amount}")
+    }
+
+    private fun createEntTransferHttpClient(mchId: String): HttpClient {
+        val clientBuilder = HttpClients.custom()
+        if (mchId.isNotBlank()) {
+            val password = mchId.toCharArray()
+            val keyStore = KeyStore.getInstance("PKCS12")
+
+            PrintOrderServiceImpl::class.java.getResourceAsStream("/apiclient_cert_$mchId.p12").use {
+                keyStore.load(it, password)
+            }
+
+            val sslContext = SSLContextBuilder.create()
+                    .loadKeyMaterial(keyStore, password)
+                    .loadTrustMaterial(null, TrustSelfSignedStrategy()).build()
+
+            clientBuilder.setSSLContext(sslContext)
+        }
+
+        return clientBuilder.build()
     }
 
     override fun printOrderStat(companyId: Int, startTime: Calendar, endTime: Calendar, positionId: Int, printStationId: Int): PrintOrderStatDTO {

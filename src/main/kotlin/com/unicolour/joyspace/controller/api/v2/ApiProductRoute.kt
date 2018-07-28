@@ -48,7 +48,7 @@ class ApiProductRoute {
      * 主页数据
      */
     @GetMapping(value = "/v2/app/homepage")
-    fun showHomePage(): RestResponse {
+    fun showHomePage(@RequestParam(required = false, value = "printStationId") printStationId: Int?): RestResponse {
         val advers = mutableListOf<Advert>()
         advers.add(Advert("ad_1", "轮播图", "", "$baseUrl/doc/home_page/1.png"))
         advers.add(Advert("ad_2", "轮播图", "", "$baseUrl/doc/home_page/2.png"))
@@ -56,12 +56,25 @@ class ApiProductRoute {
         advers.add(Advert("ad_4", "轮播图", "", "$baseUrl/doc/home_page/4.png"))
         advers.add(Advert("ad_5", "轮播图", "", "$baseUrl/doc/home_page/5.png"))
         val producTypes = mutableListOf<ProductType>()
-        producTypes.add(ProductType(0, "普通照片", "智能手机照片高质量打印", "$baseUrl/doc/home_page/product_type_0.png"))
-        producTypes.add(ProductType(1, "证件照", "支持多种尺寸，自动排版", "$baseUrl/doc/home_page/product_type_1.png"))
-        producTypes.add(ProductType(2, "模版", "多种精美模板 随心定制", "$baseUrl/doc/home_page/product_type_2.png"))
+        if (beSupportProductType(com.unicolour.joyspace.model.ProductType.PHOTO, printStationId)) {
+            producTypes.add(ProductType(0, "普通照片", "智能手机照片高质量打印", "$baseUrl/doc/home_page/product_type_0.png"))
+        }
+        if (beSupportProductType(com.unicolour.joyspace.model.ProductType.ID_PHOTO, printStationId)) {
+            producTypes.add(ProductType(1, "证件照", "支持多种尺寸，自动排版","$baseUrl/doc/home_page/product_type_1.png"))
+        }
+        producTypes.add(ProductType(2, "模版", "多种精美模板 随心定制","$baseUrl/doc/home_page/product_type_2.png"))
         producTypes.add(ProductType(3, "相册", "生活也许是一本书","$baseUrl/doc/home_page/product_type_3.png"))
         val homePage = HomePageVo(advers, producTypes)
         return RestResponse.ok(homePage)
+    }
+
+    private fun beSupportProductType(type: com.unicolour.joyspace.model.ProductType, printStationId: Int?): Boolean {
+        if (printStationId == null) return true
+        val templateIds = templateService.queryTemplates(type, "", true, "id asc").map { it.id }
+        val products = productDao.findByTemplateIdInAndDeletedOrderBySequence(templateIds, false)
+        products.asSequence().firstOrNull {
+            printStationProductDao.existsByPrintStationIdAndProductId(printStationId, it.id)
+        }?.let { return true } ?: return false
     }
 
 
