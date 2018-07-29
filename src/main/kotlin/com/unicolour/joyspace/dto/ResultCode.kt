@@ -31,6 +31,7 @@ enum class ResultCode(val value:Int, val desc:String, val descEn: String) {
     REPRINT_TASK_EXISTS(27, "重新打印任务已存在", "Reprint task already exists"),
     PRINT_ORDER_ALREADY_TRANSFERED(28, "订单已经转账过", "PrintOrder already transfered"),
     ADD_WX_ACCOUNT_FAILED(29, "添加微信收款账户失败", ""),
+    IMAGE_UPLOAD_NOT_YET(30,"还有未上传成功的订单图片","image upload not complete"),
 
     SERVER_ERROR(100, "服务器错误", "Server error"),
 
