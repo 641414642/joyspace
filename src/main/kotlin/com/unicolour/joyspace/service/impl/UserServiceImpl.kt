@@ -2,6 +2,7 @@ package com.unicolour.joyspace.service.impl
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.unicolour.joyspace.dao.UserAddressDao
 import com.unicolour.joyspace.dao.UserDao
 import com.unicolour.joyspace.dao.UserLoginSessionDao
 import com.unicolour.joyspace.dao.VerifyCodeDao
@@ -61,6 +62,9 @@ open class UserServiceImpl : UserService {
 
     @Autowired
     lateinit var transactionTemplate: TransactionTemplate
+
+    @Autowired
+    lateinit var userAddressDao: UserAddressDao
 
     //登录
     override val loginDataFetcher: DataFetcher<AppUserLoginResult>
@@ -431,6 +435,16 @@ open class UserServiceImpl : UserService {
         userDao.save(retUser)
 
         return retUser
+    }
+
+    @Transactional
+    override fun defaultAddress(userId: Int, id: Int) {
+        userAddressDao.updateDefault(userId,id)
+    }
+
+    @Transactional
+    override fun deleteAddress(id: Int) {
+        userAddressDao.deleteS(id)
     }
 }
 
