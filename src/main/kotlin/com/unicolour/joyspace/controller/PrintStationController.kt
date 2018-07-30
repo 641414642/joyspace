@@ -13,6 +13,7 @@ import com.unicolour.joyspace.service.PrintOrderService
 import com.unicolour.joyspace.service.PrintStationService
 import com.unicolour.joyspace.service.ProductService
 import com.unicolour.joyspace.util.Pager
+import com.unicolour.joyspace.view.PrintStationExcelView
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
@@ -129,20 +130,28 @@ class PrintStationController {
         return modelAndView
     }
 
-    @RequestMapping("/printStation/allList")
+    @GetMapping("/printStation/allList")
     fun allPrintStationList(
             modelAndView: ModelAndView,
             @RequestParam(name = "pageno", required = false, defaultValue = "1") pageno: Int,
-            @RequestParam(name = "inputCompanyId", required = false, defaultValue = "0") inputCompanyId: Int
+            @RequestParam(name = "inputCompanyId", required = false, defaultValue = "0") inputCompanyId: Int,
+            @RequestParam(name = "inputPositionId", required = false, defaultValue = "0") inputPositionId: Int,
+            @RequestParam(name = "inputPrintStationId", required = false, defaultValue = "0") inputPrintStationId: Int,
+            @RequestParam(name = "inputName", required = false, defaultValue = "") inputName: String,
+            @RequestParam(name = "inputPrinterModel", required = false, defaultValue = "") inputPrinterModel: String
     ): ModelAndView {
 
         val printerNameDispMap = printerTypeDao.findAll().map { it.name to it.displayName }.toMap()
 
         val pageable = PageRequest(pageno - 1, 20, Sort.Direction.ASC, "id")
-        val printStations = if (inputCompanyId > 0)
-                printStationDao.findByCompanyId(inputCompanyId, pageable)
-            else
-                printStationDao.findAll(pageable)
+        val printStations = printStationDao.queryPrintStations(
+                pageable = pageable,
+                companyId = inputCompanyId,
+                positionId = inputPositionId,
+                printStationId = inputPrintStationId,
+                name = inputName,
+                printerModel = inputPrinterModel
+        )
 
         val pager = Pager(printStations.totalPages, 7, pageno - 1)
         modelAndView.model["pager"] = pager
@@ -150,7 +159,6 @@ class PrintStationController {
         val time = Calendar.getInstance()
         time.add(Calendar.SECOND, 3600 - 30)
 
-        modelAndView.model["companies"] = companyDao.findAll()
         modelAndView.model["printStations"] = printStations.content.map {
             val session = printStationLoginSessionDao.findByPrintStationId(it.id)
             var online = false
@@ -163,11 +171,59 @@ class PrintStationController {
             val paperSizeDisp = getPaperSizeDisplay(it)
             PrintStationInfo(it, online, printerTypeDisp, paperSizeDisp)
         }
+        modelAndView.model["printStationCount"] = printStations.totalElements
 
-        modelAndView.model["inputCompanyId"] = inputCompanyId
+        modelAndView.model["company"] = if (inputCompanyId > 0) companyDao.findOne(inputCompanyId) else null
+        modelAndView.model["position"] = if (inputPositionId > 0) positionDao.findOne(inputPositionId) else null
+        modelAndView.model["inputName"] = inputName
+        modelAndView.model["inputPrinterModel"] = inputPrinterModel
+        modelAndView.model["inputPrintStationId"] = if (inputPrintStationId <= 0) "" else inputPrintStationId.toString()
+
         modelAndView.model["viewCat"] = "system_mgr"
         modelAndView.model["viewContent"] = "printStation_allList"
         modelAndView.viewName = "layout"
+
+        return modelAndView
+    }
+
+    @GetMapping("/printStation/export")
+    fun exportPrintStationList(
+            modelAndView: ModelAndView,
+            @RequestParam(name = "inputCompanyId", required = false, defaultValue = "0") inputCompanyId: Int,
+            @RequestParam(name = "inputPositionId", required = false, defaultValue = "0") inputPositionId: Int,
+            @RequestParam(name = "inputPrintStationId", required = false, defaultValue = "0") inputPrintStationId: Int,
+            @RequestParam(name = "inputName", required = false, defaultValue = "") inputName: String,
+            @RequestParam(name = "inputPrinterModel", required = false, defaultValue = "") inputPrinterModel: String
+    ): ModelAndView {
+
+        val printerNameDispMap = printerTypeDao.findAll().map { it.name to it.displayName }.toMap()
+
+        val printStations = printStationDao.queryPrintStations(
+                companyId = inputCompanyId,
+                positionId = inputPositionId,
+                printStationId = inputPrintStationId,
+                name = inputName,
+                printerModel = inputPrinterModel
+        )
+
+        val time = Calendar.getInstance()
+        time.add(Calendar.SECOND, 3600 - 30)
+
+        modelAndView.model["printStations"] = printStations.sortedBy { it.id }.map {
+            val session = printStationLoginSessionDao.findByPrintStationId(it.id)
+            var online = false
+
+            if (session != null && session.expireTime.timeInMillis > time.timeInMillis) {    //自助机30秒之内访问过后台
+                online = true
+            }
+
+            val printerTypeDisp = printerNameDispMap[it.printerType] ?: ""
+            val paperSizeDisp = getPaperSizeDisplay(it)
+            PrintStationInfo(it, online, printerTypeDisp, paperSizeDisp)
+        }
+        modelAndView.model["printStationCount"] = printStations.size
+
+        modelAndView.view = PrintStationExcelView()
 
         return modelAndView
     }

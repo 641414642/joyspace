@@ -23,17 +23,29 @@
 					<input type="hidden" id="pageNoField" name="pageno" />
 					<div class="form-inline">
 						<label class="form-label" for="inputCompanyId">投放商</label>
-						<select name="inputCompanyId" class="form-control" id="inputCompanyId">
-							<option value="0">所有投放商</option>
-							<option th:each="company : ${companies}"
-									th:value="${company.id}"
-									th:text="${company.name}"
-									th:selected="${inputCompanyId == company.id}">
-							</option>
+						<select name="inputCompanyId" class="form-control" style="width:200px" id="inputCompanyId" th:attr="data-query-url=@{/company/query}">
+							<option th:if="${company == null}" value="0" selected="selected">所有投放商</option>
+							<option th:unless="${company == null}" selected="selected" th:value="${company.id}" th:text="${company.name}"></option>
 						</select>
+						&nbsp;&nbsp;
+						<label class="form-label" for="inputPositionId">店面</label>
+						<select name="inputPositionId" class="form-control" style="width:150px" id="inputPositionId" th:attr="data-query-url=@{/position/query}">
+							<option th:if="${position == null}" value="0" selected="selected">所有店面</option>
+							<option th:unless="${position == null}" selected="selected" th:value="${position.id}" th:text="${position.name}"></option>
+						</select>
+						&nbsp;&nbsp;
+						<label class="form-label" for="inputName">名称</label>
+						<input class="form-control" type="text" style="width:100px" id="inputName" name="inputName" th:value="${inputName}" />
+						&nbsp;&nbsp;
+						<label class="form-label" for="inputPrintStationId">ID</label>
+						<input class="form-control" type="text" style="width:80px" id="inputPrintStationId" name="inputPrintStationId" th:value="${inputPrintStationId}" />
+						&nbsp;&nbsp;
+						<label class="form-label" for="inputPrinterModel">打印机型号</label>
+						<input class="form-control" type="text" style="width:100px" id="inputPrinterModel" name="inputPrinterModel" th:value="${inputPrinterModel}" />
 						&nbsp;&nbsp;
 						<button type="submit" class="btn btn-default btn-sm">查询</button>
 						<a href="#" th:href="@{/printStation/allList}" class="btn btn-default btn-sm">重置</a>
+						<a href="#" id="exportPrintStationListButton" class="btn btn-info btn-sm" style="margin-left: 10px" th:attr="data-url=@{/printStation/export}">导出</a>
 
 						<div class="pull-right">
 							<a href="#" th:attr="data-url=@{/printStation/activate(allCompany=true)}" class="btn btn-primary btn-sm" onclick="return activatePrintStation(event)">新建</a>
@@ -43,6 +55,10 @@
 			</div>
 
 			<div class="box-body">
+				<div class="row">
+					<span class="order_list_stat">自助机数量&nbsp;&nbsp;&nbsp;<span th:text="${printStationCount}"></span></span>
+				</div>
+
 				<table class="table table-bordered table-striped">
 					<tr>
 						<th>ID</th>

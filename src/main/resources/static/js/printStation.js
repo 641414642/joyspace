@@ -73,3 +73,48 @@ function confirmUploadLogFile(event) {
             .datepicker("setDate", new Date());
     });
 }
+$(function() {
+    var companySel = $("#inputCompanyId");
+    var positionSel = $("#inputPositionId");
+
+    companySel.select2({
+        language: "zh-CN",
+        ajax: {
+            url: companySel.data("query-url"),
+            dataType: 'json',
+            data: function (params) {
+                return {
+                    name: params.term,
+                    pageno: params.page || 1
+                }
+            }
+        }
+    });
+
+    positionSel.select2({
+        language: "zh-CN",
+        ajax: {
+            url: positionSel.data("query-url"),
+            dataType: 'json',
+            data: function (params) {
+                return {
+                    name: params.term,
+                    companyId: companySel.val(),
+                    pageno: params.page || 1
+                }
+            }
+        }
+    });
+
+    $("#exportPrintStationListButton").on("click", function(e){
+        e.preventDefault();
+        var exportUrl = $("#exportPrintStationListButton").data("url");
+
+        window.location.href = exportUrl +
+            "?inputCompanyId=" + $("#inputCompanyId").val() +
+            "&inputPositionId=" + $("#inputPositionId").val() +
+            "&inputName=" + $("#inputName").val() +
+            "&inputPrintStationId=" + $("#inputPrintStationId").val() +
+            "&inputPrinterModel=" + $("#inputPrinterModel").val();
+    });
+});
