@@ -77,6 +77,7 @@ class ApiOrderRoute {
             val session = userLoginSessionDao.findOne(orderInput.sessionId) ?: return RestResponse.error(ResultCode.INVALID_USER_LOGIN_SESSION)
             userDao.findOne(session.userId) ?: return RestResponse.error(ResultCode.INVALID_USER_LOGIN_SESSION)
             val order = printOrderDao.findOne(orderInput.orderId) ?: return RestResponse.error(ResultCode.PRINT_ORDER_NOT_FOUND)
+            if (!order.imageFileUploaded) return RestResponse.error(ResultCode.IMAGE_UPLOAD_NOT_YET)
             if ((order.totalFee - order.discount) <= 0){
                 order.payed = true
                 order.updateTime = Calendar.getInstance()
