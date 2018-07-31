@@ -233,8 +233,16 @@ class PrintStationController {
             ""
         } else {
             val fmt = DecimalFormat("0.#")
-            val widInInch = printStation.paperWidth!! / 25.4
-            val heiInInch = printStation.paperLength!! / 25.4
+            var widInInch = printStation.paperWidth!! / 25.4
+            var heiInInch = printStation.paperLength!! / 25.4
+
+            if (widInInch % 1.0 < 0.2) {
+                widInInch = Math.floor(widInInch)
+            }
+
+            if (heiInInch % 1.0 < 0.2) {
+                heiInInch = Math.floor(heiInInch)
+            }
 
             fmt.format(widInInch) + " x " + fmt.format(heiInInch)
         }
