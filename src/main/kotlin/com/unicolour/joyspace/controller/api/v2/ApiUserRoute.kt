@@ -7,6 +7,7 @@ import com.unicolour.joyspace.dao.UserLoginSessionDao
 import com.unicolour.joyspace.dto.*
 import com.unicolour.joyspace.dto.common.RestResponse
 import com.unicolour.joyspace.model.Address
+import com.unicolour.joyspace.service.UserService
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.*
@@ -24,6 +25,8 @@ class ApiUserRoute {
     private lateinit var userDao: UserDao
     @Autowired
     private lateinit var printOrderDao: PrintOrderDao
+    @Autowired
+    private lateinit var userService: UserService
 
     //获取个人信息
     @GetMapping(value = "/v2/user/info")
@@ -83,7 +86,7 @@ class ApiUserRoute {
         param.name?.let { addr.name = param.name }
         if (param.default == 1) addr.defalut = true
         val address = userAddressDao.save(addr)
-        if (address.defalut) userAddressDao.updateDefault(user.id, address.id)
+        if (address.defalut) userService.defaultAddress(user.id,address.id)
         return RestResponse.ok(address)
     }
 
@@ -96,7 +99,7 @@ class ApiUserRoute {
         val user = userDao.findOne(session.userId) ?: return RestResponse.error(ResultCode.INVALID_USER_LOGIN_SESSION)
         val address = userAddressDao.findOne(deleteAddress.id)
         if (address == null || address.userId != user.id) RestResponse.error(ResultCode.INVALID_USER_LOGIN_SESSION)
-        userAddressDao.deleteS(deleteAddress.id!!)
+        userService.deleteAddress(deleteAddress.id!!)
         return RestResponse.ok()
     }
 }
