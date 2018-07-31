@@ -234,7 +234,13 @@ open class PrintStationServiceImpl : PrintStationService {
             sign.update(strToSign.toByteArray())
 
             if (sign.verify(signBytes)) {
+                val now = Calendar.getInstance()
                 printStation.loginSequence = sequence
+                printStation.lastLoginTime = now
+
+                if (printStation.firstLoginTime == null) {
+                    printStation.firstLoginTime = now
+                }
 
                 if (printStation.lastLoginVersion != version) {
                     printStation.lastLoginVersion = version
