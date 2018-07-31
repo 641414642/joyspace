@@ -55,10 +55,12 @@ class PrintStationExcelView : AbstractXlsxView() {
         header.createCell(column++).apply { setCellValue("分账比例"); cellStyle = headerStyle; sheet.setColumnWidth(columnIndex, 10 * 256) }
         header.createCell(column++).apply { setCellValue("指定打印机类型"); cellStyle = headerStyle; sheet.setColumnWidth(columnIndex, 25 * 256) }
         header.createCell(column++).apply { setCellValue("打印机型号"); cellStyle = headerStyle; sheet.setColumnWidth(columnIndex, 25 * 256) }
-        header.createCell(column++).apply { setCellValue("卷纸"); cellStyle = headerStyle; sheet.setColumnWidth(columnIndex, 10 * 256) }
-        header.createCell(column++).apply { setCellValue("纸张"); cellStyle = headerStyle; sheet.setColumnWidth(columnIndex, 20 * 256) }
+        header.createCell(column++).apply { setCellValue("纸张类型"); cellStyle = headerStyle; sheet.setColumnWidth(columnIndex, 10 * 256) }
+        header.createCell(column++).apply { setCellValue("纸张尺寸"); cellStyle = headerStyle; sheet.setColumnWidth(columnIndex, 20 * 256) }
         header.createCell(column++).apply { setCellValue("打印机状态"); cellStyle = headerStyle; sheet.setColumnWidth(columnIndex, 15 * 256) }
         header.createCell(column++).apply { setCellValue("在线状态"); cellStyle = headerStyle; sheet.setColumnWidth(columnIndex, 15 * 256) }
+        header.createCell(column++).apply { setCellValue("首次登录时间"); cellStyle = headerStyle; sheet.setColumnWidth(columnIndex, 18 * 256) }
+        header.createCell(column++).apply { setCellValue("最后登录时间"); cellStyle = headerStyle; sheet.setColumnWidth(columnIndex, 18 * 256) }
         header.createCell(column++).apply { setCellValue("软件版本"); cellStyle = headerStyle; sheet.setColumnWidth(columnIndex, 10 * 256) }
         header.createCell(column).apply { setCellValue("广告"); cellStyle = headerStyle; sheet.setColumnWidth(columnIndex, 25 * 256) }
 
@@ -83,10 +85,18 @@ class PrintStationExcelView : AbstractXlsxView() {
             row.createCell(column++).setCellValue(df.format(info.printStation.transferProportion / 10.0) + "%")
             row.createCell(column++).setCellValue(info.printerTypeDisp)
             row.createCell(column++).setCellValue(info.printStation.printerModel ?: "")
-            row.createCell(column++).apply { if (info.printStation.rollPaper == true) setCellValue("✓") }
+            row.createCell(column++).setCellValue(
+                    when(info.printStation.rollPaper) {
+                        true -> "卷纸"
+                        false -> "单张纸"
+                        else -> ""
+                    }
+            )
             row.createCell(column++).setCellValue(paperSize)
             row.createCell(column++).setCellValue(PrintStationStatus.values().firstOrNull { it.value == info.printStation.status }?.message?:"")
             row.createCell(column++).setCellValue(if (info.online) "在线" else "离线")
+            row.createCell(column++).apply { setCellValue(info.printStation.firstLoginTime); cellStyle = dateTimeCellStyle }
+            row.createCell(column++).apply { setCellValue(info.printStation.lastLoginTime); cellStyle = dateTimeCellStyle }
             row.createCell(column++).setCellValue(info.printStation.lastLoginVersion?.toString() ?: "")
             row.createCell(column).setCellValue(info.printStation.adSet?.name ?: "")
         }

@@ -68,9 +68,11 @@
 						<th>分账比例</th>
 						<th>指定打印机类型</th>
 						<th>打印机型号</th>
-						<th>纸张</th>
+						<th>纸张尺寸</th>
 						<th>打印机状态</th>
 						<th>在线状态</th>
+						<th>首次登录时间</th>
+						<th>最后登录时间</th>
 						<th>软件版本</th>
 						<th>广告</th>
 						<th>操作</th>
@@ -101,6 +103,8 @@
 							<span th:if="${ps.online}" class="label label-success">在线</span>
 							<span th:unless="${ps.online}" class="label label-default">离线</span>
 						</td>
+						<td th:text="${ps.printStation.firstLoginTime == null ? '' : #calendars.format(ps.printStation.firstLoginTime, 'yyyy-MM-dd HH:mm:ss')}"></td>
+						<td th:text="${ps.printStation.lastLoginTime == null ? '' : #calendars.format(ps.printStation.lastLoginTime, 'yyyy-MM-dd HH:mm:ss')}"></td>
 						<td th:text="${ps.printStation.lastLoginVersion}"></td>
 						<td th:text="${ps.printStation.adSet?.name}"></td>
 						<td>
