@@ -57,7 +57,7 @@ open class PrintOrderServiceImpl : PrintOrderService {
         val logger = LoggerFactory.getLogger(PrintOrderServiceImpl::class.java)
     }
 
-    val wxEntTransferExecutor: ExecutorService = Executors.newFixedThreadPool(1)
+    private val wxEntTransferExecutor: ExecutorService = Executors.newFixedThreadPool(1)
 
     @Value("\${com.unicolour.joyspace.baseUrl}")
     lateinit var baseUrl: String
@@ -112,9 +112,6 @@ open class PrintOrderServiceImpl : PrintOrderService {
 
     @Autowired
     lateinit var productDao: ProductDao
-
-    @Autowired
-    lateinit var templateImageInfoDao: TemplateImageInfoDao
 
     @Autowired
     lateinit var couponDao: CouponDao
@@ -765,7 +762,7 @@ open class PrintOrderServiceImpl : PrintOrderService {
             return
         }
 
-        synchronized(this, {
+        synchronized(this) {
             transactionTemplate.execute {
                 val record = WxEntTransferRecord()
                 record.amount = orderAmountAndFee.totalSharing
@@ -798,7 +795,7 @@ open class PrintOrderServiceImpl : PrintOrderService {
 
                 doWxEntTransfer(wxMpAccount, record, orders)
             }
-        })
+        }
     }
 
     private fun getUntransferedPrintOrders(companyId: Int): List<PrintOrder> {
@@ -1120,7 +1117,7 @@ open class PrintOrderServiceImpl : PrintOrderService {
                 "spbill_create_ip" to ipAddress
         ))
 
-        val requestBody = getPaymentRequestParams(wxPayKey, params)
+        val requestBody = getPaymentRequestParams(wxMpAccount.payKey, params)
 
 
         val post = HttpPost("https://api.mch.weixin.qq.com/mmpaymkttransfers/promotion/transfers")
