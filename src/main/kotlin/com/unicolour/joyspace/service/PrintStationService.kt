@@ -45,4 +45,7 @@ interface PrintStationService {
     fun recordPrinterStat(sessionId: String, printerSn: String, printerType: String, printerName: String, mediaCounter: Int, errorCode: Int): Boolean
     fun getPrintStationQrCodeUrl(printStationId: Int, noBackground: Boolean): String
     fun updatePrintStationPrinterInfo(sessionId: String, printerInfo: PrinterInfoDTO): Boolean
+
+    fun getHomeCurrentVersion(): Int   //当前的home版本号
+    fun getHomeDownloadUrl(): String   //当前版本的home安装文件的下载地址
 }

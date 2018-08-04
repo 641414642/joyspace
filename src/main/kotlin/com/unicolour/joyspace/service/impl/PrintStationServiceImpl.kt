@@ -340,14 +340,7 @@ open class PrintStationServiceImpl : PrintStationService {
         }
 
         if (version == -1) {
-            version =
-                    try {
-                        val versionFile = File(assetsDir, "home/current.txt")
-                        versionFile.reader().use { it.readText().trim(' ', '\r', '\n', '\t').toInt() }
-                    } catch (e: Exception) {
-                        e.printStackTrace()
-                        0
-                    }
+            version = getHomeCurrentVersion()
         }
 
         return UpdateAndAdSetDTO(
@@ -356,6 +349,19 @@ open class PrintStationServiceImpl : PrintStationService {
                 defaultIccFileName = newIccFileName,
                 iccConfigs = iccConfigs
         )
+    }
+
+    override fun getHomeCurrentVersion(): Int {
+        val version: Int =
+            try {
+                val versionFile = File(assetsDir, "home/current.txt")
+                versionFile.reader().use { it.readText().trim(' ', '\r', '\n', '\t').toInt() }
+            } catch (e: Exception) {
+                e.printStackTrace()
+                0
+            }
+
+        return version
     }
 
     override fun getPriceMap(printStation: PrintStation): Map<Int, Int> {
@@ -627,8 +633,7 @@ open class PrintStationServiceImpl : PrintStationService {
                     }
 
                     if (version == 0) {
-                        val versionFile = File(assetsDir, "home/current.txt")
-                        version = versionFile.reader().use { it.readText().trim(' ', '\r', '\n', '\t').toInt() }
+                        version = getHomeCurrentVersion()
                     }
 
                     version
@@ -638,6 +643,11 @@ open class PrintStationServiceImpl : PrintStationService {
                 }
             }
         }
+
+    override fun getHomeDownloadUrl(): String {
+        val version = getHomeCurrentVersion()
+        return "$baseUrl/joyspace_home/joyspace_home_$version.exe"
+    }
 
     private val AVERAGE_RADIUS_OF_EARTH_M = 6371000
 
