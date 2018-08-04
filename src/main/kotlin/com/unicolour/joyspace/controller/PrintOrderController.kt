@@ -200,11 +200,12 @@ class PrintOrderController {
         modelAndView.model["photoCopies"] = orderStat.printPageCount
         modelAndView.model["turnOver"] = "${turnOver/100}.${String.format("%02d", turnOver%100)}"
 
+        modelAndView.model["query"] = query
+
         if (partial == true) {
             modelAndView.viewName = "/printOrder/list :: order_list_content"
         }
         else {
-            modelAndView.model["query"] = query
 
             val dateFormat = SimpleDateFormat("yyyy-MM-dd")
 

@@ -178,3 +178,26 @@
         white-space: wrap;
     }
 }
+
+label.toggle input {
+    display: none;
+}
+
+label.toggle span {
+    display: inline-block;
+    font: normal normal normal 14px/1 FontAwesome;
+    font-size: inherit;
+    text-rendering: auto;
+    -webkit-font-smoothing: antialiased;
+}
+
+label.toggle span:before {
+    content: "\f204";
+    color: darkgray;
+}
+
+/* style its checked state..with a ticked icon */
+label.toggle  [type=checkbox]:checked + span:before {
+    content: '\f205';
+    color: #4bd763;
+}
