@@ -27,14 +27,9 @@ function validateActivationInput() {
     clearFormGroupErrMsg("#activatePrintStationForm");
 
     var code = $("#activatePrintStationForm [name='code']").val();
-    var password = $("#activatePrintStationForm [name='printStationPassword']").val();
 
     if (code.length === 0 || !code.trim()) {
         showFormGroupErrMsg("code", "激活码不能为空!");
-        return false;
-    }
-    else if (password.length === 0 || !password.trim()) {
-        showFormGroupErrMsg("printStationPassword", "自助机密码不能为空!");
         return false;
     }
     else if ($("#positionId option:selected").length == 0) {
