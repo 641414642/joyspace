@@ -144,12 +144,6 @@ open class PrintOrderServiceImpl : PrintOrderService {
     @Value("\${com.unicolour.wxAppId}")
     lateinit var wxAppId: String
 
-    @Value("\${com.unicolour.wxMchId}")  //商户id
-    lateinit var wxMchId: String
-
-    @Value("\${com.unicolour.wxPayKey}")
-    lateinit var wxPayKey: String
-
     private lateinit var wxUnifyOrderResultUnmarshaller: Unmarshaller
     private lateinit var wxPayNotifyUnmarshaller: Unmarshaller
     private lateinit var wxEnterprisePayResultUnmarshaller: Unmarshaller
@@ -913,6 +907,12 @@ open class PrintOrderServiceImpl : PrintOrderService {
     }
 
     override fun startPayment(orderId: Int): WxPayParams {
+        val activeWxMpAccount = wxMpAccountDao.findFirstByActiveIsTrue()
+        if (activeWxMpAccount == null) {
+            CompanyServiceImpl.logger.warn("No active WxMpAccount, cannot start wx payment")
+            throw ProcessException(ResultCode.ADD_WX_ACCOUNT_FAILED)
+        }
+
         val order = printOrderDao.findOne(orderId)
 
         val user = userDao.findOne(order.userId)
@@ -935,10 +935,10 @@ open class PrintOrderServiceImpl : PrintOrderService {
         wxPayRecordDao.save(wxPayRecord)
 
 
-        val requestBody = getPaymentRequestParams(wxPayKey, TreeMap(hashMapOf<String, String>(
+        val requestBody = getPaymentRequestParams(activeWxMpAccount.payKey, TreeMap(hashMapOf<String, String>(
                 "appid" to wxAppId,
                 "body" to "优利绚彩-照片打印",
-                "mch_id" to wxMchId,
+                "mch_id" to activeWxMpAccount.mchId,
                 "nonce_str" to nonceStr,
                 "notify_url" to notifyUrl,
                 "openid" to openId,
@@ -966,7 +966,7 @@ open class PrintOrderServiceImpl : PrintOrderService {
             val result = wxUnifyOrderResultUnmarshaller.unmarshal(StringReader(resultStr)) as WxUnifyOrderResult
 
             if (result.return_code == "SUCCESS" && result.result_code == "SUCCESS") {
-                return createWxPayParams(wxPayKey, result, nonceStr)
+                return createWxPayParams(activeWxMpAccount.payKey, result, nonceStr)
             }
             else {
                 logger.error("微信支付调用失败--info ： ${objectMapper.writeValueAsString(result)}")
@@ -998,6 +998,12 @@ open class PrintOrderServiceImpl : PrintOrderService {
 
     @Transactional
     override fun processWxPayNotify(requestBodyStr: String): String? {
+        val activeWxMpAccount = wxMpAccountDao.findFirstByActiveIsTrue()
+        if (activeWxMpAccount == null) {
+            CompanyServiceImpl.logger.warn("No active WxMpAccount, processWxPayNotify failed")
+            return "没有找到收款商户"
+        }
+
         //XXX 记录到文件中
         //XXX 签名检查
         val result = wxPayNotifyUnmarshaller.unmarshal(StringReader(requestBodyStr)) as WxPayNotify
@@ -1005,7 +1011,7 @@ open class PrintOrderServiceImpl : PrintOrderService {
         if (result.appid != wxAppId) {
             return "错误的AppId"
         }
-        else if (result.mch_id != wxMchId) {
+        else if (result.mch_id != activeWxMpAccount.mchId) {
             return "错误的商户号"
         }
         else if (result.out_trade_no == null) {
