@@ -105,17 +105,12 @@ class PrintStationController {
         val pager = Pager(printStations.totalPages, 7, pageno - 1)
         modelAndView.model["pager"] = pager
 
-        val time = Calendar.getInstance()
-        time.add(Calendar.SECOND, 3600 - 30)
+        val time = System.currentTimeMillis() - 30 * 1000
 
         modelAndView.model["positions"] = positionDao.findByCompanyId(loginManager.companyId)
         modelAndView.model["printStations"] = printStations.content.map {
-            val session = printStationLoginSessionDao.findByPrintStationId(it.id)
-            var online = false
-
-            if (session != null && session.expireTime.timeInMillis > time.timeInMillis) {    //自助机30秒之内访问过后台
-                online = true
-            }
+            val lastAccessTime = it.lastAccessTime
+            val online = lastAccessTime != null && lastAccessTime.timeInMillis > time   //自助机30秒之内访问过后台
 
             val printerTypeDisp = printerNameDispMap[it.printerType] ?: ""
             val paperSizeDisp = getPaperSizeDisplay(it)
@@ -138,7 +133,8 @@ class PrintStationController {
             @RequestParam(name = "inputPositionId", required = false, defaultValue = "0") inputPositionId: Int,
             @RequestParam(name = "inputPrintStationId", required = false, defaultValue = "0") inputPrintStationId: Int,
             @RequestParam(name = "inputName", required = false, defaultValue = "") inputName: String,
-            @RequestParam(name = "inputPrinterModel", required = false, defaultValue = "") inputPrinterModel: String
+            @RequestParam(name = "inputPrinterModel", required = false, defaultValue = "") inputPrinterModel: String,
+            @RequestParam(name = "inputOnlineOnly", required = false, defaultValue = "false") inputOnlineOnly: Boolean
     ): ModelAndView {
 
         val printerNameDispMap = printerTypeDao.findAll().map { it.name to it.displayName }.toMap()
@@ -150,22 +146,18 @@ class PrintStationController {
                 positionId = inputPositionId,
                 printStationId = inputPrintStationId,
                 name = inputName,
-                printerModel = inputPrinterModel
+                printerModel = inputPrinterModel,
+                onlineOnly = inputOnlineOnly
         )
 
         val pager = Pager(printStations.totalPages, 7, pageno - 1)
         modelAndView.model["pager"] = pager
 
-        val time = Calendar.getInstance()
-        time.add(Calendar.SECOND, 3600 - 30)
+        val time = System.currentTimeMillis() - 30 * 1000
 
         modelAndView.model["printStations"] = printStations.content.map {
-            val session = printStationLoginSessionDao.findByPrintStationId(it.id)
-            var online = false
-
-            if (session != null && session.expireTime.timeInMillis > time.timeInMillis) {    //自助机30秒之内访问过后台
-                online = true
-            }
+            val lastAccessTime = it.lastAccessTime
+            val online = lastAccessTime != null && lastAccessTime.timeInMillis > time   //自助机30秒之内访问过后台
 
             val printerTypeDisp = printerNameDispMap[it.printerType] ?: ""
             val paperSizeDisp = getPaperSizeDisplay(it)
@@ -178,6 +170,7 @@ class PrintStationController {
         modelAndView.model["inputName"] = inputName
         modelAndView.model["inputPrinterModel"] = inputPrinterModel
         modelAndView.model["inputPrintStationId"] = if (inputPrintStationId <= 0) "" else inputPrintStationId.toString()
+        modelAndView.model["inputOnlineOnly"] = inputOnlineOnly
 
         modelAndView.model["viewCat"] = "system_mgr"
         modelAndView.model["viewContent"] = "printStation_allList"
@@ -193,7 +186,8 @@ class PrintStationController {
             @RequestParam(name = "inputPositionId", required = false, defaultValue = "0") inputPositionId: Int,
             @RequestParam(name = "inputPrintStationId", required = false, defaultValue = "0") inputPrintStationId: Int,
             @RequestParam(name = "inputName", required = false, defaultValue = "") inputName: String,
-            @RequestParam(name = "inputPrinterModel", required = false, defaultValue = "") inputPrinterModel: String
+            @RequestParam(name = "inputPrinterModel", required = false, defaultValue = "") inputPrinterModel: String,
+            @RequestParam(name = "inputOnlineOnly", required = false, defaultValue = "false") inputOnlineOnly: Boolean
     ): ModelAndView {
 
         val printerNameDispMap = printerTypeDao.findAll().map { it.name to it.displayName }.toMap()
@@ -203,19 +197,15 @@ class PrintStationController {
                 positionId = inputPositionId,
                 printStationId = inputPrintStationId,
                 name = inputName,
-                printerModel = inputPrinterModel
+                printerModel = inputPrinterModel,
+                onlineOnly = inputOnlineOnly
         )
 
-        val time = Calendar.getInstance()
-        time.add(Calendar.SECOND, 3600 - 30)
+        val time = System.currentTimeMillis() - 30 * 1000
 
         modelAndView.model["printStations"] = printStations.sortedBy { it.id }.map {
-            val session = printStationLoginSessionDao.findByPrintStationId(it.id)
-            var online = false
-
-            if (session != null && session.expireTime.timeInMillis > time.timeInMillis) {    //自助机30秒之内访问过后台
-                online = true
-            }
+            val lastAccessTime = it.lastAccessTime
+            val online = lastAccessTime != null && lastAccessTime.timeInMillis > time   //自助机30秒之内访问过后台
 
             val printerTypeDisp = printerNameDispMap[it.printerType] ?: ""
             val paperSizeDisp = getPaperSizeDisplay(it)

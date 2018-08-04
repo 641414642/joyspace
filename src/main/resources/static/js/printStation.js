@@ -115,6 +115,7 @@ $(function() {
             "&inputPositionId=" + $("#inputPositionId").val() +
             "&inputName=" + $("#inputName").val() +
             "&inputPrintStationId=" + $("#inputPrintStationId").val() +
-            "&inputPrinterModel=" + $("#inputPrinterModel").val();
+            "&inputPrinterModel=" + $("#inputPrinterModel").val() +
+            "&inputOnlineOnly=" + $("#inputOnlineOnly").is(":checked");
     });
 });

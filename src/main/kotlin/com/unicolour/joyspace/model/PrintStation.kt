@@ -103,6 +103,10 @@ class PrintStation {
     @Column
     var lastLoginTime: Calendar? = null
 
+    //上次访问的时间
+    @Column
+    var lastAccessTime: Calendar? = null
+
     //指定更新到的home版本号, 如果为null, 使用全局版本号设置
     @Column(name = "update_to_version")
     var updateToVersion: Int? = null

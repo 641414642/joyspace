@@ -237,6 +237,7 @@ open class PrintStationServiceImpl : PrintStationService {
                 val now = Calendar.getInstance()
                 printStation.loginSequence = sequence
                 printStation.lastLoginTime = now
+                printStation.lastAccessTime = now
 
                 if (printStation.firstLoginTime == null) {
                     printStation.firstLoginTime = now
@@ -690,10 +691,17 @@ open class PrintStationServiceImpl : PrintStationService {
     override fun getUnFetchedPrintStationTasks(printStationSessionId: String, taskIdAfter: Int): List<PrintStationTask> {
         val session = getPrintStationLoginSession(printStationSessionId)
         return if (session != null) {
-            val curTime = System.currentTimeMillis()
+            val curTime = Calendar.getInstance()
+
+            val printStation = printStationDao.findOne(session.printStationId)
+            if (printStation != null) {
+                printStation.lastAccessTime = curTime
+                printStationDao.save(printStation)
+            }
+
             val tasks = printStationTaskDao.findByPrintStationIdAndIdGreaterThanAndFetchedIsFalse(session.printStationId,taskIdAfter)
             for (task in tasks) {
-                if (task.createTime.timeInMillis < curTime - 30 * 60 * 1000) {  //超过30分钟
+                if (task.createTime.timeInMillis < curTime.timeInMillis - 30 * 60 * 1000) {  //超过30分钟
                     logger.info("PrintStationTask expired, task id=${task.id}, printSatationId=${task.printStationId}, type=${task.type}, param=${task.param}, createTime=${task.createTime.format()}")
 
                     task.fetched = true

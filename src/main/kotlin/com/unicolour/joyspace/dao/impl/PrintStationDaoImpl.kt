@@ -15,7 +15,7 @@ class PrintStationDaoImpl : PrintStationCustomQuery {
     @PersistenceContext
     lateinit var em: EntityManager
 
-    override fun queryPrintStations(companyId: Int, positionId: Int, printStationId: Int, name: String, printerModel: String): List<PrintStation> {
+    override fun queryPrintStations(companyId: Int, positionId: Int, printStationId: Int, name: String, printerModel: String, onlineOnly: Boolean): List<PrintStation> {
         val cb = em.criteriaBuilder
         val cq = cb.createQuery(PrintStation::class.java)
 
@@ -23,12 +23,12 @@ class PrintStationDaoImpl : PrintStationCustomQuery {
 
         cq.select(printStationRoot)
 
-        where(companyId, positionId, printStationId, name, printerModel, cb, cq, printStationRoot)
+        where(companyId, positionId, printStationId, name, printerModel, onlineOnly, cb, cq, printStationRoot)
 
         return em.createQuery(cq).resultList
     }
 
-    override fun queryPrintStations(pageable: Pageable, companyId: Int, positionId: Int, printStationId: Int, name: String, printerModel: String): Page<PrintStation> {
+    override fun queryPrintStations(pageable: Pageable, companyId: Int, positionId: Int, printStationId: Int, name: String, printerModel: String, onlineOnly: Boolean): Page<PrintStation> {
         val cb = em.criteriaBuilder
         val cq = cb.createQuery(PrintStation::class.java)
         val cqCount = cb.createQuery(Long::class.java)
@@ -39,8 +39,8 @@ class PrintStationDaoImpl : PrintStationCustomQuery {
         cq.select(printStationRoot)
         cqCount.select(cb.count(printStationCountRoot))
 
-        where(companyId, positionId, printStationId, name, printerModel, cb, cq, printStationRoot)
-        where(companyId, positionId, printStationId, name, printerModel, cb, cqCount, printStationRoot)
+        where(companyId, positionId, printStationId, name, printerModel, onlineOnly, cb, cq, printStationRoot)
+        where(companyId, positionId, printStationId, name, printerModel, onlineOnly, cb, cqCount, printStationRoot)
 
         orderBy(cb, pageable.sort, cq, printStationRoot)
 
@@ -67,7 +67,7 @@ class PrintStationDaoImpl : PrintStationCustomQuery {
         query.orderBy(orders)
     }
 
-    private fun where(companyId: Int, positionId: Int, printStationId: Int, name: String, printerModel: String,
+    private fun where(companyId: Int, positionId: Int, printStationId: Int, name: String, printerModel: String, onlineOnly: Boolean,
                       cb: CriteriaBuilder, cq: CriteriaQuery<*>, root: Root<PrintStation>) {
 
         val conditions = ArrayList<Predicate>()
@@ -90,6 +90,13 @@ class PrintStationDaoImpl : PrintStationCustomQuery {
 
         if (printerModel.isNotEmpty()) {
             conditions += cb.like(cb.lower(root.get("printerModel")), "%${printerModel.toLowerCase()}%")
+        }
+
+        if (onlineOnly) {
+            val time = Calendar.getInstance()
+            time.add(Calendar.SECOND, -30)
+
+            conditions += cb.greaterThan(root.get("lastAccessTime"), time)
         }
 
         cq.where(*conditions.toTypedArray())
