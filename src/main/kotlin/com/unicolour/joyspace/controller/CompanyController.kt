@@ -3,6 +3,7 @@ package com.unicolour.joyspace.controller
 import com.unicolour.joyspace.dao.CompanyDao
 import com.unicolour.joyspace.dao.CompanyWxAccountDao
 import com.unicolour.joyspace.dao.WxMpAccountDao
+import com.unicolour.joyspace.dto.*
 import com.unicolour.joyspace.dao.ManagerDao
 import com.unicolour.joyspace.dao.VerifyCodeDao
 import com.unicolour.joyspace.dto.CommonRequestResult
@@ -21,10 +22,7 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Controller
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RequestMethod
-import org.springframework.web.bind.annotation.RequestParam
-import org.springframework.web.bind.annotation.ResponseBody
+import org.springframework.web.bind.annotation.*
 import org.springframework.web.servlet.ModelAndView
 import java.time.Duration
 import java.time.Instant
@@ -59,7 +57,7 @@ class CompanyController {
     @Autowired
     lateinit var managerDao: ManagerDao
 
-    @RequestMapping("/company/list")
+    @GetMapping("/company/list")
     fun companyList(
             modelAndView: ModelAndView,
             @RequestParam(name = "name", required = false, defaultValue = "") name: String?,
@@ -83,6 +81,29 @@ class CompanyController {
         modelAndView.viewName = "layout"
 
         return modelAndView
+    }
+
+    @GetMapping("/company/query")
+    @ResponseBody
+    fun companyQuery(
+            @RequestParam(name = "name", required = false, defaultValue = "") name: String,
+            @RequestParam(name = "pageno", required = false, defaultValue = "1") pageno: Int): Select2QueryResult {
+        val pageable = PageRequest(pageno - 1, 20, Sort.Direction.ASC, "id")
+        val companies =
+                if (name == "")
+                    companyDao.findAll(pageable)
+                else
+                    companyDao.findByName(name, pageable)
+
+        return Select2QueryResult(
+                results = companies.content.map {
+                    ResultItem(
+                            id = it.id,
+                            text = it.name
+                    )
+                },
+                pagination = ResultPagination(more = companies.hasNext())
+        )
     }
 
     @RequestMapping(path = arrayOf("/company/edit"), method = arrayOf(RequestMethod.GET))

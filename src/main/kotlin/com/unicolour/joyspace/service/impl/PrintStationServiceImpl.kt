@@ -234,7 +234,14 @@ open class PrintStationServiceImpl : PrintStationService {
             sign.update(strToSign.toByteArray())
 
             if (sign.verify(signBytes)) {
+                val now = Calendar.getInstance()
                 printStation.loginSequence = sequence
+                printStation.lastLoginTime = now
+                printStation.lastAccessTime = now
+
+                if (printStation.firstLoginTime == null) {
+                    printStation.firstLoginTime = now
+                }
 
                 if (printStation.lastLoginVersion != version) {
                     printStation.lastLoginVersion = version
@@ -334,14 +341,7 @@ open class PrintStationServiceImpl : PrintStationService {
         }
 
         if (version == -1) {
-            version =
-                    try {
-                        val versionFile = File(assetsDir, "home/current.txt")
-                        versionFile.reader().use { it.readText().trim(' ', '\r', '\n', '\t').toInt() }
-                    } catch (e: Exception) {
-                        e.printStackTrace()
-                        0
-                    }
+            version = getHomeCurrentVersion()
         }
 
         return UpdateAndAdSetDTO(
@@ -350,6 +350,19 @@ open class PrintStationServiceImpl : PrintStationService {
                 defaultIccFileName = newIccFileName,
                 iccConfigs = iccConfigs
         )
+    }
+
+    override fun getHomeCurrentVersion(): Int {
+        val version: Int =
+            try {
+                val versionFile = File(assetsDir, "home/current.txt")
+                versionFile.reader().use { it.readText().trim(' ', '\r', '\n', '\t').toInt() }
+            } catch (e: Exception) {
+                e.printStackTrace()
+                0
+            }
+
+        return version
     }
 
     override fun getPriceMap(printStation: PrintStation): Map<Int, Int> {
@@ -621,8 +634,7 @@ open class PrintStationServiceImpl : PrintStationService {
                     }
 
                     if (version == 0) {
-                        val versionFile = File(assetsDir, "home/current.txt")
-                        version = versionFile.reader().use { it.readText().trim(' ', '\r', '\n', '\t').toInt() }
+                        version = getHomeCurrentVersion()
                     }
 
                     version
@@ -632,6 +644,11 @@ open class PrintStationServiceImpl : PrintStationService {
                 }
             }
         }
+
+    override fun getHomeDownloadUrl(): String {
+        val version = getHomeCurrentVersion()
+        return "$baseUrl/joyspace_home/joyspace_home_$version.exe"
+    }
 
     private val AVERAGE_RADIUS_OF_EARTH_M = 6371000
 
@@ -674,10 +691,17 @@ open class PrintStationServiceImpl : PrintStationService {
     override fun getUnFetchedPrintStationTasks(printStationSessionId: String, taskIdAfter: Int): List<PrintStationTask> {
         val session = getPrintStationLoginSession(printStationSessionId)
         return if (session != null) {
-            val curTime = System.currentTimeMillis()
+            val curTime = Calendar.getInstance()
+
+            val printStation = printStationDao.findOne(session.printStationId)
+            if (printStation != null) {
+                printStation.lastAccessTime = curTime
+                printStationDao.save(printStation)
+            }
+
             val tasks = printStationTaskDao.findByPrintStationIdAndIdGreaterThanAndFetchedIsFalse(session.printStationId,taskIdAfter)
             for (task in tasks) {
-                if (task.createTime.timeInMillis < curTime - 30 * 60 * 1000) {  //超过30分钟
+                if (task.createTime.timeInMillis < curTime.timeInMillis - 30 * 60 * 1000) {  //超过30分钟
                     logger.info("PrintStationTask expired, task id=${task.id}, printSatationId=${task.printStationId}, type=${task.type}, param=${task.param}, createTime=${task.createTime.format()}")
 
                     task.fetched = true

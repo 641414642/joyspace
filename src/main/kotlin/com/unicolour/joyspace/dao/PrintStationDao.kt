@@ -7,7 +7,7 @@ import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.PagingAndSortingRepository
 import org.springframework.data.repository.query.Param
 
-interface PrintStationDao : PagingAndSortingRepository<PrintStation, Int> {
+interface PrintStationDao : PagingAndSortingRepository<PrintStation, Int>, PrintStationCustomQuery {
     fun findByWxQrCode(qrCode: String): PrintStation?
 
     fun findByCompanyId(companyId: Int, pageable: Pageable): Page<PrintStation>

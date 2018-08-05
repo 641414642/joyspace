@@ -1,5 +1,6 @@
 package com.unicolour.joyspace.model
 
+import java.util.*
 import javax.persistence.*
 import javax.validation.constraints.NotNull
 import javax.persistence.JoinColumn
@@ -93,6 +94,18 @@ class PrintStation {
     //上次登录时的home版本号
     @Column(name = "last_login_version")
     var lastLoginVersion: Int? = null
+
+    //首次登录的时间
+    @Column
+    var firstLoginTime: Calendar? = null
+
+    //上次登录的时间
+    @Column
+    var lastLoginTime: Calendar? = null
+
+    //上次访问的时间
+    @Column
+    var lastAccessTime: Calendar? = null
 
     //指定更新到的home版本号, 如果为null, 使用全局版本号设置
     @Column(name = "update_to_version")

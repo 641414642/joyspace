@@ -3,8 +3,7 @@ package com.unicolour.joyspace.controller
 import com.unicolour.joyspace.dao.PositionDao
 import com.unicolour.joyspace.dao.PositionImageFileDao
 import com.unicolour.joyspace.dao.PriceListDao
-import com.unicolour.joyspace.dto.CommonRequestResult
-import com.unicolour.joyspace.dto.ResultCode
+import com.unicolour.joyspace.dto.*
 import com.unicolour.joyspace.exception.ProcessException
 import com.unicolour.joyspace.model.Position
 import com.unicolour.joyspace.service.ManagerService
@@ -15,10 +14,7 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Controller
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RequestMethod
-import org.springframework.web.bind.annotation.RequestParam
-import org.springframework.web.bind.annotation.ResponseBody
+import org.springframework.web.bind.annotation.*
 import org.springframework.web.multipart.MultipartFile
 import org.springframework.web.servlet.ModelAndView
 
@@ -41,6 +37,34 @@ class PositionController {
 
     @Autowired
     lateinit var positionImageFileDao: PositionImageFileDao
+
+    @GetMapping("/position/query")
+    @ResponseBody
+    fun positionQuery(
+            @RequestParam(name = "name", required = false, defaultValue = "") name: String,
+            @RequestParam(name = "companyId", required = false, defaultValue = "0") companyId: Int,
+            @RequestParam(name = "pageno", required = false, defaultValue = "1") pageno: Int): Select2QueryResult {
+        val pageable = PageRequest(pageno - 1, 20, Sort.Direction.ASC, "id")
+        val positions =
+                if (name == "" && companyId <= 0)
+                    positionDao.findAll(pageable)
+                else if (name == "")
+                    positionDao.findByCompanyId(companyId, pageable)
+                else if (companyId <= 0)
+                    positionDao.findByName(name, pageable)
+                else
+                    positionDao.findByCompanyIdAndName(companyId, name, pageable)
+
+        return Select2QueryResult(
+                results = positions.content.map {
+                    ResultItem(
+                            id = it.id,
+                            text = it.name
+                    )
+                },
+                pagination = ResultPagination(more = positions.hasNext())
+        )
+    }
 
     @RequestMapping("/position/list")
     fun positionList(

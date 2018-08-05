@@ -34,6 +34,10 @@ class WxMpAccount {
     @NotNull
     var wxAppSecret: String = ""
 
+    @Column(length = 100)
+    @NotNull
+    var payKey: String = ""
+
     @NotNull
     var active: Boolean = false
 }
