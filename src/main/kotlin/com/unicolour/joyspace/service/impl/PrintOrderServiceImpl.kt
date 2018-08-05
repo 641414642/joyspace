@@ -143,6 +143,9 @@ open class PrintOrderServiceImpl : PrintOrderService {
     @Autowired
     lateinit var wxMpAccountDao: WxMpAccountDao
 
+    @Autowired
+    lateinit var templateImageInfoDao: TemplateImageInfoDao
+
     //小程序appid
     @Value("\${com.unicolour.wxAppId}")
     lateinit var wxAppId: String

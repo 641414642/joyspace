@@ -62,8 +62,12 @@ class ApiProductRoute {
         if (beSupportProductType(com.unicolour.joyspace.model.ProductType.ID_PHOTO, printStationId)) {
             producTypes.add(ProductType(1, "证件照", "支持多种尺寸，自动排版","$baseUrl/doc/home_page/product_type_1.png"))
         }
-        producTypes.add(ProductType(2, "模版", "多种精美模板 随心定制","$baseUrl/doc/home_page/product_type_2.png"))
-        producTypes.add(ProductType(3, "相册", "生活也许是一本书","$baseUrl/doc/home_page/product_type_3.png"))
+        if (beSupportProductType(com.unicolour.joyspace.model.ProductType.TEMPLATE, printStationId)) {
+            producTypes.add(ProductType(2, "模版", "多种精美模板 随心定制","$baseUrl/doc/home_page/product_type_2.png"))
+        }
+        if (beSupportProductType(com.unicolour.joyspace.model.ProductType.ALBUM, printStationId)) {
+            producTypes.add(ProductType(3, "相册", "生活也许是一本书","$baseUrl/doc/home_page/product_type_3.png"))
+        }
         val homePage = HomePageVo(advers, producTypes)
         return RestResponse.ok(homePage)
     }
@@ -87,15 +91,13 @@ class ApiProductRoute {
         val productType = com.unicolour.joyspace.model.ProductType.values().firstOrNull { it.value == type }
         val templateIds = templateService.queryTemplates(productType, "", true, "id asc").map { it.id }
         var products = productDao.findByTemplateIdInAndDeletedOrderBySequence(templateIds, false)
-        if (productType == com.unicolour.joyspace.model.ProductType.ID_PHOTO || productType == com.unicolour.joyspace.model.ProductType.PHOTO) {
-            products = if (printStationId != null) {
-                products.filter {
-                    printStationProductDao.existsByPrintStationIdAndProductId(printStationId, it.id)
-                }
-            } else {
-                products.filter {
-                    printStationProductDao.existsByPrintStationIdAndProductId(1, it.id)
-                }
+        products = if (printStationId != null) {
+            products.filter {
+                printStationProductDao.existsByPrintStationIdAndProductId(printStationId, it.id)
+            }
+        } else {
+            products.filter {
+                printStationProductDao.existsByPrintStationIdAndProductId(1, it.id)
             }
         }
         val productVoList = products.map {

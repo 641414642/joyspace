@@ -263,6 +263,7 @@ class PrintStationController {
         modelAndView.model["photo_products"] = products.filter { it.productType == ProductType.PHOTO.value }
         modelAndView.model["template_products"] = products.filter { it.productType == ProductType.TEMPLATE.value }
         modelAndView.model["id_photo_products"] = products.filter { it.productType == ProductType.ID_PHOTO.value }
+        modelAndView.model["album_products"] = products.filter { it.productType == ProductType.ALBUM.value }
         modelAndView.model["productIds"] = products.map { it.productId }.joinToString(separator = ",")
         modelAndView.model["printerTypes"] = printerTypeDao.findAll()
 
@@ -328,6 +329,7 @@ class PrintStationController {
         modelAndView.model["allCompany"] = allCompany
         modelAndView.model["photo_products"] = products.filter { it.productType == ProductType.PHOTO.value }
         modelAndView.model["template_products"] = products.filter { it.productType == ProductType.TEMPLATE.value }
+        modelAndView.model["album_products"] = products.filter { it.productType == ProductType.ALBUM.value }
         modelAndView.model["id_photo_products"] = products.filter { it.productType == ProductType.ID_PHOTO.value }
         modelAndView.model["productIds"] = products.map { it.productId }.joinToString(separator = ",")
         modelAndView.viewName = "/printStation/activate :: content"
