@@ -28,12 +28,6 @@ import kotlin.collections.HashMap
 
 @Service
 open class ManagerServiceImpl : ManagerService {
-    @Value("\${com.unicolour.wxManagerAppId}")
-    lateinit var wxManagerAppId: String
-
-    @Value("\${com.unicolour.wxManagerAppSecret}")
-    lateinit var wxManagerAppSecret: String
-
     @Autowired
     lateinit var managerDao: ManagerDao
 
@@ -44,100 +38,10 @@ open class ManagerServiceImpl : ManagerService {
     lateinit var passwordEncoder: PasswordEncoder
 
     @Autowired
-    lateinit var restTemplate: RestTemplate
-
-    @Autowired
     lateinit var objectMapper: ObjectMapper
-
-    @Autowired
-    lateinit var transactionTemplate: TransactionTemplate
-
-    private val managerIdBindKeyMap: MutableMap<Int, String> = Collections.synchronizedMap(HashMap())
 
     override fun getCompanyManager(companyId: Int): Manager? {
         return managerDao.findByCompanyId(companyId).minBy { it.id }
-    }
-
-    override fun createManagerBindKey(): String {
-        val manager = loginManager
-
-        return if (manager != null) {
-            val bindKey = """${manager.managerId}/${UUID.randomUUID().toString().replace("-", "").substring(8)}"""
-            managerIdBindKeyMap[manager.managerId] = bindKey
-            bindKey
-        }
-        else {
-            ""
-        }
-    }
-
-    override fun managerWeiXinLogin(bindKey: String?, code: String): WxLoginResult {
-        val resp = restTemplate.exchange(
-                "https://api.weixin.qq.com/sns/jscode2session?appid={appid}&secret={secret}&js_code={js_code}&grant_type={grant_type}",
-                HttpMethod.GET,
-                null,
-                String::class.java,
-                mapOf(
-                        "appid" to wxManagerAppId,
-                        "secret" to wxManagerAppSecret,
-                        "js_code" to code,
-                        "grant_type" to "authorization_code"
-                )
-        )
-
-        if (resp != null && resp.statusCode == HttpStatus.OK) {
-            val bodyStr = resp.body
-            val body: JSCode2SessionResult = objectMapper.readValue(bodyStr, JSCode2SessionResult::class.java)
-
-            if (body.errcode == 0 && body.openid != null && body.session_key != null) {
-                val manager = managerDao.findByWxOpenId(body.openid!!)
-                if (manager == null) {  //微信账号没有绑定管理员
-                    if (bindKey.isNullOrBlank()) {
-                        return WxLoginResult(1, "WeiXin account not bind to manager")
-                    } else {
-                        //XXX 验证后面的部分
-                        val managerId = bindKey!!.substringBefore('/').toInt()
-                        val bindManager = managerDao.findOne(managerId)
-                        if (bindManager == null) {
-                            return WxLoginResult(2, "Bind WeiXin account failed, manager(id=$managerId) not found")
-                        } else {
-                            return transactionTemplate.execute {
-                                bindManager.wxOpenId = body.openid
-                                managerDao.save(bindManager)
-
-                                val session = createManagerWxLoginSession(bindManager, body)
-                                WxLoginResult(0, "Bind WeiXin account and login success", session.id)
-                            }
-                        }
-                    }
-                } else {   //微信账号已绑定管理员
-                    return transactionTemplate.execute {
-                        val session = createManagerWxLoginSession(manager, body)
-                        WxLoginResult(sessionId = session.id)
-                    }
-                }
-            }
-        }
-
-        return WxLoginResult(3, "WeiXin login request failed")
-    }
-
-    private fun createManagerWxLoginSession(manager: Manager, body: JSCode2SessionResult): ManagerWxLoginSession {
-        var session = managerWxLoginSessionDao.findByManagerId(manager.id)
-        if (session == null) {
-            session = ManagerWxLoginSession()
-            session.id = UUID.randomUUID().toString().replace("-", "")
-            session.managerId = manager.id
-        }
-
-        session.wxSessionKey = body.session_key!!
-        session.wxOpenId = body.openid!!
-
-        session.expireTime = Calendar.getInstance()
-        session.expireTime.add(Calendar.SECOND, 3600)
-
-        managerWxLoginSessionDao.save(session)
-        return session
     }
 
     @Throws(UsernameNotFoundException::class)

@@ -13,8 +13,6 @@ interface ManagerService : UserDetailsService {
     fun login(userName: String, password: String): Manager?
     val loginManager: LoginManagerDetail?
     fun loginManagerHasRole(role: String): Boolean
-    fun createManagerBindKey(): String
-    fun managerWeiXinLogin(bindKey: String?, code: String): WxLoginResult
 
     fun getCompanyManager(companyId: Int): Manager?
 }

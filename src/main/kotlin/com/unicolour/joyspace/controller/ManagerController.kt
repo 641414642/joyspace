@@ -1,6 +1,7 @@
 package com.unicolour.joyspace.controller
 
 import com.unicolour.joyspace.dao.ManagerDao
+import com.unicolour.joyspace.dao.WxMpAccountDao
 import com.unicolour.joyspace.dto.LoginManagerDetail
 import com.unicolour.joyspace.service.ManagerService
 import com.unicolour.joyspace.service.WeiXinService
@@ -11,14 +12,14 @@ import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Controller
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RequestMethod
-import org.springframework.web.bind.annotation.RequestParam
-import org.springframework.web.bind.annotation.ResponseBody
+import org.springframework.web.bind.annotation.*
 import org.springframework.web.servlet.ModelAndView
 
 @Controller
 class ManagerController {
+    companion object {
+        private val logger = LoggerFactory.getLogger(ManagerController::class.java)
+    }
 
     @Autowired
     lateinit var managerDao: ManagerDao
@@ -28,6 +29,9 @@ class ManagerController {
 
     @Autowired
     lateinit var weiXinService: WeiXinService
+
+    @Autowired
+    lateinit var wxMpAccountDao: WxMpAccountDao
 
     @RequestMapping("/manager/list")
     fun adminUserList(
@@ -66,17 +70,6 @@ class ManagerController {
     @RequestMapping(path = arrayOf("/manager/change_pass"), method = arrayOf(RequestMethod.GET))
     fun changePassword(): String = "/manager/change_pass :: content"
 
-    @RequestMapping(path = arrayOf("/manager/bind_weixin"), method = arrayOf(RequestMethod.GET))
-    fun bindWeiXin(modelAndView: ModelAndView): ModelAndView {
-        val bindKey = managerService.createManagerBindKey()
-        val qrCodeImgDataUrl = weiXinService.createWxQrCode(bindKey, "page/index/index")
-
-        modelAndView.model.put("qrCodeImageDataUrl", qrCodeImgDataUrl)
-        modelAndView.viewName = "/manager/bind_weixin :: content"
-
-        return modelAndView
-    }
-
     @RequestMapping(path = arrayOf("/manager/change_pass"), method = arrayOf(RequestMethod.POST))
     @ResponseBody
     fun changePassword(@RequestParam(name = "newPass", required = true) newPassword: String): Boolean {
@@ -89,7 +82,32 @@ class ManagerController {
         }
     }
 
-    companion object {
-        private val logger = LoggerFactory.getLogger(ManagerController::class.java)
+    @GetMapping("/manager/wx/text_message")
+    fun sendWxTextMessage(modelAndView: ModelAndView): ModelAndView {
+        modelAndView.model["accounts"] = wxMpAccountDao.findAll()
+        modelAndView.viewName = "/manager/wxTextMessage"
+
+        return modelAndView
+    }
+
+    @PostMapping("/manager/wx/text_message")
+    fun sendWxTextMessage(
+            modelAndView: ModelAndView,
+            @RequestParam(name = "wxMpAccountId", required = true) wxMpAccountId: Int,
+            @RequestParam(name = "openIdList", required = true) openIdList: String,
+            @RequestParam(name = "message", required = true) message: String,
+            @RequestParam(name = "preview", required = true) preview: Boolean
+    ): ModelAndView {
+
+        if (managerService.loginManagerHasRole("ROLE_SUPERADMIN")) {
+            weiXinService.sendTextMessage(
+                    message,
+                    openIdList.lines(),
+                    wxMpAccountId,
+                    preview)
+        }
+
+        modelAndView.viewName = "empty"
+        return modelAndView
     }
 }

@@ -1,60 +1,104 @@
 package com.unicolour.joyspace.service.impl
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.unicolour.joyspace.dao.WxMpAccountDao
+import com.unicolour.joyspace.dto.ResultCode
 import com.unicolour.joyspace.dto.WxGetAccessTokenResult
+import com.unicolour.joyspace.exception.ProcessException
+import com.unicolour.joyspace.model.WxMpAccount
 import com.unicolour.joyspace.service.WeiXinService
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.*
 import org.springframework.stereotype.Component
 import org.springframework.web.client.RestTemplate
-import java.util.*
 
 
 @Component
 class WeiXinServiceImpl : WeiXinService {
+    companion object {
+        val logger = LoggerFactory.getLogger(WeiXinServiceImpl::class.java)
+    }
+
+    @Autowired
+    lateinit var wxMpAccountDao: WxMpAccountDao
+
     @Autowired
     lateinit var restTemplate: RestTemplate
-
-    @Value("\${com.unicolour.wxAppId}")
-    lateinit var wxAppId: String
-
-    @Value("\${com.unicolour.wxAppSecret}")
-    lateinit var wxAppSecret: String
-
-    @Value("\${com.unicolour.wxManagerAppId}")
-    lateinit var wxManagerAppId: String
-
-    @Value("\${com.unicolour.wxManagerAppSecret}")
-    lateinit var wxManagerAppSecret: String
 
     @Autowired
     lateinit var objectMapper: ObjectMapper
 
-    private var _appAccessToken: String? = null
-    private var _appAccessTokenExpire: Long = 0
+    private var appIdToAccessTokenMap: MutableMap<String, Pair<String, Long>> = HashMap()
 
-    private var _managerAppAccessToken: String? = null
-    private var _managerAppAccessTokenExpire: Long = 0
+    override fun sendTextMessage(message: String, openIdList: List<String>, wxMpAccountId: Int, preview: Boolean) {
+        val accessToken = getAccessToken(wxMpAccountId)
+        if (accessToken == null) {
+            throw ProcessException(ResultCode.GET_WX_ACCESS_TOKEN_FAILED)
+        }
+        else {
+            val req = mapOf(
+                    "touser" to if (preview) openIdList.first() else openIdList,
+                    "msgtype" to "text",
+                    "text" to mapOf("content" to message)
+            )
 
-    val appAccessToken: String? get() {
-        synchronized(this, {
-            if (_appAccessToken == null || System.currentTimeMillis() >= _appAccessTokenExpire) {
-                getAccsssToken(false)
+            val headers = HttpHeaders()
+            headers.contentType = MediaType.APPLICATION_JSON
+
+            val entity = HttpEntity<String>(objectMapper.writeValueAsString(req), headers)
+
+            val resp = restTemplate.exchange(
+                    if (preview) {
+                        "https://api.weixin.qq.com/cgi-bin/message/mass/preview?access_token={accessToken}"
+                    }
+                    else {
+                        "https://api.weixin.qq.com/cgi-bin/message/mass/send?access_token={accessToken}"
+                    },
+                    HttpMethod.POST,
+                    entity,
+                    String::class.java,
+                    mapOf("accessToken" to accessToken)
+            )
+
+            if (resp != null && resp.statusCode == HttpStatus.OK) {
+                logger.info("Send text message success, message: $message, wxMpAccountId: $wxMpAccountId")
             }
-            return _appAccessToken
-        })
+            else {
+                throw ProcessException(ResultCode.SEND_WX_TEXT_MESSAGE_FAILED)
+            }
+        }
     }
 
-    val managerAppAccessToken: String? get() {
-        synchronized(this, {
-            if (_managerAppAccessToken == null || System.currentTimeMillis() >= _managerAppAccessTokenExpire) {
-                getAccsssToken(true)
-            }
-            return _managerAppAccessToken
-        })
-    }
+    private fun getAccessToken(wxMpAccountId: Int): String? {
+        val account = wxMpAccountDao.findOne(wxMpAccountId)
+        if (account == null) {
+            return null
+        }
 
+        synchronized(this) {
+            val iter = appIdToAccessTokenMap.entries.iterator()
+            val now = System.currentTimeMillis()
+
+            var token: String? = null
+
+            while (iter.hasNext()) {
+                val entry = iter.next()
+                val expireTime = entry.value.second
+
+                if (now >= expireTime) {
+                    iter.remove()
+                }
+
+                if (entry.key == account.appId) {
+                    token = entry.value.first
+                }
+            }
+
+            return token ?: getAccessTokenImpl(account)
+        }
+    }
+/*
     override fun createWxQrCode(scene: String, page: String, width: Int): String {
         val token = managerAppAccessToken
         if (token != null) {
@@ -80,10 +124,11 @@ class WeiXinServiceImpl : WeiXinService {
 
         return ""
     }
+    */
 
-    private fun getAccsssToken(managerApp: Boolean) {
-        val appId = if (managerApp) wxManagerAppId else wxAppId
-        val appSecret = if (managerApp) wxManagerAppSecret else wxAppSecret
+    private fun getAccessTokenImpl(account: WxMpAccount): String? {
+        val appId = account.appId
+        val appSecret = account.wxAppSecret
 
         val resp = restTemplate.exchange(
                 "https://api.weixin.qq.com/cgi-bin/token?grant_type={grant_type}&appid={appid}&secret={secret}",
@@ -101,26 +146,22 @@ class WeiXinServiceImpl : WeiXinService {
             val bodyStr = resp.body
             val body: WxGetAccessTokenResult = objectMapper.readValue(bodyStr, WxGetAccessTokenResult::class.java)
 
-            if (body.errcode == 0 && !body.access_token.isNullOrEmpty()) {
-                if (managerApp) {
-                    _managerAppAccessToken = body.access_token
-                    _managerAppAccessTokenExpire = System.currentTimeMillis() + body.expires_in!! * 1000 - 60000
-                }
-                else {
-                    _appAccessToken = body.access_token
-                    _appAccessTokenExpire = System.currentTimeMillis() + body.expires_in!! * 1000 - 60000
-                }
+            if (body.errcode == 0 && body.access_token.isNotEmpty()) {
+                val token = body.access_token
+                val expireTime = body.expires_in * 1000 - 60000
+                appIdToAccessTokenMap[account.appId] = token to expireTime.toLong()
+
+                return token
             } else {
-                if (managerApp) {
-                    _managerAppAccessToken = null
-                    _managerAppAccessTokenExpire = 0
-                }
-                else {
-                    _appAccessToken = null
-                    _appAccessTokenExpire = 0
-                }
+                logger.warn("Get wx access token for appId: $appId failed, server response body: $body")
+                appIdToAccessTokenMap.remove(account.appId)
             }
         }
+        else {
+            logger.warn("Get wx access token for appId: $appId failed, server response status code: ${resp?.statusCode}, response body: ${resp?.body}")
+        }
+
+        return null
     }
 }
 
