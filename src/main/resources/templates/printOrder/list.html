@@ -149,42 +149,30 @@
 					<input type="hidden" name="partial" value="false" />
 					<input type="hidden" name="query" value="true" />
 					<div class="form-inline">
+						<input type="hidden" id="loginCompanyId" th:value="${loginCompanyId}" />
+
 						<th:block sec:authorize="hasAnyRole('ROLE_SUPERADMIN','ROLE_EPSON')">
 							<label class="form-label" for="inputCompanyId">投放商</label>
-							<select name="inputCompanyId" class="form-control" id="inputCompanyId" style="margin-right: 10px">
-								<option value="0">&lt;所有投放商&gt;</option>
-								<option th:each="company : ${companies}"
-										th:value="${company.id}"
-										th:text="${company.name}"
-										th:selected="${inputCompanyId == company.id}">
-								</option>
+							<select name="inputCompanyId" class="form-control" style="width:200px" id="inputCompanyId" th:attr="data-query-url=@{/company/query}">
+								<option th:if="${company == null}" value="0" selected="selected">所有投放商</option>
+								<option th:unless="${company == null}" selected="selected" th:value="${company.id}" th:text="${company.name}"></option>
 							</select>
+							&nbsp;&nbsp;
 						</th:block>
+
 						<label class="form-label" for="inputPositionId">店面</label>
-						<select name="inputPositionId" class="form-control" id="inputPositionId">
-							<option value="0">&lt;所有店面&gt;</option>
-							<option th:each="position : ${positions}"
-									th:value="${position.id}"
-									th:text="${position.name}"
-									th:selected="${inputPositionId == position.id}">
-							</option>
+						<select name="inputPositionId" class="form-control" style="width:150px" id="inputPositionId" th:attr="data-query-url=@{/position/query}">
+							<option th:if="${position == null}" value="0" selected="selected">所有店面</option>
+							<option th:unless="${position == null}" selected="selected" th:value="${position.id}" th:text="${position.name}"></option>
 						</select>
-						<label class="form-label" for="inputPrintStationId" style="margin-left: 10px">自助机</label>
-						<select id="printStationCache" style="display:none">
-							<option th:each="printStation : ${allPrintStations}"
-									th:attr="data-position-id=${printStation.positionId}"
-									th:value="${printStation.id}"
-									th:text="${printStation.name == '' ? '自助机' + printStation.id : printStation.name}">
-							</option>
+						&nbsp;&nbsp;
+
+						<label class="form-label" for="inputPrintStationId">自助机</label>
+						<select name="inputPrintStationId" class="form-control" style="width:150px" id="inputPrintStationId" th:attr="data-query-url=@{/printStation/query}">
+							<option th:if="${printStation == null}" value="0" selected="selected">所有自助机</option>
+							<option th:unless="${printStation == null}" selected="selected" th:value="${printStation.id}" th:text="${printStation.name == '' ? '自助机' + printStation.id : printStation.name}"></option>
 						</select>
-						<select name="inputPrintStationId" class="form-control" id="inputPrintStationId">
-							<option value="0">&lt;所有自助机&gt;</option>
-							<option th:class="${'pid_' + printStation.positionId}" th:each="printStation : ${printStations}"
-									th:value="${printStation.id}"
-									th:text="${printStation.name == '' ? '自助机' + printStation.id : printStation.name}"
-									th:selected="${inputPrintStationId == printStation.id}">
-							</option>
-						</select>
+						&nbsp;&nbsp;
 
 						<label class="form-label" for="inputTimeRange" style="margin-left: 10px">时间</label>
 						<select name="inputTimeRange" class="form-control" id="inputTimeRange">

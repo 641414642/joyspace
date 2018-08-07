@@ -62,7 +62,7 @@ class WeiXinServiceImpl : WeiXinService {
             )
 
             if (resp != null && resp.statusCode == HttpStatus.OK) {
-                logger.info("Send text message success, message: $message, wxMpAccountId: $wxMpAccountId")
+                logger.info("Send text message response, message: $message, wxMpAccountId: $wxMpAccountId, response body: ${resp.body}")
             }
             else {
                 throw ProcessException(ResultCode.SEND_WX_TEXT_MESSAGE_FAILED)

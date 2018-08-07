@@ -119,31 +119,57 @@ $(function() {
     var autoRefresh = localStorage.getItem("autoRefreshOrderList");
     $("#autoRefresh").prop('checked', autoRefresh != "false");
 
-    //投放商选择改变后，刷新页面，重新加载店面和自助机列表
-    $("#inputCompanyId").on("change", function() {
-        $("#inputPositionId").val("0");
-        $("#inputPrintStationId").val("0");
-        $("#inputCompanyId").closest("form").submit();
+    var companySel = $("#inputCompanyId");
+    var positionSel = $("#inputPositionId");
+    var printStationSel = $("#inputPrintStationId");
+
+    if (companySel.length === 0) {
+        companySel = $("#loginCompanyId");
+    }
+    else {
+        companySel.select2({
+            language: "zh-CN",
+            ajax: {
+                url: companySel.data("query-url"),
+                dataType: 'json',
+                data: function (params) {
+                    return {
+                        name: params.term,
+                        pageno: params.page || 1
+                    }
+                }
+            }
+        });
+    }
+
+    positionSel.select2({
+        language: "zh-CN",
+        ajax: {
+            url: positionSel.data("query-url"),
+            dataType: 'json',
+            data: function (params) {
+                return {
+                    name: params.term,
+                    companyId: companySel.val(),
+                    pageno: params.page || 1
+                }
+            }
+        }
     });
 
-    //店面选择改变，更新自助机选择列表
-    $("#inputPositionId").on("change", function() {
-        var selPrintStationId = $("#inputPrintStationId option:selected").val();
-
-        $("#inputPrintStationId option").remove();
-        $("#inputPrintStationId").append('<option value="0">&lt;所有自助机&gt;</option>');
-
-        var selPositionId = $("#inputPositionId option:selected").val();
-        if (selPositionId == 0) {
-            $("#printStationCache option").clone().appendTo($("#inputPrintStationId"));
-        }
-        else {
-            $("#printStationCache option[data-position-id=" + selPositionId + "]").clone().appendTo($("#inputPrintStationId"));
-        }
-
-        $("#inputPrintStationId").val(selPrintStationId);
-        if ($("#inputPrintStationId").val() === null) {
-            $("#inputPrintStationId").val("0");
+    printStationSel.select2({
+        language: "zh-CN",
+        ajax: {
+            url: printStationSel.data("query-url"),
+            dataType: 'json',
+            data: function (params) {
+                return {
+                    name: params.term,
+                    companyId: companySel.val(),
+                    positionId: positionSel.val(),
+                    pageno: params.page || 1
+                }
+            }
         }
     });
 
