@@ -534,7 +534,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">type</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">PHOTO 普通照片：0,  ID_PHOTO 证件照：1,   TEMPLATE 模板拼图：2,   ALBUM 相册：3</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">PHOTO 普通照片：0,  ID_PHOTO 证件照：1,   TEMPLATE 模板拼图：2,   ALBUM 相册：3,   DIY 定制产品：5</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">printStationId</p></td>
@@ -567,7 +567,35 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
     ...
     ...
     ...
-]</pre>
+]
+
+如果是定制产品类型：
+
+[{
+	"name": "T恤",
+	"styles": [{
+		"name": "短袖T恤 白色男款",
+		"sizes": [{
+			"name": "XS",
+			"gender": "男",
+			"product": {
+				"id": 90,
+				"name": "短袖T恤 白色男款 XS",
+				"width": 0.0,
+				"height": 0.0,
+				"type": 5,
+				"typeStr": "定制产品",
+				"version": 1,
+				"displaySize": "0 x 0 mm",
+				"imageRequired": 0,
+				"remark": "短袖T恤 白色男款 XS",
+				"price": 10,
+				"thumbnailImageUrl": null
+			}
+		}],
+		"product": null
+	}]
+}]</pre>
 </div>
 </div>
 </div>
@@ -1230,17 +1258,24 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 			{
 				"productId" : xx,       //产品id
 				"productVersion" : "xx.xx",  //产品版本号
-				"copies": xx            //打印份数 (&gt;=1)
+				"copies": xx,            //打印份数 (&gt;=1)
+				"area":0.0,              //计算价格面积数
+				"piece":0                //需要加工费的面数
 			},
 			{
 			    "productId" : xx,
 			    "productVersion" : "xx.xx",
-			    "copies": xx
+			    "copies": xx,
+				"area":0.0,
+				"piece":0
+
 			},
 			{
 			    "productId" : xx,
 			    "productVersion" : "xx.xx",
-			    "copies": xx
+			    "copies": xx,
+				"area":0.0,
+				"piece":0
 			}
 			...
 		  ],
@@ -2166,7 +2201,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2018-07-28 17:38:42 +08:00
+Last updated 2018-08-12 23:25:15 +08:00
 </div>
 </div>
 </body>
