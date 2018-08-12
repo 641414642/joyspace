@@ -60,13 +60,16 @@ class ApiProductRoute {
             producTypes.add(ProductType(0, "普通照片", "智能手机照片高质量打印", "$baseUrl/doc/home_page/product_type_0.png"))
         }
         if (beSupportProductType(com.unicolour.joyspace.model.ProductType.ID_PHOTO, printStationId)) {
-            producTypes.add(ProductType(1, "证件照", "支持多种尺寸，自动排版","$baseUrl/doc/home_page/product_type_1.png"))
+            producTypes.add(ProductType(1, "证件照", "支持多种尺寸，自动排版", "$baseUrl/doc/home_page/product_type_1.png"))
         }
         if (beSupportProductType(com.unicolour.joyspace.model.ProductType.TEMPLATE, printStationId)) {
-            producTypes.add(ProductType(2, "模版", "多种精美模板 随心定制","$baseUrl/doc/home_page/product_type_2.png"))
+            producTypes.add(ProductType(2, "模版", "多种精美模板 随心定制", "$baseUrl/doc/home_page/product_type_2.png"))
         }
         if (beSupportProductType(com.unicolour.joyspace.model.ProductType.ALBUM, printStationId)) {
-            producTypes.add(ProductType(3, "相册", "生活也许是一本书","$baseUrl/doc/home_page/product_type_3.png"))
+            producTypes.add(ProductType(3, "相册", "生活也许是一本书", "$baseUrl/doc/home_page/product_type_3.png"))
+        }
+        if (beSupportProductType(com.unicolour.joyspace.model.ProductType.DIY, printStationId)) {
+            producTypes.add(ProductType(5, "定制产品", "DIY的T恤&丝巾", "$baseUrl/doc/home_page/product_type_5.jpg"))
         }
         val homePage = HomePageVo(advers, producTypes)
         return RestResponse.ok(homePage)
@@ -134,8 +137,198 @@ class ApiProductRoute {
                     it.defaultPrice,
                     thumbnailImageUrl)
         }
-        return RestResponse.ok(productVoList)
+
+        return if (productType == com.unicolour.joyspace.model.ProductType.DIY) {
+            RestResponse.ok(getDiyProductRes(productVoList))
+        } else {
+            RestResponse.ok(productVoList)
+        }
     }
+
+    private fun getDiyProductRes(productVos: List<ProductVo>): List<DiyProductVo> {
+        val tShirt = DiyProductVo().apply {
+            this.name = "T恤"
+            this.styles = listOf(
+                    Style().apply {
+                        name = "短袖T恤 白色男款"
+                        sizes = listOf(
+                                StyleSize().apply {
+                                    name = "XS"
+                                    gender = "男"
+                                    product = productVos.firstOrNull { it.remark == "短袖T恤 白色男款 XS" }
+                                },
+                                StyleSize().apply {
+                                    name = "S"
+                                    gender = "男"
+                                    product = productVos.firstOrNull { it.remark == "短袖T恤 白色男款 S" }
+                                },
+                                StyleSize().apply {
+                                    name = "M"
+                                    gender = "男"
+                                    product = productVos.firstOrNull { it.remark == "短袖T恤 白色男款 M" }
+                                },
+                                StyleSize().apply {
+                                    name = "L"
+                                    gender = "男"
+                                    product = productVos.firstOrNull { it.remark == "短袖T恤 白色男款 L" }
+                                },
+                                StyleSize().apply {
+                                    name = "XL"
+                                    gender = "男"
+                                    product = productVos.firstOrNull { it.remark == "短袖T恤 白色男款 XL" }
+                                },
+                                StyleSize().apply {
+                                    name = "2XL"
+                                    gender = "男"
+                                    product = productVos.firstOrNull { it.remark == "短袖T恤 白色男款 2XL" }
+                                },
+                                StyleSize().apply {
+                                    name = "3XL"
+                                    gender = "男"
+                                    product = productVos.firstOrNull { it.remark == "短袖T恤 白色男款 3XL" }
+                                },
+                                StyleSize().apply {
+                                    name = "4XL"
+                                    gender = "男"
+                                    product = productVos.firstOrNull { it.remark == "短袖T恤 白色男款 4XL" }
+                                }
+                        ).filter { it.product != null }
+                    },
+                    Style().apply {
+                        name = "短袖T恤 白色女款"
+                        sizes = listOf(
+                                StyleSize().apply {
+                                    name = "S"
+                                    gender = "女"
+                                    product = productVos.firstOrNull { it.remark == "短袖T恤 白色女款 S" }
+                                },
+                                StyleSize().apply {
+                                    name = "M"
+                                    gender = "女"
+                                    product = productVos.firstOrNull { it.remark == "短袖T恤 白色女款 M" }
+                                },
+                                StyleSize().apply {
+                                    name = "L"
+                                    gender = "女"
+                                    product = productVos.firstOrNull { it.remark == "短袖T恤 白色女款 L" }
+                                },
+                                StyleSize().apply {
+                                    name = "XL"
+                                    gender = "女"
+                                    product = productVos.firstOrNull { it.remark == "短袖T恤 白色女款 XL" }
+                                },
+                                StyleSize().apply {
+                                    name = "2XL"
+                                    gender = "女"
+                                    product = productVos.firstOrNull { it.remark == "短袖T恤 白色女款 2XL" }
+                                },
+                                StyleSize().apply {
+                                    name = "3XL"
+                                    gender = "女"
+                                    product = productVos.firstOrNull { it.remark == "短袖T恤 白色女款 3XL" }
+                                }
+                        ).filter { it.product != null }
+                    },
+                    Style().apply {
+                        name = "短袖T恤 黑色男款"
+                        sizes = listOf(
+                                StyleSize().apply {
+                                    name = "XS"
+                                    gender = "男"
+                                    product = productVos.firstOrNull { it.remark == "短袖T恤 黑色男款 XS" }
+                                },
+                                StyleSize().apply {
+                                    name = "S"
+                                    gender = "男"
+                                    product = productVos.firstOrNull { it.remark == "短袖T恤 黑色男款 S" }
+                                },
+                                StyleSize().apply {
+                                    name = "M"
+                                    gender = "男"
+                                    product = productVos.firstOrNull { it.remark == "短袖T恤 黑色男款 M" }
+                                },
+                                StyleSize().apply {
+                                    name = "L"
+                                    gender = "男"
+                                    product = productVos.firstOrNull { it.remark == "短袖T恤 黑色男款 L" }
+                                },
+                                StyleSize().apply {
+                                    name = "XL"
+                                    gender = "男"
+                                    product = productVos.firstOrNull { it.remark == "短袖T恤 黑色男款 XL" }
+                                },
+                                StyleSize().apply {
+                                    name = "2XL"
+                                    gender = "男"
+                                    product = productVos.firstOrNull { it.remark == "短袖T恤 黑色男款 2XL" }
+                                },
+                                StyleSize().apply {
+                                    name = "3XL"
+                                    gender = "男"
+                                    product = productVos.firstOrNull { it.remark == "短袖T恤 黑色男款 3XL" }
+                                },
+                                StyleSize().apply {
+                                    name = "4XL"
+                                    gender = "男"
+                                    product = productVos.firstOrNull { it.remark == "短袖T恤 黑色男款 4XL" }
+                                }
+                        ).filter { it.product != null }
+                    },
+                    Style().apply {
+                        name = "短袖T恤 黑色女款"
+                        sizes = listOf(
+                                StyleSize().apply {
+                                    name = "S"
+                                    gender = "女"
+                                    product = productVos.firstOrNull { it.remark == "短袖T恤 黑色女款 S" }
+                                },
+                                StyleSize().apply {
+                                    name = "M"
+                                    gender = "女"
+                                    product = productVos.firstOrNull { it.remark == "短袖T恤 黑色女款 M" }
+                                },
+                                StyleSize().apply {
+                                    name = "L"
+                                    gender = "女"
+                                    product = productVos.firstOrNull { it.remark == "短袖T恤 黑色女款 L" }
+                                },
+                                StyleSize().apply {
+                                    name = "XL"
+                                    gender = "女"
+                                    product = productVos.firstOrNull { it.remark == "短袖T恤 黑色女款 XL" }
+                                },
+                                StyleSize().apply {
+                                    name = "2XL"
+                                    gender = "女"
+                                    product = productVos.firstOrNull { it.remark == "短袖T恤 黑色女款 2XL" }
+                                },
+                                StyleSize().apply {
+                                    name = "3XL"
+                                    gender = "女"
+                                    product = productVos.firstOrNull { it.remark == "短袖T恤 黑色女款 3XL" }
+                                }
+                        ).filter { it.product != null }
+                    }).filter { it.sizes!!.isNotEmpty() }
+
+        }
+        val scarf = DiyProductVo().apply {
+            name = "丝巾"
+            styles = listOf(
+                    Style().apply {
+                        name = "丝巾（水平）"
+                        product = productVos.firstOrNull { it.remark ==  name }
+                    },
+                    Style().apply {
+                        name = "丝巾（垂直）"
+                        product = productVos.firstOrNull { it.remark ==  name }
+                    }
+            ).filter { it.product != null }
+        }
+        return listOf(tShirt,scarf).filter { it.styles!!.isNotEmpty() }
+    }
+
+
+
 
     /**
      * 获取某个产品（规格／模版）的详细信息
@@ -145,12 +338,12 @@ class ApiProductRoute {
         val product = productDao.findOne(id)
         val template = product.template
 
-        val templateVo = if (template.type == com.unicolour.joyspace.model.ProductType.ALBUM.value) {
+        val templateVo = if (template.type == com.unicolour.joyspace.model.ProductType.ALBUM.value || template.type == com.unicolour.joyspace.model.ProductType.DIY.value) {
             val sceneList = sceneDao.findByAlbumIdAndDeletedOrderByIndex(template.id, false).map {
                 val scene = getScene(it.template).second
                 scene.name = it.name
                 scene.index = it.index
-                scene.id=it.id
+                scene.id = it.id
                 scene
             }
             TemplateVo(template.id, template.currentVersion, template.name, template.type, sceneList)
@@ -170,12 +363,12 @@ class ApiProductRoute {
     fun getTemplateDetailInMM(@PathVariable("id") id: Int): RestResponse {
         val product = productDao.findOne(id)
         val template = product.template
-        val templateVo = if (template.type == com.unicolour.joyspace.model.ProductType.ALBUM.value) {
+        val templateVo = if (template.type == com.unicolour.joyspace.model.ProductType.ALBUM.value || template.type == com.unicolour.joyspace.model.ProductType.DIY.value) {
             val sceneList = sceneDao.findByAlbumIdAndDeletedOrderByIndex(template.id, false).map {
                 val scene = getSceneInMM(it.template)
                 scene.name = it.name
                 scene.index = it.index
-                scene.id=it.id
+                scene.id = it.id
                 scene
             }
             TemplateVo(template.id, template.currentVersion, template.name, template.type, sceneList)
@@ -243,7 +436,6 @@ class ApiProductRoute {
     private fun getPixels(mm: Double, mode: Int): Double {
         return BigDecimal(mm).divide(BigDecimal(25.4), 7, BigDecimal.ROUND_HALF_UP).multiply(BigDecimal(mode)).setScale(0, BigDecimal.ROUND_HALF_UP).toDouble()
     }
-
 
 
     private fun getSceneInMM(template: Template): Scene {

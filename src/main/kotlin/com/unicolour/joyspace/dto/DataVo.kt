@@ -15,6 +15,18 @@ data class ProductType(var id: Int? = null,
                        var describe: String? = null,
                        var iconUrl: String? = null)
 
+
+data class DiyProductVo(var name:String? = null,
+                        var styles:List<Style>? = null)
+
+data class Style(var name: String? = null,
+                 var sizes:List<StyleSize>? = null,
+                 var product:ProductVo? = null)
+
+data class StyleSize(var name: String? = null,
+                     var gender:String? = null,
+                     var product:ProductVo? = null)
+
 data class ProductVo(var id: Int? = null,
                      var name: String? = null,
                      var width: Double? = null,

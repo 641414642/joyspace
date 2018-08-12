@@ -66,7 +66,8 @@ enum class ProductType(val value:Int, val dispName:String) {
     ID_PHOTO(1, "证件照"),
     TEMPLATE(2, "模板拼图"),
     ALBUM(3, "相册"),
-    SCENE(4,"相册单页")
+    SCENE(4,"相册单页"),
+    DIY(5,"定制产品")
 }
 
 

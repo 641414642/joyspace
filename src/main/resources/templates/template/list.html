@@ -32,6 +32,7 @@
 							<option value="1" th:selected="${inputTemplateType == 1}">证件照</option>
 							<option value="2" th:selected="${inputTemplateType == 2}">模板拼图</option>
 							<option value="3" th:selected="${inputTemplateType == 3}">相册</option>
+							<option value="5" th:selected="${inputTemplateType == 5}">定制产品</option>
 						</select>
 						&nbsp;&nbsp;
 
@@ -49,6 +50,7 @@
 									<li><a href="#" th:attr="data-url=@{/template/edit(id=0,type=1)}" onclick="return createOrEditTemplate(event)">证件照</a></li>
 									<li><a href="#" th:attr="data-url=@{/template/edit(id=0,type=2)}" onclick="return createOrEditTemplate(event)">模板拼图</a></li>
 									<li><a href="#" th:attr="data-url=@{/template/edit(id=0,type=3)}" onclick="return createOrEditTemplate(event)">相册</a></li>
+									<li><a href="#" th:attr="data-url=@{/template/edit(id=0,type=5)}" onclick="return createOrEditTemplate(event)">定制产品</a></li>
 								</ul>
 							</div>
 						</div>
@@ -76,6 +78,7 @@
 							<td th:case="1">证件照</td>
 							<td th:case="2">模板拼图</td>
 							<td th:case="3">相册</td>
+							<td th:case="5">定制产品</td>
 						</th:block>
 						<td th:text="${tplWrapper.template.currentVersion}"></td>
 						<td th:text="${#numbers.formatDecimal(tplWrapper.template.width, 1, 'DEFAULT', 2, 'DEFAULT') + ' x ' + #numbers.formatDecimal(tplWrapper.template.height, 1, 'NONE', 2, 'POINT')}"></td>

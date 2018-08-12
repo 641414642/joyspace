@@ -220,7 +220,7 @@ open class PrintOrderServiceImpl : PrintOrderService {
 
             orderItems.add(newOrderItem)
 
-            if (product.template.type == com.unicolour.joyspace.model.ProductType.ALBUM.value) {
+            if (product.template.type == com.unicolour.joyspace.model.ProductType.ALBUM.value || product.template.type == com.unicolour.joyspace.model.ProductType.DIY.value) {
                 sceneDao.findByAlbumIdAndDeletedOrderByIndex(product.templateId, false).forEach {
                     saveOrderImage(it.id.toString(), it.template, newOrder.id, newOrderItem.id, orderImages)
                 }
@@ -842,6 +842,7 @@ open class PrintOrderServiceImpl : PrintOrderService {
             val tPrice = matchTprice(printStation.positionId, printOrderItem.productId, productIdCopiesMap[printOrderItem.productId]
                     ?: printOrderItem.copies)
             if (tPrice!=0) orderItemFee = tPrice
+            orderItemFee += (printOrderItem.area * 1).toInt() + (printOrderItem.piece * 300)// 0.01元／平方毫米  3元／面
             totalFee += orderItemFee * printOrderItem.copies
         }
 

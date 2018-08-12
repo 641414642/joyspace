@@ -25,6 +25,8 @@ class OrderItemInput(
         var copies: Int = 1,
         var productId: Int = 0,           //产品id
         var productVersion: String = "",  //产品版本号
+        var area: Double = 0.0,
+        var piece: Int = 0,
         var images: List<ImageParam>? = null
 )
 

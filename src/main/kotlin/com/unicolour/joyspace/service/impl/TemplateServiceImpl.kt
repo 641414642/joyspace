@@ -426,7 +426,7 @@ open class TemplateServiceImpl : TemplateService {
             //相册
             val tplImages = ArrayList<TemplateImageInfo>()
             val albumImagesPath = "$assetsDir/template/preview/${template.id}_v${template.currentVersion}/images"
-            template.type = ProductType.ALBUM.value
+            //template.type = ProductType.ALBUM.value
             templateBo.scenes.forEachIndexed { index, it ->
                 val tpl = Template()
                 tpl.currentVersion = 1

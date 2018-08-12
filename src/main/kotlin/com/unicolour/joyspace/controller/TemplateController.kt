@@ -105,6 +105,7 @@ class TemplateController {
             ProductType.PHOTO.value -> modelAndView.viewName = "/template/photoEdit :: content"
             ProductType.TEMPLATE.value -> modelAndView.viewName = "/template/edit :: content"
             ProductType.ALBUM.value -> modelAndView.viewName = "/template/albumEdit :: content"
+            ProductType.DIY.value -> modelAndView.viewName = "/template/diyEdit :: content"
         }
 
         return modelAndView
@@ -146,6 +147,28 @@ class TemplateController {
             success = true
         } else {
             success = templateService.updateTemplate(id, name, ProductType.ALBUM, templateFile)
+        }
+
+        modelAndView.model["success"] = success
+        modelAndView.viewName = "/template/templateFileUploaded"
+
+        return modelAndView
+    }
+
+    @RequestMapping(path = arrayOf("/template/editDiy"), method = arrayOf(RequestMethod.POST))
+    fun editDiy(
+            modelAndView: ModelAndView,
+            @RequestParam(name = "id", required = true) id: Int,
+            @RequestParam(name = "name", required = true) name: String,
+            @RequestParam("templateFile") templateFile: MultipartFile?
+    ): ModelAndView {
+
+        val success: Boolean
+        if (id <= 0) {
+            templateService.createTemplate(name, ProductType.DIY, templateFile!!)
+            success = true
+        } else {
+            success = templateService.updateTemplate(id, name, ProductType.DIY, templateFile)
         }
 
         modelAndView.model["success"] = success
