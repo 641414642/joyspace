@@ -146,13 +146,15 @@ class PrintOrderController {
             @RequestParam(name = "partial", required = false, defaultValue = "false") partial: Boolean?,
             @RequestParam(name = "pageno", required = false, defaultValue = "1") pageno: Int): ModelAndView {
 
+        val loginManager = managerService.loginManager!!
+
         val isSuperAdmin = managerService.loginManagerHasRole("ROLE_SUPERADMIN")
         val isEpson = managerService.loginManagerHasRole("ROLE_EPSON")
 
         val companyId = if (isSuperAdmin || isEpson) {
                 inputCompanyId
             } else {
-                managerService.loginManager!!.companyId
+                loginManager.companyId
             }
 
         val startTime = parseDate(inputStartTime)
@@ -162,8 +164,6 @@ class PrintOrderController {
 
         val printOrders = printOrderService.queryPrinterOrders(pageno, 50,
                 companyId, startTime, endTime1, inputPositionId, inputPrintStationId, "id desc")
-
-        val allPrintStationsOfCompany = printStationDao.findByCompanyId(companyId)
 
         val idUserMap = userDao.findByIdIn(printOrders.content.map { it.userId }).map { Pair(it.id, it) }.toMap()
         val idPrintStationMap = printStationDao.findByIdIn(printOrders.content.map { it.printStationId }).map { Pair(it.id, it) }.toMap()
@@ -206,20 +206,15 @@ class PrintOrderController {
             modelAndView.viewName = "/printOrder/list :: order_list_content"
         }
         else {
-
             val dateFormat = SimpleDateFormat("yyyy-MM-dd")
 
             if (isSuperAdmin || isEpson) {
-                modelAndView.model["companies"] = companyDao.findAll(Sort(Sort.Order(Sort.Direction.ASC, "id")))
-                modelAndView.model["inputCompanyId"] = inputCompanyId
+                modelAndView.model["company"] = if (inputCompanyId > 0) companyDao.findOne(inputCompanyId) else null
             }
 
-            modelAndView.model["positions"] = positionDao.findByCompanyId(companyId)
-            modelAndView.model["inputPositionId"] = inputPositionId
-
-            modelAndView.model["allPrintStations"] = allPrintStationsOfCompany
-            modelAndView.model["printStations"] = if (inputPositionId == 0) allPrintStationsOfCompany else allPrintStationsOfCompany.filter { it.positionId == inputPositionId }
-            modelAndView.model["inputPrintStationId"] = inputPrintStationId
+            modelAndView.model["loginCompanyId"] = loginManager.companyId
+            modelAndView.model["position"] = if (inputPositionId > 0) positionDao.findOne(inputPositionId) else null
+            modelAndView.model["printStation"] = if (inputPrintStationId > 0) printStationDao.findOne(inputPrintStationId) else null
 
             modelAndView.model["inputTimeRange"] = inputTimeRange
             modelAndView.model["inputStartTime"] = dateFormat.format(startTime.timeInMillis)

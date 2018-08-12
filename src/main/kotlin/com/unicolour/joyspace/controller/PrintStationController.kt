@@ -23,7 +23,6 @@ import org.springframework.http.MediaType
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.servlet.ModelAndView
-import java.util.*
 import javax.servlet.http.HttpServletRequest
 import kotlin.collections.ArrayList
 import org.springframework.web.servlet.view.RedirectView
@@ -77,6 +76,37 @@ class PrintStationController {
 
     @Value("\${com.unicolour.joyspace.baseUrl}")
     lateinit var baseUrl: String
+
+
+    @GetMapping("/printStation/query")
+    @ResponseBody
+    fun printStationQuery(
+            @RequestParam(name = "name", required = false, defaultValue = "") name: String,
+            @RequestParam(name = "companyId", required = false, defaultValue = "0") companyId: Int,
+            @RequestParam(name = "positionId", required = false, defaultValue = "0") positionId: Int,
+            @RequestParam(name = "pageno", required = false, defaultValue = "1") pageno: Int): Select2QueryResult {
+
+        val pageable = PageRequest(pageno - 1, 20, Sort.Direction.ASC, "id")
+        val printStations = printStationDao.queryPrintStations(
+                pageable = pageable,
+                companyId = companyId,
+                positionId = positionId,
+                printStationId = 0,
+                name = name,
+                printerModel = "",
+                onlineOnly = false
+        )
+
+        return Select2QueryResult(
+                results = printStations.content.map {
+                    ResultItem(
+                            id = it.id,
+                            text = if (it.name.isBlank()) "自助机${it.id}" else it.name
+                    )
+                },
+                pagination = ResultPagination(more = printStations.hasNext())
+        )
+    }
 
     class PrintStationInfo(val printStation: PrintStation, val online: Boolean, val printerTypeDisp: String, val paperSizeDisp: String)
 

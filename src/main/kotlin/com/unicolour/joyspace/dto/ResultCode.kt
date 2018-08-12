@@ -32,6 +32,8 @@ enum class ResultCode(val value:Int, val desc:String, val descEn: String) {
     PRINT_ORDER_ALREADY_TRANSFERED(28, "订单已经转账过", "PrintOrder already transfered"),
     ADD_WX_ACCOUNT_FAILED(29, "添加微信收款账户失败", ""),
     IMAGE_UPLOAD_NOT_YET(30,"还有未上传成功的订单图片","image upload not complete"),
+    GET_WX_ACCESS_TOKEN_FAILED(31,"获取微信访问令牌失败","Get wechat access token failed"),
+    SEND_WX_TEXT_MESSAGE_FAILED(32,"公众号群发文本信息失败","Send wechat text message failed"),
 
     SERVER_ERROR(100, "服务器错误", "Server error"),
 

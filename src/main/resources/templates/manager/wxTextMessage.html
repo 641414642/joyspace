@@ -28,26 +28,55 @@
 
 	<script type="text/javascript">
 		$(document).ready(function() {
-			$('#bindWeiXinDialog').modal('show');
+			$('#messageDialog').modal('show');
 		});
 	</script>
 </head>
 <body>
-<div class="modal fade" role="dialog" id="bindWeiXinDialog">
+<div class="modal fade" role="dialog" id="messageDialog">
 	<div class="modal-dialog" role="document">
 		<div class="modal-content" th:fragment="content">
-			<div class="modal-header">
-				<button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
-				<h4 class="modal-title">绑定微信账号 - 请使用微信扫码</h4>
-			</div>
-			<div class="modal-body">
-				<div class="text-center">
-					<img src="" th:src="${qrCodeImageDataUrl}" />
+			<form id="sendMessageForm" th:action="@{/manager/wx/text_message}" method="post">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+					<h4 class="modal-title">群发信息</h4>
 				</div>
-			</div>
-			<div class="modal-footer">
-				<button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
-			</div>
+				<div class="modal-body">
+					<div class="form-group">
+						<label for="account" class="control-label">公众号:</label>
+						<select name="wxMpAccountId" class="form-control" id="account">
+							<option th:each="account : ${accounts}"
+									th:value="${account.id}"
+									th:text="${account.name}">
+							</option>
+						</select>
+						<span class="help-block"></span>
+					</div>
+					<div class="form-group">
+						<label for="openIdList" class="control-label">OpenId列表:</label>
+						<textarea name="openIdList" class="form-control" id="openIdList"></textarea>
+						<span class="help-block"></span>
+					</div>
+					<div class="form-group">
+						<label for="message" class="control-label">文本消息:</label>
+						<textarea name="message" class="form-control" id="message"></textarea>
+						<span class="help-block"></span>
+					</div>
+					<div class="form-group">
+						<label for="preview" class="control-label">预览:</label>
+						<div class="checkbox" id="preview">
+							<label>
+								<input type="checkbox" name="preview" />
+							</label>
+						</div>
+						<span class="help-block"></span>
+					</div>
+				</div>
+				<div class="modal-footer">
+					<button type="submit" class="btn btn-primary">确定</button>
+					<button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+				</div>
+			</form>
 		</div>
 	</div>
 </div>
