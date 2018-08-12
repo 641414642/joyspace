@@ -1,6 +1,6 @@
 package com.unicolour.joyspace.view
 
-import com.unicolour.joyspace.dto.PrintOrderWrapper
+import com.unicolour.joyspace.model.PrintOrder
 import org.apache.poi.hssf.util.HSSFColor
 import org.apache.poi.ss.usermodel.FillPatternType
 import org.apache.poi.ss.usermodel.Workbook
@@ -11,7 +11,7 @@ import javax.servlet.http.HttpServletResponse
 
 class PrintOrderExcelView(private val isSuperAdmin:Boolean) : AbstractXlsxView() {
     override fun buildExcelDocument(model: MutableMap<String, Any>, workbook: Workbook, request: HttpServletRequest, response: HttpServletResponse) {
-        val printOrders = model["printOrders"] as List<PrintOrderWrapper>
+        val printOrders = model["printOrders"] as List<PrintOrder>
         val orderCount = model["printOrderCount"] as Int
         val photoCopies = model["photoCopies"] as Int
         val turnOver = model["turnOver"] as Int
@@ -72,46 +72,42 @@ class PrintOrderExcelView(private val isSuperAdmin:Boolean) : AbstractXlsxView()
         header.createCell(column++).apply { setCellValue("打印"); cellStyle = headerStyle; sheet.setColumnWidth(columnIndex, 5 * 256) }
         header.createCell(column).apply { setCellValue("转账"); cellStyle = headerStyle; sheet.setColumnWidth(columnIndex, 5 * 256) }
 
-        for((index, wrapper) in printOrders.withIndex()){
+        for((index, order) in printOrders.withIndex()){
             column = 0
             val row =  sheet.createRow(rowOffset + index + 1)
-            row.createCell(column++).apply { setCellValue(wrapper.order.id.toDouble()); cellStyle = intCellStyle }
-            row.createCell(column++).apply { setCellValue(wrapper.order.createTime); cellStyle = dateTimeCellStyle }
+            row.createCell(column++).apply { setCellValue(order.id.toDouble()); cellStyle = intCellStyle }
+            row.createCell(column++).apply { setCellValue(order.createTime); cellStyle = dateTimeCellStyle }
             if (isSuperAdmin) {
-                row.createCell(column++).setCellValue(wrapper.company?.name ?: "")
+                row.createCell(column++).setCellValue(order.companyName)
             }
-            row.createCell(column++).setCellValue(wrapper.position.name)
-            row.createCell(column++).apply { setCellValue(wrapper.order.printStationId.toDouble()); cellStyle = intCellStyle }
-            row.createCell(column++).setCellValue(wrapper.userName)
-            row.createCell(column++).apply { setCellValue(wrapper.order.totalFee / 100.0); cellStyle = currencyCellStyle }
+            row.createCell(column++).setCellValue(order.positionName)
+            row.createCell(column++).apply { setCellValue(order.printStationId.toDouble()); cellStyle = intCellStyle }
+            row.createCell(column++).setCellValue(order.userName)
+            row.createCell(column++).apply { setCellValue(order.totalFee / 100.0); cellStyle = currencyCellStyle }
 
-            if (wrapper.order.discount > 0) {
-                row.createCell(column++).apply { setCellValue(wrapper.order.discount / 100.0); cellStyle = currencyCellStyle; }
+            if (order.discount > 0) {
+                row.createCell(column++).apply { setCellValue(order.discount / 100.0); cellStyle = currencyCellStyle; }
             }
             else {
                 row.createCell(column++)
             }
 
-            row.createCell(column++).apply { setCellValue(wrapper.transferRecord?.transferTime); cellStyle = dateTimeCellStyle }
-            if (wrapper.transferRecord != null) {
-                row.createCell(column++).apply { setCellValue(wrapper.transferRecord.amount / 100.0); cellStyle = currencyCellStyle }
+            row.createCell(column++).apply { setCellValue(order.transferTime); cellStyle = dateTimeCellStyle }
+            if (order.transferTime != null) {
+                row.createCell(column++).apply { setCellValue(order.transferAmount / 100.0); cellStyle = currencyCellStyle }
+                row.createCell(column++).apply { setCellValue(order.transferCharge / 100.0); cellStyle = currencyCellStyle }
             }
             else {
+                row.createCell(column++)
                 row.createCell(column++)
             }
 
-            if (wrapper.transferRecordItem?.charge ?: 0 > 0) {
-                row.createCell(column++).apply { setCellValue(wrapper.transferRecordItem!!.charge / 100.0); cellStyle = currencyCellStyle }
-            }
-            else {
-                row.createCell(column++)
-            }
-            row.createCell(column++).setCellValue(wrapper.transferRecord?.receiverName)
-            row.createCell(column++).apply { if (wrapper.order.payed) setCellValue("✓") }
-            row.createCell(column++).apply { if (wrapper.order.imageFileUploaded) setCellValue("✓") }
-            row.createCell(column++).apply { if (wrapper.order.downloadedToPrintStation) setCellValue("✓") }
-            row.createCell(column++).apply { if (wrapper.order.printedOnPrintStation) setCellValue("✓") }
-            row.createCell(column).apply { if (wrapper.order.transfered) setCellValue("✓") }
+            row.createCell(column++).setCellValue(order.transferReceiverName ?: "")
+            row.createCell(column++).apply { if (order.payed) setCellValue("✓") }
+            row.createCell(column++).apply { if (order.imageFileUploaded) setCellValue("✓") }
+            row.createCell(column++).apply { if (order.downloadedToPrintStation) setCellValue("✓") }
+            row.createCell(column++).apply { if (order.printedOnPrintStation) setCellValue("✓") }
+            row.createCell(column).apply { if (order.transfered) setCellValue("✓") }
         }
     }
 }

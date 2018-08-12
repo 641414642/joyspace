@@ -48,6 +48,7 @@ import javax.xml.bind.JAXBContext
 import javax.xml.bind.Unmarshaller
 import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
+import kotlin.collections.HashSet
 import kotlin.experimental.and
 
 
@@ -158,30 +159,59 @@ open class PrintOrderServiceImpl : PrintOrderService {
     @Transactional
     override fun createOrder(orderInput: OrderInput): PrintOrder {
         val session = userLoginSessionDao.findOne(orderInput.sessionId) ?: throw ProcessException(1, "用户未登录")
-
         val printStation = printStationDao.findOne(orderInput.printStationId) ?: throw ProcessException(2, "没有找到指定的自助机")
 
+        val user = userDao.findOne(session.userId)
+        val userName = user.nickName ?: user.fullName ?: ""
+
         val ret = calculateOrderFee(orderInput)
+
+        val productNames = ArrayList<String>()
+        val productIdSet = HashSet<Int>()
+        var totalPageCount = 0
+        for (orderItemInput in orderInput.orderItems) {
+            if (!productIdSet.contains(orderItemInput.productId)) {
+                productIdSet += orderItemInput.productId
+                val product = productDao.findOne(orderItemInput.productId)
+
+                productNames += product.name
+                totalPageCount += orderItemInput.copies    //XXX
+            }
+        }
 
         val newOrder = PrintOrder()
         newOrder.orderNo = createOrderNo()
         newOrder.companyId = printStation.companyId
+        newOrder.companyName = printStation.company.name
+        newOrder.positionName = printStation.position.name
+        newOrder.printStationName = if (printStation.name.isBlank()) "自助机${printStation.id}" else printStation.name
+        newOrder.productNames = productNames.joinToString(",")
+        newOrder.totalPageCount = totalPageCount
         newOrder.createTime = Calendar.getInstance()
         newOrder.updateTime = newOrder.createTime
         newOrder.printStationId = orderInput.printStationId
         newOrder.userId = session.userId
+        newOrder.userName = userName
         newOrder.totalFee = ret.first
         newOrder.discount = ret.second
         //XXX newOrder.coupon = orderInput.coupon
-        if (ret.second>0) newOrder.couponId = orderInput.couponId
+        if (ret.second > 0) {
+            newOrder.couponId = orderInput.couponId
+        }
+
         newOrder.payed = false
         newOrder.imageFileUploaded = false
         newOrder.downloadedToPrintStation = false
         newOrder.printedOnPrintStation = false
         newOrder.transfered = false
         newOrder.transferProportion = printStation.transferProportion
+        newOrder.transferTime = null
+        newOrder.transferReceiverName = null
+        newOrder.transferAmount = 0
+        newOrder.transferCharge = 0
         newOrder.pageCount = orderInput.orderItems.sumBy { it.copies }
         newOrder.printType = orderInput.printType
+
         if (newOrder.printType == 1) {
             newOrder.province = orderInput.province
             newOrder.city = orderInput.city
@@ -206,6 +236,7 @@ open class PrintOrderServiceImpl : PrintOrderService {
             newOrderItem.productId = orderItemInput.productId
             newOrderItem.productType = product.template.type
             newOrderItem.productVersion = orderItemInput.productVersion
+            newOrderItem.pageCount = orderItemInput.copies
 
             val orderImages = ArrayList<PrintOrderImage>()
             newOrderItem.orderImages = orderImages
@@ -779,6 +810,10 @@ open class PrintOrderServiceImpl : PrintOrderService {
 
                         wxEntTransferRecordItemDao.save(recordItem)
 
+                        order.transferTime = record.transferTime
+                        order.transferReceiverName = account.name
+                        order.transferAmount = recordItem.amount
+                        order.transferCharge = recordItem.charge
                         order.transfered = true
                         printOrderDao.save(order)
                     } else {
