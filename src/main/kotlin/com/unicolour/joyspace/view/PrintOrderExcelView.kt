@@ -9,7 +9,7 @@ import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
 
-class PrintOrderExcelView : AbstractXlsxView() {
+class PrintOrderExcelView(private val isSuperAdmin:Boolean) : AbstractXlsxView() {
     override fun buildExcelDocument(model: MutableMap<String, Any>, workbook: Workbook, request: HttpServletRequest, response: HttpServletResponse) {
         val printOrders = model["printOrders"] as List<PrintOrderWrapper>
         val orderCount = model["printOrderCount"] as Int
@@ -53,10 +53,12 @@ class PrintOrderExcelView : AbstractXlsxView() {
         val header = sheet.createRow(rowOffset)
         column = 0
         header.createCell(column++).apply { setCellValue("ID"); cellStyle = headerStyle; sheet.setColumnWidth(columnIndex, 10 * 256) }
-        header.createCell(column++).apply { setCellValue("编号"); cellStyle = headerStyle; sheet.setColumnWidth(columnIndex, 20 * 256) }
         header.createCell(column++).apply { setCellValue("创建时间"); cellStyle = headerStyle; sheet.setColumnWidth(columnIndex, 20 * 256) }
-        header.createCell(column++).apply { setCellValue("自助机"); cellStyle = headerStyle; sheet.setColumnWidth(columnIndex, 10 * 256) }
+        if (isSuperAdmin) {
+            header.createCell(column++).apply { setCellValue("店家"); cellStyle = headerStyle; sheet.setColumnWidth(columnIndex, 20 * 256) }
+        }
         header.createCell(column++).apply { setCellValue("店面"); cellStyle = headerStyle; sheet.setColumnWidth(columnIndex, 20 * 256) }
+        header.createCell(column++).apply { setCellValue("自助机"); cellStyle = headerStyle; sheet.setColumnWidth(columnIndex, 10 * 256) }
         header.createCell(column++).apply { setCellValue("用户"); cellStyle = headerStyle; sheet.setColumnWidth(columnIndex, 20 * 256) }
         header.createCell(column++).apply { setCellValue("总价"); cellStyle = headerStyle; sheet.setColumnWidth(columnIndex, 10 * 256) }
         header.createCell(column++).apply { setCellValue("折扣"); cellStyle = headerStyle; sheet.setColumnWidth(columnIndex, 10 * 256) }
@@ -74,10 +76,12 @@ class PrintOrderExcelView : AbstractXlsxView() {
             column = 0
             val row =  sheet.createRow(rowOffset + index + 1)
             row.createCell(column++).apply { setCellValue(wrapper.order.id.toDouble()); cellStyle = intCellStyle }
-            row.createCell(column++).setCellValue(wrapper.order.orderNo)
             row.createCell(column++).apply { setCellValue(wrapper.order.createTime); cellStyle = dateTimeCellStyle }
-            row.createCell(column++).apply { setCellValue(wrapper.order.printStationId.toDouble()); cellStyle = intCellStyle }
+            if (isSuperAdmin) {
+                row.createCell(column++).setCellValue(wrapper.company?.name ?: "")
+            }
             row.createCell(column++).setCellValue(wrapper.position.name)
+            row.createCell(column++).apply { setCellValue(wrapper.order.printStationId.toDouble()); cellStyle = intCellStyle }
             row.createCell(column++).setCellValue(wrapper.userName)
             row.createCell(column++).apply { setCellValue(wrapper.order.totalFee / 100.0); cellStyle = currencyCellStyle }
 

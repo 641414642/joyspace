@@ -107,15 +107,21 @@ class PrintOrderController {
         val idUserMap = userDao.findByIdIn(printOrders.map { it.userId }).map { Pair(it.id, it) }.toMap()
         val idPrintStationMap = printStationDao.findByIdIn(printOrders.map { it.printStationId }).map { Pair(it.id, it) }.toMap()
         val idPositionMap = positionDao.findByIdIn(idPrintStationMap.values.map { it.positionId }).map { Pair(it.id, it) }.toMap()
+        val idCompanyMap =
+                if (isSuperAdmin) {
+                    companyDao.findByIdIn(printOrders.map { it.companyId }).map { Pair(it.id, it) }.toMap()
+                }
+                else {
+                    emptyMap()
+                }
 
         modelAndView.model["printOrders"] = printOrders.map {
             val printStation = idPrintStationMap[it.printStationId]!!
+            val company = idCompanyMap[it.companyId]
             val position = idPositionMap[printStation.positionId]!!
             val user = idUserMap[it.userId]!!
-            var userName = user.nickName ?: user.fullName ?: ""
-            if (userName != "") {
-                userName = " / $userName"
-            }
+            val userName = user.nickName ?: user.fullName ?: ""
+
             var tri: WxEntTransferRecordItem? = null
             var tr: WxEntTransferRecord? = null
             if (it.transfered) {
@@ -125,10 +131,10 @@ class PrintOrderController {
                 }
             }
 
-            PrintOrderWrapper(it, position, "ID:${user.id}" + userName, tr, tri)
+            PrintOrderWrapper(it, company, position, user.id, userName, tr, tri)
         }
 
-        modelAndView.view = PrintOrderExcelView()
+        modelAndView.view = PrintOrderExcelView(isSuperAdmin)
 
         return modelAndView
     }
@@ -168,6 +174,13 @@ class PrintOrderController {
         val idUserMap = userDao.findByIdIn(printOrders.content.map { it.userId }).map { Pair(it.id, it) }.toMap()
         val idPrintStationMap = printStationDao.findByIdIn(printOrders.content.map { it.printStationId }).map { Pair(it.id, it) }.toMap()
         val idPositionMap = positionDao.findByIdIn(idPrintStationMap.values.map { it.positionId }).map { Pair(it.id, it) }.toMap()
+        val idCompanyMap =
+                if (isSuperAdmin) {
+                    companyDao.findByIdIn(printOrders.content.map { it.companyId }).map { Pair(it.id, it) }.toMap()
+                }
+                else {
+                    emptyMap()
+                }
 
         val pager = Pager(printOrders.totalPages, 7, pageno - 1)
         modelAndView.model["pager"] = pager
@@ -175,11 +188,10 @@ class PrintOrderController {
         modelAndView.model["printOrders"] = printOrders.content.map {
             val printStation = idPrintStationMap[it.printStationId]!!
             val position = idPositionMap[printStation.positionId]!!
+            val company = idCompanyMap[it.companyId]
             val user = idUserMap[it.userId]!!
-            var userName = user.nickName ?: user.fullName ?: ""
-            if (userName != "") {
-                userName = " / $userName"
-            }
+            val userName = user.nickName ?: user.fullName ?: ""
+
             var tri: WxEntTransferRecordItem? = null
             var tr: WxEntTransferRecord? = null
             if (it.transfered) {
@@ -189,7 +201,7 @@ class PrintOrderController {
                 }
             }
 
-            PrintOrderWrapper(it, position, "ID:${user.id}" + userName, tr, tri)
+            PrintOrderWrapper(it, company, position, user.id, userName, tr, tri)
         }
 
         val orderStat = printOrderService.printOrderStat(companyId, startTime, endTime1, inputPositionId, inputPrintStationId)

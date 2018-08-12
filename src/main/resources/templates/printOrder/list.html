@@ -216,10 +216,10 @@
 				<table class="table table-bordered table-striped">
 					<tr>
 						<th style="width:50px">ID</th>
-						<th style="width:120px">编号</th>
 						<th style="width:120px">创建时间</th>
-						<th style="width:80px">自助机</th>
+						<th sec:authorize="hasAnyRole('ROLE_SUPERADMIN','ROLE_EPSON')" style="width:80px">店家</th>
 						<th style="width:80px">店面</th>
+						<th style="width:80px">自助机</th>
 						<th style="width:100px">用户</th>
 						<th style="width:100px">总价-折扣(元)</th>
 						<th style="width:120px">转账时间</th>
@@ -230,11 +230,11 @@
 					</tr>
 					<tr th:each="orderWrapper : ${printOrders}">
 						<td th:text="${orderWrapper.order.id}"></td>
-						<td th:text="${orderWrapper.order.orderNo}"></td>
 						<td th:text="${orderWrapper.order.createTime == null ? '' : #calendars.format(orderWrapper.order.createTime, 'yyyy-MM-dd HH:mm:ss')}"></td>
-						<td th:text="${orderWrapper.order.printStationId}"></td>
+						<td sec:authorize="hasAnyRole('ROLE_SUPERADMIN','ROLE_EPSON')" th:text="${orderWrapper.company == null ? '' : orderWrapper.company.name}"></td>
 						<td th:text="${orderWrapper.position.name}"></td>
-						<td th:text="${orderWrapper.userName}"></td>
+						<td th:text="${orderWrapper.order.printStationId}"></td>
+						<td th:text="${orderWrapper.userName}"><input type="hidden" th:value="${orderWrapper.userId}" /></td>
 						<td>
                             <span th:text="${#numbers.formatDecimal(orderWrapper.order.totalFee / 100.0, 1, 'DEFAULT', 2, 'DEFAULT')}"></span>
                             <span th:if="${orderWrapper.order.discount != 0}">-</span>

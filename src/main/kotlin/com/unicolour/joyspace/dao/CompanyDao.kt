@@ -12,4 +12,6 @@ interface CompanyDao : PagingAndSortingRepository<Company, Int> {
     fun findByName(@Param("name") name: String, pageable: Pageable) : Page<Company>
 
     fun existsByNameIgnoreCase(name: String): Boolean
+    fun findByIdIn(idList: List<Int>): List<Company>
+
 }
