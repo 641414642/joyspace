@@ -233,9 +233,39 @@
 					<tr th:each="order : ${printOrders}">
 						<td th:text="${order.id}"></td>
 						<td th:text="${order.createTime == null ? '' : #calendars.format(order.createTime, 'yyyy-MM-dd HH:mm:ss')}"></td>
-						<td sec:authorize="hasAnyRole('ROLE_SUPERADMIN','ROLE_EPSON')" th:text="${order.companyName}"></td>
-						<td th:text="${order.positionName}"></td>
-						<td th:text="${order.printStationName}"></td>
+						<td sec:authorize="hasAnyRole('ROLE_SUPERADMIN','ROLE_EPSON')">
+							<a href="#" th:text="${order.companyName}" th:href="@{/printOrder/list(
+								inputCompanyId=${order.companyId},
+								inputPositionId=${position?.id},
+								inputPrintStationId=${printStation?.id},
+								inputTimeRange=${inputTimeRange},
+								inputStartTime=${inputStartTime},
+								inputEndTime=${inputEndTime}
+								)}">
+							</a>
+						</td>
+						<td>
+							<a href="#" th:text="${order.positionName}" th:href="@{/printOrder/list(
+								inputCompanyId=${company?.id},
+								inputPositionId=${order.positionId},
+								inputPrintStationId=${printStation?.id},
+								inputTimeRange=${inputTimeRange},
+								inputStartTime=${inputStartTime},
+								inputEndTime=${inputEndTime}
+								)}">
+							</a>
+						</td>
+						<td>
+							<a href="#" th:text="${order.printStationName}" th:href="@{/printOrder/list(
+								inputCompanyId=${company?.id},
+								inputPositionId=${position?.id},
+								inputPrintStationId=${order.printStationId},
+								inputTimeRange=${inputTimeRange},
+								inputStartTime=${inputStartTime},
+								inputEndTime=${inputEndTime}
+								)}">
+							</a>
+						</td>
 						<td th:text="${order.userName}"><input type="hidden" th:value="${order.userId}" /></td>
 						<td th:text="${order.productNames}"></td>
 						<td th:text="${order.totalPageCount}"></td>

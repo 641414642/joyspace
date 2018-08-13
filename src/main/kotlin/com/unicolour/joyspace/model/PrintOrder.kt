@@ -26,6 +26,11 @@ class PrintOrder {
     @NotNull
     lateinit var orderNo: String
 
+    //店面id
+    @Column
+    @NotNull
+    var positionId: Int = 0
+
     //在哪台自助机上输出
     @Column
     @NotNull

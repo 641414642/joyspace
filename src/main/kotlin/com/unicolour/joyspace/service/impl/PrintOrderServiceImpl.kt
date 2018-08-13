@@ -189,6 +189,7 @@ open class PrintOrderServiceImpl : PrintOrderService {
         newOrder.totalPageCount = totalPageCount
         newOrder.createTime = Calendar.getInstance()
         newOrder.updateTime = newOrder.createTime
+        newOrder.positionId = printStation.positionId
         newOrder.printStationId = orderInput.printStationId
         newOrder.userId = session.userId
         newOrder.userName = userName
