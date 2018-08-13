@@ -1,13 +1,19 @@
 package com.unicolour.joyspace.service.impl
 
 import com.unicolour.joyspace.dao.*
+import com.unicolour.joyspace.model.PrintOrder
 import com.unicolour.joyspace.service.DatabaseUpgradeRecordService
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 import javax.transaction.Transactional
 
 @Component
 open class DatabaseUpgradeRecordServiceImpl : DatabaseUpgradeRecordService {
+    companion object {
+        val logger = LoggerFactory.getLogger(DatabaseUpgradeRecordServiceImpl::class.java)
+    }
+
     @Autowired
     lateinit var dbUpgradeRecordDao: DatabaseUpgradeRecordDao
 
@@ -27,11 +33,18 @@ open class DatabaseUpgradeRecordServiceImpl : DatabaseUpgradeRecordService {
     override fun upgradeDatabase() {
         if (dbUpgradeRecordDao.exists("InitPrintOrderNewColumns")) {
             val allOrders = printOrderDao.findAll()
+
+            val orders = ArrayList<PrintOrder>()
+
+            val idProductMap = productDao.findAll().map { Pair(it.id, it) }.toMap()
+            val idTriMap = wxEntTransferRecordItemDao.findAll().map { Pair(it.printOrderId, it) }.toMap()
+            val idTrMap = wxEntTransferRecordDao.findAll().map { Pair(it.id, it) }.toMap()
+
             for (order in allOrders) {
                 if (order.transfered) {
-                    val transferRecordItem = wxEntTransferRecordItemDao.findByPrintOrderId(order.id)
+                    val transferRecordItem = idTriMap[order.id]
                     if (transferRecordItem != null) {
-                        val transferRecord = wxEntTransferRecordDao.findOne(transferRecordItem.recordId)
+                        val transferRecord = idTrMap[transferRecordItem.recordId]
                         if (transferRecord != null) {
                             order.transferTime = transferRecord.transferTime
                             order.transferReceiverName = transferRecord.receiverName
@@ -48,17 +61,29 @@ open class DatabaseUpgradeRecordServiceImpl : DatabaseUpgradeRecordService {
                 for (orderItem in orderItems) {
                     if (!productIdSet.contains(orderItem.productId)) {
                         productIdSet += orderItem.productId
-                        val product = productDao.findOne(orderItem.productId)
+                        val product = idProductMap[orderItem.productId]
 
-                        productNames += product.name
-                        totalPageCount += orderItem.copies
+                        if (product != null) {
+                            productNames += product.name
+                            totalPageCount += orderItem.copies
+                        }
                     }
                 }
 
                 order.productNames = productNames.joinToString(",")
                 order.totalPageCount = totalPageCount
 
-                printOrderDao.save(order)
+                orders += order
+
+                if (orders.size >= 100) {
+                    printOrderDao.save(orders)
+                    orders.clear()
+                }
+            }
+
+            if (orders.isNotEmpty()) {
+                printOrderDao.save(orders)
+                orders.clear()
             }
 
             dbUpgradeRecordDao.delete("InitPrintOrderNewColumns")

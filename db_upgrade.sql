@@ -140,9 +140,10 @@ update print_order as po set print_station_name = c.name from print_station as c
 update print_order set print_station_name = concat('自助机', print_station_id) where print_station_name = '';
 update print_order_item set page_count = copies;
 
-create table "database_upgrade_record" (
-	"name" varchar(255) not null,
-	primary key ("name")
+CREATE TABLE "database_upgrade_record" (
+	"name" VARCHAR(255) NOT NULL,
+	PRIMARY KEY ("name")
 )
+;
 
 insert into database_upgrade_record (name) values ('InitPrintOrderNewColumns');
