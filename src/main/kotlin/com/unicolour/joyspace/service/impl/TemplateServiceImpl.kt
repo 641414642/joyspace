@@ -476,7 +476,7 @@ open class TemplateServiceImpl : TemplateService {
         } else {
             //模板拼图
             val tplImages = ArrayList<TemplateImageInfo>()
-            template.type = ProductType.TEMPLATE.value
+//            template.type = ProductType.TEMPLATE.value
             templateBo.scenes.forEach { sceneBo ->
                 template.width = toMM(sceneBo.width)
                 template.height = toMM(sceneBo.height)
