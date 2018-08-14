@@ -17,6 +17,7 @@ data class ProductType(var id: Int? = null,
 
 
 data class DiyProductVo(var name:String? = null,
+                        var thumbnailImageUrl: String? = null,
                         var styles:List<Style>? = null)
 
 data class Style(var name: String? = null,

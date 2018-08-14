@@ -69,7 +69,7 @@ class ApiProductRoute {
             producTypes.add(ProductType(3, "相册", "生活也许是一本书", "$baseUrl/doc/home_page/product_type_3.png"))
         }
         if (beSupportProductType(com.unicolour.joyspace.model.ProductType.DIY, printStationId)) {
-            producTypes.add(ProductType(5, "定制产品", "DIY的T恤&丝巾", "$baseUrl/doc/home_page/product_type_5.jpg"))
+            producTypes.add(ProductType(5, "定制产品", "DIY的T恤&丝巾", "$baseUrl/doc/home_page/product_type_5.png"))
         }
         val homePage = HomePageVo(advers, producTypes)
         return RestResponse.ok(homePage)
@@ -148,6 +148,7 @@ class ApiProductRoute {
     private fun getDiyProductRes(productVos: List<ProductVo>): List<DiyProductVo> {
         val tShirt = DiyProductVo().apply {
             this.name = "T恤"
+            this.thumbnailImageUrl = "$baseUrl/doc/home_page/tx.png"
             this.styles = listOf(
                     Style().apply {
                         name = "短袖T恤 白色男款"
@@ -313,6 +314,7 @@ class ApiProductRoute {
         }
         val scarf = DiyProductVo().apply {
             name = "丝巾"
+            this.thumbnailImageUrl = "$baseUrl/doc/home_page/sj.png"
             styles = listOf(
                     Style().apply {
                         name = "丝巾（水平）"
