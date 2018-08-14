@@ -20,6 +20,7 @@ import org.apache.batik.gvt.CompositeGraphicsNode
 import org.apache.batik.gvt.GraphicsNode
 import org.apache.batik.gvt.ImageNode
 import org.apache.batik.util.XMLResourceDescriptor
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.data.domain.Page
@@ -53,6 +54,9 @@ const val X_LINK_NAMESPACE: String = "http://www.w3.org/1999/xlink"
 
 @Service
 open class TemplateServiceImpl : TemplateService {
+
+    val logger = LoggerFactory.getLogger(TemplateServiceImpl::class.java)
+
     @Value("\${com.unicolour.joyspace.baseUrl}")
     lateinit var baseUrl: String
 
@@ -413,6 +417,11 @@ open class TemplateServiceImpl : TemplateService {
                         val targetFile = File(previewImgDir, fileName)
                         targetFile.parentFile.mkdirs()
                         targetFile.outputStream().use { out -> it.copyTo(out) }
+                        try {
+                            imageService.createThumbnailImageFile(targetFile, "1000x1000", File(tplDir, "thum_$fileName"))
+                        } catch (e: Exception) {
+                            logger.error("createThumbnailImageFile fail")
+                        }
                     }
                 }
                 entry = it.nextEntry

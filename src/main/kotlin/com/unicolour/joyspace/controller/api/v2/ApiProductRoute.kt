@@ -6,11 +6,10 @@ import com.unicolour.joyspace.dao.ProductDao
 import com.unicolour.joyspace.dao.SceneDao
 import com.unicolour.joyspace.dao.TemplateImageInfoDao
 import com.unicolour.joyspace.dto.*
+import com.unicolour.joyspace.dto.ProductType
+import com.unicolour.joyspace.dto.Scene
 import com.unicolour.joyspace.dto.common.RestResponse
-import com.unicolour.joyspace.model.LayerType
-import com.unicolour.joyspace.model.ProductImageFileType
-import com.unicolour.joyspace.model.Template
-import com.unicolour.joyspace.model.TemplateImageType
+import com.unicolour.joyspace.model.*
 import com.unicolour.joyspace.service.TemplateService
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
@@ -318,18 +317,16 @@ class ApiProductRoute {
             styles = listOf(
                     Style().apply {
                         name = "丝巾（水平）"
-                        product = productVos.firstOrNull { it.remark ==  name }
+                        product = productVos.firstOrNull { it.remark == name }
                     },
                     Style().apply {
                         name = "丝巾（垂直）"
-                        product = productVos.firstOrNull { it.remark ==  name }
+                        product = productVos.firstOrNull { it.remark == name }
                     }
             ).filter { it.product != null }
         }
-        return listOf(tShirt,scarf).filter { it.styles!!.isNotEmpty() }
+        return listOf(tShirt, scarf).filter { it.styles!!.isNotEmpty() }
     }
-
-
 
 
     /**
@@ -411,7 +408,7 @@ class ApiProductRoute {
                     width = getPixels(templateImage.width, mode),
                     height = getPixels(templateImage.height, mode),
                     angleClip = templateImage.angleClip,
-                    resourceURL = if (templateImage.href.isNullOrEmpty()) "" else "$baseUrl/assets/template/preview/${template.id}_v${template.currentVersion}/${templateImage.href}"
+                    resourceURL = getThumbURl(templateImage, template)
             )
             when (templateImage.layerType) {
                 LayerType.BACKGROUND.value -> layerBg.images.add(image)
@@ -483,6 +480,17 @@ class ApiProductRoute {
                 height = template.height,
                 layers = listOf(layerBg, layerUser, layerFront, layerFront))
         return scene
+    }
+
+    private fun getThumbURl(templateImage: TemplateImageInfo, template: Template): String {
+
+        if (templateImage.href.isNullOrEmpty()) {
+            return ""
+        } else {
+            val thumbFile = File(assetsDir, "template/preview/${template.id}_v${template.currentVersion}/${templateImage.href!!.replace("/", "/thum_")}")
+            if (thumbFile.exists()) return "$baseUrl/assets/template/preview/${template.id}_v${template.currentVersion}/${templateImage.href!!.replace("/", "/thum_")}"
+            return "$baseUrl/assets/template/preview/${template.id}_v${template.currentVersion}/${templateImage.href}"
+        }
     }
 }
 
