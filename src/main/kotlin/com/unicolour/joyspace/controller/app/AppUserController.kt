@@ -1,6 +1,5 @@
 package com.unicolour.joyspace.controller.api
 
-import com.unicolour.joyspace.service.GraphQLService
 import graphql.GraphQL
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.*
