@@ -64,6 +64,8 @@ data class PrintStationProduct(var id: Int? = null,
                                var name: String? = null,
                                var type: String? = null,
                                var price: Int? = null,
+                               var areaPrice: Int? = null,
+                               var piecePrice: Int? = null,
                                var tPriceItems:MutableList<TPriceItemVo>? = null,
                                var couponSign: Int? = null)
 
