@@ -417,11 +417,11 @@ open class TemplateServiceImpl : TemplateService {
                         val targetFile = File(previewImgDir, fileName)
                         targetFile.parentFile.mkdirs()
                         targetFile.outputStream().use { out -> it.copyTo(out) }
-                        try {
-                            imageService.createThumbnailImageFile(targetFile, "1000x1000", File(tplDir, "thum_$fileName"))
-                        } catch (e: Exception) {
-                            logger.error("createThumbnailImageFile fail")
-                        }
+//                        try {
+//                            imageService.createThumbnailImageFile(targetFile, "1000x1000", File(tplDir, "thum_$fileName"))
+//                        } catch (e: Exception) {
+//                            logger.error("createThumbnailImageFile fail")
+//                        }
                     }
                 }
                 entry = it.nextEntry
