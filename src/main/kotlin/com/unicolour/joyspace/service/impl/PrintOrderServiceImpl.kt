@@ -145,6 +145,10 @@ open class PrintOrderServiceImpl : PrintOrderService {
     @Value("\${com.unicolour.wxAppId}")
     lateinit var wxAppId: String
 
+    //微信转账最小金额(分)
+    @Value("\${com.unicolour.wxEntTransferMinAmount}")
+    var wxEntTransferMinAmount: Int = 0
+
     private lateinit var wxUnifyOrderResultUnmarshaller: Unmarshaller
     private lateinit var wxPayNotifyUnmarshaller: Unmarshaller
     private lateinit var wxEnterprisePayResultUnmarshaller: Unmarshaller
@@ -857,7 +861,7 @@ open class PrintOrderServiceImpl : PrintOrderService {
                     val notTransferedOrders = getUntransferedPrintOrders(company.id)
                     val ordersAmountAndFee = calcOrdersAmountAndTransferFee(notTransferedOrders)
 
-                    if (ordersAmountAndFee.totalSharing > 100) {
+                    if (ordersAmountAndFee.totalSharing > wxEntTransferMinAmount) {
                         startWxEntTransfer(notTransferedOrders, ordersAmountAndFee)
                         Thread.sleep(5000)
                     }
@@ -1087,17 +1091,17 @@ open class PrintOrderServiceImpl : PrintOrderService {
 
     /** 检查是否可以开始微信转账给投放商, 如果金额不够，检查是否可以和之前未转账的订单一起批量转，如果可以的话开始转账 */
     private fun checkStartWxEntTransfer(printOrder: PrintOrder) {
-        val orderAmountAndFee = calcOrdersAmountAndTransferFee(Collections.singletonList(printOrder))
-        if (!printOrder.transfered && orderAmountAndFee.totalSharing > 100) {
-            startWxEntTransfer(Collections.singletonList(printOrder), orderAmountAndFee)
-        } else {
+//        val orderAmountAndFee = calcOrdersAmountAndTransferFee(Collections.singletonList(printOrder))
+//        if (!printOrder.transfered && orderAmountAndFee.totalSharing > wxEntTransferMinAmount) {
+//            startWxEntTransfer(Collections.singletonList(printOrder), orderAmountAndFee)
+//        } else {
             val notTransferedOrders = getUntransferedPrintOrders(printOrder.companyId)
             val batchOrdersAmountAndFee = calcOrdersAmountAndTransferFee(notTransferedOrders)
 
-            if (batchOrdersAmountAndFee.totalSharing > 100) {
+            if (batchOrdersAmountAndFee.totalSharing > wxEntTransferMinAmount) {
                 startWxEntTransfer(notTransferedOrders, batchOrdersAmountAndFee)
             }
-        }
+//        }
     }
 
     private fun getPaymentRequestParams(payKey: String, varMap: TreeMap<String, String>): String {
