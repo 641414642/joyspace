@@ -422,7 +422,7 @@ open class TemplateServiceImpl : TemplateService {
 
     private fun generateTemplateInfo(template: Template, tplSvgFile: File) {
         val templateBo = objectMapper.readValue(tplSvgFile, TemplateBo::class.java)
-        if (templateBo.scenes.size > 1) {
+        if (template.type == ProductType.DIY.value || template.type == ProductType.ALBUM.value) {
             //相册
             val tplImages = ArrayList<TemplateImageInfo>()
             val albumImagesPath = "$assetsDir/template/preview/${template.id}_v${template.currentVersion}/images"
