@@ -49,6 +49,7 @@ import javax.xml.bind.Unmarshaller
 import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
 import kotlin.collections.HashSet
+import kotlin.concurrent.thread
 import kotlin.experimental.and
 
 
@@ -1074,9 +1075,11 @@ open class PrintOrderServiceImpl : PrintOrderService {
                 printOrderDao.save(printOrder)
                 printStationService.createPrintStationTask(printOrder.printStationId, PrintStationTaskType.PROCESS_PRINT_ORDER, printOrder.id.toString())
 
-                //转账
-                wxEntTransferExecutor.submit {
-                    transactionTemplate.execute {
+                //微信转账
+                thread(start = true) {
+                    Thread.sleep(5000)  //等5秒钟， printOrder.payed 的值保存后再开始
+
+                    wxEntTransferExecutor.submit {
                         try {
                             checkStartWxEntTransfer(printOrder)
                         } catch (e: Exception) {
@@ -1099,7 +1102,11 @@ open class PrintOrderServiceImpl : PrintOrderService {
             val batchOrdersAmountAndFee = calcOrdersAmountAndTransferFee(notTransferedOrders)
 
             if (batchOrdersAmountAndFee.totalSharing > wxEntTransferMinAmount) {
+                logger.info("PrintOrders: ${notTransferedOrders.map { it.id }.joinToString()}, start wxEntTransfer, totalSharing: ${batchOrdersAmountAndFee.totalSharing}")
                 startWxEntTransfer(notTransferedOrders, batchOrdersAmountAndFee)
+            }
+            else {
+                logger.info("PrintOrders: ${notTransferedOrders.map { it.id }.joinToString()}, totalSharing: ${batchOrdersAmountAndFee.totalSharing} less than $wxEntTransferMinAmount, not start wxEntTransfer")
             }
 //        }
     }
