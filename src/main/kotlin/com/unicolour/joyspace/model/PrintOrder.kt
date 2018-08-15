@@ -26,6 +26,11 @@ class PrintOrder {
     @NotNull
     lateinit var orderNo: String
 
+    //店面id
+    @Column
+    @NotNull
+    var positionId: Int = 0
+
     //在哪台自助机上输出
     @Column
     @NotNull
@@ -110,6 +115,44 @@ class PrintOrder {
     @Column
     @NotNull
     var printType = 0 //0:现场打印  1：邮寄
+
+    @Column(length = 200)
+    @NotNull
+    var userName: String = ""     //下单用户名
+
+    @Column(length = 50)
+    @NotNull
+    var companyName: String = ""     //投放商名称
+
+    @Column(length = 50)
+    @NotNull
+    var positionName: String = ""     //店面名
+
+    @Column(length = 50)
+    @NotNull
+    var printStationName: String = ""     //自助机名称
+
+    @Column(length = 200)
+    @NotNull
+    var productNames: String = ""     //产品名称列表 (逗号分隔)
+
+    @Column
+    @NotNull
+    var totalPageCount: Int = 0     //总打印张数
+
+    @Column
+    var transferTime: Calendar? = null   //微信转账时间
+
+    @Column(length = 50)
+    var transferReceiverName: String? = null    //微信转账收款人姓名
+
+    @Column
+    @NotNull
+    var transferAmount: Int = 0     //微信转账金额
+
+    @Column
+    @NotNull
+    var transferCharge: Int = 0     //微信转账手续费
 }
 
 @Entity
@@ -160,6 +203,10 @@ class PrintOrderItem {
 
     @Column
     var status: Int? = PrintOrderImageStatus.CREATED.value
+
+    @Column
+    @NotNull
+    var pageCount: Int = 0   //打印张数
 }
 
 

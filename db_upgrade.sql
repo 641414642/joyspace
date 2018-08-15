@@ -129,3 +129,32 @@ alter table wx_mp_account add column mch_id varchar(100) default '' not null;
 alter table wx_mp_account add column pay_key varchar(100) default '' not null;
 
 alter table print_station drop column password;
+
+alter table print_order_item add column page_count integer default 0 not null;
+alter table print_order add column total_page_count integer default 0 not null;
+alter table print_order add column user_name varchar(200) default '' not null;
+alter table print_order add column company_name varchar(50) default '' not null;
+alter table print_order add column position_id integer default 0 not null;
+alter table print_order add column position_name varchar(50) default '' not null;
+alter table print_order add column print_station_name varchar(50) default '' not null;
+alter table print_order add column product_names varchar(200) default '' not null;
+alter table print_order add column transfer_time timestamp default null;
+alter table print_order add column transfer_receiver_name varchar(50) default '';
+alter table print_order add column transfer_amount integer default 0 not null;
+alter table print_order add column transfer_charge integer default 0 not null;
+
+update print_order as p set user_name = COALESCE(u.nick_name, u.full_name, '') from joyspace_user as u where p.user_id = u.id;
+update print_order as p set company_name = c.name from company as c where p.company_id = c.id;
+update print_order as po set position_name = c.position_name from (select p.id as print_station_id, d.name as position_name from print_station p inner join position d on p.position_id=d.id) as c where po.print_station_id = c.print_station_id;
+update print_order as po set position_id = c.position_id from (select p.id as print_station_id, d.id as position_id from print_station p inner join position d on p.position_id=d.id) as c where po.print_station_id = c.print_station_id;
+update print_order as po set print_station_name = c.name from print_station as c where po.print_station_id = c.id;
+update print_order set print_station_name = concat('自助机', print_station_id) where print_station_name = '';
+update print_order_item set page_count = copies;
+
+CREATE TABLE "database_upgrade_record" (
+	"name" VARCHAR(255) NOT NULL,
+	PRIMARY KEY ("name")
+)
+;
+
+insert into database_upgrade_record (name) values ('InitPrintOrderNewColumns');

@@ -49,6 +49,8 @@ import javax.xml.bind.JAXBContext
 import javax.xml.bind.Unmarshaller
 import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
+import kotlin.collections.HashSet
+import kotlin.concurrent.thread
 import kotlin.experimental.and
 
 
@@ -150,6 +152,10 @@ open class PrintOrderServiceImpl : PrintOrderService {
     @Value("\${com.unicolour.wxAppId}")
     lateinit var wxAppId: String
 
+    //微信转账最小金额(分)
+    @Value("\${com.unicolour.wxEntTransferMinAmount}")
+    var wxEntTransferMinAmount: Int = 0
+
     private lateinit var wxUnifyOrderResultUnmarshaller: Unmarshaller
     private lateinit var wxPayNotifyUnmarshaller: Unmarshaller
     private lateinit var wxEnterprisePayResultUnmarshaller: Unmarshaller
@@ -164,30 +170,60 @@ open class PrintOrderServiceImpl : PrintOrderService {
     @Transactional
     override fun createOrder(orderInput: OrderInput): PrintOrder {
         val session = userLoginSessionDao.findOne(orderInput.sessionId) ?: throw ProcessException(1, "用户未登录")
-
         val printStation = printStationDao.findOne(orderInput.printStationId) ?: throw ProcessException(2, "没有找到指定的自助机")
 
+        val user = userDao.findOne(session.userId)
+        val userName = user.nickName ?: user.fullName ?: ""
+
         val ret = calculateOrderFee(orderInput)
+
+        val productNames = ArrayList<String>()
+        val productIdSet = HashSet<Int>()
+        var totalPageCount = 0
+        for (orderItemInput in orderInput.orderItems) {
+            if (!productIdSet.contains(orderItemInput.productId)) {
+                productIdSet += orderItemInput.productId
+                val product = productDao.findOne(orderItemInput.productId)
+
+                productNames += product.name
+                totalPageCount += orderItemInput.copies    //XXX
+            }
+        }
 
         val newOrder = PrintOrder()
         newOrder.orderNo = createOrderNo()
         newOrder.companyId = printStation.companyId
+        newOrder.companyName = printStation.company.name
+        newOrder.positionName = printStation.position.name
+        newOrder.printStationName = if (printStation.name.isBlank()) "自助机${printStation.id}" else printStation.name
+        newOrder.productNames = productNames.joinToString(",")
+        newOrder.totalPageCount = totalPageCount
         newOrder.createTime = Calendar.getInstance()
         newOrder.updateTime = newOrder.createTime
+        newOrder.positionId = printStation.positionId
         newOrder.printStationId = orderInput.printStationId
         newOrder.userId = session.userId
+        newOrder.userName = userName
         newOrder.totalFee = ret.first
         newOrder.discount = ret.second
         //XXX newOrder.coupon = orderInput.coupon
-        if (ret.second>0) newOrder.couponId = orderInput.couponId
+        if (ret.second > 0) {
+            newOrder.couponId = orderInput.couponId
+        }
+
         newOrder.payed = false
         newOrder.imageFileUploaded = false
         newOrder.downloadedToPrintStation = false
         newOrder.printedOnPrintStation = false
         newOrder.transfered = false
         newOrder.transferProportion = printStation.transferProportion
+        newOrder.transferTime = null
+        newOrder.transferReceiverName = null
+        newOrder.transferAmount = 0
+        newOrder.transferCharge = 0
         newOrder.pageCount = orderInput.orderItems.sumBy { it.copies }
         newOrder.printType = orderInput.printType
+
         if (newOrder.printType == 1) {
             newOrder.province = orderInput.province
             newOrder.city = orderInput.city
@@ -212,6 +248,7 @@ open class PrintOrderServiceImpl : PrintOrderService {
             newOrderItem.productId = orderItemInput.productId
             newOrderItem.productType = product.template.type
             newOrderItem.productVersion = orderItemInput.productVersion
+            newOrderItem.pageCount = orderItemInput.copies
 
             val orderImages = ArrayList<PrintOrderImage>()
             newOrderItem.orderImages = orderImages
@@ -755,6 +792,10 @@ open class PrintOrderServiceImpl : PrintOrderService {
 
                         wxEntTransferRecordItemDao.save(recordItem)
 
+                        order.transferTime = record.transferTime
+                        order.transferReceiverName = account.name
+                        order.transferAmount = recordItem.amount
+                        order.transferCharge = recordItem.charge
                         order.transfered = true
                         printOrderDao.save(order)
                     } else {
@@ -797,7 +838,7 @@ open class PrintOrderServiceImpl : PrintOrderService {
                     val notTransferedOrders = getUntransferedPrintOrders(company.id)
                     val ordersAmountAndFee = calcOrdersAmountAndTransferFee(notTransferedOrders)
 
-                    if (ordersAmountAndFee.totalSharing > 100) {
+                    if (ordersAmountAndFee.totalSharing > wxEntTransferMinAmount) {
                         startWxEntTransfer(notTransferedOrders, ordersAmountAndFee)
                         Thread.sleep(5000)
                     }
@@ -1011,9 +1052,11 @@ open class PrintOrderServiceImpl : PrintOrderService {
                 printOrderDao.save(printOrder)
                 printStationService.createPrintStationTask(printOrder.printStationId, PrintStationTaskType.PROCESS_PRINT_ORDER, printOrder.id.toString())
 
-                //转账
-                wxEntTransferExecutor.submit {
-                    transactionTemplate.execute {
+                //微信转账
+                thread(start = true) {
+                    Thread.sleep(5000)  //等5秒钟， printOrder.payed 的值保存后再开始
+
+                    wxEntTransferExecutor.submit {
                         try {
                             checkStartWxEntTransfer(printOrder)
                         } catch (e: Exception) {
@@ -1028,17 +1071,21 @@ open class PrintOrderServiceImpl : PrintOrderService {
 
     /** 检查是否可以开始微信转账给投放商, 如果金额不够，检查是否可以和之前未转账的订单一起批量转，如果可以的话开始转账 */
     private fun checkStartWxEntTransfer(printOrder: PrintOrder) {
-        val orderAmountAndFee = calcOrdersAmountAndTransferFee(Collections.singletonList(printOrder))
-        if (!printOrder.transfered && orderAmountAndFee.totalSharing > 100) {
-            startWxEntTransfer(Collections.singletonList(printOrder), orderAmountAndFee)
-        } else {
+//        val orderAmountAndFee = calcOrdersAmountAndTransferFee(Collections.singletonList(printOrder))
+//        if (!printOrder.transfered && orderAmountAndFee.totalSharing > wxEntTransferMinAmount) {
+//            startWxEntTransfer(Collections.singletonList(printOrder), orderAmountAndFee)
+//        } else {
             val notTransferedOrders = getUntransferedPrintOrders(printOrder.companyId)
             val batchOrdersAmountAndFee = calcOrdersAmountAndTransferFee(notTransferedOrders)
 
-            if (batchOrdersAmountAndFee.totalSharing > 100) {
+            if (batchOrdersAmountAndFee.totalSharing > wxEntTransferMinAmount) {
+                logger.info("PrintOrders: ${notTransferedOrders.map { it.id }.joinToString()}, start wxEntTransfer, totalSharing: ${batchOrdersAmountAndFee.totalSharing}")
                 startWxEntTransfer(notTransferedOrders, batchOrdersAmountAndFee)
             }
-        }
+            else {
+                logger.info("PrintOrders: ${notTransferedOrders.map { it.id }.joinToString()}, totalSharing: ${batchOrdersAmountAndFee.totalSharing} less than $wxEntTransferMinAmount, not start wxEntTransfer")
+            }
+//        }
     }
 
     private fun getPaymentRequestParams(payKey: String, varMap: TreeMap<String, String>): String {
