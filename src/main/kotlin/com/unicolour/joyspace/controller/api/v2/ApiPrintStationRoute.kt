@@ -4,7 +4,6 @@ import com.unicolour.joyspace.dao.PrintStationDao
 import com.unicolour.joyspace.dao.PrintStationProductDao
 import com.unicolour.joyspace.dao.TPriceDao
 import com.unicolour.joyspace.dto.PrintStationProduct
-import com.unicolour.joyspace.dto.PrintStationVo
 import com.unicolour.joyspace.dto.ResultCode
 import com.unicolour.joyspace.dto.TPriceItemVo
 import com.unicolour.joyspace.dto.common.RestResponse
@@ -58,7 +57,7 @@ class ApiPrintStationRoute {
                 tPriceItemVoList.add(TPriceItemVo(it.minCount,it.maxCount,it.price))
             }
             val couponSign = couponService.beCouponProduct(sessionId ?: "", it.productId)
-            PrintStationProduct(it.productId, it.product.name, it.product.template.type.toString(), price, 1, 300, tPriceItemVoList, if (couponSign) 1 else 0)
+            PrintStationProduct(it.productId, it.product.name, it.product.template.type.toString(), price, 100, 5, tPriceItemVoList, if (couponSign) 1 else 0)
         }.toMutableList()
 //        val tProduct = productDao.findOne(9528)
 //        val tPrice = priceMap.getOrDefault(tProduct.id,tProduct.defaultPrice)
@@ -102,7 +101,7 @@ class ApiPrintStationRoute {
                         tPriceItemVoList.add(TPriceItemVo(it.minCount,it.maxCount,it.price))
                     }
                     val couponSign = couponService.beCouponProduct(sessionId ?: "", it.productId)
-                    PrintStationProduct(it.productId, it.product.name, it.product.template.type.toString(), price, 1, 300, tPriceItemVoList, if (couponSign) 1 else 0)
+                    PrintStationProduct(it.productId, it.product.name, it.product.template.type.toString(), price, 100, 5, tPriceItemVoList, if (couponSign) 1 else 0)
                 }.toMutableList()
                 return RestResponse.ok(psVo)
             }
