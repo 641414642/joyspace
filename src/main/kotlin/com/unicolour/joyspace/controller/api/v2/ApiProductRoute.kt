@@ -123,6 +123,7 @@ class ApiProductRoute {
             }
             var mode = 240
             if (it.template.width * it.template.height > 19354.8) mode = 180
+            mode = 360
             ProductVo(it.id,
                     it.name,
                     getPixels(it.template.width, mode),
@@ -384,8 +385,8 @@ class ApiProductRoute {
         val layerFront = Layer(3, LayerType.FRONT.name.toLowerCase())
         val layerControl = Layer(4, LayerType.CONTROL.name.toLowerCase())
         var idPhotoMaskImageUrl = ""
-        val mode = if (template.width * template.height > 19354.8) 180 else 240
-
+//        val mode = if (template.width * template.height > 19354.8) 180 else 240
+        val mode = 360
         if (template.type == com.unicolour.joyspace.model.ProductType.ID_PHOTO.value) {
             idPhotoMaskImageUrl = "$baseUrl/assets/template/preview/${template.id}_v${template.currentVersion}/mask.png"
             layerBg.images.add(

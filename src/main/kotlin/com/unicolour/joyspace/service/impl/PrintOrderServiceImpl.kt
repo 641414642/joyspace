@@ -387,7 +387,7 @@ open class PrintOrderServiceImpl : PrintOrderService {
             it.orderImages.filter { it.userImageFile != null }.forEach { img ->
                 val userImgFile = img.userImageFile!!
                 val param = objectMapper.readValue(img.processParams, OrderImgProcessParam::class.java)
-                param.dpi = dpi
+                param.dpi = 360
                 img.processParams = objectMapper.writeValueAsString(param)
                 imageDTOs += PrintOrderImageDTO(
                         id = img.id,
