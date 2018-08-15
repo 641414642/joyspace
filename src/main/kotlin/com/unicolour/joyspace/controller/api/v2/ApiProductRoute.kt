@@ -151,7 +151,7 @@ class ApiProductRoute {
             this.thumbnailImageUrl = "$baseUrl/doc/home_page/tx.png"
             this.styles = listOf(
                     Style().apply {
-                        name = "短袖T恤 白色男款"
+                        name = "短袖T恤 浅色男款"
                         sizes = listOf(
                                 StyleSize().apply {
                                     name = "XS"
@@ -196,7 +196,7 @@ class ApiProductRoute {
                         ).filter { it.product != null }
                     },
                     Style().apply {
-                        name = "短袖T恤 白色女款"
+                        name = "短袖T恤 浅色女款"
                         sizes = listOf(
                                 StyleSize().apply {
                                     name = "S"
@@ -231,7 +231,7 @@ class ApiProductRoute {
                         ).filter { it.product != null }
                     },
                     Style().apply {
-                        name = "短袖T恤 黑色男款"
+                        name = "短袖T恤 深色男款"
                         sizes = listOf(
                                 StyleSize().apply {
                                     name = "XS"
@@ -276,7 +276,7 @@ class ApiProductRoute {
                         ).filter { it.product != null }
                     },
                     Style().apply {
-                        name = "短袖T恤 黑色女款"
+                        name = "短袖T恤 深色女款"
                         sizes = listOf(
                                 StyleSize().apply {
                                     name = "S"
