@@ -182,9 +182,7 @@ class CouponController {
             @RequestParam(name = "printStationIds", required = true) printStationIds: String
     ): CommonRequestResult {
         val couponCode = if (code.isEmpty() && claimMethod == 2) getRandomStr(8) else code
-        couponDao.findFirstByCodeIgnoreCaseOrderByBeginDesc(couponCode)?.let {
-            return CommonRequestResult(12138,"已有该代码的优惠券")
-        }
+
 
         val enabled = !(disabled != null && disabled)
 
@@ -210,6 +208,9 @@ class CouponController {
         val df = SimpleDateFormat("yyyy-MM-dd")
         val couponClaimMethod = CouponClaimMethod.values().find{ it.value == claimMethod }
         if (id <= 0) {
+            couponDao.findFirstByCodeIgnoreCaseOrderByBeginDesc(couponCode)?.let {
+                return CommonRequestResult(12138,"已有该代码的优惠券")
+            }
             couponService.createCoupon(name, couponCode, enabled, couponClaimMethod!!, maxUses, maxUsesPerUser,
                     (minExpense * 100).toInt(), (discount * 100).toInt(),
                     df.parse(begin), df.parse(expire), userRegDays,
