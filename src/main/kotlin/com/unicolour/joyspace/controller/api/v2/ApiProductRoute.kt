@@ -47,7 +47,7 @@ class ApiProductRoute {
      * 主页数据
      */
     @GetMapping(value = "/v2/app/homepage")
-    fun showHomePage(@RequestParam(required = false, value = "printStationId") printStationId: Int?): RestResponse {
+    fun showHomePage(@RequestParam(required = false, value = "printStationId", defaultValue = "1") printStationId: Int): RestResponse {
         val advers = mutableListOf<Advert>()
         advers.add(Advert("ad_1", "轮播图", "", "$baseUrl/doc/home_page/1.png"))
         advers.add(Advert("ad_2", "轮播图", "", "$baseUrl/doc/home_page/2.png"))
@@ -74,8 +74,7 @@ class ApiProductRoute {
         return RestResponse.ok(homePage)
     }
 
-    private fun beSupportProductType(type: com.unicolour.joyspace.model.ProductType, printStationId: Int?): Boolean {
-        if (printStationId == null) return true
+    private fun beSupportProductType(type: com.unicolour.joyspace.model.ProductType, printStationId: Int): Boolean {
         val templateIds = templateService.queryTemplates(type, "", true, "id asc").map { it.id }
         val products = productDao.findByTemplateIdInAndDeletedOrderBySequence(templateIds, false)
         products.asSequence().firstOrNull {
