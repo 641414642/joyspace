@@ -883,7 +883,7 @@ open class PrintOrderServiceImpl : PrintOrderService {
             val tPrice = matchTprice(printStation.positionId, printOrderItem.productId, productIdCopiesMap[printOrderItem.productId]
                     ?: printOrderItem.copies)
             if (tPrice!=0) orderItemFee = tPrice
-            orderItemFee += (printOrderItem.area * 100 / 200000000).toInt() + if (printOrderItem.piece > 0) (printOrderItem.piece - 1) * 5 else 0// 1元／平方米  0.05元／面
+            orderItemFee += (printOrderItem.area * 32000 / 200000000).toInt() + if (printOrderItem.piece > 0) (printOrderItem.piece - 1) * 500 else 0// 1元／平方米  0.05元／面
             totalFee += orderItemFee * printOrderItem.copies
         }
 

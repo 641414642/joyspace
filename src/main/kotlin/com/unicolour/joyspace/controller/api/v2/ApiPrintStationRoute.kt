@@ -57,7 +57,7 @@ class ApiPrintStationRoute {
                 tPriceItemVoList.add(TPriceItemVo(it.minCount,it.maxCount,it.price))
             }
             val couponSign = couponService.beCouponProduct(sessionId ?: "", it.productId)
-            PrintStationProduct(it.productId, it.product.name, it.product.template.type.toString(), price, 100, 5, tPriceItemVoList, if (couponSign) 1 else 0)
+            PrintStationProduct(it.productId, it.product.name, it.product.template.type.toString(), price, 32000, 500, tPriceItemVoList, if (couponSign) 1 else 0)
         }.toMutableList()
 //        val tProduct = productDao.findOne(9528)
 //        val tPrice = priceMap.getOrDefault(tProduct.id,tProduct.defaultPrice)
@@ -101,7 +101,7 @@ class ApiPrintStationRoute {
                         tPriceItemVoList.add(TPriceItemVo(it.minCount,it.maxCount,it.price))
                     }
                     val couponSign = couponService.beCouponProduct(sessionId ?: "", it.productId)
-                    PrintStationProduct(it.productId, it.product.name, it.product.template.type.toString(), price, 100, 5, tPriceItemVoList, if (couponSign) 1 else 0)
+                    PrintStationProduct(it.productId, it.product.name, it.product.template.type.toString(), price, 32000, 500, tPriceItemVoList, if (couponSign) 1 else 0)
                 }.toMutableList()
                 return RestResponse.ok(psVo)
             }
