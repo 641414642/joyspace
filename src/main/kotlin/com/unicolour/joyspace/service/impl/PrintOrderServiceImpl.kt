@@ -876,6 +876,7 @@ open class PrintOrderServiceImpl : PrintOrderService {
 
 
         for (printOrderItem in orderInput.orderItems) {
+            val p = productDao.findOne(printOrderItem.productId)
             var orderItemFee:Int = priceMap.getOrElse(printOrderItem.productId, {
                 val product = productIdObjMap.computeIfAbsent(printOrderItem.productId, { productId -> productDao.findOne(productId) })
                 product.defaultPrice
@@ -883,7 +884,7 @@ open class PrintOrderServiceImpl : PrintOrderService {
             val tPrice = matchTprice(printStation.positionId, printOrderItem.productId, productIdCopiesMap[printOrderItem.productId]
                     ?: printOrderItem.copies)
             if (tPrice!=0) orderItemFee = tPrice
-            orderItemFee += (printOrderItem.area * 32000 / 200000000).toInt() + if (printOrderItem.piece > 0) (printOrderItem.piece - 1) * 500 else 0// 1元／平方米  0.05元／面
+            orderItemFee += (printOrderItem.area * p.areaPrice / 200000000).toInt() + if (printOrderItem.piece > 0) (printOrderItem.piece - 1) * p.piecePrice else 0// 318.6 元／平方米  5元／面
             totalFee += orderItemFee * printOrderItem.copies
         }
 

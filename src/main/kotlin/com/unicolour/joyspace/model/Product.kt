@@ -40,6 +40,16 @@ class Product {
     @NotNull
     var defaultPrice: Int = 0
 
+    /** 单位面积价格(单位是分／平米) */
+    @Column
+    @NotNull
+    var areaPrice: Int = 0
+
+    /** 加工费(单位是分／面) */
+    @Column
+    @NotNull
+    var piecePrice: Int = 0
+
     @OneToMany(mappedBy = "product")
     lateinit var imageFiles: List<ProductImageFile>
 

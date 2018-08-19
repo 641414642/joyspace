@@ -158,3 +158,11 @@ CREATE TABLE "database_upgrade_record" (
 ;
 
 insert into database_upgrade_record (name) values ('InitPrintOrderNewColumns');
+
+
+
+alter table product add column area_price integer default 0 not null;
+alter table product add column piece_price integer default 0 not null;
+
+
+
