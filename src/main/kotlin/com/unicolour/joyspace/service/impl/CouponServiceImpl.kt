@@ -543,6 +543,10 @@ open class CouponServiceImpl : CouponService {
                               selectedPrintStationIds: Set<Int>) {
         val loginManager = managerService.loginManager
 
+        if (discount > minExpense) {
+            throw IllegalArgumentException("折扣金额不能大于最低消费")
+        }
+
         val coupon = Coupon()
         coupon.name = name
         coupon.code = code
@@ -613,6 +617,10 @@ open class CouponServiceImpl : CouponService {
             return false
         }
         else {
+            if (discount > minExpense) {
+                throw IllegalArgumentException("折扣金额不能大于最低消费")
+            }
+
             coupon.name = name
             coupon.code = code
             coupon.enabled = enabled

@@ -181,6 +181,10 @@ class CouponController {
             @RequestParam(name = "positionIds", required = true) positionIds: String,
             @RequestParam(name = "printStationIds", required = true) printStationIds: String
     ): CommonRequestResult {
+        if (discount > minExpense) {
+            throw IllegalArgumentException("折扣金额不能大于最低消费")
+        }
+
         val couponCode = if (code.isEmpty() && claimMethod == 2) getRandomStr(8) else code
 
 
@@ -191,17 +195,17 @@ class CouponController {
                 .toSet()
         val selectedProductIds = productIds
                 .split(',')
-                .filter { !request.getParameter("product_${it}").isNullOrBlank() }
+                .filter { !request.getParameter("product_$it").isNullOrBlank() }
                 .map { it.toInt() }
                 .toSet()
         val selectedPositionIds = positionIds
                 .split(',')
-                .filter { !request.getParameter("position_${it}").isNullOrBlank() }
+                .filter { !request.getParameter("position_$it").isNullOrBlank() }
                 .map { it.toInt() }
                 .toSet()
         val selectedPrintStationIds = printStationIds
                 .split(',')
-                .filter { !request.getParameter("printStation_${it}").isNullOrBlank() }
+                .filter { !request.getParameter("printStation_$it").isNullOrBlank() }
                 .map { it.toInt() }
                 .toSet()
 
