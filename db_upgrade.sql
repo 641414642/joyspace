@@ -164,5 +164,7 @@ insert into database_upgrade_record (name) values ('InitPrintOrderNewColumns');
 alter table product add column area_price integer default 0 not null;
 alter table product add column piece_price integer default 0 not null;
 
+alter table print_order add column image_file_cleared boolean default false not null;
+
 
 

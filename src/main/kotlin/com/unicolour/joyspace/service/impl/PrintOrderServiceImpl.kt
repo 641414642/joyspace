@@ -216,6 +216,7 @@ open class PrintOrderServiceImpl : PrintOrderService {
         newOrder.downloadedToPrintStation = false
         newOrder.printedOnPrintStation = false
         newOrder.transfered = false
+        newOrder.imageFileCleared = false
         newOrder.transferProportion = printStation.transferProportion
         newOrder.transferTime = null
         newOrder.transferReceiverName = null
