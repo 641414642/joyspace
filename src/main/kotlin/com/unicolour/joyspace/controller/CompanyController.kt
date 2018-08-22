@@ -9,10 +9,7 @@ import com.unicolour.joyspace.dao.VerifyCodeDao
 import com.unicolour.joyspace.dto.CommonRequestResult
 import com.unicolour.joyspace.dto.ResultCode
 import com.unicolour.joyspace.exception.ProcessException
-import com.unicolour.joyspace.model.Company
-import com.unicolour.joyspace.model.CompanyWxAccount
-import com.unicolour.joyspace.model.Manager
-import com.unicolour.joyspace.model.WxMpAccount
+import com.unicolour.joyspace.model.*
 import com.unicolour.joyspace.service.CompanyService
 import com.unicolour.joyspace.service.ManagerService
 import com.unicolour.joyspace.util.Pager
@@ -74,6 +71,7 @@ class CompanyController {
         val pager = Pager(companies.totalPages, 7, pageno - 1)
         modelAndView.model["pager"] = pager
 
+        modelAndView.model["businessModels"] = BusinessModel.values()
         modelAndView.model["companies"] = companies.content
 
         modelAndView.model["viewCat"] = "system_mgr"
@@ -121,6 +119,7 @@ class CompanyController {
             company = Company()
         }
 
+        modelAndView.model["businessModels"] = BusinessModel.values().filterNot { it == BusinessModel.DEFAULT }
         modelAndView.model["create"] = id <= 0
         modelAndView.model["company"] = company
         modelAndView.model["manager"] = manager
@@ -140,6 +139,7 @@ class CompanyController {
             @RequestParam(name = "id", required = true) id: Int,
             @RequestParam(name = "managerId", required = false, defaultValue = "0") managerId: Int,
             @RequestParam(name = "name", required = true) name: String,
+            @RequestParam(name = "businessModel", required = true) businessModel: Int,
             @RequestParam(name = "username", required = true) username: String,
             @RequestParam(name = "fullname", required = true) fullname: String,
             @RequestParam(name = "phone", required = true) phone: String,
@@ -148,10 +148,12 @@ class CompanyController {
     ): CommonRequestResult {
 
         try {
+            val businessModelEnum = BusinessModel.values().firstOrNull { it.value == businessModel } ?: BusinessModel.DEFAULT
+
             if (id <= 0) {
-                companyService.createCompany(name.trim(), null, username.trim(), fullname, phone, email, password)
+                companyService.createCompany(name.trim(), businessModelEnum, null, username.trim(), fullname, phone, email, password)
             } else {
-                companyService.updateCompany(id, name.trim(), managerId, fullname, phone, email, password)
+                companyService.updateCompany(id, name.trim(), businessModelEnum, managerId, fullname, phone, email, password)
             }
             return CommonRequestResult()
         }catch(e: ProcessException) {
@@ -183,7 +185,7 @@ class CompanyController {
                     Duration.between(verifyCodeObj.sendTime.toInstant(), now).seconds > 60 * 10) {  //超过10分钟
                 throw ProcessException(ResultCode.INVALID_VERIFY_CODE)
             }
-            companyService.createCompany(name.trim(), null, username.trim(), fullname, phone, email, password)
+            companyService.createCompany(name.trim(), BusinessModel.DEFAULT, null, username.trim(), fullname, phone, email, password)
             verifyCodeDao.delete(verifyCodeObj)
             CommonRequestResult()
         } catch (e: ProcessException) {

@@ -6,10 +6,7 @@ import com.unicolour.joyspace.dto.ResultCode
 import com.unicolour.joyspace.dto.WxGetAccessTokenResult
 import com.unicolour.joyspace.dto.WxGetUserInfoResult
 import com.unicolour.joyspace.exception.ProcessException
-import com.unicolour.joyspace.model.Company
-import com.unicolour.joyspace.model.CompanyWxAccount
-import com.unicolour.joyspace.model.PriceList
-import com.unicolour.joyspace.model.VerifyCode
+import com.unicolour.joyspace.model.*
 import com.unicolour.joyspace.service.CompanyService
 import com.unicolour.joyspace.service.ManagerService
 import com.unicolour.joyspace.service.SmsService
@@ -66,7 +63,9 @@ open class CompanyServiceImpl : CompanyService {
     @Autowired
     lateinit var smsService: SmsService
     @Transactional
-    override fun createCompany(name: String, defPriceList: PriceList?,
+    override fun createCompany(name: String,
+                               businessModel: BusinessModel,
+                               defPriceList: PriceList?,
                                username: String,
                                fullname: String,
                                phone: String,
@@ -79,6 +78,7 @@ open class CompanyServiceImpl : CompanyService {
         val company = Company()
 
         company.name = name
+        company.businessModel = businessModel.value
         company.createTime = Calendar.getInstance()
         company.defaultPriceList = defPriceList
 
@@ -95,10 +95,11 @@ open class CompanyServiceImpl : CompanyService {
     }
 
     @Transactional
-    override fun updateCompany(companyId: Int, name: String, managerId: Int, fullname: String, phone: String, email: String, password: String): Boolean {
+    override fun updateCompany(companyId: Int, name: String, businessModel: BusinessModel, managerId: Int, fullname: String, phone: String, email: String, password: String): Boolean {
         val company = companyDao.findOne(companyId)
         if (company != null) {
             company.name = name
+            company.businessModel = businessModel.value
             companyDao.save(company)
 
             val manager = managerService.getCompanyManager(companyId)

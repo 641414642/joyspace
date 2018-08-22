@@ -40,12 +40,18 @@
 					<tr>
 						<th>ID</th>
 						<th>名称</th>
+						<th>经营方式</th>
 						<th>创建时间</th>
 						<th>操作</th>
 					</tr>
 					<tr th:each="company : ${companies}">
 						<td th:text="${company.id}"></td>
 						<td th:text="${company.name}"></td>
+						<td>
+							<th:block th:each="bm : ${businessModels}">
+								<span th:if="${bm.value == company.businessModel}" th:text="${bm.displayName}"></span>
+							</th:block>
+						</td>
 						<td th:text="${company.createTime == null ? '' : #calendars.format(company.createTime, 'yyyy-MM-dd HH:mm')}"></td>
 						<td valign="middle" style="vertical-align:middle">
 							<a href="#" style="margin-right:5px">

@@ -3,7 +3,7 @@ package com.unicolour.joyspace.config
 import com.unicolour.joyspace.dao.CompanyDao
 import com.unicolour.joyspace.dao.PositionDao
 import com.unicolour.joyspace.dao.PrintStationDao
-import com.unicolour.joyspace.model.DatabaseUpgradeRecord
+import com.unicolour.joyspace.model.BusinessModel
 import com.unicolour.joyspace.service.CompanyService
 import com.unicolour.joyspace.service.DatabaseUpgradeRecordService
 import com.unicolour.joyspace.service.ManagerService
@@ -36,7 +36,7 @@ class ApplicationStartup : ApplicationListener<ApplicationReadyEvent> {
         //创建缺省店面和管理员
         val companies = companyDao.findAll()
         if (!companies.iterator().hasNext()) {
-            companyService.createCompany("缺省店面", null, "admin", "管理员", "", "", "123456")
+            companyService.createCompany("缺省店面", BusinessModel.DEFAULT,null, "admin", "管理员", "", "", "123456")
         }
 
         //数据库升级操作

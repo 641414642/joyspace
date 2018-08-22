@@ -167,4 +167,5 @@ alter table product add column piece_price integer default 0 not null;
 alter table print_order add column image_file_cleared boolean default false not null;
 
 alter table position add column short_name varchar (50) default '' not null;
+alter table company add column business_model integer default 0 not null;
 
