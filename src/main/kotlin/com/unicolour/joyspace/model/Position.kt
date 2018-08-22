@@ -15,6 +15,10 @@ class Position {
     @NotNull
     var name: String = ""
 
+    @Column(length = 50)
+    @NotNull
+    var shortName: String = ""
+
     /** 地址 */
     @Column(length = 255)
     @NotNull

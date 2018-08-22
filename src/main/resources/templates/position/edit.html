@@ -44,8 +44,13 @@
                 <input type="hidden" name="id" th:value="${position.id}" />
                 <div class="modal-body">
                     <div class="form-group">
-                        <label for="name" class="control-label">名称:</label>
+                        <label for="name" class="control-label">店面全称:</label>
                         <input type="text" name="name" class="form-control" id="name" th:value="${position.name}" />
+                        <span class="help-block"></span>
+                    </div>
+                    <div class="form-group">
+                        <label for="shortName" class="control-label">店面简称:</label>
+                        <input type="text" name="shortName" class="form-control" id="shortName" th:value="${position.shortName}" />
                         <span class="help-block"></span>
                     </div>
                     <div class="form-group">

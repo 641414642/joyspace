@@ -134,6 +134,7 @@ class PositionController {
     fun editPosition(
             @RequestParam(name = "id", required = true) id: Int,
             @RequestParam(name = "name", required = true) name: String,
+            @RequestParam(name = "shortName", required = true) shortName: String,
             @RequestParam(name = "address", required = true) address: String,
             @RequestParam(name = "transportation", required = true) transportation: String,
             @RequestParam(name = "longitudeAndLatitude", required = true) longitudeAndLatitude: String,
@@ -145,9 +146,9 @@ class PositionController {
             val longitude = split[1].toDouble()
 
             if (id <= 0) {
-                positionService.createPosition(name, address, transportation, longitude, latitude, priceListId)
+                positionService.createPosition(name, shortName, address, transportation, longitude, latitude, priceListId)
             } else {
-                positionService.updatePosition(id, name, address, transportation, longitude, latitude, priceListId)
+                positionService.updatePosition(id, name, shortName, address, transportation, longitude, latitude, priceListId)
             }
             return CommonRequestResult()
         } catch (e: ProcessException) {
