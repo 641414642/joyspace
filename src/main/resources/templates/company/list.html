@@ -25,6 +25,16 @@
 						<label class="form-label">名称</label>
 						<input class="form-control" type="text" name="name" th:value="${inputCompanyName}" />
 						&nbsp;&nbsp;
+						<label class="form-label">经营方式</label>
+						<select name="businessModel" class="form-control">
+							<option value="-1">所有</option>
+							<option th:each="bm : ${businessModels}"
+									th:value="${bm.value}"
+									th:text="${bm.displayName}"
+									th:selected="${bm.value == inputBusinessModel}">
+							</option>
+						</select>
+						&nbsp;&nbsp;
 						<button type="submit" class="btn btn-default btn-sm">查询</button>
 						<a href="#" th:href="@{/company/list}" class="btn btn-default btn-sm">重置</a>
 

@@ -1,13 +1,7 @@
 package com.unicolour.joyspace.controller
 
-import com.unicolour.joyspace.dao.CompanyDao
-import com.unicolour.joyspace.dao.CompanyWxAccountDao
-import com.unicolour.joyspace.dao.WxMpAccountDao
+import com.unicolour.joyspace.dao.*
 import com.unicolour.joyspace.dto.*
-import com.unicolour.joyspace.dao.ManagerDao
-import com.unicolour.joyspace.dao.VerifyCodeDao
-import com.unicolour.joyspace.dto.CommonRequestResult
-import com.unicolour.joyspace.dto.ResultCode
 import com.unicolour.joyspace.exception.ProcessException
 import com.unicolour.joyspace.model.*
 import com.unicolour.joyspace.service.CompanyService
@@ -58,20 +52,21 @@ class CompanyController {
     fun companyList(
             modelAndView: ModelAndView,
             @RequestParam(name = "name", required = false, defaultValue = "") name: String?,
+            @RequestParam(name = "businessModel", required = false, defaultValue = "-1") businessModel: Int,
             @RequestParam(name = "pageno", required = false, defaultValue = "1") pageno: Int): ModelAndView {
 
+        val businessModelEnum = BusinessModel.values().firstOrNull { it.value == businessModel }
+
         val pageable = PageRequest(pageno - 1, 20, Sort.Direction.ASC, "id")
-        val companies = if (name == null || name == "")
-            companyDao.findAll(pageable)
-        else
-            companyDao.findByName(name, pageable)
+        val companies = companyDao.queryCompanies(pageable, name ?: "", businessModelEnum)
 
         modelAndView.model["inputCompanyName"] = name
+        modelAndView.model["inputBusinessModel"] = businessModel
 
         val pager = Pager(companies.totalPages, 7, pageno - 1)
         modelAndView.model["pager"] = pager
 
-        modelAndView.model["businessModels"] = BusinessModel.values()
+        modelAndView.model["businessModels"] = BusinessModel.values().filterNot { it == BusinessModel.DEFAULT }
         modelAndView.model["companies"] = companies.content
 
         modelAndView.model["viewCat"] = "system_mgr"

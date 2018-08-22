@@ -7,11 +7,8 @@ import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.PagingAndSortingRepository
 import org.springframework.data.repository.query.Param
 
-interface CompanyDao : PagingAndSortingRepository<Company, Int> {
+interface CompanyDao : PagingAndSortingRepository<Company, Int>, CompanyCustomQuery {
     @Query("SELECT c FROM Company c WHERE LOWER(c.name) LIKE LOWER(CONCAT('%', :name, '%'))")
     fun findByName(@Param("name") name: String, pageable: Pageable) : Page<Company>
-
     fun existsByNameIgnoreCase(name: String): Boolean
-    fun findByIdIn(idList: List<Int>): List<Company>
-
 }
