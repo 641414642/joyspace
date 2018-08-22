@@ -460,6 +460,7 @@ open class PrintStationServiceImpl : PrintStationService {
         printStation.addressCity = printStation.position.addressCity
         printStation.addressDistrict = printStation.position.addressDistrict
         printStation.addressStreet = printStation.position.addressStreet
+        printStation.stationType = StationType.DEFAULT.value
         printStation.printerModel = null
         printStation.rollPaper = null
         printStation.paperWidth = null

@@ -73,6 +73,7 @@
 						<th style="width:200px">投放商</th>
 						<th style="width:200px">店面</th>
 						<th>分账比例</th>
+						<th>站点属性</th>
 						<th>指定打印机类型</th>
 						<th>打印机型号</th>
 						<th>纸张尺寸</th>
@@ -90,6 +91,11 @@
 						<td th:text="${ps.printStation.company?.name}"></td>
 						<td th:text="${ps.printStation.position.name}"></td>
 						<td th:text="${#numbers.formatDecimal(ps.printStation.transferProportion / 10.0, 1, 'DEFAULT', 1, 'DEFAULT') + '%'}"></td>
+						<td>
+							<th:block th:each="st : ${stationTypes}">
+								<span th:if="${st.value == ps.printStation.stationType}" th:text="${st.displayName}"></span>
+							</th:block>
+						</td>
 						<td th:text="${ps.printerTypeDisp}"></td>
 						<td>
 							<th:block th:if="${ps.printStation.rollPaper != null}">

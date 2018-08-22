@@ -32,6 +32,10 @@ class PrintStation {
     @JoinColumn(name = "position_id")
     lateinit var position: Position
 
+    @Column
+    @NotNull
+    var stationType: Int = 0            //站点属性
+
     @Column(length = 128)
     @NotNull
     lateinit var printerType: String     //允许的打印机类型
@@ -124,3 +128,17 @@ enum class PrintStationStatus(val value:Int, val message:String) {
     OUT_OF_PRINTING_SUPPLIES(2, "打印耗材用完")
 }
 
+
+//站点属性
+enum class StationType(
+        val value: Int,
+        val displayName: String
+) {
+    DEFAULT(0, ""),
+    JOYSPACE(1, "悦印自助机"),
+    CY(2, "CY单机"),
+    D700(3, "D700单机"),
+    EPSON_DESKTOP(4, "EPSON桌面机"),
+    F2180(5, "F2180"),
+    OTHER(6, "其它设备"),
+}

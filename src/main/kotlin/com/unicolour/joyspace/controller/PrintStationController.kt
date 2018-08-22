@@ -4,9 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.unicolour.joyspace.dao.*
 import com.unicolour.joyspace.dto.*
 import com.unicolour.joyspace.exception.ProcessException
-import com.unicolour.joyspace.model.PrintStation
-import com.unicolour.joyspace.model.PrintStationStatus
-import com.unicolour.joyspace.model.PrintStationTaskType
+import com.unicolour.joyspace.model.*
 import com.unicolour.joyspace.model.ProductType
 import com.unicolour.joyspace.service.ManagerService
 import com.unicolour.joyspace.service.PrintOrderService
@@ -185,6 +183,7 @@ class PrintStationController {
 
         val time = System.currentTimeMillis() - 30 * 1000
 
+        modelAndView.model["stationTypes"] = StationType.values().filterNot { it == StationType.DEFAULT }
         modelAndView.model["printStations"] = printStations.content.map {
             val lastAccessTime = it.lastAccessTime
             val online = lastAccessTime != null && lastAccessTime.timeInMillis > time   //自助机30秒之内访问过后台
