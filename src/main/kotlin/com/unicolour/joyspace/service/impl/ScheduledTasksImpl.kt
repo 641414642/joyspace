@@ -26,7 +26,7 @@ open class ScheduledTasksImpl : ScheduledTasks {
     lateinit var assetsDir: String
 
     //删除旧用户图片
-    @Scheduled(cron = "0 */5 2-3 * * *")
+    @Scheduled(cron = "0 */10 2-3 * * *")
     @Transactional
     override fun clearOldUserImages() {
         val beforeTime = Calendar.getInstance()
