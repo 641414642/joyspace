@@ -304,6 +304,7 @@ class PrintStationController {
         modelAndView.model["diy_products"] = products.filter { it.productType == ProductType.DIY.value }
         modelAndView.model["productIds"] = products.map { it.productId }.joinToString(separator = ",")
         modelAndView.model["printerTypes"] = printerTypeDao.findAll()
+        modelAndView.model["stationTypes"] = StationType.values().filterNot { it == StationType.DEFAULT}
 
         modelAndView.viewName = "/printStation/edit :: content"
 
@@ -319,6 +320,7 @@ class PrintStationController {
             @RequestParam(name = "positionId", required = true) positionId: Int,
             @RequestParam(name = "proportion", required = false, defaultValue = "0") proportion: Double,
             @RequestParam(name = "printerType", required = true, defaultValue = "") printerType: String,
+            @RequestParam(name = "stationType", required = true, defaultValue = "0") stationType: Int,
             @RequestParam(name = "adSetId", required = false, defaultValue = "-1") adSetId: Int,
             @RequestParam(name = "productIds", required = true) productIds: String
     ): Boolean {
@@ -329,8 +331,9 @@ class PrintStationController {
                 .map { it.toInt() }
                 .toSet()
 
+        val stationTypeObj = StationType.values().first { it.value == stationType }
         return printStationService.updatePrintStation(id, printStationName,
-                positionId, (proportion * 10).toInt(), printerType, adSetId, selectedProductIds)
+                positionId, (proportion * 10).toInt(), stationTypeObj, printerType, adSetId, selectedProductIds)
     }
 
     @RequestMapping(path = arrayOf("/printStation/activate"), method = arrayOf(RequestMethod.GET))

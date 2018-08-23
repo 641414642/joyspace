@@ -69,6 +69,17 @@
                         <span class="help-block"></span>
                     </div>
                     <div class="form-group">
+                        <label for="stationType" class="control-label">站点属性:</label>
+                        <select name="stationType" class="form-control" id="stationType">
+                            <option th:each="stationType : ${stationTypes}"
+                                    th:value="${stationType.value}"
+                                    th:text="${stationType.displayName}"
+                                    th:selected="${printStation.stationType == stationType.value}">
+                            </option>
+                        </select>
+                        <span class="help-block"></span>
+                    </div>
+                    <div class="form-group">
                         <label for="printerType" class="control-label">打印机型号:</label>
                         <select name="printerType" class="form-control" id="printerType">
                             <option th:each="printerType : ${printerTypes}"

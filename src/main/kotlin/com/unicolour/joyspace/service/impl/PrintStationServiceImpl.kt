@@ -387,7 +387,7 @@ open class PrintStationServiceImpl : PrintStationService {
 
     @Transactional
     override fun updatePrintStation(id: Int, printStationName: String, positionId: Int, transferProportion: Int,
-                                    printerType: String, adSetId: Int, selectedProductIds: Set<Int>): Boolean {
+                                    stationType: StationType, printerType: String, adSetId: Int, selectedProductIds: Set<Int>): Boolean {
         val printStation = printStationDao.findOne(id)
 
         if (printStation != null) {
@@ -400,6 +400,7 @@ open class PrintStationServiceImpl : PrintStationService {
             printStation.addressDistrict = printStation.position.addressDistrict
             printStation.addressStreet = printStation.position.addressStreet
             printStation.printerType = printerType
+            printStation.stationType = stationType.value
 
             if (adSetId > 0) {
                 printStation.adSet = adSetDao.findOne(adSetId)
