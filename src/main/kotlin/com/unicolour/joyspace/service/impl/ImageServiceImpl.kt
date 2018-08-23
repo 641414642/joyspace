@@ -262,14 +262,14 @@ class ImageServiceImpl : ImageService {
      */
     override fun uploadFileterImage(sessionId: String): String {
         val session = userLoginSessionDao.findOne(sessionId);
-
         if (session == null) {
             return "用户未登录"
         } else {
             try {
-
-
-                val fileName = UUID.randomUUID().toString()
+                val fileName = UUID.randomUUID().toString().replace("-", "")
+                val filePath = "fileter//${sessionId}/${fileName}"
+                val file = File(assetsDir, filePath)
+                file.parentFile.mkdirs()
 
                 val srcImage = "/root/fileterImage/fileter${fileName}.jpeg"
 
@@ -291,14 +291,30 @@ class ImageServiceImpl : ImageService {
                 BufferedReader(InputStreamReader(process.errorStream)).use { reader ->
                     retError = reader.readText()
                 }
-
                 val retCode = process.waitFor()
+
+                logger.info("uploadFileterImage retStr = ${retStr}, retError = ${retError}, retCode = ${retCode}")
 
                 if (retCode != 0) {
                     logger.error("获取滤镜失败，请稍后重试 ，retStr:$retStr , retCode: $retCode , retError: $retError")
                     return "获取滤镜失败，请稍后重试"
                 } else {
-                    return retStr
+                    val patternStr = Pattern.quote(file.absolutePath) + "\\s(\\w+)\\s(\\d+)x(\\d+)\\s.*"
+                    val pattern = Pattern.compile(patternStr)
+                    val matcher = pattern.matcher(retStr)
+                    matcher.find()
+                    var imgType = matcher.group(1).toLowerCase()
+                    if (imgType == "jpeg") {
+                        imgType = "jpg"
+                    }
+
+
+                    val fileWithExt = File(assetsDir, "${filePath}_${fileName}.${imgType}")
+                    file.renameTo(fileWithExt)
+
+                    val url = "${baseUrl}/assets/${filePath}.${imgType}"
+
+                    return url
                 }
             } catch (e: Exception) {
                 logger.error("error occurs while ", e)
