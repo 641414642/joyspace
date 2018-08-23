@@ -186,8 +186,9 @@ open class PrintOrderServiceImpl : PrintOrderService {
                 val product = productDao.findOne(orderItemInput.productId)
 
                 productNames += product.name
-                totalPageCount += orderItemInput.copies    //XXX
             }
+
+            totalPageCount += orderItemInput.copies    //XXX
         }
 
         val newOrder = PrintOrder()
