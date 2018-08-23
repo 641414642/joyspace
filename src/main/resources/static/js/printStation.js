@@ -110,6 +110,7 @@ $(function() {
             "&inputPositionId=" + $("#inputPositionId").val() +
             "&inputName=" + $("#inputName").val() +
             "&inputPrintStationId=" + $("#inputPrintStationId").val() +
+            "&inputStationType=" + $("#inputStationType").val() +
             "&inputPrinterModel=" + $("#inputPrinterModel").val() +
             "&inputOnlineOnly=" + $("#inputOnlineOnly").is(":checked");
     });

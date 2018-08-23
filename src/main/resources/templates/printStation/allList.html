@@ -39,6 +39,16 @@
 						&nbsp;&nbsp;
 						<label class="form-label" for="inputPrintStationId">ID</label>
 						<input class="form-control" type="text" style="width:80px" id="inputPrintStationId" name="inputPrintStationId" th:value="${inputPrintStationId}" />
+                        &nbsp;&nbsp;
+                        <label class="form-label" for="inputStationType">站点属性</label>
+                        <select name="inputStationType" class="form-control" id="inputStationType">
+                            <option value="-1">所有</option>
+                            <option th:each="st : ${stationTypes}"
+                                    th:value="${st.value}"
+                                    th:text="${st.displayName}"
+                                    th:selected="${st.value == inputStationType}">
+                            </option>
+                        </select>
 						&nbsp;&nbsp;
 						<label class="form-label" for="inputPrinterModel">打印机型号</label>
 						<input class="form-control" type="text" style="width:100px" id="inputPrinterModel" name="inputPrinterModel" th:value="${inputPrinterModel}" />

@@ -91,6 +91,7 @@ class PrintStationController {
                 positionId = positionId,
                 printStationId = 0,
                 name = name,
+                stationType = null,
                 printerModel = "",
                 onlineOnly = false
         )
@@ -161,10 +162,12 @@ class PrintStationController {
             @RequestParam(name = "inputPositionId", required = false, defaultValue = "0") inputPositionId: Int,
             @RequestParam(name = "inputPrintStationId", required = false, defaultValue = "0") inputPrintStationId: Int,
             @RequestParam(name = "inputName", required = false, defaultValue = "") inputName: String,
+            @RequestParam(name = "inputStationType", required = false, defaultValue = "-1") inputStationType: Int,
             @RequestParam(name = "inputPrinterModel", required = false, defaultValue = "") inputPrinterModel: String,
             @RequestParam(name = "inputOnlineOnly", required = false, defaultValue = "false") inputOnlineOnly: Boolean
     ): ModelAndView {
 
+        val stationType = StationType.values().firstOrNull { it.value == inputStationType }
         val printerNameDispMap = printerTypeDao.findAll().map { it.name to it.displayName }.toMap()
 
         val pageable = PageRequest(pageno - 1, 20, Sort.Direction.ASC, "id")
@@ -174,6 +177,7 @@ class PrintStationController {
                 positionId = inputPositionId,
                 printStationId = inputPrintStationId,
                 name = inputName,
+                stationType = stationType,
                 printerModel = inputPrinterModel,
                 onlineOnly = inputOnlineOnly
         )
@@ -198,6 +202,7 @@ class PrintStationController {
         modelAndView.model["position"] = if (inputPositionId > 0) positionDao.findOne(inputPositionId) else null
         modelAndView.model["inputName"] = inputName
         modelAndView.model["inputPrinterModel"] = inputPrinterModel
+        modelAndView.model["inputStationType"] = inputStationType
         modelAndView.model["inputPrintStationId"] = if (inputPrintStationId <= 0) "" else inputPrintStationId.toString()
         modelAndView.model["inputOnlineOnly"] = inputOnlineOnly
 
@@ -215,10 +220,12 @@ class PrintStationController {
             @RequestParam(name = "inputPositionId", required = false, defaultValue = "0") inputPositionId: Int,
             @RequestParam(name = "inputPrintStationId", required = false, defaultValue = "0") inputPrintStationId: Int,
             @RequestParam(name = "inputName", required = false, defaultValue = "") inputName: String,
+            @RequestParam(name = "inputStationType", required = false, defaultValue = "-1") inputStationType: Int,
             @RequestParam(name = "inputPrinterModel", required = false, defaultValue = "") inputPrinterModel: String,
             @RequestParam(name = "inputOnlineOnly", required = false, defaultValue = "false") inputOnlineOnly: Boolean
     ): ModelAndView {
 
+        val stationType = StationType.values().firstOrNull { it.value == inputStationType }
         val printerNameDispMap = printerTypeDao.findAll().map { it.name to it.displayName }.toMap()
 
         val printStations = printStationDao.queryPrintStations(
@@ -226,6 +233,7 @@ class PrintStationController {
                 positionId = inputPositionId,
                 printStationId = inputPrintStationId,
                 name = inputName,
+                stationType = stationType,
                 printerModel = inputPrinterModel,
                 onlineOnly = inputOnlineOnly
         )
