@@ -42,7 +42,8 @@ enum class BusinessModel(
     DEFAULT(0, ""),
     INVEST(1, "投放"),
     PURCHASE(2, "购买"),
-    PARTNER(3, "合作")
+    PARTNER(3, "合作"),
+    SELF_OPERATION(4, "自营")
 }
 
 
