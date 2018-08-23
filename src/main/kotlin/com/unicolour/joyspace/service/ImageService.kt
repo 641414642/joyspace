@@ -19,4 +19,10 @@ interface ImageService {
     fun getImageFileUrlDataFetcher(): DataFetcher<String>
     fun getImageFileDimensionAndType(imageFile: File): ImageFileDimensionAndType
     fun createThumbnailImageFile(srcImgFile: File, geometry: String, thumbImgFile: File)   //geometry   http://www.imagemagick.org/script/command-line-processing.php#geometry
+
+
+    /**
+     * 调用python,获取滤镜风格列表
+     */
+    fun uploadFileterImage(sessionId: String):String
 }

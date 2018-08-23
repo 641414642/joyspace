@@ -1,6 +1,7 @@
 package com.unicolour.joyspace.controller.api
 
 import com.unicolour.joyspace.dto.WxLoginResult
+import com.unicolour.joyspace.service.GraphQLService
 import com.unicolour.joyspace.service.UserService
 import graphql.GraphQL
 import org.springframework.beans.factory.annotation.Autowired

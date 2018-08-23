@@ -1,5 +1,6 @@
 package com.unicolour.joyspace.controller.api
 
+import com.unicolour.joyspace.service.GraphQLService
 import graphql.GraphQL
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.*
@@ -9,7 +10,7 @@ import org.springframework.web.bind.annotation.*
 class AppUserController {
 
     @Autowired
-    lateinit var graphQLService: GraphQLService
+    lateinit var graphQLService:GraphQLService
 
     @RequestMapping("/app/user/sendVerifyCode", method = arrayOf(RequestMethod.POST))
     @ResponseBody

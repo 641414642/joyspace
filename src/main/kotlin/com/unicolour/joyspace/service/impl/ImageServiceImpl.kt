@@ -256,5 +256,55 @@ class ImageServiceImpl : ImageService {
         val process = pb.start()
         process.waitFor()
     }
+
+    /**
+     * 调用python,获取滤镜风格列表
+     */
+    override fun uploadFileterImage(sessionId: String): String {
+        val session = userLoginSessionDao.findOne(sessionId);
+
+        if (session == null) {
+            return "用户未登录"
+        } else {
+            try {
+
+
+                val fileName = UUID.randomUUID().toString()
+
+                val srcImage = "/root/fileterImage/fileter${fileName}.jpeg"
+
+                val desImage = "/root/fileterImage/fileter_${fileName}.jpeg"
+
+                logger.info("uploadFileterImage srcImage:${srcImage},desImage:${desImage}")
+
+
+                var filterImageJson = ProcessBuilder("python", "/root/joy_style/joy_api.py", srcImage, desImage);
+
+                var process = filterImageJson.start();
+
+                var retStr: String = "";
+                var retError: String = ""
+                BufferedReader(InputStreamReader(process.inputStream)).use { reader ->
+                    retStr = reader.readText()
+                }
+
+                BufferedReader(InputStreamReader(process.errorStream)).use { reader ->
+                    retError = reader.readText()
+                }
+
+                val retCode = process.waitFor()
+
+                if (retCode != 0) {
+                    logger.error("获取滤镜失败，请稍后重试 ，retStr:$retStr , retCode: $retCode , retError: $retError")
+                    return "获取滤镜失败，请稍后重试"
+                } else {
+                    return retStr
+                }
+            } catch (e: Exception) {
+                logger.error("error occurs while ", e)
+                return "获取滤镜失败"
+            }
+        }
+    }
 }
 
