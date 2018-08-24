@@ -155,44 +155,44 @@ class ApiProductRoute {
                                 StyleSize().apply {
                                     name = "XS"
                                     gender = "男"
-                                    product = productVos.firstOrNull { it.remark == "短袖T恤 白色男款 XS" }
+                                    products = productVos.filter { it.remark == "短袖T恤 白色男款 XS" }
                                 },
                                 StyleSize().apply {
                                     name = "S"
                                     gender = "男"
-                                    product = productVos.firstOrNull { it.remark == "短袖T恤 白色男款 S" }
+                                    products = productVos.filter { it.remark == "短袖T恤 白色男款 S" }
                                 },
                                 StyleSize().apply {
                                     name = "M"
                                     gender = "男"
-                                    product = productVos.firstOrNull { it.remark == "短袖T恤 白色男款 M" }
+                                    products = productVos.filter { it.remark == "短袖T恤 白色男款 M" }
                                 },
                                 StyleSize().apply {
                                     name = "L"
                                     gender = "男"
-                                    product = productVos.firstOrNull { it.remark == "短袖T恤 白色男款 L" }
+                                    products = productVos.filter { it.remark == "短袖T恤 白色男款 L" }
                                 },
                                 StyleSize().apply {
                                     name = "XL"
                                     gender = "男"
-                                    product = productVos.firstOrNull { it.remark == "短袖T恤 白色男款 XL" }
+                                    products = productVos.filter { it.remark == "短袖T恤 白色男款 XL" }
                                 },
                                 StyleSize().apply {
                                     name = "2XL"
                                     gender = "男"
-                                    product = productVos.firstOrNull { it.remark == "短袖T恤 白色男款 2XL" }
+                                    products = productVos.filter { it.remark == "短袖T恤 白色男款 2XL" }
                                 },
                                 StyleSize().apply {
                                     name = "3XL"
                                     gender = "男"
-                                    product = productVos.firstOrNull { it.remark == "短袖T恤 白色男款 3XL" }
+                                    products = productVos.filter { it.remark == "短袖T恤 白色男款 3XL" }
                                 },
                                 StyleSize().apply {
                                     name = "4XL"
                                     gender = "男"
-                                    product = productVos.firstOrNull { it.remark == "短袖T恤 白色男款 4XL" }
+                                    products = productVos.filter { it.remark == "短袖T恤 白色男款 4XL" }
                                 }
-                        ).filter { it.product != null }
+                        ).filter { it.products.isNotEmpty() }
                     },
                     Style().apply {
                         name = "短袖T恤 浅色女款"
@@ -200,34 +200,34 @@ class ApiProductRoute {
                                 StyleSize().apply {
                                     name = "S"
                                     gender = "女"
-                                    product = productVos.firstOrNull { it.remark == "短袖T恤 白色女款 S" }
+                                    products = productVos.filter { it.remark == "短袖T恤 白色女款 S" }
                                 },
                                 StyleSize().apply {
                                     name = "M"
                                     gender = "女"
-                                    product = productVos.firstOrNull { it.remark == "短袖T恤 白色女款 M" }
+                                    products = productVos.filter { it.remark == "短袖T恤 白色女款 M" }
                                 },
                                 StyleSize().apply {
                                     name = "L"
                                     gender = "女"
-                                    product = productVos.firstOrNull { it.remark == "短袖T恤 白色女款 L" }
+                                    products = productVos.filter { it.remark == "短袖T恤 白色女款 L" }
                                 },
                                 StyleSize().apply {
                                     name = "XL"
                                     gender = "女"
-                                    product = productVos.firstOrNull { it.remark == "短袖T恤 白色女款 XL" }
+                                    products = productVos.filter { it.remark == "短袖T恤 白色女款 XL" }
                                 },
                                 StyleSize().apply {
                                     name = "2XL"
                                     gender = "女"
-                                    product = productVos.firstOrNull { it.remark == "短袖T恤 白色女款 2XL" }
+                                    products = productVos.filter { it.remark == "短袖T恤 白色女款 2XL" }
                                 },
                                 StyleSize().apply {
                                     name = "3XL"
                                     gender = "女"
-                                    product = productVos.firstOrNull { it.remark == "短袖T恤 白色女款 3XL" }
+                                    products = productVos.filter { it.remark == "短袖T恤 白色女款 3XL" }
                                 }
-                        ).filter { it.product != null }
+                        ).filter { it.products.isNotEmpty() }
                     },
                     Style().apply {
                         name = "短袖T恤 深色男款"
@@ -235,44 +235,44 @@ class ApiProductRoute {
                                 StyleSize().apply {
                                     name = "XS"
                                     gender = "男"
-                                    product = productVos.firstOrNull { it.remark == "短袖T恤 黑色男款 XS" }
+                                    products = productVos.filter { it.remark == "短袖T恤 黑色男款 XS" }
                                 },
                                 StyleSize().apply {
                                     name = "S"
                                     gender = "男"
-                                    product = productVos.firstOrNull { it.remark == "短袖T恤 黑色男款 S" }
+                                    products = productVos.filter { it.remark == "短袖T恤 黑色男款 S" }
                                 },
                                 StyleSize().apply {
                                     name = "M"
                                     gender = "男"
-                                    product = productVos.firstOrNull { it.remark == "短袖T恤 黑色男款 M" }
+                                    products = productVos.filter { it.remark == "短袖T恤 黑色男款 M" }
                                 },
                                 StyleSize().apply {
                                     name = "L"
                                     gender = "男"
-                                    product = productVos.firstOrNull { it.remark == "短袖T恤 黑色男款 L" }
+                                    products = productVos.filter { it.remark == "短袖T恤 黑色男款 L" }
                                 },
                                 StyleSize().apply {
                                     name = "XL"
                                     gender = "男"
-                                    product = productVos.firstOrNull { it.remark == "短袖T恤 黑色男款 XL" }
+                                    products = productVos.filter { it.remark == "短袖T恤 黑色男款 XL" }
                                 },
                                 StyleSize().apply {
                                     name = "2XL"
                                     gender = "男"
-                                    product = productVos.firstOrNull { it.remark == "短袖T恤 黑色男款 2XL" }
+                                    products = productVos.filter { it.remark == "短袖T恤 黑色男款 2XL" }
                                 },
                                 StyleSize().apply {
                                     name = "3XL"
                                     gender = "男"
-                                    product = productVos.firstOrNull { it.remark == "短袖T恤 黑色男款 3XL" }
+                                    products = productVos.filter { it.remark == "短袖T恤 黑色男款 3XL" }
                                 },
                                 StyleSize().apply {
                                     name = "4XL"
                                     gender = "男"
-                                    product = productVos.firstOrNull { it.remark == "短袖T恤 黑色男款 4XL" }
+                                    products = productVos.filter { it.remark == "短袖T恤 黑色男款 4XL" }
                                 }
-                        ).filter { it.product != null }
+                        ).filter { it.products.isNotEmpty() }
                     },
                     Style().apply {
                         name = "短袖T恤 深色女款"
@@ -280,34 +280,34 @@ class ApiProductRoute {
                                 StyleSize().apply {
                                     name = "S"
                                     gender = "女"
-                                    product = productVos.firstOrNull { it.remark == "短袖T恤 黑色女款 S" }
+                                    products = productVos.filter { it.remark == "短袖T恤 黑色女款 S" }
                                 },
                                 StyleSize().apply {
                                     name = "M"
                                     gender = "女"
-                                    product = productVos.firstOrNull { it.remark == "短袖T恤 黑色女款 M" }
+                                    products = productVos.filter { it.remark == "短袖T恤 黑色女款 M" }
                                 },
                                 StyleSize().apply {
                                     name = "L"
                                     gender = "女"
-                                    product = productVos.firstOrNull { it.remark == "短袖T恤 黑色女款 L" }
+                                    products = productVos.filter { it.remark == "短袖T恤 黑色女款 L" }
                                 },
                                 StyleSize().apply {
                                     name = "XL"
                                     gender = "女"
-                                    product = productVos.firstOrNull { it.remark == "短袖T恤 黑色女款 XL" }
+                                    products = productVos.filter { it.remark == "短袖T恤 黑色女款 XL" }
                                 },
                                 StyleSize().apply {
                                     name = "2XL"
                                     gender = "女"
-                                    product = productVos.firstOrNull { it.remark == "短袖T恤 黑色女款 2XL" }
+                                    products = productVos.filter { it.remark == "短袖T恤 黑色女款 2XL" }
                                 },
                                 StyleSize().apply {
                                     name = "3XL"
                                     gender = "女"
-                                    product = productVos.firstOrNull { it.remark == "短袖T恤 黑色女款 3XL" }
+                                    products = productVos.filter { it.remark == "短袖T恤 黑色女款 3XL" }
                                 }
-                        ).filter { it.product != null }
+                        ).filter { it.products.isNotEmpty() }
                     }).filter { it.sizes!!.isNotEmpty() }
 
         }

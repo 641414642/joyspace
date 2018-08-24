@@ -25,8 +25,8 @@ data class Style(var name: String? = null,
                  var product:ProductVo? = null)
 
 data class StyleSize(var name: String? = null,
-                     var gender:String? = null,
-                     var product:ProductVo? = null)
+                     var gender: String? = null,
+                     var products: List<ProductVo> = emptyList())
 
 data class ProductVo(var id: Int? = null,
                      var name: String? = null,
