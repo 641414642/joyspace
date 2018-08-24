@@ -154,6 +154,9 @@ data class Img(var id: Int = 0,
                var bgcolor: String = "",
                var resourceURL: String = "")
 
+data class FilterListVo(var filters: List<Filter> = emptyList())
+data class Filter(var id: Int = 0, var name: String = "")
+
 data class OrderStatusVo(var orderItems: List<OrderItemS>? = null)
 data class OrderItemS(var images: List<ImageS>? = null)
 data class ImageS(var status:Int? = null)

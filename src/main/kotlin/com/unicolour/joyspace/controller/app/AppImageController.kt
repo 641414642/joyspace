@@ -20,13 +20,13 @@ class AppImageController {
     @RequestMapping("/app/image", method = arrayOf(RequestMethod.POST))
     fun uploadImage(@RequestParam("sessionId") sessionId: String,
                     @RequestParam("imageFile") imgFiles: Array<MultipartFile>,
-                    @RequestParam("imageFileMD5") imgFileMD5s : Array<String>
-    ) : ResponseEntity<List<ImageInfo>> {
+                    @RequestParam("imageFileMD5") imgFileMD5s : Array<String>,
+                    @RequestParam("filterImageId",required = false) filterImageId:String) : ResponseEntity<List<ImageInfo>> {
         val imgInfoList = ArrayList<ImageInfo>()
         var i = 0;
         for (imgFile in imgFiles) {
             val md5 = imgFileMD5s[i++]
-            val imgInfo = imageService.uploadImage(sessionId, imgFile)
+            val imgInfo = imageService.uploadImage(filterImageId,sessionId, imgFile)
             imgInfoList.add(imgInfo)
             imgInfo.errmsg = md5
         }

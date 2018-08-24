@@ -1,6 +1,7 @@
 package com.unicolour.joyspace.service
 
 import com.unicolour.joyspace.dto.CommonRequestResult
+import com.unicolour.joyspace.dto.FilterListVo
 import com.unicolour.joyspace.dto.ImageFileDimensionAndType
 import com.unicolour.joyspace.dto.ImageInfo
 import com.unicolour.joyspace.model.UserImageFile
@@ -9,7 +10,7 @@ import org.springframework.web.multipart.MultipartFile
 import java.io.File
 
 interface ImageService {
-    fun uploadImage(sessionId: String, imgFile: MultipartFile?): ImageInfo
+    fun uploadImage(filterImageId: String,sessionId: String, imgFile: MultipartFile?): ImageInfo
     fun createThumbnail(sessionId: String, userImgFile: UserImageFile, width: Int, height: Int): UserImageFile?
 
     fun deleteImage(sessionId: String, imageId: Int): CommonRequestResult
@@ -24,5 +25,5 @@ interface ImageService {
     /**
      * 调用python,获取滤镜风格列表
      */
-    fun uploadFileterImage(sessionId: String):String
+    fun fileterImageList(sessionId: String):FilterListVo?
 }

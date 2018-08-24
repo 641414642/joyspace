@@ -70,7 +70,7 @@ class ApiPrintOrderController {
                     @RequestParam("brightness", required = false, defaultValue = "1") brightness: Double,
                     @RequestParam("saturate", required = false, defaultValue = "1") saturate: Double,
                     @RequestParam("effect", required = false, defaultValue = "none") effect: String,
-                    @RequestParam("image") imgFile: MultipartFile?) : ResponseEntity<UploadOrderImageResult> {
+                    @RequestParam("image") imgFile: MultipartFile?) : ResponseEntity<UploadOrderImageResult>{
         val imageProcessParam =
                 if (printReady) {
                     null

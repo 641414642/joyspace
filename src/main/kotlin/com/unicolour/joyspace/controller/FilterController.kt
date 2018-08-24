@@ -2,6 +2,8 @@ package com.unicolour.joyspace.controller
 
 import com.unicolour.joyspace.dao.PrintOrderProductImageDao
 import com.unicolour.joyspace.dao.UserImageFileDao
+import com.unicolour.joyspace.dao.UserLoginSessionDao
+import com.unicolour.joyspace.dto.FilterListVo
 import com.unicolour.joyspace.dto.ImageInfo
 import com.unicolour.joyspace.dto.ResultCode
 import com.unicolour.joyspace.dto.common.RestResponse
@@ -33,17 +35,35 @@ class FilterController{
     @Autowired
     lateinit var imageService: ImageService
 
+    @Autowired
+    lateinit var userLoginSessionDao: UserLoginSessionDao
+
 
     /**
      * 滤镜列表接口
      */
-    @RequestMapping(value = "/adSet/filterList",method = arrayOf(RequestMethod.POST))
-    fun filterList(equest: HttpServletRequest,
-                   @RequestParam("sessionId") sessionId: String,
-                   @RequestParam("image") imgFile: MultipartFile?): String {
-        val imgInfo = imageService.uploadFileterImage(sessionId)
+    @RequestMapping(value = "/filter/filterList",method = arrayOf(RequestMethod.POST))
+    fun filterList(@RequestParam("sessionId") sessionId: String): FilterListVo? {
+        val imgInfo = imageService.fileterImageList(sessionId)
         logger.info("filterList:${imgInfo}")
         return imgInfo
     }
 
+
+    /**
+     * 根据前段传来的图片生成效果图
+     */
+    @RequestMapping(value = "/fileter/fileterImage",method = arrayOf(RequestMethod.POST))
+    fun fileterImage(@RequestParam("sessionId") sessionId: String?,
+                     @RequestParam("image") imgFile: MultipartFile?): RestResponse{
+
+        var user =  userLoginSessionDao.findOne(sessionId);
+        if (user == null) {
+            return RestResponse.error(ResultCode.INVALID_USER_LOGIN_SESSION)
+        } else {
+
+        }
+        return RestResponse.ok()
     }
+
+}

@@ -343,7 +343,7 @@ open class PrintOrderServiceImpl : PrintOrderService {
     @Deprecated("上传改为单张")
     @Transactional
     override fun uploadOrderItemImage(sessionId: String, orderItemId: Int, name:String, imageProcessParam: ImageProcessParams?, imgFile: MultipartFile?): Boolean {
-        val imgInfo = imageService.uploadImage(sessionId, imgFile)
+        val imgInfo = imageService.uploadImage("",sessionId, imgFile)
         if (imgInfo.errcode == 0) {
             val orderImg = printOrderImageDao.findByOrderItemIdAndName(orderItemId, name)
             if (orderImg == null) {
@@ -367,8 +367,8 @@ open class PrintOrderServiceImpl : PrintOrderService {
 
 
     @Transactional
-    override fun uploadOrderImage(sessionId: String, orderItemId: Int, imgFile: MultipartFile?, x: Double, y: Double, scale: Double, rotate: Double): Boolean {
-        val imgInfo = imageService.uploadImage(sessionId, imgFile)
+    override fun uploadOrderImage(filterImageId: String,sessionId: String, orderItemId: Int, imgFile: MultipartFile?, x: Double, y: Double, scale: Double, rotate: Double): Boolean {
+        val imgInfo = imageService.uploadImage(filterImageId,sessionId, imgFile)
         if (imgInfo.errcode == 0) {
             val orderImg = printOrderItemDao.findOne(orderItemId)
             val printOrderImg = printOrderImageDao.findByOrderItemIdAndName(orderItemId,"")

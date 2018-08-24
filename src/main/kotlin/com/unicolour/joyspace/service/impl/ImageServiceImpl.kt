@@ -1,7 +1,9 @@
 package com.unicolour.joyspace.service.impl
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.unicolour.joyspace.dao.*
 import com.unicolour.joyspace.dto.CommonRequestResult
+import com.unicolour.joyspace.dto.FilterListVo
 import com.unicolour.joyspace.dto.ImageFileDimensionAndType
 import com.unicolour.joyspace.dto.ImageInfo
 import com.unicolour.joyspace.model.UserImageFile
@@ -27,6 +29,7 @@ class ImageServiceImpl : ImageService {
     companion object {
         val logger = LoggerFactory.getLogger(PositionServiceImpl::class.java)
     }
+
     @Value("\${com.unicolour.joyspace.baseUrl}")
     lateinit var baseUrl: String
 
@@ -42,16 +45,17 @@ class ImageServiceImpl : ImageService {
     @Autowired
     lateinit var productDao: ProductDao
 
-    override fun uploadImage(sessionId: String, imgFile: MultipartFile?): ImageInfo {
+    @Autowired
+    lateinit var objectMapper: ObjectMapper
+
+    override fun uploadImage(filterImageId: String,sessionId: String, imgFile: MultipartFile?): ImageInfo {
         val session = userLoginSessionDao.findOne(sessionId);
 
         if (session == null) {
             return ImageInfo(1, "用户未登录")
-        }
-        else if (imgFile == null) {
+        } else if (imgFile == null) {
             return ImageInfo(2, "没有图片文件")
-        }
-        else {
+        } else {
             try {
                 val fileName = UUID.randomUUID().toString().replace("-", "")
                 val filePath = "user/${session.userId}/${sessionId}/${fileName}"
@@ -60,13 +64,14 @@ class ImageServiceImpl : ImageService {
 
                 imgFile.transferTo(file)
 
+
                 logger.info("file.absolutePath:${file.absolutePath}")
 
                 val pb = ProcessBuilder("magick", "identify", file.absolutePath)
 
                 val process = pb.start()
 
-                var retStr:String = "";
+                var retStr: String = "";
                 BufferedReader(InputStreamReader(process.inputStream)).use { reader ->
                     retStr = reader.readText()
                 }
@@ -76,8 +81,7 @@ class ImageServiceImpl : ImageService {
                 if (retCode != 0) {
                     logger.error("图片处理失败，retStr:$retStr , retCode: $retCode")
                     return ImageInfo(3, retStr)
-                }
-                else {
+                } else {
                     val patternStr = Pattern.quote(file.absolutePath) + "\\s(\\w+)\\s(\\d+)x(\\d+)\\s.*"
                     val pattern = Pattern.compile(patternStr)
                     val matcher = pattern.matcher(retStr)
@@ -95,8 +99,33 @@ class ImageServiceImpl : ImageService {
                     val fileWithExt = File(assetsDir, "${filePath}.${imgType}")
                     file.renameTo(fileWithExt)
 
-                    val url = "${baseUrl}/assets/${filePath}.${imgType}"
 
+                    val fileWithExtOut = File(assetsDir, "${filePath}_$filterImageId.${imgType}")
+
+//                    val filterImageInput = "/path/to/input_image"
+
+                    val processBuilder = ProcessBuilder("python","/root/joy_style/joy_api.py",fileWithExt.absolutePath,fileWithExtOut.absolutePath,filterImageId).start()
+
+
+                    var retStr: String = "";
+                    BufferedReader(InputStreamReader(processBuilder.inputStream)).use { reader ->
+                        retStr = reader.readText()
+                    }
+
+                    val retCode = process.waitFor()
+
+                    if (retCode != 0) {
+                        logger.error("下单生成滤镜失败，retStr:$retStr , retCode: $retCode")
+                        return ImageInfo(3, retStr)
+                    }
+
+
+                    val url :String
+                    if(filterImageId != null) {
+                         url = "${baseUrl}/assets/${filePath}_$filterImageId.${imgType}"
+                    } else {
+                         url = "${baseUrl}/assets/${filePath}.${imgType}"
+                    }
                     val userImgFile = UserImageFile()
                     userImgFile.type = imgType
                     userImgFile.fileName = fileName
@@ -111,13 +140,13 @@ class ImageServiceImpl : ImageService {
                     return ImageInfo(0, null, userImgFile.id, imgWid, imgHei, url)
                 }
             } catch (e: Exception) {
-                logger.error("error occurs while ",e)
+                logger.error("error occurs while ", e)
                 return ImageInfo(3, "")
             }
         }
     }
 
-    override fun createThumbnail(sessionId: String, userImgFile: UserImageFile, width: Int, height: Int) : UserImageFile? {
+    override fun createThumbnail(sessionId: String, userImgFile: UserImageFile, width: Int, height: Int): UserImageFile? {
         val destFileName = UUID.randomUUID().toString().replace("-", "")
         val destFilePath = "user/${userImgFile.userId}/${sessionId}/${destFileName}.jpg"
 
@@ -178,16 +207,13 @@ class ImageServiceImpl : ImageService {
 
         if (session == null) {
             return CommonRequestResult(1, "用户未登录")
-        }
-        else {
-            val imageFile =  userImageFileDao.findOne(imageId);
+        } else {
+            val imageFile = userImageFileDao.findOne(imageId);
             if (imageFile == null) {
                 return CommonRequestResult(2, "图片不存在")
-            }
-            else if (imageFile.userId != session.userId) {
+            } else if (imageFile.userId != session.userId) {
                 return CommonRequestResult(3, "图片不属于当前登录用户")
-            }
-            else {
+            } else {
                 val filePath = "user/${imageFile.userId}/${imageFile.sessionId}/${imageFile.fileName}"
                 val file = File(assetsDir, "${filePath}/.${imageFile.type}")
                 val thumbFile = File(assetsDir, "${filePath}.thumb.jpg")
@@ -260,65 +286,44 @@ class ImageServiceImpl : ImageService {
     /**
      * 调用python,获取滤镜风格列表
      */
-    override fun uploadFileterImage(sessionId: String): String {
+    override fun fileterImageList(sessionId: String): FilterListVo? {
         val session = userLoginSessionDao.findOne(sessionId);
         if (session == null) {
-            return "用户未登录"
+            logger.info("fileterImageList session=$session")
+            return null
         } else {
             try {
-                val fileName = UUID.randomUUID().toString().replace("-", "")
-                val filePath = "fileter//${sessionId}/${fileName}"
-                val file = File(assetsDir, filePath)
-                file.parentFile.mkdirs()
 
-                val srcImage = "/root/fileterImage/fileter${fileName}.jpeg"
+                val desImage = "/path/to/style_list.json"
 
-                val desImage = "/root/fileterImage/fileter_${fileName}.jpeg"
-
-                logger.info("uploadFileterImage srcImage:${srcImage},desImage:${desImage}")
+                logger.info("uploadFileterImage desImage:${desImage}")
 
 
-                var filterImageJson = ProcessBuilder("python", "/root/joy_style/joy_api.py", srcImage, desImage);
+                var filterImagepJson = ProcessBuilder("python", "/root/joy_style/joy_api.py", desImage).start();
 
-                var process = filterImageJson.start();
 
-                var retStr: String = "";
-                var retError: String = ""
-                BufferedReader(InputStreamReader(process.inputStream)).use { reader ->
+                var retStr = ""
+                var retError = ""
+                BufferedReader(InputStreamReader(filterImagepJson.inputStream)).use { reader ->
                     retStr = reader.readText()
                 }
-
-                BufferedReader(InputStreamReader(process.errorStream)).use { reader ->
+                BufferedReader(InputStreamReader(filterImagepJson.errorStream)).use { reader ->
                     retError = reader.readText()
                 }
-                val retCode = process.waitFor()
 
-                logger.info("uploadFileterImage retStr = ${retStr}, retError = ${retError}, retCode = ${retCode}")
+                val retCode = filterImagepJson.waitFor()
+                println("fileterImageList retStr:$retStr,retCode:$retCode,retError:$retError")
 
-                if (retCode != 0) {
-                    logger.error("获取滤镜失败，请稍后重试 ，retStr:$retStr , retCode: $retCode , retError: $retError")
-                    return "获取滤镜失败，请稍后重试"
-                } else {
-                    val patternStr = Pattern.quote(file.absolutePath) + "\\s(\\w+)\\s(\\d+)x(\\d+)\\s.*"
-                    val pattern = Pattern.compile(patternStr)
-                    val matcher = pattern.matcher(retStr)
-                    matcher.find()
-                    var imgType = matcher.group(1).toLowerCase()
-                    if (imgType == "jpeg") {
-                        imgType = "jpg"
-                    }
-
-
-                    val fileWithExt = File(assetsDir, "${filePath}_${fileName}.${imgType}")
-                    file.renameTo(fileWithExt)
-
-                    val url = "${baseUrl}/assets/${filePath}.${imgType}"
-
-                    return url
+                val jsonFile = File(desImage)
+                if (jsonFile.exists()) {
+                    return objectMapper.readValue(jsonFile,FilterListVo::class.java)
+                }else{
+                    return null
                 }
+
             } catch (e: Exception) {
                 logger.error("error occurs while ", e)
-                return "获取滤镜失败"
+                return null
             }
         }
     }

@@ -138,9 +138,10 @@ class ApiOrderRoute {
                              @RequestParam("y",required = false) y: Double?,
                              @RequestParam("scale",required = false) scale: Double?,
                              @RequestParam("rotate",required = false) rotate: Double?,
-                             @RequestParam("image") imgFile: MultipartFile?): ResponseEntity<UploadOrderImageResult> {
+                             @RequestParam("image") imgFile: MultipartFile?,
+                             @RequestParam("filterImageId")filterImageId:String): ResponseEntity<UploadOrderImageResult> {
 
-        val allUploaded = printOrderService.uploadOrderImage(sessionId, orderItemId, imgFile, x ?: 0.0, y ?: 0.0, scale ?: 0.0, rotate ?: 0.0)
+        val allUploaded = printOrderService.uploadOrderImage(filterImageId,sessionId, orderItemId, imgFile, x ?: 0.0, y ?: 0.0, scale ?: 0.0, rotate ?: 0.0)
         return ResponseEntity.ok(UploadOrderImageResult(allUploaded))
     }
 
@@ -150,13 +151,14 @@ class ApiOrderRoute {
                              @RequestParam("sessionId") sessionId: String,
                              @RequestParam("orderId") orderId: Int,
                              @RequestParam("productId") productId: Int,
-                             @RequestParam("image") imgFile: MultipartFile?): RestResponse {
+                             @RequestParam("image") imgFile: MultipartFile?,
+                             @RequestParam("filterImageId",required = false)filterImageId: String): RestResponse {
 
         //上传缩略图
         val proImage = PrintOrderProductImage()
         proImage.orderId = orderId
         proImage.productId = productId
-        val imgInfo = imageService.uploadImage(sessionId, imgFile)
+        val imgInfo = imageService.uploadImage(filterImageId,sessionId, imgFile)
         return if (imgInfo.errcode == 0) {
             proImage.userImageFile = userImageFileDao.findOne(imgInfo.imageId)
             proImage.status = PrintOrderImageStatus.UPLOADED.value
