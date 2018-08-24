@@ -104,15 +104,17 @@ class ProductController {
             @RequestParam(name = "name", required = true) name: String,
             @RequestParam(name = "remark", required = true) remark: String,
             @RequestParam(name = "defPrice", required = true) defPrice: Double,
+            @RequestParam(name = "areaPrice", required = false, defaultValue = "0.0") areaPrice: Double,
+            @RequestParam(name = "piecePrice", required = false, defaultValue = "0.0") piecePrice: Double,
             @RequestParam(name = "templateId", required = true) templateId: Int,
             @RequestParam(name = "refined", required = false) refined: Int?
     ): Boolean {
 
         return if (id <= 0) {
-            productService.createProduct(name, remark, defPrice, templateId, refined?:0)
+            productService.createProduct(name, remark, defPrice, areaPrice, piecePrice, templateId, refined ?: 0)
             true
         } else {
-            productService.updateProduct(id, name, remark, defPrice, templateId, refined?:0)
+            productService.updateProduct(id, name, remark, defPrice, areaPrice, piecePrice, templateId, refined ?: 0)
         }
     }
 
