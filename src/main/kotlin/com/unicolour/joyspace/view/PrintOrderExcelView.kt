@@ -17,8 +17,10 @@ class PrintOrderExcelView(private val isSuperAdmin:Boolean) : AbstractXlsxView()
         val orderCount = model["printOrderCount"] as Int
         val photoCopies = model["photoCopies"] as Int
         val turnOver = model["turnOver"] as Int
+
         val companyIdBusinessModelMap = model["companyIdBusinessModelMap"] as Map<Int, Int>
         val printStationIdStationTypeMap = model["printStationIdStationTypeMap"] as Map<Int, Int>
+        val printStationIdPrinterModelMap = model["printStationIdPrinterModelMap"] as Map<Int, String>
 
         val businessModelValObjMap = BusinessModel.values().map { it.value to it }.toMap()
         val stationTypeValObjMap = StationType.values().map { it.value to it }.toMap()
@@ -69,6 +71,7 @@ class PrintOrderExcelView(private val isSuperAdmin:Boolean) : AbstractXlsxView()
         header.createCell(column++).apply { setCellValue("自助机"); cellStyle = headerStyle; sheet.setColumnWidth(columnIndex, 10 * 256) }
         if (isSuperAdmin) {
             header.createCell(column++).apply { setCellValue("站点属性"); cellStyle = headerStyle; sheet.setColumnWidth(columnIndex, 10 * 256) }
+            header.createCell(column++).apply { setCellValue("打印机型号"); cellStyle = headerStyle; sheet.setColumnWidth(columnIndex, 15 * 256) }
         }
         header.createCell(column++).apply { setCellValue("用户"); cellStyle = headerStyle; sheet.setColumnWidth(columnIndex, 20 * 256) }
         header.createCell(column++).apply { setCellValue("总价"); cellStyle = headerStyle; sheet.setColumnWidth(columnIndex, 10 * 256) }
@@ -102,6 +105,7 @@ class PrintOrderExcelView(private val isSuperAdmin:Boolean) : AbstractXlsxView()
                 val stationType = stationTypeValObjMap[stationTypeVal] ?: StationType.DEFAULT
 
                 row.createCell(column++).setCellValue(stationType.displayName)
+                row.createCell(column++).setCellValue(printStationIdPrinterModelMap[order.printStationId])
             }
 
             row.createCell(column++).setCellValue(order.userName)
