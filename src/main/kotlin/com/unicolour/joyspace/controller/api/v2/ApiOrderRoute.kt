@@ -8,6 +8,7 @@ import com.unicolour.joyspace.model.PrintOrderImageStatus
 import com.unicolour.joyspace.model.PrintOrderProductImage
 import com.unicolour.joyspace.service.ImageService
 import com.unicolour.joyspace.service.PrintOrderService
+import com.unicolour.joyspace.service.PrintStationService
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.ResponseEntity
@@ -40,6 +41,8 @@ class ApiOrderRoute {
     private lateinit var userImageFileDao: UserImageFileDao
     @Autowired
     private lateinit var printOrderProductImageDao: PrintOrderProductImageDao
+    @Autowired
+    private lateinit var printStationService:PrintStationService
 
     /**
      * 创建订单
@@ -143,7 +146,7 @@ class ApiOrderRoute {
                              @RequestParam("image") imgFile: MultipartFile?,
                              @RequestParam("filterImageId")filterImageId:String): ResponseEntity<UploadOrderImageResult> {
 
-        val allUploaded = printOrderService.uploadOrderImage(filterImageId,sessionId, orderItemId, imgFile, x ?: 0.0, y ?: 0.0, scale ?: 0.0, rotate ?: 0.0)
+        val allUploaded = printOrderService.uploadOrderImage(filterImageId,sessionId, orderItemId,name, imgFile, x ?: 0.0, y ?: 0.0, scale ?: 0.0, rotate ?: 0.0,totalCount ?: 0)
         return ResponseEntity.ok(UploadOrderImageResult(allUploaded))
     }
 

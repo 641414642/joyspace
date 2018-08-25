@@ -363,7 +363,7 @@ open class PrintOrderServiceImpl : PrintOrderService {
 
 
     @Transactional
-    override fun uploadOrderImage(filterImageId: String,sessionId: String, orderItemId: Int,name: String, imgFile: MultipartFile?, x: Double, y: Double, scale: Double, rotate: Double): Boolean {
+    override fun uploadOrderImage(filterImageId: String,sessionId: String, orderItemId: Int,name: String, imgFile: MultipartFile?, x: Double, y: Double, scale: Double, rotate: Double,totalCount: Int): Boolean {
         val imgInfo = imageService.uploadImage(filterImageId,sessionId, imgFile)
         if (imgInfo.errcode == 0) {
             val orderImg = printOrderItemDao.findOne(orderItemId)

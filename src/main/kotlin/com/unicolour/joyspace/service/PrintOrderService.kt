@@ -25,7 +25,7 @@ interface PrintOrderService {
     //所有图片都上传完成后返回true
     fun uploadOrderItemImage(sessionId: String, orderItemId: Int, name: String, imageProcessParam: ImageProcessParams?, imgFile: MultipartFile?): Boolean
     //上传单张合成订单图片
-    fun uploadOrderImage(filterImageId: String,sessionId: String, orderItemId: Int,name: String, imgFile: MultipartFile?, x: Double, y: Double, scale: Double, rotate: Double): Boolean
+    fun uploadOrderImage(filterImageId: String,sessionId: String, orderItemId: Int,name: String, imgFile: MultipartFile?, x: Double, y: Double, scale: Double, rotate: Double,totalCount: Int): Boolean
 
 
     //计算订单价格
