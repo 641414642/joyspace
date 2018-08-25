@@ -1,6 +1,23 @@
 //添加编辑产品
 function createOrEditProduct(event) {
-    return showPostFormModal(event, 'editProductForm', null, true);
+
+    return showPostFormModal(event, 'editProductForm', null, true,null,null,function () {
+        var type = $('#templateId').find("option:selected").attr("type");
+        if (type === "0") {
+            $("#refined").show()
+        } else {
+            $("#refined").find("input").prop( "checked", false );
+            $("#refined").find("input").prop( "value", 0 );
+            $("#refined").hide()
+        }
+        if (type === "5") {
+            $("#area").show();
+            $("#piece").show();
+        }else{
+            $("#area").hide();
+            $("#piece").hide();
+        }
+    });
 }
 
 //上传产品图片文件
