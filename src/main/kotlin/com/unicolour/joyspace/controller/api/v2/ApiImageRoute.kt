@@ -1,13 +1,53 @@
 package com.unicolour.joyspace.controller.api.v2
 
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RestController
+import com.unicolour.joyspace.dao.UserLoginSessionDao
+import com.unicolour.joyspace.dto.FilterListVo
+import com.unicolour.joyspace.dto.FilterUrl
+import com.unicolour.joyspace.service.ImageService
+import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.web.bind.annotation.*
+import org.springframework.web.multipart.MultipartFile
 import java.io.BufferedReader
 import java.io.IOException
 import java.io.InputStreamReader
 
 @RestController
 class ApiImageRoute {
+    companion object {
+        val logger = LoggerFactory.getLogger(ApiImageRoute::class.java)
+    }
+
+    @Autowired
+    lateinit var imageService: ImageService
+
+    @Autowired
+    lateinit var userLoginSessionDao: UserLoginSessionDao
+
+
+    /**
+     * 滤镜列表接口
+     */
+    @RequestMapping(value = "/v2/filter/filterList",method = arrayOf(RequestMethod.POST))
+    fun filterList(@RequestParam("sessionId") sessionId: String): FilterListVo? {
+        val imgInfo = imageService.fileterImageList(sessionId)
+        logger.info("filterList:${imgInfo}")
+        return imgInfo
+    }
+
+
+    /**
+     * 根据前段传来的图片生成效果图
+     */
+    @RequestMapping(value = "/v2/fileter/fileterImage",method = arrayOf(RequestMethod.POST))
+    fun fileterImage(@RequestParam("sessionId") sessionId: String?,
+                     @RequestParam("image") imgFile: MultipartFile?,
+                     @RequestParam("styleId")styleId: String): FilterUrl?{
+        return imageService.imageToFilter(sessionId,imgFile,styleId)
+    }
+
+
+
     @PostMapping("v2/image/convert")
     fun convert() {
         try {

@@ -341,9 +341,27 @@ class ImageServiceImpl : ImageService {
             return FilterUrl("图片为空")
         } else {
             try {
-                //val inputImage = "/path/to/input_image"
+
+                val fileName = UUID.randomUUID().toString().replace("-", "")
+                val inputImageUrl = "filter/${sessionId}/${imgFile}_${fileName}"
+                val file = File(assetsDir, inputImageUrl)
+                file.parentFile.mkdirs()
+                imgFile.transferTo(file)
+
+                logger.info("imageToFilter file=${file}")
+
+                val outputImageUrl = "filter/${sessionId}_${styleId}/${imgFile}_${fileName}_${styleId}"
+                val file1 = File(assetsDir,outputImageUrl)
+                file1.parentFile.mkdirs()
+
+                logger.info("imageToFilter file1=${file1}")
+
+
+
+
+                val inputImage = "/path/to/input_image"
                 val ouputImage = "/path/to/output_image_$styleId"
-                val imageToFilter = ProcessBuilder("python","/root/joy_style/joy_api.py",imgFile.toString(),ouputImage,styleId).start()
+                val imageToFilter = ProcessBuilder("python","/root/joy_style/joy_api.py",file.toString(),file1.toString(),styleId).start()
                 var retStr = ""
                 var retError = ""
                 BufferedReader(InputStreamReader(imageToFilter.inputStream)).use { reader ->
