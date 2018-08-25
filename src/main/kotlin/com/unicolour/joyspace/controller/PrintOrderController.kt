@@ -115,17 +115,22 @@ class PrintOrderController {
                     emptyMap()
                 }
 
-        modelAndView.model["printStationIdStationTypeMap"] =     //Map<Int, Int>
-                if (isSuperAdmin) {
-                    printOrders.asSequence()
-                            .map { it.printStationId }
-                            .distinct()
-                            .map { it to (printStationDao.findOne(it)?.stationType ?: StationType.DEFAULT.value) }
-                            .toMap()
-                }
-                else {
-                    emptyMap()
-                }
+        val psIdToStationTypeMap = HashMap<Int, Int>()
+        val psIdToPrinterModelMap = HashMap<Int, String>()
+
+        if (isSuperAdmin) {
+            printOrders.asSequence()
+                    .map { it.printStationId }
+                    .distinct()
+                    .forEach {
+                        val printStation = printStationDao.findOne(it)
+                        psIdToStationTypeMap[it] = printStation?.stationType ?: StationType.DEFAULT.value
+                        psIdToPrinterModelMap[it] = printStation?.printerModel ?: ""
+                    }
+        }
+
+        modelAndView.model["printStationIdStationTypeMap"] = psIdToStationTypeMap
+        modelAndView.model["printStationIdPrinterModelMap"] = psIdToPrinterModelMap
 
         modelAndView.view = PrintOrderExcelView(isSuperAdmin)
 
