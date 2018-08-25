@@ -93,7 +93,7 @@
 		"sizes": [{
 			"name": "XS",
 			"gender": "男",
-			"product": {
+			"products": [{
 				"id": 90,
 				"name": "短袖T恤 白色男款 XS",
 				"width": 0.0,
@@ -106,7 +106,7 @@
 				"remark": "短袖T恤 白色男款 XS",
 				"price": 10,
 				"thumbnailImageUrl": null
-			}
+			}]
 		}],
 		"product": null
 	}]
