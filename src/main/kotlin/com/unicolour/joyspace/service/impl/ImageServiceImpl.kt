@@ -2,18 +2,17 @@ package com.unicolour.joyspace.service.impl
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.unicolour.joyspace.dao.*
-import com.unicolour.joyspace.dto.CommonRequestResult
-import com.unicolour.joyspace.dto.FilterListVo
-import com.unicolour.joyspace.dto.ImageFileDimensionAndType
-import com.unicolour.joyspace.dto.ImageInfo
+import com.unicolour.joyspace.dto.*
 import com.unicolour.joyspace.model.UserImageFile
 import com.unicolour.joyspace.service.ImageService
 import graphql.schema.DataFetcher
+import org.codehaus.groovy.transform.sc.ListOfExpressionsExpression
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import org.springframework.web.multipart.MultipartFile
+import sun.jvm.hotspot.debugger.cdbg.ProcessControl
 import java.io.BufferedReader
 import java.io.File
 import java.io.IOException
@@ -288,9 +287,10 @@ class ImageServiceImpl : ImageService {
      */
     override fun fileterImageList(sessionId: String): FilterListVo? {
         val session = userLoginSessionDao.findOne(sessionId);
+
         if (session == null) {
-            logger.info("fileterImageList session=$session")
-            return null
+            logger.info("fileterImageList session为空")
+            return FilterListVo(listOf(Filter(0,"用户未登录")))
         } else {
             try {
 
@@ -318,14 +318,62 @@ class ImageServiceImpl : ImageService {
                 if (jsonFile.exists()) {
                     return objectMapper.readValue(jsonFile,FilterListVo::class.java)
                 }else{
-                    return null
+                    return FilterListVo(listOf(Filter(0,"调取python风格列表异常")))
                 }
 
             } catch (e: Exception) {
                 logger.error("error occurs while ", e)
-                return null
+                return FilterListVo(listOf(Filter(0,"获取滤镜风格列表方法异常")))
             }
         }
+    }
+
+    /**
+     * 根据前段传过来的图片生成效果滤镜图片
+     */
+    override fun imageToFilter(sessionId: String?, imgFile: MultipartFile?, styleId: String):FilterUrl? {
+        val session = userLoginSessionDao.findOne(sessionId)
+        if (session == null) {
+            logger.info("imageToFilter session为空")
+            return FilterUrl("用户未登陆")
+        } else if (imgFile == null) {
+            logger.info("imageToFilter 图片为空")
+            return FilterUrl("图片为空")
+        } else {
+            try {
+                //val inputImage = "/path/to/input_image"
+                val ouputImage = "/path/to/output_image_$styleId"
+                val imageToFilter = ProcessBuilder("python","/root/joy_style/joy_api.py",imgFile.toString(),ouputImage,styleId).start()
+                var retStr = ""
+                var retError = ""
+                BufferedReader(InputStreamReader(imageToFilter.inputStream)).use { reader ->
+                    retStr = reader.readText()
+                }
+                BufferedReader(InputStreamReader(imageToFilter.errorStream)).use { reader ->
+                    retError = reader.readText()
+                }
+
+                val retCode = imageToFilter.waitFor()
+
+
+                logger.info("imageToFilter retStr:$retStr,retError:$retError,retCode:$retCode")
+
+
+                if (retCode != 0) {
+                    logger.error("图片生成滤镜失败，retStr:$retStr , retCode: $retCode")
+                    return FilterUrl("生成滤镜图片失败")
+                }
+
+
+                return FilterUrl(ouputImage)
+            } catch (e: Exception) {
+                logger.error("imageToFilter error:",e)
+                return FilterUrl("生成滤镜图片失败")
+            }
+
+
+        }
+        return FilterUrl("生成滤镜图片数据为空")
     }
 }
 

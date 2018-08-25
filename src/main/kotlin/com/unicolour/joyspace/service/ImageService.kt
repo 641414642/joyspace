@@ -1,9 +1,6 @@
 package com.unicolour.joyspace.service
 
-import com.unicolour.joyspace.dto.CommonRequestResult
-import com.unicolour.joyspace.dto.FilterListVo
-import com.unicolour.joyspace.dto.ImageFileDimensionAndType
-import com.unicolour.joyspace.dto.ImageInfo
+import com.unicolour.joyspace.dto.*
 import com.unicolour.joyspace.model.UserImageFile
 import graphql.schema.DataFetcher
 import org.springframework.web.multipart.MultipartFile
@@ -26,4 +23,6 @@ interface ImageService {
      * 调用python,获取滤镜风格列表
      */
     fun fileterImageList(sessionId: String):FilterListVo?
+
+    fun imageToFilter(sessionId: String?,imagFile: MultipartFile?,styleId:String):FilterUrl?
 }

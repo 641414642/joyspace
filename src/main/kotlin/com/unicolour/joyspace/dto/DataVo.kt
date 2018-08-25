@@ -156,6 +156,7 @@ data class Img(var id: Int = 0,
 
 data class FilterListVo(var filters: List<Filter> = emptyList())
 data class Filter(var id: Int = 0, var name: String = "")
+data class FilterUrl(var filterYrl: String?)
 
 data class OrderStatusVo(var orderItems: List<OrderItemS>? = null)
 data class OrderItemS(var images: List<ImageS>? = null)

@@ -4,6 +4,7 @@ import com.unicolour.joyspace.dao.PrintOrderProductImageDao
 import com.unicolour.joyspace.dao.UserImageFileDao
 import com.unicolour.joyspace.dao.UserLoginSessionDao
 import com.unicolour.joyspace.dto.FilterListVo
+import com.unicolour.joyspace.dto.FilterUrl
 import com.unicolour.joyspace.dto.ImageInfo
 import com.unicolour.joyspace.dto.ResultCode
 import com.unicolour.joyspace.dto.common.RestResponse
@@ -55,15 +56,9 @@ class FilterController{
      */
     @RequestMapping(value = "/fileter/fileterImage",method = arrayOf(RequestMethod.POST))
     fun fileterImage(@RequestParam("sessionId") sessionId: String?,
-                     @RequestParam("image") imgFile: MultipartFile?): RestResponse{
-
-        var user =  userLoginSessionDao.findOne(sessionId);
-        if (user == null) {
-            return RestResponse.error(ResultCode.INVALID_USER_LOGIN_SESSION)
-        } else {
-
-        }
-        return RestResponse.ok()
+                     @RequestParam("image") imgFile: MultipartFile?,
+                     @RequestParam("styleId")styleId: String): FilterUrl?{
+           return imageService.imageToFilter(sessionId,imgFile,styleId)
     }
 
 }
