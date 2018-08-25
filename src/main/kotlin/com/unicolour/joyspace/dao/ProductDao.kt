@@ -21,4 +21,5 @@ interface ProductDao : PagingAndSortingRepository<Product, Int>, ProductCustomQu
     fun findByTemplateIdInAndDeletedOrderBySequence(templateIdList: List<Int>, deleted: Boolean): List<Product>
 
     fun findByDeleted(deleted: Boolean): List<Product>
+
 }

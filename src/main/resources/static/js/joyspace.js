@@ -302,7 +302,13 @@ $(function(){
             $("#refined").find("input").prop( "checked", false )
             $("#refined").find("input").prop( "value", 0 )
             $("#refined").hide()
-
+        }
+        if (type === "5") {
+            $("#area").show();
+            $("#piece").show();
+        }else{
+            $("#area").hide();
+            $("#piece").hide();
         }
     });
 

@@ -101,6 +101,7 @@ alter table template add column deleted boolean default false not null;
 alter table printer_type add column default_icc_file_name varchar(100);
 insert into printer_type (name,display_name,resolution,media_alert_thresholds,roll_paper) values ('Any', '无限制', 360, '', false);
 
+
 ALTER TABLE product ADD refined BOOLEAN DEFAULT FALSE  NOT NULL;
 COMMENT ON COLUMN product.refined IS '专家精修';
 
@@ -110,6 +111,16 @@ insert into icc_config (printer_model, os_name, icc_file_name) values ('EPSON SL
 alter table ad_set drop column public_resource;
 update ad_set set company_id = 0;
 alter table ad_image_file add column enabled boolean default true not null;
+
+
+alter table template_image_info add column angle_clip DOUBLE default 0.0 not null;
+UPDATE template_image_info set angle_clip=0.0;
+UPDATE template_image_info set layer_type=2;
+UPDATE template_image_info set type=0;
+
+
+ALTER TABLE address ADD deleted BOOLEAN default false NOT NULL;
+
 
 alter table company drop column wei_xin_pay_config_id;
 
@@ -147,3 +158,15 @@ CREATE TABLE "database_upgrade_record" (
 ;
 
 insert into database_upgrade_record (name) values ('InitPrintOrderNewColumns');
+
+
+
+alter table product add column area_price integer default 0 not null;
+alter table product add column piece_price integer default 0 not null;
+
+alter table print_order add column image_file_cleared boolean default false not null;
+
+alter table position add column short_name varchar (50) default '' not null;
+alter table company add column business_model integer default 0 not null;
+alter table print_station add column station_type integer default 0 not null;
+

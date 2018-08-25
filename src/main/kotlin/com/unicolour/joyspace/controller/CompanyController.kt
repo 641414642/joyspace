@@ -1,14 +1,9 @@
 package com.unicolour.joyspace.controller
 
-import com.unicolour.joyspace.dao.CompanyDao
-import com.unicolour.joyspace.dao.CompanyWxAccountDao
-import com.unicolour.joyspace.dao.WxMpAccountDao
+import com.unicolour.joyspace.dao.*
 import com.unicolour.joyspace.dto.*
 import com.unicolour.joyspace.exception.ProcessException
-import com.unicolour.joyspace.model.Company
-import com.unicolour.joyspace.model.CompanyWxAccount
-import com.unicolour.joyspace.model.Manager
-import com.unicolour.joyspace.model.WxMpAccount
+import com.unicolour.joyspace.model.*
 import com.unicolour.joyspace.service.CompanyService
 import com.unicolour.joyspace.service.ManagerService
 import com.unicolour.joyspace.util.Pager
@@ -20,6 +15,8 @@ import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.servlet.ModelAndView
+import java.time.Duration
+import java.time.Instant
 
 @Controller
 class CompanyController {
@@ -45,23 +42,31 @@ class CompanyController {
     @Autowired
     lateinit var managerService: ManagerService
 
+    @Autowired
+    lateinit var verifyCodeDao: VerifyCodeDao
+
+    @Autowired
+    lateinit var managerDao: ManagerDao
+
     @GetMapping("/company/list")
     fun companyList(
             modelAndView: ModelAndView,
             @RequestParam(name = "name", required = false, defaultValue = "") name: String?,
+            @RequestParam(name = "businessModel", required = false, defaultValue = "-1") businessModel: Int,
             @RequestParam(name = "pageno", required = false, defaultValue = "1") pageno: Int): ModelAndView {
 
+        val businessModelEnum = BusinessModel.values().firstOrNull { it.value == businessModel }
+
         val pageable = PageRequest(pageno - 1, 20, Sort.Direction.ASC, "id")
-        val companies = if (name == null || name == "")
-            companyDao.findAll(pageable)
-        else
-            companyDao.findByName(name, pageable)
+        val companies = companyDao.queryCompanies(pageable, name ?: "", businessModelEnum)
 
         modelAndView.model["inputCompanyName"] = name
+        modelAndView.model["inputBusinessModel"] = businessModel
 
         val pager = Pager(companies.totalPages, 7, pageno - 1)
         modelAndView.model["pager"] = pager
 
+        modelAndView.model["businessModels"] = BusinessModel.values().filterNot { it == BusinessModel.DEFAULT }
         modelAndView.model["companies"] = companies.content
 
         modelAndView.model["viewCat"] = "system_mgr"
@@ -109,6 +114,7 @@ class CompanyController {
             company = Company()
         }
 
+        modelAndView.model["businessModels"] = BusinessModel.values().filterNot { it == BusinessModel.DEFAULT }
         modelAndView.model["create"] = id <= 0
         modelAndView.model["company"] = company
         modelAndView.model["manager"] = manager
@@ -128,6 +134,7 @@ class CompanyController {
             @RequestParam(name = "id", required = true) id: Int,
             @RequestParam(name = "managerId", required = false, defaultValue = "0") managerId: Int,
             @RequestParam(name = "name", required = true) name: String,
+            @RequestParam(name = "businessModel", required = true) businessModel: Int,
             @RequestParam(name = "username", required = true) username: String,
             @RequestParam(name = "fullname", required = true) fullname: String,
             @RequestParam(name = "phone", required = true) phone: String,
@@ -136,10 +143,12 @@ class CompanyController {
     ): CommonRequestResult {
 
         try {
+            val businessModelEnum = BusinessModel.values().firstOrNull { it.value == businessModel } ?: BusinessModel.DEFAULT
+
             if (id <= 0) {
-                companyService.createCompany(name.trim(), null, username.trim(), fullname, phone, email, password)
+                companyService.createCompany(name.trim(), businessModelEnum, null, username.trim(), fullname, phone, email, password)
             } else {
-                companyService.updateCompany(id, name.trim(), managerId, fullname, phone, email, password)
+                companyService.updateCompany(id, name.trim(), businessModelEnum, managerId, fullname, phone, email, password)
             }
             return CommonRequestResult()
         }catch(e: ProcessException) {
@@ -149,6 +158,92 @@ class CompanyController {
             return CommonRequestResult(ResultCode.OTHER_ERROR.value, msg)
         }
     }
+
+
+    @RequestMapping(path = arrayOf("/company/register"), method = arrayOf(RequestMethod.POST))
+    @ResponseBody
+    fun registerCompany(
+            @RequestParam(name = "name", required = true) name: String,
+            @RequestParam(name = "username", required = true) username: String,
+            @RequestParam(name = "fullname", required = true) fullname: String,
+            @RequestParam(name = "phone", required = true) phone: String,
+            @RequestParam(name = "email", required = true) email: String,
+            @RequestParam(name = "password", required = true) password: String,
+            @RequestParam(name = "verifyCode", required = true) verifyCode: String
+    ): CommonRequestResult {
+
+        return try {
+            val now = Instant.now()
+            val verifyCodeObj = verifyCodeDao.findOne(phone)
+            if (verifyCodeObj == null ||
+                    verifyCodeObj.code != verifyCode ||
+                    Duration.between(verifyCodeObj.sendTime.toInstant(), now).seconds > 60 * 10) {  //超过10分钟
+                throw ProcessException(ResultCode.INVALID_VERIFY_CODE)
+            }
+            companyService.createCompany(name.trim(), BusinessModel.DEFAULT, null, username.trim(), fullname, phone, email, password)
+            verifyCodeDao.delete(verifyCodeObj)
+            CommonRequestResult()
+        } catch (e: ProcessException) {
+            CommonRequestResult(e.errcode, e.message)
+        } catch (e: Exception) {
+            val msg = "注册失败"
+            CommonRequestResult(ResultCode.OTHER_ERROR.value, msg)
+        }
+    }
+
+
+    @RequestMapping(path = arrayOf("/company/sendVerifyCode"), method = arrayOf(RequestMethod.POST))
+    @ResponseBody
+    fun sendVerifyCode(
+            @RequestParam(name = "phone", required = true) phone: String
+    ): CommonRequestResult {
+
+        return try {
+            companyService.sendVerifyCode(phone)
+            CommonRequestResult()
+        } catch (e: ProcessException) {
+            CommonRequestResult(e.errcode, e.message)
+        } catch (e: Exception) {
+            val msg = "发送验证码失败"
+            CommonRequestResult(ResultCode.OTHER_ERROR.value, msg)
+        }
+    }
+
+
+    @RequestMapping(path = arrayOf("/company/resetPassword"), method = arrayOf(RequestMethod.POST))
+    @ResponseBody
+    fun resetPassword(
+            @RequestParam(name = "username", required = true) username: String,
+            @RequestParam(name = "phone", required = true) phone: String,
+            @RequestParam(name = "password", required = true) password: String,
+            @RequestParam(name = "verifyCode", required = true) verifyCode: String
+    ): CommonRequestResult {
+
+        return try {
+            val now = Instant.now()
+            val verifyCodeObj = verifyCodeDao.findOne(phone)
+            if (verifyCodeObj == null ||
+                    verifyCodeObj.code != verifyCode ||
+                    Duration.between(verifyCodeObj.sendTime.toInstant(), now).seconds > 60 * 10) {  //超过10分钟
+                throw ProcessException(ResultCode.INVALID_VERIFY_CODE)
+            }
+            val manager = managerDao.findByUserName(username)
+            if (manager == null || !manager.isEnabled) throw ProcessException(ResultCode.USER_NOT_FOUND)
+            if (verifyCodeObj.phoneNumber != manager.cellPhone && verifyCodeObj.phoneNumber != manager.phone) throw ProcessException(ResultCode.USER_NOT_FOUND_FOR_THIS_PHONE_NUMBER)
+            managerService.resetPassword(manager.id, password)
+            CommonRequestResult()
+        } catch (e: ProcessException) {
+            CommonRequestResult(e.errcode, e.message)
+        } catch (e: Exception) {
+            val msg = "重置密码失败"
+            CommonRequestResult(ResultCode.OTHER_ERROR.value, msg)
+        }
+    }
+
+
+
+
+
 
     @RequestMapping("/company/wxAccountList", method = arrayOf(RequestMethod.GET))
     fun companyWxAccountList(modelAndView: ModelAndView): ModelAndView {

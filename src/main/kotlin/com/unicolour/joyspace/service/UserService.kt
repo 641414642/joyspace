@@ -27,5 +27,9 @@ interface UserService {
 
     //微信用户登录，返回 sessionId
     fun wxLogin(code: String): WxLoginResult
+
+    fun defaultAddress(userId:Int,id:Int)
+
+    fun deleteAddress(id:Int)
 }
 

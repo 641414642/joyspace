@@ -78,6 +78,11 @@ class PrintOrder {
     @NotNull
     var printedOnPrintStation: Boolean = false
 
+    //是否已清除文件
+    @Column
+    @NotNull
+    var imageFileCleared: Boolean = false
+
     //分账比例 x 1000
     @Column(name = "transfer_proportion")
     var transferProportion: Int = 1000

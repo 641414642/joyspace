@@ -2,10 +2,8 @@ package com.unicolour.joyspace.controller.api.v2
 
 import com.unicolour.joyspace.dao.PrintStationDao
 import com.unicolour.joyspace.dao.PrintStationProductDao
-import com.unicolour.joyspace.dao.ProductDao
 import com.unicolour.joyspace.dao.TPriceDao
 import com.unicolour.joyspace.dto.PrintStationProduct
-import com.unicolour.joyspace.dto.PrintStationVo
 import com.unicolour.joyspace.dto.ResultCode
 import com.unicolour.joyspace.dto.TPriceItemVo
 import com.unicolour.joyspace.dto.common.RestResponse
@@ -13,6 +11,7 @@ import com.unicolour.joyspace.model.PrintStation
 import com.unicolour.joyspace.service.CouponService
 import com.unicolour.joyspace.service.PositionService
 import com.unicolour.joyspace.service.PrintStationService
+import com.unicolour.joyspace.service.ProductService
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.GetMapping
@@ -32,11 +31,11 @@ class ApiPrintStationRoute {
     @Autowired
     private lateinit var positionService:PositionService
     @Autowired
-    private lateinit var productDao:ProductDao
-    @Autowired
     private lateinit var tPriceDao: TPriceDao
     @Autowired
     private lateinit var couponService: CouponService
+    @Autowired
+    private lateinit var productService: ProductService
 
 
     /**
@@ -48,20 +47,9 @@ class ApiPrintStationRoute {
                                 @RequestParam("sessionId", required = false) sessionId: String?): RestResponse {
         val printStation = findPrintStation(id, qrcode ?: "")
                 ?: return RestResponse.error(ResultCode.PRINT_STATION_NOT_FOUND)
-        val psVo = PrintStationVo()
-        psVo.id = printStation.id
-        psVo.address = printStation.addressNation + printStation.addressProvince + printStation.addressCity + printStation.addressDistrict + printStation.addressStreet
-        psVo.longitude = printStation.position.longitude
-        psVo.latitude = printStation.position.latitude
-        psVo.wxQrCode = printStation.wxQrCode
-        psVo.positionId = printStation.positionId.toString()
-        psVo.companyId = printStation.companyId.toString()
-        psVo.status = printStation.status
-        psVo.name = printStation.name
-        psVo.imgUrl = ""
-
+        val psVo = printStationService.toPrintStationVo(printStation)
         val priceMap: Map<Int, Int> = printStationService.getPriceMap(printStation)
-        psVo.products = printStationProductDao.findByPrintStationId(printStation.id).map {
+        psVo.products = productService.getProductsOfPrintStation(printStation.id).map { it ->
             val price = priceMap.getOrDefault(it.productId, it.product.defaultPrice)
             val tPrice = tPriceDao.findByPositionIdAndProductIdAndBeginLessThanAndExpireGreaterThanAndEnabled(printStation.positionId, it.productId, Date(), Date(), true).firstOrNull()
             val tPriceItemVoList = mutableListOf<TPriceItemVo>()
@@ -69,11 +57,11 @@ class ApiPrintStationRoute {
                 tPriceItemVoList.add(TPriceItemVo(it.minCount,it.maxCount,it.price))
             }
             val couponSign = couponService.beCouponProduct(sessionId ?: "", it.productId)
-            PrintStationProduct(it.productId, it.product.name, it.product.template.type.toString(), price, tPriceItemVoList, if (couponSign) 1 else 0)
+            PrintStationProduct(it.productId, it.product.name, it.product.template.type.toString(), price, it.product.areaPrice, it.product.piecePrice, tPriceItemVoList, if (couponSign) 1 else 0)
         }.toMutableList()
-        val tProduct = productDao.findOne(9528)
-        val tPrice = priceMap.getOrDefault(tProduct.id,tProduct.defaultPrice)
-        psVo.products!!.add(PrintStationProduct(9528,tProduct.name,"2",tPrice))
+//        val tProduct = productDao.findOne(9528)
+//        val tPrice = priceMap.getOrDefault(tProduct.id,tProduct.defaultPrice)
+//        psVo.products!!.add(PrintStationProduct(9528,tProduct.name,"2",tPrice))
         return RestResponse.ok(psVo)
     }
 
@@ -103,20 +91,9 @@ class ApiPrintStationRoute {
             if (nearest == null) {
                 return RestResponse.error(ResultCode.PRINT_STATION_NOT_FOUND)
             } else {
-                val psVo = PrintStationVo()
-                psVo.id = nearest.id
-                psVo.address = nearest.addressNation + nearest.addressProvince + nearest.addressCity + nearest.addressDistrict + nearest.addressStreet
-                psVo.longitude = nearest.position.longitude
-                psVo.latitude = nearest.position.latitude
-                psVo.wxQrCode = nearest.wxQrCode
-                psVo.positionId = nearest.positionId.toString()
-                psVo.companyId = nearest.companyId.toString()
-                psVo.status = nearest.status
-                psVo.name = nearest.name
-                psVo.imgUrl = ""
-
+                val psVo = printStationService.toPrintStationVo(nearest)
                 val priceMap: Map<Int, Int> = printStationService.getPriceMap(nearest)
-                psVo.products = printStationProductDao.findByPrintStationId(nearest.id).map {
+                psVo.products = productService.getProductsOfPrintStation(nearest.id).map { it ->
                     val price = priceMap.getOrDefault(it.productId, it.product.defaultPrice)
                     val tPrice = tPriceDao.findByPositionIdAndProductIdAndBeginLessThanAndExpireGreaterThanAndEnabled(nearest.positionId, it.productId, Date(), Date(), true).firstOrNull()
                     val tPriceItemVoList = mutableListOf<TPriceItemVo>()
@@ -124,11 +101,8 @@ class ApiPrintStationRoute {
                         tPriceItemVoList.add(TPriceItemVo(it.minCount,it.maxCount,it.price))
                     }
                     val couponSign = couponService.beCouponProduct(sessionId ?: "", it.productId)
-                    PrintStationProduct(it.productId, it.product.name, it.product.template.type.toString(), price, tPriceItemVoList, if (couponSign) 1 else 0)
+                    PrintStationProduct(it.productId, it.product.name, it.product.template.type.toString(), price, it.product.areaPrice, it.product.piecePrice, tPriceItemVoList, if (couponSign) 1 else 0)
                 }.toMutableList()
-                val tProduct = productDao.findOne(9528)
-                val tPrice = priceMap.getOrDefault(tProduct.id,tProduct.defaultPrice)
-                psVo.products!!.add(PrintStationProduct(9528,tProduct.name,"2",tPrice))
                 return RestResponse.ok(psVo)
             }
         }
@@ -151,18 +125,7 @@ class ApiPrintStationRoute {
 
         val printStations = printStationDao.findByAddressNation("中国")
         val resultList = printStations.map { printStation ->
-            val psVo = PrintStationVo()
-            psVo.id = printStation.id
-            psVo.address = printStation.addressNation + printStation.addressProvince + printStation.addressCity + printStation.addressDistrict + printStation.addressStreet
-            psVo.longitude = printStation.position.longitude
-            psVo.latitude = printStation.position.latitude
-            psVo.wxQrCode = printStation.wxQrCode
-            psVo.positionId = printStation.positionId.toString()
-            psVo.companyId = printStation.companyId.toString()
-            psVo.status = printStation.status
-            psVo.name = printStation.name
-            psVo.imgUrl = ""
-            psVo
+            printStationService.toPrintStationVo(printStation)
         }
 
 

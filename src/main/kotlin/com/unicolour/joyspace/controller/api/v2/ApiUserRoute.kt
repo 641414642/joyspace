@@ -4,12 +4,10 @@ import com.unicolour.joyspace.dao.PrintOrderDao
 import com.unicolour.joyspace.dao.UserAddressDao
 import com.unicolour.joyspace.dao.UserDao
 import com.unicolour.joyspace.dao.UserLoginSessionDao
-import com.unicolour.joyspace.dto.AddressInput
-import com.unicolour.joyspace.dto.NoticeVo
-import com.unicolour.joyspace.dto.ResultCode
-import com.unicolour.joyspace.dto.UserInfoVo
+import com.unicolour.joyspace.dto.*
 import com.unicolour.joyspace.dto.common.RestResponse
 import com.unicolour.joyspace.model.Address
+import com.unicolour.joyspace.service.UserService
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.*
@@ -27,6 +25,8 @@ class ApiUserRoute {
     private lateinit var userDao: UserDao
     @Autowired
     private lateinit var printOrderDao: PrintOrderDao
+    @Autowired
+    private lateinit var userService: UserService
 
     //获取个人信息
     @GetMapping(value = "/v2/user/info")
@@ -59,7 +59,7 @@ class ApiUserRoute {
     fun listAddress(@RequestParam("sessionId") sessionId: String): RestResponse {
         val session = userLoginSessionDao.findOne(sessionId)
         val user = userDao.findOne(session.userId) ?: return RestResponse.error(ResultCode.INVALID_USER_LOGIN_SESSION)
-        val addressList = userAddressDao.findByUserId(user.id)
+        val addressList = userAddressDao.findByUserIdAndDeleted(user.id, false)
         return RestResponse.ok(mapOf("addressList" to addressList))
     }
 
@@ -75,9 +75,7 @@ class ApiUserRoute {
         addr.createTime = Calendar.getInstance()
         if (param.id != null && param.id != 0) {
             val srcAddress = userAddressDao.findOne(param.id)
-            if (srcAddress != null) {
-                addr = srcAddress
-            }
+            if (srcAddress != null) addr = srcAddress
         }
         addr.userId = user.id
         param.province?.let { addr.province = param.province }
@@ -87,7 +85,21 @@ class ApiUserRoute {
         param.phoneNum?.let { addr.phoneNum = param.phoneNum }
         param.name?.let { addr.name = param.name }
         if (param.default == 1) addr.defalut = true
-        userAddressDao.save(addr)
+        val address = userAddressDao.save(addr)
+        if (address.defalut) userService.defaultAddress(user.id,address.id)
+        return RestResponse.ok(address)
+    }
+
+    /**
+     * 删除地址
+     */
+    @DeleteMapping(value = "/v2/user/address")
+    fun delete(@RequestBody deleteAddress: DeleteAddress): RestResponse {
+        val session = userLoginSessionDao.findOne(deleteAddress.sessionId)
+        val user = userDao.findOne(session.userId) ?: return RestResponse.error(ResultCode.INVALID_USER_LOGIN_SESSION)
+        val address = userAddressDao.findOne(deleteAddress.id)
+        if (address == null || address.userId != user.id) RestResponse.error(ResultCode.INVALID_USER_LOGIN_SESSION)
+        userService.deleteAddress(deleteAddress.id!!)
         return RestResponse.ok()
     }
 }

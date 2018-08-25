@@ -85,6 +85,8 @@ class TemplateDaoImpl : TemplateCustomQuery {
 
         if (type != null) {
             conditions.add(cb.equal(root.get<Int>("type"), type.value))
+        }else{
+            conditions.add(cb.notEqual(root.get<Int>("type"), ProductType.SCENE.value))
         }
 
         cq.where(*conditions.toTypedArray())

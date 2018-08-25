@@ -69,6 +69,17 @@
                         <span class="help-block"></span>
                     </div>
                     <div class="form-group">
+                        <label for="stationType" class="control-label">站点属性:</label>
+                        <select name="stationType" class="form-control" id="stationType">
+                            <option th:each="stationType : ${stationTypes}"
+                                    th:value="${stationType.value}"
+                                    th:text="${stationType.displayName}"
+                                    th:selected="${printStation.stationType == stationType.value}">
+                            </option>
+                        </select>
+                        <span class="help-block"></span>
+                    </div>
+                    <div class="form-group">
                         <label for="printerType" class="control-label">打印机型号:</label>
                         <select name="printerType" class="form-control" id="printerType">
                             <option th:each="printerType : ${printerTypes}"
@@ -95,8 +106,10 @@
                         <div class="nav-tabs-custom" style="border:none;box-shadow:none;">
                             <ul class="nav nav-tabs">
                                 <li class="active"><a href="#photo" data-toggle="tab">普通照片</a></li>
-                                <!--<li><a href="#template" data-toggle="tab">模板拼图</a></li>-->
+                                <li><a href="#template" data-toggle="tab">模板拼图</a></li>
                                 <li><a href="#id_photo" data-toggle="tab">证件照</a></li>
+                                <li><a href="#album" data-toggle="tab">相册</a></li>
+                                <li><a href="#diy" data-toggle="tab">定制产品</a></li>
                             </ul>
                             <div class="tab-content">
                                 <div class="active tab-pane container-fluid" id="photo">
@@ -110,9 +123,10 @@
                                         </div>
                                     </div>
                                 </div>
-<!--/*                                <div class="tab-pane container-fluid" id="template">
+                                <div class="tab-pane container-fluid" id="template">
                                     <div class="row">
-                                        <div class="col-md-6 checkbox" style="margin:5px 0" th:each="product : ${template_products}">
+                                        <div class="col-md-6 checkbox" style="margin:5px 0"
+                                             th:each="product : ${template_products}">
                                             <label>
                                                 <input type="checkbox" th:checked="${product.selected}"
                                                        th:name="${'product_' + product.productId}"
@@ -120,10 +134,32 @@
                                             </label>
                                         </div>
                                     </div>
-                                </div>*/-->
+                                </div>
                                 <div class="tab-pane container-fluid" id="id_photo">
                                     <div class="row">
                                         <div class="col-md-6 checkbox" style="margin:5px 0" th:each="product : ${id_photo_products}">
+                                            <label>
+                                                <input type="checkbox" th:checked="${product.selected}"
+                                                       th:name="${'product_' + product.productId}"
+                                                       th:text="${product.productName + ' (' + product.templateName + ')'}"/>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="tab-pane container-fluid" id="album">
+                                    <div class="row">
+                                        <div class="col-md-6 checkbox" style="margin:5px 0" th:each="product : ${album_products}">
+                                            <label>
+                                                <input type="checkbox" th:checked="${product.selected}"
+                                                       th:name="${'product_' + product.productId}"
+                                                       th:text="${product.productName + ' (' + product.templateName + ')'}"/>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="tab-pane container-fluid" id="diy">
+                                    <div class="row">
+                                        <div class="col-md-6 checkbox" style="margin:5px 0" th:each="product : ${diy_products}">
                                             <label>
                                                 <input type="checkbox" th:checked="${product.selected}"
                                                        th:name="${'product_' + product.productId}"

@@ -54,7 +54,7 @@ class ApiOrderRoute {
                 printOrderDao.save(order)
             }
 
-            val orderItems = order.printOrderItems.map { OrderItemRet(it.id, it.productId) }
+            val orderItems = order.printOrderItems.map { OrderItemRet(it.id, it.productId, it.copies) }
             return RestResponse.ok(CreateOrderRequestResult(order.id, order.orderNo, null, orderItems, order.totalFee, order.discount))
         } catch (e: ProcessException) {
             e.printStackTrace()
@@ -81,7 +81,7 @@ class ApiOrderRoute {
                 printOrderDao.save(order)
             }
             val params = printOrderService.startPayment(orderInput.orderId)
-            val orderItems = order.printOrderItems.map { OrderItemRet(it.id, it.productId) }
+            val orderItems = order.printOrderItems.map { OrderItemRet(it.id, it.productId, it.copies) }
             return RestResponse.ok(CreateOrderRequestResult(order.id, order.orderNo, params, orderItems, order.totalFee, order.discount))
         } catch (e: ProcessException) {
             e.printStackTrace()
@@ -119,7 +119,8 @@ class ApiOrderRoute {
         val printOrder = printOrderDao.findOne(printOrderId)
         if (printOrder != null && printOrder.userId == session.userId) {
             val orderItemVoList = printOrder.printOrderItems.map {
-                OrderItemS(listOf(ImageS(it.status)))
+                val images = it.orderImages.map { ImageS(it.status) }
+                OrderItemS(images)
             }
             return RestResponse.ok(OrderStatusVo(orderItemVoList))
         } else {
@@ -138,6 +139,7 @@ class ApiOrderRoute {
                              @RequestParam("y",required = false) y: Double?,
                              @RequestParam("scale",required = false) scale: Double?,
                              @RequestParam("rotate",required = false) rotate: Double?,
+                             @RequestParam("totalCount") totalCount: Int?,
                              @RequestParam("image") imgFile: MultipartFile?,
                              @RequestParam("filterImageId")filterImageId:String): ResponseEntity<UploadOrderImageResult> {
 
@@ -251,17 +253,7 @@ class ApiOrderRoute {
                     1)
         }
 
-        val psVo = PrintStationVo()
-        psVo.id = printStation.id
-        psVo.address = printStation.addressNation + printStation.addressProvince + printStation.addressCity + printStation.addressDistrict + printStation.addressStreet
-        psVo.longitude = printStation.position.longitude
-        psVo.latitude = printStation.position.latitude
-        psVo.wxQrCode = printStation.wxQrCode
-        psVo.positionId = printStation.positionId.toString()
-        psVo.companyId = printStation.companyId.toString()
-        psVo.status = printStation.status
-        psVo.name = printStation.name
-        psVo.imgUrl = ""
+        val psVo = printStationService.toPrintStationVo(printStation)
         var addressVo: AddressVo? = null
         if (order.printType == 1) {
             addressVo = AddressVo()

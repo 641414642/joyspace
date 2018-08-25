@@ -11,7 +11,7 @@ interface PrintStationService {
     fun getPriceMap(printStation: PrintStation): Map<Int, Int>
 
     fun updatePrintStation(id: Int, printStationName: String, positionId: Int, transferProportion: Int,
-                           printerType: String, adSetId: Int, selectedProductIds: Set<Int>): Boolean
+                           stationType: StationType, printerType: String, adSetId: Int, selectedProductIds: Set<Int>): Boolean
 
     fun updatePrintStationStatus(printStationSessionId: String, status: PrintStationStatus, additionalInfo: String): Boolean
     fun activatePrintStation(manager: Manager?, code: String, name:String, positionId: Int, selectedProductIds: Set<Int>, uuid: String)
@@ -48,4 +48,5 @@ interface PrintStationService {
 
     fun getHomeCurrentVersion(): Int   //当前的home版本号
     fun getHomeDownloadUrl(): String   //当前版本的home安装文件的下载地址
+    fun toPrintStationVo(printStation: PrintStation): PrintStationVo
 }

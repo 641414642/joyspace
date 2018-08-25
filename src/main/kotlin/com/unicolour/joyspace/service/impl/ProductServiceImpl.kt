@@ -5,6 +5,7 @@ import com.unicolour.joyspace.model.*
 import com.unicolour.joyspace.service.ManagerService
 import com.unicolour.joyspace.service.PrintStationService
 import com.unicolour.joyspace.service.ProductService
+import com.unicolour.joyspace.service.TemplateService
 import graphql.schema.DataFetcher
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
@@ -53,14 +54,25 @@ open class ProductServiceImpl : ProductService {
 
     @Autowired
     lateinit var printStationService: PrintStationService
+    @Autowired
+    lateinit var templateService: TemplateService
 
     override fun getProductsOfPrintStation(printStationId: Int): List<PrintStationProduct> {
         val products = printStationProductDao.findByPrintStationId(printStationId)
         return products.filter { !it.product.deleted }.sortedBy { it.product.sequence }
     }
 
+    override fun getProductsOfPrintStationAndCommonProduct(printStationId: Int): List<Product> {
+        val products = printStationProductDao.findByPrintStationId(printStationId).filter { !it.product.deleted }.sortedBy { it.product.sequence }.map { it.product }
+        val temTemplateIds = templateService.queryTemplates(ProductType.TEMPLATE, "", true, "id asc").map { it.id }
+        val temProducts = productDao.findByTemplateIdInAndDeletedOrderBySequence(temTemplateIds, false)
+        val albumTemplateIds = templateService.queryTemplates(ProductType.ALBUM, "", true, "id asc").map { it.id }
+        val albumProducts = productDao.findByTemplateIdInAndDeletedOrderBySequence(albumTemplateIds, false)
+        return products.plus(temProducts).plus(albumProducts)
+    }
+
     @Transactional
-    override fun updateProduct(id: Int, name: String, remark: String, defPrice: Double, templateId: Int, refined: Int): Boolean {
+    override fun updateProduct(id: Int, name: String, remark: String, defPrice: Double, areaPrice: Double, piecePrice: Double, templateId: Int, refined: Int): Boolean {
         val product = productDao.findOne(id)
         if (product != null) {
             val tpl = templateDao.findOne(templateId)
@@ -69,6 +81,8 @@ open class ProductServiceImpl : ProductService {
                 product.name = name
                 product.template = tpl
                 product.defaultPrice = (defPrice * 100).toInt()
+                product.areaPrice = (areaPrice * 100).toInt()
+                product.piecePrice = (piecePrice * 100).toInt()
                 product.deleted = false
                 product.remark = remark
                 product.refined = refined == 1
@@ -112,7 +126,7 @@ open class ProductServiceImpl : ProductService {
     }
 
     @Transactional
-    override fun createProduct(name: String, remark: String, defPrice: Double, templateId: Int, refined: Int): Product? {
+    override fun createProduct(name: String, remark: String, defPrice: Double, areaPrice: Double, piecePrice: Double, templateId: Int, refined: Int): Product? {
         val loginManager = managerService.loginManager
         val tpl = templateDao.findOne(templateId)
 
@@ -127,7 +141,9 @@ open class ProductServiceImpl : ProductService {
             product.deleted = false
             product.remark = remark
             product.companyId = 0
-            product.sequence = productDao.getMaxProductSequence(manager.companyId) + 1
+            product.areaPrice = (areaPrice * 100).toInt()
+            product.piecePrice = (piecePrice * 100).toInt()
+            product.sequence = productDao.getMaxProductSequence(0) + 1
             product.refined = refined == 1
             productDao.save(product)
 

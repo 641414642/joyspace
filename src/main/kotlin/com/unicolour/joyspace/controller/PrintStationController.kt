@@ -4,9 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.unicolour.joyspace.dao.*
 import com.unicolour.joyspace.dto.*
 import com.unicolour.joyspace.exception.ProcessException
-import com.unicolour.joyspace.model.PrintStation
-import com.unicolour.joyspace.model.PrintStationStatus
-import com.unicolour.joyspace.model.PrintStationTaskType
+import com.unicolour.joyspace.model.*
 import com.unicolour.joyspace.model.ProductType
 import com.unicolour.joyspace.service.ManagerService
 import com.unicolour.joyspace.service.PrintOrderService
@@ -93,6 +91,7 @@ class PrintStationController {
                 positionId = positionId,
                 printStationId = 0,
                 name = name,
+                stationType = null,
                 printerModel = "",
                 onlineOnly = false
         )
@@ -163,10 +162,12 @@ class PrintStationController {
             @RequestParam(name = "inputPositionId", required = false, defaultValue = "0") inputPositionId: Int,
             @RequestParam(name = "inputPrintStationId", required = false, defaultValue = "0") inputPrintStationId: Int,
             @RequestParam(name = "inputName", required = false, defaultValue = "") inputName: String,
+            @RequestParam(name = "inputStationType", required = false, defaultValue = "-1") inputStationType: Int,
             @RequestParam(name = "inputPrinterModel", required = false, defaultValue = "") inputPrinterModel: String,
             @RequestParam(name = "inputOnlineOnly", required = false, defaultValue = "false") inputOnlineOnly: Boolean
     ): ModelAndView {
 
+        val stationType = StationType.values().firstOrNull { it.value == inputStationType }
         val printerNameDispMap = printerTypeDao.findAll().map { it.name to it.displayName }.toMap()
 
         val pageable = PageRequest(pageno - 1, 20, Sort.Direction.ASC, "id")
@@ -176,6 +177,7 @@ class PrintStationController {
                 positionId = inputPositionId,
                 printStationId = inputPrintStationId,
                 name = inputName,
+                stationType = stationType,
                 printerModel = inputPrinterModel,
                 onlineOnly = inputOnlineOnly
         )
@@ -185,6 +187,7 @@ class PrintStationController {
 
         val time = System.currentTimeMillis() - 30 * 1000
 
+        modelAndView.model["stationTypes"] = StationType.values().filterNot { it == StationType.DEFAULT }
         modelAndView.model["printStations"] = printStations.content.map {
             val lastAccessTime = it.lastAccessTime
             val online = lastAccessTime != null && lastAccessTime.timeInMillis > time   //自助机30秒之内访问过后台
@@ -199,6 +202,7 @@ class PrintStationController {
         modelAndView.model["position"] = if (inputPositionId > 0) positionDao.findOne(inputPositionId) else null
         modelAndView.model["inputName"] = inputName
         modelAndView.model["inputPrinterModel"] = inputPrinterModel
+        modelAndView.model["inputStationType"] = inputStationType
         modelAndView.model["inputPrintStationId"] = if (inputPrintStationId <= 0) "" else inputPrintStationId.toString()
         modelAndView.model["inputOnlineOnly"] = inputOnlineOnly
 
@@ -216,10 +220,12 @@ class PrintStationController {
             @RequestParam(name = "inputPositionId", required = false, defaultValue = "0") inputPositionId: Int,
             @RequestParam(name = "inputPrintStationId", required = false, defaultValue = "0") inputPrintStationId: Int,
             @RequestParam(name = "inputName", required = false, defaultValue = "") inputName: String,
+            @RequestParam(name = "inputStationType", required = false, defaultValue = "-1") inputStationType: Int,
             @RequestParam(name = "inputPrinterModel", required = false, defaultValue = "") inputPrinterModel: String,
             @RequestParam(name = "inputOnlineOnly", required = false, defaultValue = "false") inputOnlineOnly: Boolean
     ): ModelAndView {
 
+        val stationType = StationType.values().firstOrNull { it.value == inputStationType }
         val printerNameDispMap = printerTypeDao.findAll().map { it.name to it.displayName }.toMap()
 
         val printStations = printStationDao.queryPrintStations(
@@ -227,6 +233,7 @@ class PrintStationController {
                 positionId = inputPositionId,
                 printStationId = inputPrintStationId,
                 name = inputName,
+                stationType = stationType,
                 printerModel = inputPrinterModel,
                 onlineOnly = inputOnlineOnly
         )
@@ -293,8 +300,11 @@ class PrintStationController {
         modelAndView.model["photo_products"] = products.filter { it.productType == ProductType.PHOTO.value }
         modelAndView.model["template_products"] = products.filter { it.productType == ProductType.TEMPLATE.value }
         modelAndView.model["id_photo_products"] = products.filter { it.productType == ProductType.ID_PHOTO.value }
+        modelAndView.model["album_products"] = products.filter { it.productType == ProductType.ALBUM.value }
+        modelAndView.model["diy_products"] = products.filter { it.productType == ProductType.DIY.value }
         modelAndView.model["productIds"] = products.map { it.productId }.joinToString(separator = ",")
         modelAndView.model["printerTypes"] = printerTypeDao.findAll()
+        modelAndView.model["stationTypes"] = StationType.values().filterNot { it == StationType.DEFAULT}
 
         modelAndView.viewName = "/printStation/edit :: content"
 
@@ -310,6 +320,7 @@ class PrintStationController {
             @RequestParam(name = "positionId", required = true) positionId: Int,
             @RequestParam(name = "proportion", required = false, defaultValue = "0") proportion: Double,
             @RequestParam(name = "printerType", required = true, defaultValue = "") printerType: String,
+            @RequestParam(name = "stationType", required = true, defaultValue = "0") stationType: Int,
             @RequestParam(name = "adSetId", required = false, defaultValue = "-1") adSetId: Int,
             @RequestParam(name = "productIds", required = true) productIds: String
     ): Boolean {
@@ -320,8 +331,9 @@ class PrintStationController {
                 .map { it.toInt() }
                 .toSet()
 
+        val stationTypeObj = StationType.values().first { it.value == stationType }
         return printStationService.updatePrintStation(id, printStationName,
-                positionId, (proportion * 10).toInt(), printerType, adSetId, selectedProductIds)
+                positionId, (proportion * 10).toInt(), stationTypeObj, printerType, adSetId, selectedProductIds)
     }
 
     @RequestMapping(path = arrayOf("/printStation/activate"), method = arrayOf(RequestMethod.GET))
@@ -358,6 +370,8 @@ class PrintStationController {
         modelAndView.model["allCompany"] = allCompany
         modelAndView.model["photo_products"] = products.filter { it.productType == ProductType.PHOTO.value }
         modelAndView.model["template_products"] = products.filter { it.productType == ProductType.TEMPLATE.value }
+        modelAndView.model["album_products"] = products.filter { it.productType == ProductType.ALBUM.value }
+        modelAndView.model["diy_products"] = products.filter { it.productType == ProductType.DIY.value }
         modelAndView.model["id_photo_products"] = products.filter { it.productType == ProductType.ID_PHOTO.value }
         modelAndView.model["productIds"] = products.map { it.productId }.joinToString(separator = ",")
         modelAndView.viewName = "/printStation/activate :: content"

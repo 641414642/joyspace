@@ -5,6 +5,7 @@ import com.unicolour.joyspace.dao.*
 import com.unicolour.joyspace.dto.*
 import com.unicolour.joyspace.exception.ProcessException
 import com.unicolour.joyspace.model.*
+import com.unicolour.joyspace.model.ProductType
 import com.unicolour.joyspace.service.*
 import graphql.schema.DataFetcher
 import graphql.schema.DataFetchingEnvironment
@@ -138,9 +139,14 @@ open class PrintOrderServiceImpl : PrintOrderService {
 
     @Autowired
     lateinit var tPriceDao: TPriceDao
+    @Autowired
+    lateinit var sceneDao: SceneDao
 
     @Autowired
     lateinit var wxMpAccountDao: WxMpAccountDao
+
+    @Autowired
+    lateinit var templateImageInfoDao: TemplateImageInfoDao
 
     //小程序appid
     @Value("\${com.unicolour.wxAppId}")
@@ -180,8 +186,9 @@ open class PrintOrderServiceImpl : PrintOrderService {
                 val product = productDao.findOne(orderItemInput.productId)
 
                 productNames += product.name
-                totalPageCount += orderItemInput.copies    //XXX
             }
+
+            totalPageCount += orderItemInput.copies    //XXX
         }
 
         val newOrder = PrintOrder()
@@ -210,6 +217,7 @@ open class PrintOrderServiceImpl : PrintOrderService {
         newOrder.downloadedToPrintStation = false
         newOrder.printedOnPrintStation = false
         newOrder.transfered = false
+        newOrder.imageFileCleared = false
         newOrder.transferProportion = printStation.transferProportion
         newOrder.transferTime = null
         newOrder.transferReceiverName = null
@@ -251,53 +259,13 @@ open class PrintOrderServiceImpl : PrintOrderService {
 
             orderItems.add(newOrderItem)
 
-            val orderImg = PrintOrderImage()
-            orderImg.orderId = newOrder.id
-            orderImg.orderItemId = newOrderItem.id
-            orderImg.name = ""
-            orderImg.userImageFile = null
-            orderImg.processParams = null
-            orderImg.status = PrintOrderImageStatus.CREATED.value
-            printOrderImageDao.save(orderImg)
-            orderImages.add(orderImg)
-
-//            val tplVerSplit = orderItemInput.productVersion.split('.')
-//            val tplId = tplVerSplit[0].toInt()
-//            val tplVer = tplVerSplit[1].toInt()
-
-//            val tplImages = templateImageInfoDao.findByTemplateIdAndTemplateVersion(tplId, tplVer)
-//            for (tplImg in tplImages.filter { it.userImage }.distinctBy { it.name }) {
-//                var userImgId = 0
-//                var processParams: String? = null
-//                val orderItemImages = orderItemInput.images
-//                if (orderItemImages != null) {
-//                    val orderItemImg = orderItemImages.find { it.name == tplImg.name }
-//                    if (orderItemImg != null) {
-//                        userImgId = orderItemImg.imageId
-//
-//                        val userImgFile = userImageFileDao.findOne(userImgId)
-//                        if (userImgFile != null) {
-//                            if (userImgFile.userId != session.userId) {
-//                                throw ProcessException(3, "图片不属于指定用户")
-//                            }
-//                        }
-//
-//                        processParams = objectMapper.writeValueAsString(ImageProcessParams(orderItemImg))
-//                    }
-//                }
-//
-//                val orderImg = PrintOrderImage()
-//                orderImg.orderId = newOrder.id
-//                orderImg.orderItemId = newOrderItem.id
-//                orderImg.name = tplImg.name
-//                orderImg.userImageFile = if (userImgId == 0) null else userImageFileDao.findOne(userImgId)
-//                orderImg.processParams = processParams
-//                orderImg.status = PrintOrderImageStatus.CREATED.value
-//
-//                printOrderImageDao.save(orderImg)
-//
-//                orderImages.add(orderImg)
-//            }
+            if (product.template.type == com.unicolour.joyspace.model.ProductType.ALBUM.value || product.template.type == com.unicolour.joyspace.model.ProductType.DIY.value) {
+                sceneDao.findByAlbumIdAndDeletedOrderByIndex(product.templateId, false).forEach {
+                    saveOrderImage(it.id.toString(), it.template, newOrder.id, newOrderItem.id, orderImages)
+                }
+            } else {
+                saveOrderImage(product.template.id.toString(), product.template, newOrder.id, newOrderItem.id, orderImages)
+            }
         }
 
         //修改优惠券使用次数
@@ -316,6 +284,34 @@ open class PrintOrderServiceImpl : PrintOrderService {
         }
 
         return newOrder
+    }
+
+    private fun saveOrderImage(sceneId: String, template: Template, newOrderId: Int, newOrderItemId: Int, orderImages: ArrayList<PrintOrderImage>) {
+        val tplImages = templateImageInfoDao.findByTemplateIdAndTemplateVersion(template.id, template.currentVersion)
+        if (template.type == ProductType.ID_PHOTO.value) {
+            val tplImg = tplImages.filter { it.userImage }.sortedBy { it.id }.first()
+            val orderImg = PrintOrderImage()
+            orderImg.orderId = newOrderId
+            orderImg.orderItemId = newOrderItemId
+            orderImg.name = sceneId.plus("_").plus(tplImg.id)
+            orderImg.userImageFile = null
+            orderImg.processParams = null
+            orderImg.status = PrintOrderImageStatus.CREATED.value
+            printOrderImageDao.save(orderImg)
+            orderImages.add(orderImg)
+        } else {
+            for (tplImg in tplImages.filter { it.userImage }) {
+                val orderImg = PrintOrderImage()
+                orderImg.orderId = newOrderId
+                orderImg.orderItemId = newOrderItemId
+                orderImg.name = sceneId.plus("_").plus(tplImg.id)
+                orderImg.userImageFile = null
+                orderImg.processParams = null
+                orderImg.status = PrintOrderImageStatus.CREATED.value
+                printOrderImageDao.save(orderImg)
+                orderImages.add(orderImg)
+            }
+        }
     }
 
     private fun createOrderNo(): String {
@@ -355,7 +351,7 @@ open class PrintOrderServiceImpl : PrintOrderService {
                 orderImg.status = PrintOrderImageStatus.UPLOADED.value
 
                 printOrderImageDao.save(orderImg)
-                return checkOrderImageUploaded(orderImg.orderId)
+                return checkOrderImageUploaded(orderImg.orderId, 0)
             }
         }
         else {
@@ -367,27 +363,27 @@ open class PrintOrderServiceImpl : PrintOrderService {
 
 
     @Transactional
-    override fun uploadOrderImage(filterImageId: String,sessionId: String, orderItemId: Int, imgFile: MultipartFile?, x: Double, y: Double, scale: Double, rotate: Double): Boolean {
+    override fun uploadOrderImage(filterImageId: String,sessionId: String, orderItemId: Int,name: String, imgFile: MultipartFile?, x: Double, y: Double, scale: Double, rotate: Double): Boolean {
         val imgInfo = imageService.uploadImage(filterImageId,sessionId, imgFile)
         if (imgInfo.errcode == 0) {
             val orderImg = printOrderItemDao.findOne(orderItemId)
-            val printOrderImg = printOrderImageDao.findByOrderItemIdAndName(orderItemId,"")
+            val printOrderImg = printOrderImageDao.findByOrderItemIdAndName(orderItemId,name)
             if (orderImg == null || printOrderImg == null) {
                 throw ProcessException(2, "没有此item图片")
             }
             else {
-                orderImg.userImageFile = userImageFileDao.findOne(imgInfo.imageId)
-                orderImg.status = PrintOrderImageStatus.UPLOADED.value
-
-                printOrderItemDao.save(orderImg)
-                printOrderImg.userImageFile = orderImg.userImageFile
+//                orderImg.userImageFile = userImageFileDao.findOne(imgInfo.imageId)
+//                orderImg.status = PrintOrderImageStatus.UPLOADED.value
+//
+//                printOrderItemDao.save(orderImg)
+                printOrderImg.userImageFile = userImageFileDao.findOne(imgInfo.imageId)
                 printOrderImg.status = PrintOrderImageStatus.UPLOADED.value
                 val param = OrderImgProcessParam(x,y,scale,rotate)
                 printOrderImg.processParams = objectMapper.writeValueAsString(param)
                 printOrderImageDao.save(printOrderImg)
                 printStationService.addDownLoadUserImgTask(orderImg.printOrder!!.printStationId, imgInfo.url)
 
-                return checkOrderImageUploaded(orderImg.printOrderId)
+                return checkOrderImageUploaded(orderImg.printOrderId, totalCount)
             }
         }
         else {
@@ -398,9 +394,9 @@ open class PrintOrderServiceImpl : PrintOrderService {
 
     //检查是否所有订单图片都已上传，如果都上传了返回true并修改订单状态
     @Synchronized
-    private fun checkOrderImageUploaded(orderId: Int) : Boolean {
-        val missingImageCount = printOrderItemDao.countByPrintOrderIdAndUserImageFileIdIsNull(orderId)  //userImageFileId is null 表示此订单图片还没有上传
-        if (missingImageCount == 0L) {
+    private fun checkOrderImageUploaded(orderId: Int, totalCount: Int) : Boolean {
+        val imageCount = printOrderImageDao.countByOrderIdAndUserImageFileIdIsNotNull(orderId)  //userImageFileId is null 表示此订单图片还没有上传
+        return if (totalCount != 0 && imageCount == totalCount.toLong()) {
             val order = printOrderDao.findOne(orderId)
             order.imageFileUploaded = true
             order.updateTime = Calendar.getInstance()
@@ -409,10 +405,10 @@ open class PrintOrderServiceImpl : PrintOrderService {
                 //0元单直接生成打印任务
                 printStationService.createPrintStationTask(order.printStationId, PrintStationTaskType.PROCESS_PRINT_ORDER, order.id.toString())
             }
-            return true
+            true
         }
         else {
-            return false
+            false
         }
     }
 
@@ -421,34 +417,16 @@ open class PrintOrderServiceImpl : PrintOrderService {
 
         order.printOrderItems.forEach {
             val product = productDao.findOne(it.productId)
-            var width = product.template.width
-            var height = product.template.height
-            when (product.id) {
-                9526 -> {
-                    width = 101.6
-                    height = 152.4
-                }
-                9527 -> {
-                    width = 101.6
-                    height = 152.4
-                }
-                9528 -> {
-                    width = 152.4
-                    height = 101.6
-                }
-                9529 -> {
-                    width = 101.6
-                    height = 152.4
-                }
-            }
+            val width = product.template.width
+            val height = product.template.height
             var dpi = 240
             if (width * height > 19354.8) dpi = 180
 
             val imageDTOs = ArrayList<PrintOrderImageDTO>()
-            it.orderImages.forEach { img ->
+            it.orderImages.filter { it.userImageFile != null }.forEach { img ->
                 val userImgFile = img.userImageFile!!
                 val param = objectMapper.readValue(img.processParams, OrderImgProcessParam::class.java)
-                param.dpi = dpi
+                param.dpi = 360
                 img.processParams = objectMapper.writeValueAsString(param)
                 imageDTOs += PrintOrderImageDTO(
                         id = img.id,
@@ -900,6 +878,7 @@ open class PrintOrderServiceImpl : PrintOrderService {
 
 
         for (printOrderItem in orderInput.orderItems) {
+            val p = productDao.findOne(printOrderItem.productId)
             var orderItemFee:Int = priceMap.getOrElse(printOrderItem.productId, {
                 val product = productIdObjMap.computeIfAbsent(printOrderItem.productId, { productId -> productDao.findOne(productId) })
                 product.defaultPrice
@@ -907,6 +886,7 @@ open class PrintOrderServiceImpl : PrintOrderService {
             val tPrice = matchTprice(printStation.positionId, printOrderItem.productId, productIdCopiesMap[printOrderItem.productId]
                     ?: printOrderItem.copies)
             if (tPrice!=0) orderItemFee = tPrice
+            orderItemFee += (printOrderItem.area * p.areaPrice / 200000000).toInt() + if (printOrderItem.piece > 0) (printOrderItem.piece - 1) * p.piecePrice else 0// 318.6 元／平方米  5元／面
             totalFee += orderItemFee * printOrderItem.copies
         }
 

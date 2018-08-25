@@ -16,6 +16,30 @@ class PrintOrderDaoImpl : PrintOrderCustomQuery  {
     @PersistenceContext
     lateinit var em: EntityManager
 
+    override fun getOldUnClearedPrintOrders(beforeTime: Calendar, limit: Int): List<PrintOrder> {
+        val cb = em.criteriaBuilder
+        val cq = cb.createQuery(PrintOrder::class.java)
+
+        val orderRoot = cq.from(PrintOrder::class.java)
+
+        cq.select(orderRoot)
+
+        cq.where(
+                cb.lessThan(orderRoot.get("updateTime"), beforeTime),
+                cb.equal(orderRoot.get<Boolean>("imageFileCleared"), false),
+                cb.or(
+                        cb.equal(orderRoot.get<Boolean>("payed"), false),
+                        cb.equal(orderRoot.get<Boolean>("printedOnPrintStation"), true)
+                )
+        )
+
+        cq.orderBy(cb.asc(orderRoot.get<Any>("id")))
+
+        return em.createQuery(cq)
+                .setMaxResults(limit)
+                .resultList
+    }
+
     override fun printOrderStat(companyId: Int, startTime: Calendar?, endTime: Calendar?,
                                 payed: Boolean?, printed: Boolean?, printStationIds: List<Int>): PrintOrderStatDTO {
         val cb = em.criteriaBuilder

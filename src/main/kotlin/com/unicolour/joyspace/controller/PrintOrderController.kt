@@ -4,6 +4,8 @@ import com.unicolour.joyspace.dao.*
 import com.unicolour.joyspace.dto.CommonRequestResult
 import com.unicolour.joyspace.dto.ResultCode
 import com.unicolour.joyspace.exception.ProcessException
+import com.unicolour.joyspace.model.BusinessModel
+import com.unicolour.joyspace.model.StationType
 import com.unicolour.joyspace.service.ManagerService
 import com.unicolour.joyspace.service.PrintOrderService
 import com.unicolour.joyspace.util.Pager
@@ -15,6 +17,7 @@ import org.springframework.web.bind.annotation.*
 import org.springframework.web.servlet.ModelAndView
 import java.text.SimpleDateFormat
 import java.util.*
+import kotlin.collections.HashMap
 
 @Controller
 class PrintOrderController {
@@ -100,6 +103,34 @@ class PrintOrderController {
         modelAndView.model["turnOver"] = orderStat.totalAmount - orderStat.totalDiscount
         modelAndView.model["printOrderCount"] = printOrders.size
         modelAndView.model["printOrders"] = printOrders
+        modelAndView.model["companyIdBusinessModelMap"] =   //Map<Int, Int>
+                if (isSuperAdmin) {
+                    printOrders.asSequence()
+                            .map { it.companyId }
+                            .distinct()
+                            .map { it to (companyDao.findOne(it)?.businessModel ?: BusinessModel.DEFAULT.value) }
+                            .toMap()
+                }
+                else {
+                    emptyMap()
+                }
+
+        val psIdToStationTypeMap = HashMap<Int, Int>()
+        val psIdToPrinterModelMap = HashMap<Int, String>()
+
+        if (isSuperAdmin) {
+            printOrders.asSequence()
+                    .map { it.printStationId }
+                    .distinct()
+                    .forEach {
+                        val printStation = printStationDao.findOne(it)
+                        psIdToStationTypeMap[it] = printStation?.stationType ?: StationType.DEFAULT.value
+                        psIdToPrinterModelMap[it] = printStation?.printerModel ?: ""
+                    }
+        }
+
+        modelAndView.model["printStationIdStationTypeMap"] = psIdToStationTypeMap
+        modelAndView.model["printStationIdPrinterModelMap"] = psIdToPrinterModelMap
 
         modelAndView.view = PrintOrderExcelView(isSuperAdmin)
 

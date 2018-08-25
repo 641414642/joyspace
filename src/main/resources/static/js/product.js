@@ -1,6 +1,23 @@
 //添加编辑产品
 function createOrEditProduct(event) {
-    return showPostFormModal(event, 'editProductForm', null, true);
+
+    return showPostFormModal(event, 'editProductForm', null, true,null,null,function () {
+        var type = $('#templateId').find("option:selected").attr("type");
+        if (type === "0") {
+            $("#refined").show()
+        } else {
+            $("#refined").find("input").prop( "checked", false );
+            $("#refined").find("input").prop( "value", 0 );
+            $("#refined").hide()
+        }
+        if (type === "5") {
+            $("#area").show();
+            $("#piece").show();
+        }else{
+            $("#area").hide();
+            $("#piece").hide();
+        }
+    });
 }
 
 //上传产品图片文件
@@ -52,49 +69,6 @@ function viewPriceList(event) {
 //添加编辑价目表
 function createOrEditPriceList(event) {
     return showPostFormModal(event, 'editPriceListForm', null, true);
-}
-
-//添加编辑优惠券
-function createOrEditCoupon(event) {
-    $('#modalTemplate').removeClass().addClass("modal fade");
-
-    showModal(event, function() {
-        var frm = $('#editCouponForm');
-        frm
-            .find('.date_picker')
-            .datepicker({
-                format: 'yyyy-mm-dd',
-                startView: 0,
-                todayHighlight: true,
-                weekStart: 1,
-                language: 'zh-CN',
-                autoclose: true,
-                todayBtn: true
-            });
-        frm.submit(function (ev) {
-            //if (typeof validateFunc !== "function" || validateFunc()) {
-                $.ajax({
-                    type: frm.attr('method'),
-                    url: frm.attr('action'),
-                    data: frm.serialize(),
-                    success: function (data) {
-                        if (data.errcode == 12138) {
-                            showFormGroupErrMsg("code", data.errmsg)
-                        } else {
-                            $('#modalTemplate').modal('hide');
-                            window.location.reload();
-                        }
-                    }
-                });
-            //}
-
-            ev.preventDefault();
-        });
-    });
-
-    return false;
-
-//    return showPostFormModal(event, 'editCouponForm', null, true);
 }
 
 function moveProduct(event, up) {

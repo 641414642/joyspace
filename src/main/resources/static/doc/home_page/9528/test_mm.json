@@ -1,12 +1,12 @@
 {
   "id": 9528,
   "version": 1.0,
-  "name": "展会专用模板1",
+  "name": "测试录入模版",
   "type": 3,
   "scenes": [
     {
       "id": 1,
-      "name": "",
+      "name": "测试录入模版",
       "type": "page",
       "width": 152,
       "height": 102,

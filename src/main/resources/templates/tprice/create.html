@@ -44,7 +44,7 @@
                 <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
                 <h4 class="modal-title" th:text="${create ? '新建' : '修改'}"></h4>
             </div>
-            <form id="editCouponForm" target="_blank" th:action="@{/event/tprice/show}" method="post">
+            <form id="editTPriceForm" target="_blank" th:action="@{/event/tprice/show}" method="post">
                 <input type="hidden" name="id" th:value="${tprice.id}" />
                 <div class="modal-body">
 

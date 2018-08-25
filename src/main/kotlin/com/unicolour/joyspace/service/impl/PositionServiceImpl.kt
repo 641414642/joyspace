@@ -82,7 +82,7 @@ open class PositionServiceImpl : PositionService {
     }
 
     @Transactional
-    override fun createPosition(name: String, address: String, transportation: String, longitude: Double, latitude: Double, priceListId: Int): Position? {
+    override fun createPosition(name: String, shortName: String, address: String, transportation: String, longitude: Double, latitude: Double, priceListId: Int): Position? {
         val loginManager = managerService.loginManager
         if (loginManager == null) {
             return null
@@ -97,6 +97,7 @@ open class PositionServiceImpl : PositionService {
 
         val position = Position()
         position.name = name
+        position.shortName = shortName
         position.address = address
         position.transportation = transportation
         position.company = manager.company
@@ -118,7 +119,7 @@ open class PositionServiceImpl : PositionService {
     }
 
     @Transactional
-    override fun updatePosition(id: Int, name: String, address: String, transportation: String, longitude: Double, latitude: Double, priceListId: Int): Boolean {
+    override fun updatePosition(id: Int, name: String, shortName: String, address: String, transportation: String, longitude: Double, latitude: Double, priceListId: Int): Boolean {
         val position = positionDao.findOne(id)
         val addressComponent = getAddressComponent(longitude, latitude)
 
@@ -128,6 +129,7 @@ open class PositionServiceImpl : PositionService {
 
         if (position != null) {
             position.name = name
+            position.shortName = shortName
             position.address = address
             position.transportation = transportation
             position.latitude = latitude

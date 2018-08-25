@@ -15,6 +15,19 @@ data class ProductType(var id: Int? = null,
                        var describe: String? = null,
                        var iconUrl: String? = null)
 
+
+data class DiyProductVo(var name:String? = null,
+                        var thumbnailImageUrl: String? = null,
+                        var styles:List<Style>? = null)
+
+data class Style(var name: String? = null,
+                 var sizes:List<StyleSize>? = null,
+                 var product:ProductVo? = null)
+
+data class StyleSize(var name: String? = null,
+                     var gender: String? = null,
+                     var products: List<ProductVo> = emptyList())
+
 data class ProductVo(var id: Int? = null,
                      var name: String? = null,
                      var width: Double? = null,
@@ -44,6 +57,7 @@ data class PrintStationVo(var id: Int? = null,
                           var positionId: String? = null,
                           var companyId: String? = null,
                           var status: Int? = null,
+                          var online: Int? = null,
                           var products: MutableList<PrintStationProduct>? = null,
                           var imgUrl: String? = null)
 
@@ -51,6 +65,8 @@ data class PrintStationProduct(var id: Int? = null,
                                var name: String? = null,
                                var type: String? = null,
                                var price: Int? = null,
+                               var areaPrice: Int? = null,
+                               var piecePrice: Int? = null,
                                var tPriceItems:MutableList<TPriceItemVo>? = null,
                                var couponSign: Int? = null)
 
@@ -135,6 +151,7 @@ data class TemplateVo(var id: Int = 0,
 
 data class Scene(var id: Int = 0,
                  var name: String = "",
+                 var index: Int = 0,
                  var type: String = "",
                  var width: Double = 0.0,
                  var height: Double = 0.0,
@@ -142,7 +159,7 @@ data class Scene(var id: Int = 0,
 
 data class Layer(var id: Int = 0,
                  var type: String = "",
-                 var images: List<Img> = emptyList())
+                 var images: MutableList<Img> = mutableListOf())
 
 data class Img(var id: Int = 0,
                var type: String = "",
@@ -161,3 +178,35 @@ data class FilterUrl(var filterYrl: String?)
 data class OrderStatusVo(var orderItems: List<OrderItemS>? = null)
 data class OrderItemS(var images: List<ImageS>? = null)
 data class ImageS(var status:Int? = null)
+
+data class DeleteAddress(var sessionId: String? = null,
+                         var id: Int? = null)
+
+data class TemplateBo(var id: Int = 0,
+                      var version: Double = 0.0,
+                      var name: String = "",
+                      var type: Int = 0,
+                      var scenes: List<SceneBo> = emptyList(),
+                      var idPhotoMaskImageUrl: String = "")
+
+data class SceneBo(var id: Int = 0,
+                 var name: String = "",
+                 var index: Int = 0,
+                 var type: String = "",
+                 var width: String = "",
+                 var height: String = "",
+                 var layers: List<LayerBo> = emptyList())
+
+data class LayerBo(var id: Int = 0,
+                 var type: String = "",
+                 var images: MutableList<ImgBo> = mutableListOf())
+
+data class ImgBo(var id: Int = 0,
+               var type: String = "",
+               var x: String = "",
+               var y: String = "",
+               var width: String = "",
+               var height: String = "",
+               var angleClip: Double = 0.0,
+               var bgcolor: String = "",
+               var resourceURL: String = "")

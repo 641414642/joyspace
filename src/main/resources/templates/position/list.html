@@ -39,7 +39,8 @@
 				<table class="table table-bordered table-striped">
 					<tr>
 						<th>ID</th>
-						<th>名称</th>
+						<th>店面全称</th>
+						<th>店面简称</th>
 						<th>地址</th>
 						<th>投放商</th>
 						<th>价目表</th>
@@ -48,6 +49,7 @@
 					<tr th:each="position : ${positions}">
 						<td th:text="${position.id}"></td>
 						<td th:text="${position.name}"></td>
+						<td th:text="${position.shortName}"></td>
 						<td th:text="${position.address}"></td>
 						<td th:text="${position.company?.name}"></td>
 						<td th:text="${position.priceList?.name}"></td>

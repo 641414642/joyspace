@@ -56,6 +56,17 @@
                         <span class="help-block"></span>
                     </div>
                     <div class="form-group">
+                        <label for="businessModel" class="control-label">经营方式:</label>
+                        <select name="businessModel" class="form-control" id="businessModel">
+                            <option th:each="bm : ${businessModels}"
+                                    th:value="${bm.value}"
+                                    th:text="${bm.displayName}"
+                                    th:selected="${bm.value == T(com.unicolour.joyspace.model.BusinessModel).INVEST.value}">
+                            </option>
+                        </select>
+                        <span class="help-block"></span>
+                    </div>
+                    <div class="form-group">
                         <label for="user_name" class="control-label">管理员登录帐号:</label>
                         <input type="text" name="username" class="form-control" id="user_name" />
                         <span class="help-block"></span>
@@ -104,6 +115,17 @@
                     <div class="form-group">
                         <label for="nameEdit" class="control-label">投放商名称:</label>
                         <input type="text" name="name" class="form-control" id="nameEdit" th:value="${company.name}" />
+                        <span class="help-block"></span>
+                    </div>
+                    <div class="form-group">
+                        <label for="businessModelEdit" class="control-label">经营方式:</label>
+                        <select name="businessModel" class="form-control" id="businessModelEdit">
+                            <option th:each="bm : ${businessModels}"
+                                    th:value="${bm.value}"
+                                    th:text="${bm.displayName}"
+                                    th:selected="${bm.value == company.businessModel}">
+                            </option>
+                        </select>
                         <span class="help-block"></span>
                     </div>
                     <div class="form-group">

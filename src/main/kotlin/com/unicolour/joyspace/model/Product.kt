@@ -15,6 +15,7 @@ class Product {
     @NotNull
     var name: String = ""
 
+
     //region 模板
     /** 模板ID */
     @Column(name = "template_id", insertable = false, updatable = false)
@@ -38,6 +39,16 @@ class Product {
     @Column
     @NotNull
     var defaultPrice: Int = 0
+
+    /** 单位面积价格(单位是分／平米) */
+    @Column
+    @NotNull
+    var areaPrice: Int = 0
+
+    /** 加工费(单位是分／面) */
+    @Column
+    @NotNull
+    var piecePrice: Int = 0
 
     @OneToMany(mappedBy = "product")
     lateinit var imageFiles: List<ProductImageFile>
@@ -64,7 +75,9 @@ enum class ProductType(val value:Int, val dispName:String) {
     PHOTO(0, "普通照片"),
     ID_PHOTO(1, "证件照"),
     TEMPLATE(2, "模板拼图"),
-    ALBUM(3, "相册")
+    ALBUM(3, "相册"),
+    SCENE(4,"相册单页"),
+    DIY(5,"定制产品")
 }
 
 

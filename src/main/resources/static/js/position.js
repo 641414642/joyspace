@@ -20,7 +20,7 @@ function validatePositionInput() {
     var name = $("#editPositionForm [name='name']").val();
 
     if (name.length === 0 || !name.trim()) {
-        showFormGroupErrMsg("name", "名称不能为空!");
+        showFormGroupErrMsg("name", "店面全称不能为空!");
         return false;
     }
 

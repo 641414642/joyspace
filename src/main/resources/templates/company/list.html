@@ -25,6 +25,16 @@
 						<label class="form-label">名称</label>
 						<input class="form-control" type="text" name="name" th:value="${inputCompanyName}" />
 						&nbsp;&nbsp;
+						<label class="form-label">经营方式</label>
+						<select name="businessModel" class="form-control">
+							<option value="-1">所有</option>
+							<option th:each="bm : ${businessModels}"
+									th:value="${bm.value}"
+									th:text="${bm.displayName}"
+									th:selected="${bm.value == inputBusinessModel}">
+							</option>
+						</select>
+						&nbsp;&nbsp;
 						<button type="submit" class="btn btn-default btn-sm">查询</button>
 						<a href="#" th:href="@{/company/list}" class="btn btn-default btn-sm">重置</a>
 
@@ -40,12 +50,18 @@
 					<tr>
 						<th>ID</th>
 						<th>名称</th>
+						<th>经营方式</th>
 						<th>创建时间</th>
 						<th>操作</th>
 					</tr>
 					<tr th:each="company : ${companies}">
 						<td th:text="${company.id}"></td>
 						<td th:text="${company.name}"></td>
+						<td>
+							<th:block th:each="bm : ${businessModels}">
+								<span th:if="${bm.value == company.businessModel}" th:text="${bm.displayName}"></span>
+							</th:block>
+						</td>
 						<td th:text="${company.createTime == null ? '' : #calendars.format(company.createTime, 'yyyy-MM-dd HH:mm')}"></td>
 						<td valign="middle" style="vertical-align:middle">
 							<a href="#" style="margin-right:5px">

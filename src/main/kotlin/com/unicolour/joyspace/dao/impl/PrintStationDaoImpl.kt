@@ -2,6 +2,7 @@ package com.unicolour.joyspace.dao.impl
 
 import com.unicolour.joyspace.dao.PrintStationCustomQuery
 import com.unicolour.joyspace.model.PrintStation
+import com.unicolour.joyspace.model.StationType
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.Pageable
@@ -15,7 +16,7 @@ class PrintStationDaoImpl : PrintStationCustomQuery {
     @PersistenceContext
     lateinit var em: EntityManager
 
-    override fun queryPrintStations(companyId: Int, positionId: Int, printStationId: Int, name: String, printerModel: String, onlineOnly: Boolean): List<PrintStation> {
+    override fun queryPrintStations(companyId: Int, positionId: Int, printStationId: Int, name: String, stationType: StationType?, printerModel: String, onlineOnly: Boolean): List<PrintStation> {
         val cb = em.criteriaBuilder
         val cq = cb.createQuery(PrintStation::class.java)
 
@@ -23,12 +24,12 @@ class PrintStationDaoImpl : PrintStationCustomQuery {
 
         cq.select(printStationRoot)
 
-        where(companyId, positionId, printStationId, name, printerModel, onlineOnly, cb, cq, printStationRoot)
+        where(companyId, positionId, printStationId, name, stationType, printerModel, onlineOnly, cb, cq, printStationRoot)
 
         return em.createQuery(cq).resultList
     }
 
-    override fun queryPrintStations(pageable: Pageable, companyId: Int, positionId: Int, printStationId: Int, name: String, printerModel: String, onlineOnly: Boolean): Page<PrintStation> {
+    override fun queryPrintStations(pageable: Pageable, companyId: Int, positionId: Int, printStationId: Int, name: String, stationType: StationType?, printerModel: String, onlineOnly: Boolean): Page<PrintStation> {
         val cb = em.criteriaBuilder
         val cq = cb.createQuery(PrintStation::class.java)
         val cqCount = cb.createQuery(Long::class.java)
@@ -39,8 +40,8 @@ class PrintStationDaoImpl : PrintStationCustomQuery {
         cq.select(printStationRoot)
         cqCount.select(cb.count(printStationCountRoot))
 
-        where(companyId, positionId, printStationId, name, printerModel, onlineOnly, cb, cq, printStationRoot)
-        where(companyId, positionId, printStationId, name, printerModel, onlineOnly, cb, cqCount, printStationRoot)
+        where(companyId, positionId, printStationId, name, stationType, printerModel, onlineOnly, cb, cq, printStationRoot)
+        where(companyId, positionId, printStationId, name, stationType, printerModel, onlineOnly, cb, cqCount, printStationRoot)
 
         orderBy(cb, pageable.sort, cq, printStationRoot)
 
@@ -67,7 +68,8 @@ class PrintStationDaoImpl : PrintStationCustomQuery {
         query.orderBy(orders)
     }
 
-    private fun where(companyId: Int, positionId: Int, printStationId: Int, name: String, printerModel: String, onlineOnly: Boolean,
+    private fun where(companyId: Int, positionId: Int, printStationId: Int, name: String, stationType: StationType?,
+                      printerModel: String, onlineOnly: Boolean,
                       cb: CriteriaBuilder, cq: CriteriaQuery<*>, root: Root<PrintStation>) {
 
         val conditions = ArrayList<Predicate>()
@@ -90,6 +92,10 @@ class PrintStationDaoImpl : PrintStationCustomQuery {
 
         if (printerModel.isNotEmpty()) {
             conditions += cb.like(cb.lower(root.get("printerModel")), "%${printerModel.toLowerCase()}%")
+        }
+
+        if (stationType != null) {
+            conditions += cb.equal(root.get<Int>("stationType"), stationType.value)
         }
 
         if (onlineOnly) {

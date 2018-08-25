@@ -16,7 +16,7 @@ class PrintStationExcelView : AbstractXlsxView() {
         val printStations = model["printStations"] as List<PrintStationController.PrintStationInfo>
         val count = model["printStationCount"] as Int
 
-        response.setHeader("Content-Disposition", """attachment; filename=PrintStations.xlsx"""")
+        response.setHeader("Content-Disposition", """attachment; filename="PrintStations.xlsx"""")
 
         val sheet = workbook.createSheet("自助机列表")
         val createHelper = workbook.creationHelper

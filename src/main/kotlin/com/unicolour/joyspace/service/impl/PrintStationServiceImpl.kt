@@ -387,7 +387,7 @@ open class PrintStationServiceImpl : PrintStationService {
 
     @Transactional
     override fun updatePrintStation(id: Int, printStationName: String, positionId: Int, transferProportion: Int,
-                                    printerType: String, adSetId: Int, selectedProductIds: Set<Int>): Boolean {
+                                    stationType: StationType, printerType: String, adSetId: Int, selectedProductIds: Set<Int>): Boolean {
         val printStation = printStationDao.findOne(id)
 
         if (printStation != null) {
@@ -400,6 +400,7 @@ open class PrintStationServiceImpl : PrintStationService {
             printStation.addressDistrict = printStation.position.addressDistrict
             printStation.addressStreet = printStation.position.addressStreet
             printStation.printerType = printerType
+            printStation.stationType = stationType.value
 
             if (adSetId > 0) {
                 printStation.adSet = adSetDao.findOne(adSetId)
@@ -460,6 +461,7 @@ open class PrintStationServiceImpl : PrintStationService {
         printStation.addressCity = printStation.position.addressCity
         printStation.addressDistrict = printStation.position.addressDistrict
         printStation.addressStreet = printStation.position.addressStreet
+        printStation.stationType = StationType.DEFAULT.value
         printStation.printerModel = null
         printStation.rollPaper = null
         printStation.paperWidth = null
@@ -961,6 +963,28 @@ open class PrintStationServiceImpl : PrintStationService {
         }
 
         return "$baseUrl/assets/printStation/qrCode/$qrCodeImgFileName"
+    }
+
+    override fun toPrintStationVo(printStation: PrintStation): PrintStationVo {
+        val psVo = PrintStationVo()
+        psVo.id = printStation.id
+        psVo.address = printStation.addressNation + printStation.addressProvince + printStation.addressCity + printStation.addressDistrict + printStation.addressStreet
+        psVo.longitude = printStation.position.longitude
+        psVo.latitude = printStation.position.latitude
+        psVo.wxQrCode = printStation.wxQrCode
+        psVo.positionId = printStation.positionId.toString()
+        psVo.companyId = printStation.companyId.toString()
+        psVo.status = printStation.status
+        psVo.name = printStation.name
+        psVo.imgUrl = ""
+        val session = printStationLoginSessionDao.findByPrintStationId(printStation.id)
+        psVo.online = 0
+        val time = Calendar.getInstance()
+        time.add(Calendar.SECOND, 3600 - 30)
+        if (session != null && session.expireTime.timeInMillis > time.timeInMillis) {    //自助机30秒之内访问过后台
+            psVo.online = 1
+        }
+        return psVo
     }
 
     private fun createPrintStationQrCodeImageFile(printStationId: Int, noBackground: Boolean, psQrCodeImgFile: File) {

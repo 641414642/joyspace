@@ -18,4 +18,6 @@ interface PrintOrderCustomQuery {
 
     fun printOrderStat(companyId: Int, startTime: Calendar?, endTime: Calendar?,
                        payed: Boolean?, printed: Boolean?, printStationIds: List<Int>): PrintOrderStatDTO
+
+    fun getOldUnClearedPrintOrders(beforeTime: Calendar, limit: Int): List<PrintOrder>
 }

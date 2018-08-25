@@ -15,6 +15,10 @@ class Company {
     @NotNull
     var name: String = ""
 
+    @Column
+    @NotNull
+    var businessModel: Int = 0
+
     @NotNull
     @Column
     lateinit var createTime: Calendar
@@ -29,6 +33,19 @@ class Company {
     var defaultPriceList: PriceList? = null
     //endregion
 }
+
+//经营方式
+enum class BusinessModel(
+        val value: Int,
+        val displayName: String
+) {
+    DEFAULT(0, ""),
+    INVEST(1, "投放"),
+    PURCHASE(2, "购买"),
+    PARTNER(3, "合作"),
+    SELF_OPERATION(4, "自营")
+}
+
 
 //收款帐户信息
 @Entity

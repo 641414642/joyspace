@@ -138,6 +138,8 @@ class CouponController {
         modelAndView.model["productTypes"] = allProductTypes
         modelAndView.model["photo_products"] = products.filter { it.productType == ProductType.PHOTO.value }
         modelAndView.model["template_products"] = products.filter { it.productType == ProductType.TEMPLATE.value }
+        modelAndView.model["album_products"] = products.filter { it.productType == ProductType.ALBUM.value }
+        modelAndView.model["diy_products"] = products.filter { it.productType == ProductType.DIY.value }
         modelAndView.model["id_photo_products"] = products.filter { it.productType == ProductType.ID_PHOTO.value }
         modelAndView.model["positions"] = allPositions
         modelAndView.model["printStations"] = allPrintStations
@@ -179,10 +181,12 @@ class CouponController {
             @RequestParam(name = "positionIds", required = true) positionIds: String,
             @RequestParam(name = "printStationIds", required = true) printStationIds: String
     ): CommonRequestResult {
-        val couponCode = if (code.isEmpty() && claimMethod == 2) getRandomStr(8) else code
-        couponDao.findFirstByCodeIgnoreCaseOrderByBeginDesc(couponCode)?.let {
-            return CommonRequestResult(12138,"已有该代码的优惠券")
+        if (discount > minExpense) {
+            throw IllegalArgumentException("折扣金额不能大于最低消费")
         }
+
+        val couponCode = if (code.isEmpty() && claimMethod == 2) getRandomStr(8) else code
+
 
         val enabled = !(disabled != null && disabled)
 
@@ -191,23 +195,26 @@ class CouponController {
                 .toSet()
         val selectedProductIds = productIds
                 .split(',')
-                .filter { !request.getParameter("product_${it}").isNullOrBlank() }
+                .filter { !request.getParameter("product_$it").isNullOrBlank() }
                 .map { it.toInt() }
                 .toSet()
         val selectedPositionIds = positionIds
                 .split(',')
-                .filter { !request.getParameter("position_${it}").isNullOrBlank() }
+                .filter { !request.getParameter("position_$it").isNullOrBlank() }
                 .map { it.toInt() }
                 .toSet()
         val selectedPrintStationIds = printStationIds
                 .split(',')
-                .filter { !request.getParameter("printStation_${it}").isNullOrBlank() }
+                .filter { !request.getParameter("printStation_$it").isNullOrBlank() }
                 .map { it.toInt() }
                 .toSet()
 
         val df = SimpleDateFormat("yyyy-MM-dd")
         val couponClaimMethod = CouponClaimMethod.values().find{ it.value == claimMethod }
         if (id <= 0) {
+            couponDao.findFirstByCodeIgnoreCaseOrderByBeginDesc(couponCode)?.let {
+                return CommonRequestResult(12138,"已有该代码的优惠券")
+            }
             couponService.createCoupon(name, couponCode, enabled, couponClaimMethod!!, maxUses, maxUsesPerUser,
                     (minExpense * 100).toInt(), (discount * 100).toInt(),
                     df.parse(begin), df.parse(expire), userRegDays,

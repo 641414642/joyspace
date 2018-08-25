@@ -40,6 +40,10 @@ class Address {
     @NotNull
     var defalut: Boolean = false   //是否为默认地址
 
+    @Column
+    @NotNull
+    var deleted: Boolean = false
+
     @NotNull
     @Column
     lateinit var createTime: Calendar

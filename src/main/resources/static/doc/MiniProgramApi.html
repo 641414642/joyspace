@@ -534,7 +534,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">type</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">PHOTO 普通照片：0,  ID_PHOTO 证件照：1,   TEMPLATE 模板拼图：2,   ALBUM 相册：3</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">PHOTO 普通照片：0,  ID_PHOTO 证件照：1,   TEMPLATE 模板拼图：2,   ALBUM 相册：3,   DIY 定制产品：5</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">printStationId</p></td>
@@ -567,7 +567,35 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
     ...
     ...
     ...
-]</pre>
+]
+
+如果是定制产品类型：
+
+[{
+	"name": "T恤",
+	"styles": [{
+		"name": "短袖T恤 白色男款",
+		"sizes": [{
+			"name": "XS",
+			"gender": "男",
+			"products": [{
+				"id": 90,
+				"name": "短袖T恤 白色男款 XS",
+				"width": 0.0,
+				"height": 0.0,
+				"type": 5,
+				"typeStr": "定制产品",
+				"version": 1,
+				"displaySize": "0 x 0 mm",
+				"imageRequired": 0,
+				"remark": "短袖T恤 白色男款 XS",
+				"price": 10,
+				"thumbnailImageUrl": null
+			}]
+		}],
+		"product": null
+	}]
+}]</pre>
 </div>
 </div>
 </div>
@@ -710,13 +738,16 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
                       "latitude": 39.95392,           //自助机位置维度
                       "positionId": xx,               //店面id
                       "companyId": xx,                //投放商id
-                      "status": x,                    //状态 (0: 正常, 1: 离线, 2: 故障, 3: 打印耗材用完)
+                      "status": x,                    //状态 (0: 正常, 1: 打印机脱机, 2：打印耗材用完 )
+                      "online": 1,                    //在线状态：1：在线   0：离线
                       "products": [
                               {
                                   "id": 1,                //产品ID
                                   "name": "1寸照片",
                                   "type": 1,              //产品类型 0: 普通照片, 1: 证件照, 2: 模板拼图
                                   "price": 1,            //价格 (分)
+                                  "areaPrice": 1,            //价格 (分/平方毫米)
+                                  "piecePrice": 300,            //价格 (分/面)
                                   "tPriceItems":[
                                     {
                                         "price": 1,          //价格（分）
@@ -789,13 +820,16 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
                     "latitude": xxxx,
                     "positionId": xx,               //店面id
                     "companyId": xx,                //投放商id
-                    "status": x,                    //状态 (0: 正常, 1: 离线, 2: 故障, 3: 打印耗材用完)
+                    "status": x,                    //状态 (0: 正常, 1: 打印机脱机, 2：打印耗材用完 )
+                    "online": 1,                    //在线状态：1：在线   0：离线
                     "products": [
                             {
                                 "id": 1,                //产品ID
                                 "name": "1寸照片",
                                 "type": 1,              //产品类型 0: 普通照片, 1: 证件照, 2: 模板拼图
                                 "price": 1,            //价格 (分)
+                                "areaPrice": 1,            //价格 (分/平方毫米)
+                                "piecePrice": 300,            //价格 (分/面)
                                 "tPriceItems":[
                                   {
                                       "price": 1,          //价格（分）
@@ -1228,17 +1262,24 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 			{
 				"productId" : xx,       //产品id
 				"productVersion" : "xx.xx",  //产品版本号
-				"copies": xx            //打印份数 (&gt;=1)
+				"copies": xx,            //打印份数 (&gt;=1)
+				"area":0.0,              //计算价格面积数
+				"piece":0                //需要加工费的面数
 			},
 			{
 			    "productId" : xx,
 			    "productVersion" : "xx.xx",
-			    "copies": xx
+			    "copies": xx,
+				"area":0.0,
+				"piece":0
+
 			},
 			{
 			    "productId" : xx,
 			    "productVersion" : "xx.xx",
-			    "copies": xx
+			    "copies": xx,
+				"area":0.0,
+				"piece":0
 			}
 			...
 		  ],
@@ -1461,7 +1502,11 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">name</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">图片名称</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">图片名称(规则：sceneId_imageId)</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">totalCount</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">需要上传的图片数量（用来校验是否全部上传完成）</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">image</p></td>
@@ -2042,6 +2087,57 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
                         ...
                                 ]
             }
+    	}</pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_删除用户地址">删除用户地址:</h4>
+<div class="ulist">
+<ul>
+<li>
+<p>URL: /v2/user/address</p>
+</li>
+<li>
+<p>Method: Delete</p>
+</li>
+<li>
+<p>参数:</p>
+</li>
+</ul>
+</div>
+<table class="tableblock frame-all grid-all spread">
+<colgroup>
+<col style="width: 50%;">
+<col style="width: 50%;">
+</colgroup>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">参数名</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">描述</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">id</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">地址id</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">sessionId</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">登录返回的sessionId</p></td>
+</tr>
+</tbody>
+</table>
+<div class="ulist">
+<ul>
+<li>
+<p>返回:</p>
+</li>
+</ul>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>        {
+            "state" : 0,
+            "msg" : null
     	}</pre>
 </div>
 </div>
