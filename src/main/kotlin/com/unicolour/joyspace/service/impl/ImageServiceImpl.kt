@@ -294,13 +294,16 @@ class ImageServiceImpl : ImageService {
             return "用户未登陆"
         } else {
             try {
+               // val fileName = UUID.randomUUID().toString().replace("-", "")
+                val filePath = "filter/$sessionId.json"
+                val file = File(assetsDir, filePath)
+                file.parentFile.mkdirs()
 
-                val desImage = "/path/to/style_list_${sessionId}.json"
 
-                logger.info("uploadFileterImage desImage:${desImage}")
+                logger.info("uploadFileterImage desImage:${file}")
 
 
-                var filterImagepJson = ProcessBuilder("python", "/root/joy_style/joy_api.py", desImage).start();
+                var filterImagepJson = ProcessBuilder("python", "/root/joy_style/joy_api.py", file.toString()).start();
 
 
                 var retStr = ""
@@ -316,7 +319,7 @@ class ImageServiceImpl : ImageService {
                 println("fileterImageList retStr:$retStr,retCode:$retCode,retError:$retError")
 
 
-                return desImage
+                return file.toString()
 //                val jsonFile = File(desImage)
 //                if (jsonFile.exists()) {
 //                    return desImage
@@ -337,23 +340,31 @@ class ImageServiceImpl : ImageService {
     /**
      * 根据前段传过来的图片生成效果滤镜图片
      */
-    override fun imageToFilter(sessionId: String?, styleId:String?):String? {
+    override fun imageToFilter(sessionId: String?, imgFile: MultipartFile?):String? {
         val session = userLoginSessionDao.findOne(sessionId)
         if (session == null) {
             logger.info("imageToFilter session为空")
             return "用户未登录"
-        } else if (styleId == null) {
-            logger.info("imageToFilter 图片为空")
-            return "滤镜ID不能为空"
+        } else if (imgFile == null) {
+            logger.info("imgFile 图片为空")
+            return "imgFile不能为空"
         } else {
             try {
-                var desImage = "/path/to/style_list_${sessionId}.json"
-                val  filterList = listOf(desImage)
-                for (item in filterList) {
-                        val  filter = objectMapper.readValue(item,Filter::class.java)
-                        val inputImageUrl = "/path/to/input_image/${sessionId}"
-                        val outputImageUrl = "/path/to/output_image/${sessionId}/${styleId}"
-                        val imageToFilter = ProcessBuilder("python","/root/joy_style/joy_api.py",inputImageUrl,outputImageUrl,filter.id.toString()).start()
+
+                //val fileName = UUID.randomUUID().toString().replace("-", "")
+                val filePath = "filter/$sessionId.json"
+                val file = File(assetsDir, filePath)
+                file.parentFile.mkdirs()
+                imgFile.transferTo(file)
+
+                //var filterImagepJson = ProcessBuilder("python", "/root/joy_style/joy_api.py", file.toString()).start();
+
+                //var desImage = "/path/to/style_list_${sessionId}.json"
+                val  filterList = listOf(filePath)
+                for ((a,b) in filterList.withIndex()) {
+                        val  filter = objectMapper.readValue(b,Filter::class.java)
+                        val outputImageUrl = "${file}_${a}.json"
+                        val imageToFilter = ProcessBuilder("python","/root/joy_style/joy_api.py",file.toString(),outputImageUrl,filter.id.toString()).start()
                         var retStr = ""
                         var retError = ""
                         BufferedReader(InputStreamReader(imageToFilter.inputStream)).use { reader ->
@@ -374,7 +385,7 @@ class ImageServiceImpl : ImageService {
                     }
 
 
-                return "/path/to/output_image/${sessionId}/${styleId}"
+                return file.toString()
             } catch (e: Exception) {
                 logger.error("imageToFilter error:",e)
                 return "生成滤镜图片失败"

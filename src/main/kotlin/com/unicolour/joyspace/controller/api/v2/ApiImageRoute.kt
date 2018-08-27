@@ -41,8 +41,8 @@ class ApiImageRoute {
      */
     @GetMapping(value = "/v2/fileter/fileterImage")
     fun fileterImage(@RequestParam("sessionId") sessionId: String?,
-                     @RequestParam("styleId") styleId: String?): String?{
-        return imageService.imageToFilter(sessionId,styleId)
+                     @RequestParam("imgFile") imgFile: MultipartFile?): String?{
+        return imageService.imageToFilter(sessionId,imgFile)
     }
 
 
