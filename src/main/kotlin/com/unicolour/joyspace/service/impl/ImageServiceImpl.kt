@@ -284,16 +284,17 @@ class ImageServiceImpl : ImageService {
     /**
      * 调用python,获取滤镜风格列表
      */
-    override fun fileterImageList(sessionId: String): FilterListVo? {
+    override fun fileterImageList(sessionId: String): String?{
         val session = userLoginSessionDao.findOne(sessionId);
 
         if (session == null) {
             logger.info("fileterImageList session为空")
-            return FilterListVo(listOf(Filter(0,"用户未登录")))
+//            return FilterListVo(listOf(Filter(0,"用户未登录")))
+            return "用户未登陆"
         } else {
             try {
 
-                val desImage = "/path/to/style_list.json"
+                val desImage = "/path/to/style_list_${sessionId}.json"
 
                 logger.info("uploadFileterImage desImage:${desImage}")
 
@@ -313,16 +314,21 @@ class ImageServiceImpl : ImageService {
                 val retCode = filterImagepJson.waitFor()
                 println("fileterImageList retStr:$retStr,retCode:$retCode,retError:$retError")
 
-                val jsonFile = File(desImage)
-                if (jsonFile.exists()) {
-                    return objectMapper.readValue(jsonFile,FilterListVo::class.java)
-                }else{
-                    return FilterListVo(listOf(Filter(0,"调取python风格列表异常")))
-                }
+
+                return desImage
+//                val jsonFile = File(desImage)
+//                if (jsonFile.exists()) {
+//                    return desImage
+////                    return objectMapper.readValue(jsonFile,FilterListVo::class.java)
+//                }else{
+////                    return FilterListVo(listOf(Filter(0,"调取python风格列表异常")))
+//                    return "调取python风格列表异常"
+//                }
 
             } catch (e: Exception) {
                 logger.error("error occurs while ", e)
-                return FilterListVo(listOf(Filter(0,"获取滤镜风格列表方法异常")))
+//                return FilterListVo(listOf(Filter(0,"获取滤镜风格列表方法异常")))
+                return "获取滤镜风格列表方法异常"
             }
         }
     }
@@ -330,37 +336,20 @@ class ImageServiceImpl : ImageService {
     /**
      * 根据前段传过来的图片生成效果滤镜图片
      */
-    override fun imageToFilter(sessionId: String?, imgFile: MultipartFile?, styleId: String):FilterUrl? {
+    override fun imageToFilter(sessionId: String?, styleId:String?):String? {
         val session = userLoginSessionDao.findOne(sessionId)
         if (session == null) {
             logger.info("imageToFilter session为空")
-            return FilterUrl("用户未登陆")
-        } else if (imgFile == null) {
+            return "用户未登录"
+        } else if (styleId == null) {
             logger.info("imageToFilter 图片为空")
-            return FilterUrl("图片为空")
+            return "滤镜ID不能为空"
         } else {
             try {
 
-                val fileName = UUID.randomUUID().toString().replace("-", "")
-                val inputImageUrl = "filter/${sessionId}/${imgFile}_${fileName}"
-                val file = File(assetsDir, inputImageUrl)
-                file.parentFile.mkdirs()
-                imgFile.transferTo(file)
-
-                logger.info("imageToFilter file=${file}")
-
-                val outputImageUrl = "filter/${sessionId}_${styleId}/${imgFile}_${fileName}_${styleId}"
-                val file1 = File(assetsDir,outputImageUrl)
-                file1.parentFile.mkdirs()
-
-                logger.info("imageToFilter file1=${file1}")
-
-
-
-
-                val inputImage = "/path/to/input_image"
-                val ouputImage = "/path/to/output_image_$styleId"
-                val imageToFilter = ProcessBuilder("python","/root/joy_style/joy_api.py",file.toString(),file1.toString(),styleId).start()
+                val inputImageUrl = "/path/to/input_image/${sessionId}"
+                val outputImageUrl = "/path/to/output_image/${sessionId}"
+                val imageToFilter = ProcessBuilder("python","/root/joy_style/joy_api.py",inputImageUrl,outputImageUrl,styleId).start()
                 var retStr = ""
                 var retError = ""
                 BufferedReader(InputStreamReader(imageToFilter.inputStream)).use { reader ->
@@ -378,19 +367,19 @@ class ImageServiceImpl : ImageService {
 
                 if (retCode != 0) {
                     logger.error("图片生成滤镜失败，retStr:$retStr , retCode: $retCode")
-                    return FilterUrl("生成滤镜图片失败")
+                    return "生成滤镜图片失败"
                 }
 
 
-                return FilterUrl(ouputImage)
+                return outputImageUrl
             } catch (e: Exception) {
                 logger.error("imageToFilter error:",e)
-                return FilterUrl("生成滤镜图片失败")
+                return "生成滤镜图片失败"
             }
 
 
         }
-        return FilterUrl("生成滤镜图片数据为空")
+        return "生成滤镜图片数据为空"
     }
 }
 

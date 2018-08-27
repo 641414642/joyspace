@@ -22,7 +22,7 @@ interface ImageService {
     /**
      * 调用python,获取滤镜风格列表
      */
-    fun fileterImageList(sessionId: String):FilterListVo?
+    fun fileterImageList(sessionId: String):String?
 
-    fun imageToFilter(sessionId: String?,imagFile: MultipartFile?,styleId:String):FilterUrl?
+    fun imageToFilter(sessionId: String?,styleId: String?):String?
 }
