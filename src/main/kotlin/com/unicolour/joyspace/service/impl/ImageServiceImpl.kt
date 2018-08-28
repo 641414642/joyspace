@@ -322,12 +322,9 @@ class ImageServiceImpl : ImageService {
 
 
 //                return file.toString()
-                val filePath1 = "filter/$sessionId.json"
-                val file1 = File(assetsDir, filePath1)
-                var model:Model
-                if (file1.exists()) {
+                if (file.exists()) {
 //                    return desImage
-                    return objectMapper.readValue(file1,FilterListVo::class.java)
+                    return objectMapper.readValue(file,FilterListVo::class.java)
                 }else{
                     return FilterListVo(listOf(Filter(0,"文件不存在")))
 //                    return "调取python风格列表异常"
@@ -366,6 +363,7 @@ class ImageServiceImpl : ImageService {
                 file.parentFile.mkdirs()
                 imgFile.transferTo(file)
                 val imageFile = File(file,imgFile.toString())
+                imageFile.parentFile.mkdirs()
 
 //                val  filterList = listOf(filterImagepJson)
                 val  filterList = objectMapper.readValue(filterUrl,FilterListVo::class.java)
