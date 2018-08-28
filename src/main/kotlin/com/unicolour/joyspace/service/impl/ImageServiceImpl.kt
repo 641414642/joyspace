@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
+import org.springframework.ui.Model
 import org.springframework.web.multipart.MultipartFile
 import java.io.BufferedReader
 import java.io.File
@@ -133,6 +134,8 @@ class ImageServiceImpl : ImageService {
                     userImgFile.sessionId = sessionId
                     userImgFile.uploadTime = Calendar.getInstance()
                     userImgFile.userId = session.userId
+                    userImgFile.url = url
+
 
                     userImageFileDao.save(userImgFile)
 
@@ -294,7 +297,6 @@ class ImageServiceImpl : ImageService {
 ////            return "用户未登陆"
 //        } else {
             try {
-                val fileName = UUID.randomUUID().toString().replace("-", "")
                 val filePath = "filter/$sessionId.json"
                 val file = File(assetsDir, filePath)
                 file.parentFile.mkdirs()
@@ -303,7 +305,7 @@ class ImageServiceImpl : ImageService {
                 logger.info("uploadFileterImage desImage:${file}")
 
 
-                var filterImagepJson = ProcessBuilder("python", "/root/joy_style/joy_api.py", file.toString()).start();
+                var filterImagepJson = ProcessBuilder("/root/miniconda3/bin/python", "/root/joy_style/joy_api.py", file.absolutePath).start();
 
 
                 var retStr = ""
@@ -320,10 +322,12 @@ class ImageServiceImpl : ImageService {
 
 
 //                return file.toString()
-                val jsonFile = File(file.toString())
-                if (jsonFile.exists()) {
+                val filePath1 = "filter/$sessionId.json"
+                val file1 = File(assetsDir, filePath1)
+                var model:Model
+                if (file1.exists()) {
 //                    return desImage
-                    return objectMapper.readValue(jsonFile,FilterListVo::class.java)
+                    return objectMapper.readValue(file1,FilterListVo::class.java)
                 }else{
                     return FilterListVo(listOf(Filter(0,"文件不存在")))
 //                    return "调取python风格列表异常"
@@ -350,18 +354,28 @@ class ImageServiceImpl : ImageService {
             return "imgFile不能为空"
         } else {
             try {
+
+                val filterImageList = "filter/$sessionId.json"
+                val filterUrl = File(assetsDir, filterImageList)
+                filterUrl.parentFile.mkdirs()
+                var filterImagepJson = ProcessBuilder("/root/miniconda3/bin/python", "/root/joy_style/joy_api.py", filterUrl.absolutePath).start();
+
+
                 val filePath = "filter/$sessionId"
                 val file = File(assetsDir, filePath)
                 file.parentFile.mkdirs()
                 imgFile.transferTo(file)
-
                 val imageFile = File(file,imgFile.toString())
 
-                val  filterList = listOf(filePath)
-                for ((a,b) in filterList.withIndex()) {
-                        val  filter = objectMapper.readValue(b,Filter::class.java)
-                        val outputImageUrl = "${file}_${a}.jpg"
-                        val imageToFilter = ProcessBuilder("python","/root/joy_style/joy_api.py",imageFile.absolutePath,outputImageUrl,filter.id.toString()).start()
+//                val  filterList = listOf(filterImagepJson)
+                val  filterList = objectMapper.readValue(filterUrl,FilterListVo::class.java)
+                var filList = listOf(filterList)
+                for ((a,b) in filList.withIndex()) {
+//                        val  filter = objectMapper(b,Filter::class.java)
+                    var array = arrayOf(b)
+                    var id = array.get(a)
+                    val outputImageUrl = "${file}_${a}.jpg"
+                        val imageToFilter = ProcessBuilder("/root/miniconda3/bin/python","/root/joy_style/joy_api.py",imageFile.absolutePath,outputImageUrl,id.toString()).start()
                         var retStr = ""
                         var retError = ""
                         BufferedReader(InputStreamReader(imageToFilter.inputStream)).use { reader ->

@@ -42,6 +42,10 @@ class UserImageFile {
     @NotNull
     var height: Int = 0
 
+    @Column(length = 50)
+    @NotNull
+    lateinit var url:String
+
     //缩略图
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "thumbnail_id")
