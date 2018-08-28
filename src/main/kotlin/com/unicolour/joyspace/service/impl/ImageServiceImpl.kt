@@ -316,7 +316,7 @@ class ImageServiceImpl : ImageService {
                 }
 
                 val retCode = filterImagepJson.waitFor()
-                println("fileterImageList retStr:$retStr,retCode:$retCode,retError:$retError")
+                logger.info("fileterImageList retStr:$retStr,retCode:$retCode,retError:$retError")
 
 
 //                return file.toString()
@@ -325,7 +325,7 @@ class ImageServiceImpl : ImageService {
 //                    return desImage
                     return objectMapper.readValue(jsonFile,FilterListVo::class.java)
                 }else{
-                    return FilterListVo(listOf(Filter(0,"调取python风格列表异常")))
+                    return FilterListVo(listOf(Filter(0,"文件不存在")))
 //                    return "调取python风格列表异常"
                 }
 
@@ -350,21 +350,18 @@ class ImageServiceImpl : ImageService {
             return "imgFile不能为空"
         } else {
             try {
-
-                //val fileName = UUID.randomUUID().toString().replace("-", "")
-                val filePath = "filter/$sessionId.json"
+                val filePath = "filter/$sessionId"
                 val file = File(assetsDir, filePath)
                 file.parentFile.mkdirs()
                 imgFile.transferTo(file)
 
-                //var filterImagepJson = ProcessBuilder("python", "/root/joy_style/joy_api.py", file.toString()).start();
+                val imageFile = File(file,imgFile.toString())
 
-                //var desImage = "/path/to/style_list_${sessionId}.json"
                 val  filterList = listOf(filePath)
                 for ((a,b) in filterList.withIndex()) {
                         val  filter = objectMapper.readValue(b,Filter::class.java)
-                        val outputImageUrl = "${file}_${a}.json"
-                        val imageToFilter = ProcessBuilder("python","/root/joy_style/joy_api.py",file.toString(),outputImageUrl,filter.id.toString()).start()
+                        val outputImageUrl = "${file}_${a}.jpg"
+                        val imageToFilter = ProcessBuilder("python","/root/joy_style/joy_api.py",imageFile.absolutePath,outputImageUrl,filter.id.toString()).start()
                         var retStr = ""
                         var retError = ""
                         BufferedReader(InputStreamReader(imageToFilter.inputStream)).use { reader ->
