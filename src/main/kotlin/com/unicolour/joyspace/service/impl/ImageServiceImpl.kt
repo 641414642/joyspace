@@ -290,10 +290,10 @@ class ImageServiceImpl : ImageService {
     override fun fileterImageList(sessionId: String): List<Filter>? {
         val session = userLoginSessionDao.findOne(sessionId);
 
-//        if (session == null) {
-//            logger.info("fileterImageList session为空")
-//            return FilterListVo(listOf(Filter(0,"用户未登录")))
-//        } else {
+        if (session == null) {
+            logger.info("fileterImageList session为空")
+            return listOf(Filter(0,"用户未登录"))
+        } else {
             try {
                 val filePath = "filter/$sessionId.json"
                 val desImage = File(assetsDir, filePath)
@@ -337,7 +337,7 @@ class ImageServiceImpl : ImageService {
                 return listOf(Filter(0,"获取滤镜风格列表方法异常"))
             }
         }
-//    }
+    }
 
     /**
      * 根据前段传过来的图片生成效果滤镜图片
