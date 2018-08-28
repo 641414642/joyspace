@@ -368,15 +368,18 @@ class ImageServiceImpl : ImageService {
 
 //                val  filterList = listOf(filterImagepJson)
 
-                val fileUrl = File(filterUrl.absoluteFile.toString())
-                var mapper = ObjectMapper()
-                val  filterList = mapper.readValue(filterUrl,FilterListVo::class.java)
-               var  list = filterList.filters
-                for ((a,b) in list.withIndex()) {
-                    val a = JSONObject.parseObject(b.toString(),Filter::class.java)
+
+                val jsonFile = File(filterUrl.absoluteFile.toString())
+                logger.info("强转")
+                val mapper = ObjectMapper()
+                val typeRef = object : TypeReference<List<Filter>>() {}
+                val result : List<Filter> = mapper.readValue(jsonFile,typeRef)
+                for ((a,b) in result.withIndex()) {
+                    logger.info("遍历a=" + a + "\tb=" + b)
+                    val aa = JSONObject.parseObject(b.toString(),Filter::class.java)
                     logger.info("循环遍历=" + a)
                     val outputImageUrl = "${file}_${a}.jpg"
-                        val imageToFilter = ProcessBuilder("/root/miniconda3/bin/python","/root/joy_style/joy_api.py",imageFile.absolutePath,outputImageUrl,a.id.toString()).start()
+                        val imageToFilter = ProcessBuilder("/root/miniconda3/bin/python","/root/joy_style/joy_api.py",imageFile.absolutePath,outputImageUrl,aa.id.toString()).start()
                         var retStr = ""
                         var retError = ""
                         BufferedReader(InputStreamReader(imageToFilter.inputStream)).use { reader ->
