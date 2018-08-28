@@ -1007,6 +1007,46 @@
 |sessionId      |登录返回的sessionId
 |==========================================================
 
+----
+        [
+            {
+                "id": 101,
+                "name": "style101"
+            },
+            {
+                "id": 102,
+                "name": "style102"
+            },
+            {
+                "id": 103,
+                "name": "style103"
+            },
+            {
+                "id": 104,
+                "name": "style104"
+            },
+            {
+                "id": 105,
+                "name": "style105"
+            },
+            {
+                "id": 106,
+                "name": "style106"
+            },
+            {
+                "id": 107,
+                "name": "style107"
+            },
+            {
+                "id": 108,
+                "name": "style108"
+            },
+            {
+                "id": 109,
+                "name": "style109"
+            }
+        ]
+----
 
 ==== 根据图片生成滤镜效果图:
 - URL: /v2/fileter/fileterImage
