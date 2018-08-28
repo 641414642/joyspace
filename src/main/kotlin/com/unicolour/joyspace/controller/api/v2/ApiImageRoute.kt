@@ -29,7 +29,7 @@ class ApiImageRoute {
      * 滤镜列表接口
      */
     @GetMapping(value = "/v2/filter/filterList")
-    fun filterList(@RequestParam("sessionId") sessionId: String): String? {
+    fun filterList(@RequestParam("sessionId") sessionId: String): FilterListVo? {
         val imgInfo = imageService.fileterImageList(sessionId)
         logger.info("filterList:${imgInfo}")
         return imgInfo

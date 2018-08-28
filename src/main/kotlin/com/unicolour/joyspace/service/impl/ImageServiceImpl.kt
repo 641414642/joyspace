@@ -285,16 +285,16 @@ class ImageServiceImpl : ImageService {
     /**
      * 调用python,获取滤镜风格列表
      */
-    override fun fileterImageList(sessionId: String): String?{
+    override fun fileterImageList(sessionId: String): FilterListVo?{
         val session = userLoginSessionDao.findOne(sessionId);
 
-        if (session == null) {
-            logger.info("fileterImageList session为空")
+//        if (session == null) {
+//            logger.info("fileterImageList session为空")
 //            return FilterListVo(listOf(Filter(0,"用户未登录")))
-            return "用户未登陆"
-        } else {
+////            return "用户未登陆"
+//        } else {
             try {
-               // val fileName = UUID.randomUUID().toString().replace("-", "")
+                val fileName = UUID.randomUUID().toString().replace("-", "")
                 val filePath = "filter/$sessionId.json"
                 val file = File(assetsDir, filePath)
                 file.parentFile.mkdirs()
@@ -319,21 +319,21 @@ class ImageServiceImpl : ImageService {
                 println("fileterImageList retStr:$retStr,retCode:$retCode,retError:$retError")
 
 
-                return file.toString()
-//                val jsonFile = File(desImage)
-//                if (jsonFile.exists()) {
+//                return file.toString()
+                val jsonFile = File(file.toString())
+                if (jsonFile.exists()) {
 //                    return desImage
-////                    return objectMapper.readValue(jsonFile,FilterListVo::class.java)
-//                }else{
-////                    return FilterListVo(listOf(Filter(0,"调取python风格列表异常")))
+                    return objectMapper.readValue(jsonFile,FilterListVo::class.java)
+                }else{
+                    return FilterListVo(listOf(Filter(0,"调取python风格列表异常")))
 //                    return "调取python风格列表异常"
-//                }
+                }
 
             } catch (e: Exception) {
                 logger.error("error occurs while ", e)
-//                return FilterListVo(listOf(Filter(0,"获取滤镜风格列表方法异常")))
-                return "获取滤镜风格列表方法异常"
-            }
+                return FilterListVo(listOf(Filter(0,"获取滤镜风格列表方法异常")))
+//                return "获取滤镜风格列表方法异常"
+//            }
         }
     }
 
