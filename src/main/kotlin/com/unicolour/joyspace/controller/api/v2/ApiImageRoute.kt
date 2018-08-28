@@ -1,6 +1,7 @@
 package com.unicolour.joyspace.controller.api.v2
 
 import com.unicolour.joyspace.dao.UserLoginSessionDao
+import com.unicolour.joyspace.dto.Filter
 import com.unicolour.joyspace.dto.FilterListVo
 import com.unicolour.joyspace.dto.FilterUrl
 import com.unicolour.joyspace.service.ImageService
@@ -29,7 +30,7 @@ class ApiImageRoute {
      * 滤镜列表接口
      */
     @GetMapping(value = "/v2/filter/filterList")
-    fun filterList(@RequestParam("sessionId") sessionId: String): FilterListVo? {
+    fun filterList(@RequestParam("sessionId") sessionId: String): ArrayList<Filter>? {
         val imgInfo = imageService.fileterImageList(sessionId)
         logger.info("filterList:${imgInfo}")
         return imgInfo

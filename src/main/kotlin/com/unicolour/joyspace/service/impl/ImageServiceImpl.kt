@@ -1,7 +1,10 @@
 package com.unicolour.joyspace.service.impl
 
+import com.alibaba.fastjson.JSON
+import com.alibaba.fastjson.JSONArray
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.util.JSONPObject
+import com.fasterxml.jackson.databind.util.JSONWrappedObject
 import com.unicolour.joyspace.dao.*
 import com.unicolour.joyspace.dto.*
 import com.unicolour.joyspace.model.UserImageFile
@@ -22,6 +25,7 @@ import java.util.*
 import java.util.regex.Pattern
 import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
+import com.alibaba.fastjson.JSONObject
 
 @Service
 class ImageServiceImpl : ImageService {
@@ -134,7 +138,7 @@ class ImageServiceImpl : ImageService {
                     userImgFile.sessionId = sessionId
                     userImgFile.uploadTime = Calendar.getInstance()
                     userImgFile.userId = session.userId
-                    userImgFile.url = url
+//                    userImgFile.url = url
 
 
                     userImageFileDao.save(userImgFile)
@@ -288,7 +292,7 @@ class ImageServiceImpl : ImageService {
     /**
      * 调用python,获取滤镜风格列表
      */
-    override fun fileterImageList(sessionId: String): FilterListVo?{
+    override fun fileterImageList(sessionId: String): ArrayList<Filter>?{
         val session = userLoginSessionDao.findOne(sessionId);
 
 //        if (session == null) {
@@ -322,17 +326,36 @@ class ImageServiceImpl : ImageService {
 
 
 //                return file.toString()
+               var json = file.readText()
+                logger.info("读取文件内容=" + json + "\tfileUrl=" + file)
+
+
+//                val a = "[{\"id\": \"0\",\"name\": \"津贵所\",\"platcode\": \"tjpme\"},{\"id\": \"0\",\"name\": \"津贵所\",\"platcode\": \"tjpme\"},]"
+
+                val platformList1 = JSON.parseArray(json)
+
+                var filter:ArrayList<Filter> = ArrayList()
+
+                for (jsonObject in platformList1) {
+                    val platformModel = JSONObject.parseObject<Filter>(jsonObject.toString(), Filter::class.java)
+                    filter.add(platformModel)
+                }
+
                 if (file.exists()) {
-//                    return desImage
-                    return objectMapper.readValue(file,FilterListVo::class.java)
+                    return filter
+//                  return  JSONArray.parseObject(json,FilterListVo::class.java)
+//                    return objectMapper.readValue(file,FilterListVo::class.java)
                 }else{
-                    return FilterListVo(listOf(Filter(0,"文件不存在")))
+
+                    return ArrayList(listOf(Filter(0,"文件不存在")))
+//                    return FilterListVo(arrayOf(Filter(0,"文件不存在")))
 //                    return "调取python风格列表异常"
                 }
 
             } catch (e: Exception) {
                 logger.error("error occurs while ", e)
-                return FilterListVo(listOf(Filter(0,"获取滤镜风格列表方法异常")))
+                return ArrayList(listOf(Filter(0,"获取滤镜风格列表方法异常")))
+//                return FilterListVo(arrayOf(Filter(0,"获取滤镜风格列表方法异常")))
 //                return "获取滤镜风格列表方法异常"
 //            }
         }
