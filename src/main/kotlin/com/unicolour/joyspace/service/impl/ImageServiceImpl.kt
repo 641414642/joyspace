@@ -26,6 +26,7 @@ import java.util.regex.Pattern
 import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
 import com.alibaba.fastjson.JSONObject
+import com.alibaba.fastjson.TypeReference
 
 @Service
 class ImageServiceImpl : ImageService {
@@ -292,24 +293,23 @@ class ImageServiceImpl : ImageService {
     /**
      * 调用python,获取滤镜风格列表
      */
-    override fun fileterImageList(sessionId: String): ArrayList<Filter>?{
+    override fun fileterImageList(sessionId: String): List<Filter>? {
         val session = userLoginSessionDao.findOne(sessionId);
 
 //        if (session == null) {
 //            logger.info("fileterImageList session为空")
 //            return FilterListVo(listOf(Filter(0,"用户未登录")))
-////            return "用户未登陆"
 //        } else {
             try {
                 val filePath = "filter/$sessionId.json"
-                val file = File(assetsDir, filePath)
-                file.parentFile.mkdirs()
+                val desImage = File(assetsDir, filePath)
+                desImage.parentFile.mkdirs()
 
 
-                logger.info("uploadFileterImage desImage:${file}")
+                logger.info("uploadFileterImage desImage:${desImage}")
 
 
-                var filterImagepJson = ProcessBuilder("/root/miniconda3/bin/python", "/root/joy_style/joy_api.py", file.absolutePath).start();
+                var filterImagepJson = ProcessBuilder("/root/miniconda3/bin/python", "/root/joy_style/joy_api.py", desImage.absolutePath).start();
 
 
                 var retStr = ""
@@ -324,42 +324,26 @@ class ImageServiceImpl : ImageService {
                 val retCode = filterImagepJson.waitFor()
                 logger.info("fileterImageList retStr:$retStr,retCode:$retCode,retError:$retError")
 
-
-//                return file.toString()
-               var json = file.readText()
-                logger.info("读取文件内容=" + json + "\tfileUrl=" + file)
-
-
-//                val a = "[{\"id\": \"0\",\"name\": \"津贵所\",\"platcode\": \"tjpme\"},{\"id\": \"0\",\"name\": \"津贵所\",\"platcode\": \"tjpme\"},]"
-
-                val platformList1 = JSON.parseArray(json)
-
-                var filter:ArrayList<Filter> = ArrayList()
-
-                for (jsonObject in platformList1) {
-                    val platformModel = JSONObject.parseObject<Filter>(jsonObject.toString(), Filter::class.java)
-                    filter.add(platformModel)
-                }
-
-                if (file.exists()) {
-                    return filter
-//                  return  JSONArray.parseObject(json,FilterListVo::class.java)
-//                    return objectMapper.readValue(file,FilterListVo::class.java)
+                val jsonFile = File(desImage.absoluteFile.toString())
+                if (jsonFile.exists()) {
+                    logger.info("强转")
+                    val mapper = ObjectMapper()
+                    val typeRef = object : TypeReference<List<Filter>>() {}
+                    val result : List<Filter> = mapper.readValue(jsonFile,typeRef)
+                    return result
+//                    result.forEach(::println)
+//                    val mapper = ObjectMapper()
+//                    return mapper.readValue(jsonFile,FilterListVo::class.java)
                 }else{
-
-                    return ArrayList(listOf(Filter(0,"文件不存在")))
-//                    return FilterListVo(arrayOf(Filter(0,"文件不存在")))
-//                    return "调取python风格列表异常"
+                    return listOf(Filter(0,"调取python风格列表异常"))
                 }
 
             } catch (e: Exception) {
                 logger.error("error occurs while ", e)
-                return ArrayList(listOf(Filter(0,"获取滤镜风格列表方法异常")))
-//                return FilterListVo(arrayOf(Filter(0,"获取滤镜风格列表方法异常")))
-//                return "获取滤镜风格列表方法异常"
-//            }
+                return listOf(Filter(0,"获取滤镜风格列表方法异常"))
+            }
         }
-    }
+//    }
 
     /**
      * 根据前段传过来的图片生成效果滤镜图片
@@ -389,14 +373,16 @@ class ImageServiceImpl : ImageService {
                 imageFile.parentFile.mkdirs()
 
 //                val  filterList = listOf(filterImagepJson)
-                val  filterList = objectMapper.readValue(filterUrl,FilterListVo::class.java)
-                var filList = listOf(filterList)
-                for ((a,b) in filList.withIndex()) {
-//                        val  filter = objectMapper(b,Filter::class.java)
-                    var array = arrayOf(b)
-                    var id = array.get(a)
+
+                val fileUrl = File(filterUrl.absoluteFile.toString())
+                var mapper = ObjectMapper()
+                val  filterList = mapper.readValue(filterUrl,FilterListVo::class.java)
+               var  list = filterList.filters
+                for ((a,b) in list.withIndex()) {
+                    val a = JSONObject.parseObject(b.toString(),Filter::class.java)
+                    logger.info("循环遍历=" + a)
                     val outputImageUrl = "${file}_${a}.jpg"
-                        val imageToFilter = ProcessBuilder("/root/miniconda3/bin/python","/root/joy_style/joy_api.py",imageFile.absolutePath,outputImageUrl,id.toString()).start()
+                        val imageToFilter = ProcessBuilder("/root/miniconda3/bin/python","/root/joy_style/joy_api.py",imageFile.absolutePath,outputImageUrl,a.id.toString()).start()
                         var retStr = ""
                         var retError = ""
                         BufferedReader(InputStreamReader(imageToFilter.inputStream)).use { reader ->
