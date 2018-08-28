@@ -61,6 +61,10 @@ class ImageServiceImpl : ImageService {
                 val file = File(assetsDir, filePath)
                 file.parentFile.mkdirs()
 
+                val fileImagePath = "filter/$sessionId"
+                val fileImage = File(assetsDir, filePath)
+                file.parentFile.mkdirs()
+
                 imgFile.transferTo(file)
 
 
@@ -121,7 +125,7 @@ class ImageServiceImpl : ImageService {
 
                     val url :String
                     if(filterImageId != null) {
-                         url = "${baseUrl}/assets/${filePath}_$filterImageId.${imgType}"
+                         url = "${baseUrl}/assets/${fileImagePath}_$filterImageId.${imgType}"
                     } else {
                          url = "${baseUrl}/assets/${filePath}.${imgType}"
                     }

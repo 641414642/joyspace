@@ -1,12 +1,12 @@
 package com.unicolour.joyspace.controller.api.v2
 
 import com.unicolour.joyspace.dao.UserLoginSessionDao
-import com.unicolour.joyspace.dto.Filter
-import com.unicolour.joyspace.dto.FilterListVo
-import com.unicolour.joyspace.dto.FilterUrl
+import com.unicolour.joyspace.dto.*
+import com.unicolour.joyspace.dto.common.RestResponse
 import com.unicolour.joyspace.service.ImageService
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.multipart.MultipartFile
 import java.io.BufferedReader
@@ -30,10 +30,10 @@ class ApiImageRoute {
      * 滤镜列表接口
      */
     @GetMapping(value = "/v2/filter/filterList")
-    fun filterList(@RequestParam("sessionId") sessionId: String):  List<Filter>? {
+    fun filterList(@RequestParam("sessionId") sessionId: String):  RestResponse? {
         val imgInfo = imageService.fileterImageList(sessionId)
         logger.info("filterList:${imgInfo}")
-        return imgInfo
+        return RestResponse.ok(imgInfo.toString())
     }
 
 
