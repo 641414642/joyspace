@@ -293,7 +293,7 @@ class ImageServiceImpl : ImageService {
      * 调用python,获取滤镜风格列表
      */
     override fun filterImageList(sessionId: String): List<Filter> {
-//        userLoginSessionDao.findOne(sessionId) ?: throw ProcessException(1, "用户未登录")
+        userLoginSessionDao.findOne(sessionId) ?: throw ProcessException(1, "用户未登录")
         val filePath = "filter/$sessionId.json"
         val desImage = File(assetsDir, filePath)
         desImage.parentFile.mkdirs()
@@ -327,7 +327,7 @@ class ImageServiceImpl : ImageService {
     /**
      * 根据前段传过来的图片生成效果滤镜图片
      */
-    override fun imageToFilter(sessionId: String, imgFile: MultipartFile?,filterId:String):String? {
+    override fun imageToFilter(sessionId: String, imgFile: MultipartFile?):String? {
         val session = userLoginSessionDao.findOne(sessionId)
         if (session == null) {
             logger.info("imageToFilter session为空")
@@ -336,47 +336,52 @@ class ImageServiceImpl : ImageService {
             logger.info("imgFile 图片为空")
             return "imgFile不能为空"
         } else {
-        try {
+            try {
 
-            val filePath = "filter/$sessionId"
-            val file = File(assetsDir, filePath)
-            file.parentFile.mkdirs()
-            imgFile.transferTo(file)
-            val imageFile = File(file.absoluteFile.toString())
-            imageFile.parentFile.mkdirs()
+                val filePath = "filter/$sessionId"
+                val file = File(assetsDir, filePath)
+                file.parentFile.mkdirs()
+                imgFile.transferTo(file)
+//                val filePath1 = "filter/$sessionId.json"
+//                val desImage = File(assetsDir, filePath1)
+//                desImage.parentFile.mkdirs()
+//                logger.info("uploadFilterImage desImage:$desImage")
+//                getFilterListJsonFile(desImage)
+//                val jsonFile = File(desImage.absoluteFile.toString())
+//                var filterList = objectMapper.readValue(jsonFile, object : TypeReference<List<Filter>>() {})
 
+//                for ((a,b) in filterList.withIndex()) {
+                    for (b in 101..109) {
+                    logger.info("遍历b=" + b)
+//                    val filter = JSONObject.parseObject<Filter>(b.toString(), Filter::class.java)
+                    logger.info("循环遍历=" + b)
+                    val outputImageUrl = "${file}_${b}.jpg"
+                    val imageToFilter = ProcessBuilder("/root/miniconda3/bin/python","/root/joy_style/joy_api.py",file.absolutePath,outputImageUrl,b.toString()).start()
+                    var retStr = ""
+                    var retError = ""
+                    BufferedReader(InputStreamReader(imageToFilter.inputStream)).use { reader ->
+                        retStr = reader.readText()
+                    }
+                    BufferedReader(InputStreamReader(imageToFilter.errorStream)).use { reader ->
+                        retError = reader.readText()
+                    }
 
+                    val retCode = imageToFilter.waitFor()
 
-            var filterList = filterImageList(sessionId)
-            logger.info("imageToFilter=" + filterList)
-
-                val outputImageUrl = "${file}_${filterId}.jpg"
-                logger.info("imageToFileter111=" + outputImageUrl)
-                val imageToFilter = ProcessBuilder( "/root/miniconda3/bin/python", "/root/joy_style/joy_api.py", imageFile.absolutePath, outputImageUrl, filterId).start()
-                var retStr = ""
-                var retError = ""
-                BufferedReader(InputStreamReader(imageToFilter.inputStream)).use { reader ->
-                    retStr = reader.readText()
+                    if (retCode != 0) {
+                        logger.error("图片生成滤镜失败，retStr:$retStr , retCode: $retCode")
+                        return "生成滤镜图片失败"
+                    }
+                    logger.info("imageToFilter retStr:$retStr,retError:$retError,retCode:$retCode")
+                    continue
                 }
-                BufferedReader(InputStreamReader(imageToFilter.errorStream)).use { reader ->
-                    retError = reader.readText()
-                }
-
-                val retCode = imageToFilter.waitFor()
-
-                if (retCode != 0) {
-                    logger.error("图片生成滤镜失败，retStr:$retStr , retCode: $retCode")
-                    return "生成滤镜图片失败"
-                }
-                logger.info("imageToFilter retStr:$retStr,retError:$retError,retCode:$retCode")
 
 
-            var url = "${baseUrl}/assets/${file}"
-            return url
-        } catch (e: Exception) {
-            logger.error("imageToFilter error:", e)
-            return "生成滤镜图片失败"
-        }
+                return file.toString()
+            } catch (e: Exception) {
+                logger.error("imageToFilter error:",e)
+                return "生成滤镜图片失败"
+            }
 
 
         }

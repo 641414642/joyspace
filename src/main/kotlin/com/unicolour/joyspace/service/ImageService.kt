@@ -24,5 +24,5 @@ interface ImageService {
      */
     fun filterImageList(sessionId: String): List<Filter>
 
-    fun imageToFilter(sessionId: String, imgFile: MultipartFile?,fiterId:String):String?
+    fun imageToFilter(sessionId: String, imgFile: MultipartFile?):String?
 }
