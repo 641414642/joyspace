@@ -349,10 +349,10 @@ class ImageServiceImpl : ImageService {
 
                 for ((a,b) in filterList.withIndex()) {
                     logger.info("遍历a=" + a + "\tb=" + b)
-                    val aa = JSONObject.parseObject(b.toString(),Filter::class.java)
-                    logger.info("循环遍历=" + a)
+                    val filter = JSONObject.parseObject<Filter>(b.toString(), Filter::class.java)
+                    logger.info("循环遍历=" + filter)
                     val outputImageUrl = "${file}_${a}.jpg"
-                        val imageToFilter = ProcessBuilder("/root/miniconda3/bin/python","/root/joy_style/joy_api.py",imageFile.absolutePath,outputImageUrl,aa.id.toString()).start()
+                        val imageToFilter = ProcessBuilder("/root/miniconda3/bin/python","/root/joy_style/joy_api.py",imageFile.absolutePath,outputImageUrl,filter.id.toString()).start()
                         var retStr = ""
                         var retError = ""
                         BufferedReader(InputStreamReader(imageToFilter.inputStream)).use { reader ->
