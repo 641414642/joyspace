@@ -14,6 +14,8 @@ import graphql.schema.DataFetcher
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.boot.web.servlet.MultipartConfigFactory
+import org.springframework.context.annotation.Bean
 import org.springframework.stereotype.Service
 import org.springframework.web.multipart.MultipartFile
 import java.io.BufferedReader
@@ -22,6 +24,7 @@ import java.io.IOException
 import java.io.InputStreamReader
 import java.util.*
 import java.util.regex.Pattern
+import javax.servlet.MultipartConfigElement
 
 @Service
 class ImageServiceImpl : ImageService {
@@ -328,6 +331,7 @@ class ImageServiceImpl : ImageService {
      * 根据前段传过来的图片生成效果滤镜图片
      */
     override fun imageToFilter(sessionId: String, imgFile: MultipartFile?):String? {
+        logger.info("imageToFilter1111111=" + sessionId + "\timgFile=" + imgFile.toString())
         val session = userLoginSessionDao.findOne(sessionId)
         if (session == null) {
             logger.info("imageToFilter session为空")
@@ -338,9 +342,14 @@ class ImageServiceImpl : ImageService {
         } else {
             try {
 
-                val filePath = "filter/$sessionId"
+                val filePath = "filter/${session.userId}/$sessionId"
                 val file = File(assetsDir, filePath)
+                logger.info("imageToFilter=" + file)
                 file.parentFile.mkdirs()
+                /**
+                 * 设置临时文件目录
+                 */
+                multipartConfigElement()
                 imgFile.transferTo(file)
 //                val filePath1 = "filter/$sessionId.json"
 //                val desImage = File(assetsDir, filePath1)
@@ -373,10 +382,8 @@ class ImageServiceImpl : ImageService {
                         return "生成滤镜图片失败"
                     }
                     logger.info("imageToFilter retStr:$retStr,retError:$retError,retCode:$retCode")
-                    continue
+
                 }
-
-
 
                 var url = "${baseUrl}/assets/${filePath}"
                 return url
@@ -388,6 +395,14 @@ class ImageServiceImpl : ImageService {
 
         }
         return "生成滤镜图片数据为空"
+    }
+
+    @Bean
+    fun multipartConfigElement(): MultipartConfigElement {
+        val factory = MultipartConfigFactory()
+        //你的项目地址
+        factory.setLocation("/home/soft")
+        return factory.createMultipartConfig()
     }
 
 }
