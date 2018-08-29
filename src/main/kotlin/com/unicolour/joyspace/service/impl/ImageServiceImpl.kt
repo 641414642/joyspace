@@ -7,6 +7,7 @@ import com.unicolour.joyspace.dao.ProductDao
 import com.unicolour.joyspace.dao.UserImageFileDao
 import com.unicolour.joyspace.dao.UserLoginSessionDao
 import com.unicolour.joyspace.dto.*
+import com.unicolour.joyspace.exception.ProcessException
 import com.unicolour.joyspace.model.UserImageFile
 import com.unicolour.joyspace.service.ImageService
 import graphql.schema.DataFetcher
@@ -291,56 +292,36 @@ class ImageServiceImpl : ImageService {
     /**
      * 调用python,获取滤镜风格列表
      */
-    override fun fileterImageList(sessionId: String): List<Filter>? {
-        val session = userLoginSessionDao.findOne(sessionId);
-
-        if (session == null) {
-            logger.info("fileterImageList session为空")
-            return listOf(Filter(0,"用户未登录"))
+    override fun filterImageList(sessionId: String): List<Filter> {
+        userLoginSessionDao.findOne(sessionId) ?: throw ProcessException(1, "用户未登录")
+        val filePath = "filter/$sessionId.json"
+        val desImage = File(assetsDir, filePath)
+        desImage.parentFile.mkdirs()
+        logger.info("uploadFilterImage desImage:$desImage")
+        getFilterListJsonFile(desImage)
+        val jsonFile = File(desImage.absoluteFile.toString())
+        if (jsonFile.exists()) {
+            logger.info("强转")
+            return objectMapper.readValue(jsonFile, object : TypeReference<List<Filter>>() {})
         } else {
-            try {
-                val filePath = "filter/$sessionId.json"
-                val desImage = File(assetsDir, filePath)
-                desImage.parentFile.mkdirs()
-
-
-                logger.info("uploadFileterImage desImage:${desImage}")
-
-
-                var filterImagepJson = ProcessBuilder("/root/miniconda3/bin/python", "/root/joy_style/joy_api.py", desImage.absolutePath).start();
-
-
-                var retStr = ""
-                var retError = ""
-                BufferedReader(InputStreamReader(filterImagepJson.inputStream)).use { reader ->
-                    retStr = reader.readText()
-                }
-                BufferedReader(InputStreamReader(filterImagepJson.errorStream)).use { reader ->
-                    retError = reader.readText()
-                }
-
-                val retCode = filterImagepJson.waitFor()
-                logger.info("fileterImageList retStr:$retStr,retCode:$retCode,retError:$retError")
-
-                val jsonFile = File(desImage.absoluteFile.toString())
-                if (jsonFile.exists()) {
-                    logger.info("强转")
-                    val mapper = ObjectMapper()
-                    val typeRef = object : TypeReference<List<Filter>>() {}
-                    val result : List<Filter> = mapper.readValue(jsonFile,typeRef)
-                    return result
-//                    result.forEach(::println)
-//                    val mapper = ObjectMapper()
-//                    return mapper.readValue(jsonFile,FilterListVo::class.java)
-                }else{
-                    return listOf(Filter(0,"调取python风格列表异常"))
-                }
-
-            } catch (e: Exception) {
-                logger.error("error occurs while ", e)
-                return listOf(Filter(0,"获取滤镜风格列表方法异常"))
-            }
+            throw ProcessException(2, "没找到 json 文件")
         }
+
+
+    }
+
+    private fun getFilterListJsonFile(desImage: File) {
+        val process = ProcessBuilder("/root/miniconda3/bin/python", "/root/joy_style/joy_api.py", desImage.absolutePath).start()
+        var retStr = ""
+        var retError = ""
+        BufferedReader(InputStreamReader(process.inputStream)).use { reader ->
+            retStr = reader.readText()
+        }
+        BufferedReader(InputStreamReader(process.errorStream)).use { reader ->
+            retError = reader.readText()
+        }
+        val retCode = process.waitFor()
+        logger.info("filterImageList retStr:$retStr,retCode:$retCode,retError:$retError")
     }
 
     /**

@@ -1,13 +1,14 @@
 package com.unicolour.joyspace.controller.api.v2
 
-import com.unicolour.joyspace.dao.UserLoginSessionDao
-import com.unicolour.joyspace.dto.*
 import com.unicolour.joyspace.dto.common.RestResponse
+import com.unicolour.joyspace.exception.ProcessException
 import com.unicolour.joyspace.service.ImageService
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.annotation.*
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestParam
+import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.multipart.MultipartFile
 import java.io.BufferedReader
 import java.io.IOException
@@ -22,25 +23,30 @@ class ApiImageRoute {
     @Autowired
     lateinit var imageService: ImageService
 
-    @Autowired
-    lateinit var userLoginSessionDao: UserLoginSessionDao
-
 
     /**
      * 滤镜列表接口
      */
     @GetMapping(value = "/v2/filter/filterList")
-    fun filterList(@RequestParam("sessionId") sessionId: String):  RestResponse? {
-        val imgInfo = imageService.fileterImageList(sessionId)
-        logger.info("filterList:${imgInfo}")
-        return RestResponse.ok(imgInfo.toString())
+    fun filterList(@RequestParam("sessionId") sessionId: String): RestResponse? {
+        return try {
+            val imgInfo = imageService.filterImageList(sessionId)
+            logger.info("filterList:$imgInfo")
+            RestResponse.ok(imgInfo)
+        } catch (e: ProcessException) {
+            logger.error("error code:${e.errcode},message:${e.message}", e)
+            RestResponse(e.errcode, null, e.message)
+        } catch (e: Exception) {
+            logger.error("error occurs while filterList", e)
+            RestResponse(1, null, e.message)
+        }
     }
 
 
     /**
      * 根据前段传来的图片生成效果图
      */
-    @GetMapping(value = "/v2/fileter/fileterImage")
+    @PostMapping(value = "/v2/fileter/fileterImage")
     fun fileterImage(@RequestParam("sessionId") sessionId: String?,
                      @RequestParam("imgFile") imgFile: MultipartFile?): String?{
         return imageService.imageToFilter(sessionId,imgFile)
