@@ -327,7 +327,7 @@ class ImageServiceImpl : ImageService {
     /**
      * 根据前段传过来的图片生成效果滤镜图片
      */
-    override fun imageToFilter(sessionId: String?, imgFile: MultipartFile?):String? {
+    override fun imageToFilter(sessionId: String, imgFile: MultipartFile?):String? {
         val session = userLoginSessionDao.findOne(sessionId)
         if (session == null) {
             logger.info("imageToFilter session为空")
@@ -338,12 +338,6 @@ class ImageServiceImpl : ImageService {
         } else {
             try {
 
-                val filterImageList = "filter/$sessionId.json"
-                val filterUrl = File(assetsDir, filterImageList)
-                filterUrl.parentFile.mkdirs()
-                var filterImagepJson = ProcessBuilder("/root/miniconda3/bin/python", "/root/joy_style/joy_api.py", filterUrl.absolutePath).start();
-
-
                 val filePath = "filter/$sessionId"
                 val file = File(assetsDir, filePath)
                 file.parentFile.mkdirs()
@@ -351,15 +345,9 @@ class ImageServiceImpl : ImageService {
                 val imageFile = File(file,imgFile.toString())
                 imageFile.parentFile.mkdirs()
 
-//                val  filterList = listOf(filterImagepJson)
+                var filterList = filterImageList(sessionId)
 
-
-                val jsonFile = File(filterUrl.absoluteFile.toString())
-                logger.info("强转")
-                val mapper = ObjectMapper()
-                val typeRef = object : TypeReference<List<Filter>>() {}
-                val result : List<Filter> = mapper.readValue(jsonFile,typeRef)
-                for ((a,b) in result.withIndex()) {
+                for ((a,b) in filterList.withIndex()) {
                     logger.info("遍历a=" + a + "\tb=" + b)
                     val aa = JSONObject.parseObject(b.toString(),Filter::class.java)
                     logger.info("循环遍历=" + a)
