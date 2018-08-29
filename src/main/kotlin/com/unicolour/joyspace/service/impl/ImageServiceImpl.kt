@@ -377,7 +377,9 @@ class ImageServiceImpl : ImageService {
                 }
 
 
-                return file.toString()
+
+                var url = "${baseUrl}/assets/${filePath}"
+                return url
             } catch (e: Exception) {
                 logger.error("imageToFilter error:",e)
                 return "生成滤镜图片失败"
