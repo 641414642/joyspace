@@ -46,9 +46,9 @@ class ApiImageRoute {
     /**
      * 根据前段传来的图片生成效果图
      */
-   @GetMapping(value = "/v2/fileter/fileterImage")
+   @PostMapping(value = "/v2/fileter/fileterImage")
     fun fileterImage(@RequestParam("sessionId") sessionId: String,
-                     @RequestParam("imgFile",required = false) imgFile: MultipartFile?,
+                     @RequestParam("imgFile") imgFile: MultipartFile?,
                      @RequestParam("filterId")filterId:String): String?{
         return imageService.imageToFilter(sessionId,imgFile,filterId)
     }
