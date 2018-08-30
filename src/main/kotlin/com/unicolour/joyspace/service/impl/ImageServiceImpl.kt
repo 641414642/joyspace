@@ -129,9 +129,9 @@ class ImageServiceImpl : ImageService {
 
                     val url :String
                     if(filterImageId != null) {
-                         url = "${baseUrl}/assets/${fileImagePath}_$filterImageId.${imgType}"
+                        url = "${baseUrl}/assets/${fileImagePath}_$filterImageId.${imgType}"
                     } else {
-                         url = "${baseUrl}/assets/${filePath}.${imgType}"
+                        url = "${baseUrl}/assets/${filePath}.${imgType}"
                     }
                     val userImgFile = UserImageFile()
                     userImgFile.type = imgType
@@ -369,10 +369,9 @@ class ImageServiceImpl : ImageService {
 
                     if (retCode != 0) {
                         logger.error("图片生成滤镜失败，retStr:$retStr , retCode: $retCode")
-                        return "生成滤镜图片失败"
+                        continue
                     }
                     logger.info("imageToFilter retStr:$retStr,retError:$retError,retCode:$retCode")
-                    continue
                 }
 
                 var url = "${baseUrl}/assets/${file}"
@@ -388,4 +387,3 @@ class ImageServiceImpl : ImageService {
     }
 
 }
-
