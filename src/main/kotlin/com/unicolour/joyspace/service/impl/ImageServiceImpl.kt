@@ -330,7 +330,9 @@ class ImageServiceImpl : ImageService {
     private fun getFilterImage(srcImgFile: File,filterImageId: Int) {
         logger.info("getFilterImage filterImageId=" + filterImageId)
         val desImagePath = srcImgFile.absolutePath.split(".").first().plus("_$filterImageId").plus(srcImgFile.absolutePath.split(".").last())
-        val imageToFilter = ProcessBuilder("/root/miniconda3/bin/python","/root/joy_style/joy_api.py",srcImgFile.absolutePath,desImagePath,filterImageId.toString()).start()
+        var inputImagePath = srcImgFile.absolutePath.split(".").first()
+        logger.info("desImagePath=" + desImagePath + "\tinputImagePath=" + inputImagePath)
+        val imageToFilter = ProcessBuilder("/root/miniconda3/bin/python","/root/joy_style/joy_api.py",inputImagePath,desImagePath,filterImageId.toString()).start()
         var retStr = ""
         var retError = ""
         BufferedReader(InputStreamReader(imageToFilter.inputStream)).use { reader ->
