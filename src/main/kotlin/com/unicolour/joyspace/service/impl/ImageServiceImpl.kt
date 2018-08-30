@@ -328,7 +328,7 @@ class ImageServiceImpl : ImageService {
     }
 
     private fun getFilterImage(srcImgFile: File,filterImageId: Int) {
-        logger.info("getFilterImage first=" + srcImgFile.absolutePath.split(".").first() + "\t")
+        logger.info("getFilterImage filterImageId=" + filterImageId)
         val desImagePath = srcImgFile.absolutePath.split(".").first().plus("_$filterImageId").plus(srcImgFile.absolutePath.split(".").last())
         val imageToFilter = ProcessBuilder("/root/miniconda3/bin/python","/root/joy_style/joy_api.py",srcImgFile.absolutePath,desImagePath,filterImageId.toString()).start()
         var retStr = ""
@@ -362,7 +362,7 @@ class ImageServiceImpl : ImageService {
             getFilterImage(srcImgFile,i)
         }
 //        filterList.forEach { getFilterImage(srcImgFile,it.id) }
-        val url = filePath.split(".").first()
+        val url = filePath.split(".").first() + "_##filterId##.jpg"
         logger.info("imageToFilter url=" + url)
         return "$baseUrl/assets/$url"
     }
