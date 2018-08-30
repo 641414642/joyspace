@@ -46,10 +46,19 @@ class ApiImageRoute {
     /**
      * 根据前段传来的图片生成效果图
      */
-   @PostMapping(value = "/v2/fileter/fileterImage")
-    fun fileterImage(@RequestParam("sessionId") sessionId: String,
-                     @RequestParam("imgFile") imgFile: MultipartFile?): String?{
-        return imageService.imageToFilter(sessionId,imgFile)
+    @PostMapping(value = "/v2/fileter/fileterImage")
+    fun filterImage(@RequestParam("sessionId") sessionId: String,
+                    @RequestParam("imgFile") imgFile: MultipartFile?): RestResponse? {
+        return try {
+            val url = imageService.imageToFilter(sessionId, imgFile)
+            RestResponse.ok(url)
+        } catch (e: ProcessException) {
+            logger.error("error code:${e.errcode},message:${e.message}", e)
+            RestResponse(e.errcode, null, e.message)
+        } catch (e: Exception) {
+            logger.error("error occurs while filterImage", e)
+            RestResponse(1, null, e.message)
+        }
     }
 
 

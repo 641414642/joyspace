@@ -297,7 +297,7 @@ class ImageServiceImpl : ImageService {
      */
     override fun filterImageList(sessionId: String): List<Filter> {
         userLoginSessionDao.findOne(sessionId) ?: throw ProcessException(1, "用户未登录")
-        val filePath = "filter/$sessionId.json"
+        val filePath = "filter/filterList.json"
         val desImage = File(assetsDir, filePath)
         desImage.parentFile.mkdirs()
         logger.info("uploadFilterImage desImage:$desImage")
@@ -327,62 +327,37 @@ class ImageServiceImpl : ImageService {
         logger.info("filterImageList retStr:$retStr,retCode:$retCode,retError:$retError")
     }
 
+    private fun getFilterImage(srcImgFile: File,filterImageId: Int) {
+        val desImagePath = srcImgFile.absolutePath.split(".").first().plus("_$filterImageId").plus(srcImgFile.absolutePath.split(".").last())
+        val imageToFilter = ProcessBuilder("/root/miniconda3/bin/python","/root/joy_style/joy_api.py",srcImgFile.absolutePath,desImagePath,filterImageId.toString()).start()
+        var retStr = ""
+        var retError = ""
+        BufferedReader(InputStreamReader(imageToFilter.inputStream)).use { reader ->
+            retStr = reader.readText()
+        }
+        BufferedReader(InputStreamReader(imageToFilter.errorStream)).use { reader ->
+            retError = reader.readText()
+        }
+        val retCode = imageToFilter.waitFor()
+        logger.info("getFilterImage retStr:$retStr,retCode:$retCode,retError:$retError")
+    }
+
     /**
      * 根据前段传过来的图片生成效果滤镜图片
      */
-    override fun imageToFilter(sessionId: String, imgFile: MultipartFile?):String? {
-        val session = userLoginSessionDao.findOne(sessionId)
-        if (session == null) {
-            logger.info("imageToFilter session为空")
-            return "用户未登录"
-        } else if (imgFile == null) {
-            logger.info("imgFile 图片为空")
-            return "imgFile不能为空"
-        } else {
-            try {
-
-                val filePath = "filter/${session.userId}/$sessionId"
-                val file = File(assetsDir, filePath)
-                file.parentFile.mkdirs()
-                imgFile.transferTo(file)
-
-
-                var filterList = filterImageList(sessionId)
-
-                for ((a,b) in filterList.withIndex()) {
-                    logger.info("遍历a=" + a + "\tb=" + b)
-                    val filter = JSONObject.parseObject<Filter>(b.toString(), Filter::class.java)
-                    logger.info("循环遍历=" + filter)
-                    val outputImageUrl = "${file}_${a}.jpg"
-                    val imageToFilter = ProcessBuilder("/root/miniconda3/bin/python","/root/joy_style/joy_api.py",file.absolutePath,outputImageUrl,filter.id.toString()).start()
-                    var retStr = ""
-                    var retError = ""
-                    BufferedReader(InputStreamReader(imageToFilter.inputStream)).use { reader ->
-                        retStr = reader.readText()
-                    }
-                    BufferedReader(InputStreamReader(imageToFilter.errorStream)).use { reader ->
-                        retError = reader.readText()
-                    }
-
-                    val retCode = imageToFilter.waitFor()
-
-                    if (retCode != 0) {
-                        logger.error("图片生成滤镜失败，retStr:$retStr , retCode: $retCode")
-                        continue
-                    }
-                    logger.info("imageToFilter retStr:$retStr,retError:$retError,retCode:$retCode")
-                }
-
-                var url = "${baseUrl}/assets/${file}"
-                return url
-            } catch (e: Exception) {
-                logger.error("imageToFilter error:",e)
-                return "生成滤镜图片失败"
-            }
-
-
-        }
-        return "生成滤镜图片数据为空"
+    override fun imageToFilter(sessionId: String, imgFile: MultipartFile?):String {
+        userLoginSessionDao.findOne(sessionId) ?: throw ProcessException(1, "用户未登录")
+        imgFile ?: throw ProcessException(2, "没有图片文件")
+        val fileName = UUID.randomUUID().toString().replace("-", "")
+        val filePath = "filterTmp/$sessionId/$fileName.jpg"
+        val srcImgFile = File(assetsDir, filePath)
+        srcImgFile.parentFile.mkdirs()
+        imgFile.transferTo(srcImgFile)
+        val jsonFile = File(assetsDir,"filter/filterList.json")
+        if (!jsonFile.exists()) throw ProcessException(3,"没找到filterList.json文件")
+        val filterList: List<Filter> = objectMapper.readValue(jsonFile, object : TypeReference<List<Filter>>() {})
+        filterList.forEach { getFilterImage(srcImgFile,it.id) }
+        return "$baseUrl/assets/$filePath"
     }
 
 }
