@@ -65,7 +65,8 @@ class ImageServiceImpl : ImageService {
                 val file = File(assetsDir, filePath)
                 file.parentFile.mkdirs()
 
-                val fileImagePath = "filter/$sessionId"
+
+                val fileImagePath = "filterTmp/${session.userId}/${fileName}_${filterImageId}.jpg"
                 val fileImage = File(assetsDir, filePath)
                 file.parentFile.mkdirs()
 
@@ -129,7 +130,7 @@ class ImageServiceImpl : ImageService {
 
                     val url :String
                     if(filterImageId != null) {
-                        url = "${baseUrl}/assets/${fileImagePath}_$filterImageId.${imgType}"
+                        url = "${baseUrl}/assets/${fileImagePath}"
                     } else {
                         url = "${baseUrl}/assets/${filePath}.${imgType}"
                     }
@@ -329,10 +330,9 @@ class ImageServiceImpl : ImageService {
 
     private fun getFilterImage(srcImgFile: File,filterImageId: Int) {
         logger.info("getFilterImage filterImageId=" + filterImageId)
-        val desImagePath = srcImgFile.absolutePath.split(".").first().plus("_$filterImageId").plus(srcImgFile.absolutePath.split(".").last())
-        var inputImagePath = srcImgFile.absolutePath.split(".").first()
-        logger.info("desImagePath=" + desImagePath + "\tinputImagePath=" + inputImagePath)
-        val imageToFilter = ProcessBuilder("/root/miniconda3/bin/python","/root/joy_style/joy_api.py",inputImagePath,desImagePath,filterImageId.toString()).start()
+        val desImagePath = srcImgFile.absolutePath.split(".").first().plus("_$filterImageId.").plus(srcImgFile.absolutePath.split(".").last())
+        logger.info("desImagePath=" + desImagePath + "\tinputImagePath=" + srcImgFile)
+        val imageToFilter = ProcessBuilder("/root/miniconda3/bin/python","/root/joy_style/joy_api.py",srcImgFile.absolutePath.toString(),desImagePath,filterImageId.toString()).start()
         var retStr = ""
         var retError = ""
         BufferedReader(InputStreamReader(imageToFilter.inputStream)).use { reader ->
