@@ -328,6 +328,7 @@ class ImageServiceImpl : ImageService {
     }
 
     private fun getFilterImage(srcImgFile: File,filterImageId: Int) {
+        logger.info("getFilterImage first=" + srcImgFile.absolutePath.split(".").first() + "\t")
         val desImagePath = srcImgFile.absolutePath.split(".").first().plus("_$filterImageId").plus(srcImgFile.absolutePath.split(".").last())
         val imageToFilter = ProcessBuilder("/root/miniconda3/bin/python","/root/joy_style/joy_api.py",srcImgFile.absolutePath,desImagePath,filterImageId.toString()).start()
         var retStr = ""
@@ -346,18 +347,24 @@ class ImageServiceImpl : ImageService {
      * 根据前段传过来的图片生成效果滤镜图片
      */
     override fun imageToFilter(sessionId: String, imgFile: MultipartFile?):String {
-        userLoginSessionDao.findOne(sessionId) ?: throw ProcessException(1, "用户未登录")
+        var session = userLoginSessionDao.findOne(sessionId) ?: throw ProcessException(1, "用户未登录")
         imgFile ?: throw ProcessException(2, "没有图片文件")
         val fileName = UUID.randomUUID().toString().replace("-", "")
-        val filePath = "filterTmp/$sessionId/$fileName.jpg"
+        val filePath = "filterTmp/${session.userId}/$fileName.jpg"
         val srcImgFile = File(assetsDir, filePath)
         srcImgFile.parentFile.mkdirs()
         imgFile.transferTo(srcImgFile)
         val jsonFile = File(assetsDir,"filter/filterList.json")
         if (!jsonFile.exists()) throw ProcessException(3,"没找到filterList.json文件")
         val filterList: List<Filter> = objectMapper.readValue(jsonFile, object : TypeReference<List<Filter>>() {})
-        filterList.forEach { getFilterImage(srcImgFile,it.id) }
-        return "$baseUrl/assets/$filePath"
+        logger.info("filterListInfo=" + filterList)
+        for (i in 101..109) {
+            getFilterImage(srcImgFile,i)
+        }
+//        filterList.forEach { getFilterImage(srcImgFile,it.id) }
+        val url = filePath.split(".").first()
+        logger.info("imageToFilter url=" + url)
+        return "$baseUrl/assets/$url"
     }
 
 }
