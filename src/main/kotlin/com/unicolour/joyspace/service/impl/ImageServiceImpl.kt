@@ -331,7 +331,6 @@ class ImageServiceImpl : ImageService {
      * 根据前段传过来的图片生成效果滤镜图片
      */
     override fun imageToFilter(sessionId: String, imgFile: MultipartFile?):String? {
-        logger.info("imageToFilter1111111=" + sessionId + "\timgFile=" + imgFile.toString())
         val session = userLoginSessionDao.findOne(sessionId)
         if (session == null) {
             logger.info("imageToFilter session为空")
@@ -342,30 +341,21 @@ class ImageServiceImpl : ImageService {
         } else {
             try {
 
-                val filePath = "filter/${session.userId}/$sessionId"
+                val filePath = "filter/$sessionId"
                 val file = File(assetsDir, filePath)
-                logger.info("imageToFilter=" + file)
                 file.parentFile.mkdirs()
-                /**
-                 * 设置临时文件目录
-                 */
-                multipartConfigElement()
                 imgFile.transferTo(file)
-//                val filePath1 = "filter/$sessionId.json"
-//                val desImage = File(assetsDir, filePath1)
-//                desImage.parentFile.mkdirs()
-//                logger.info("uploadFilterImage desImage:$desImage")
-//                getFilterListJsonFile(desImage)
-//                val jsonFile = File(desImage.absoluteFile.toString())
-//                var filterList = objectMapper.readValue(jsonFile, object : TypeReference<List<Filter>>() {})
+                val imageFile = File(file,imgFile.toString())
+                imageFile.parentFile.mkdirs()
 
-//                for ((a,b) in filterList.withIndex()) {
-                    for (b in 101..109) {
-                    logger.info("遍历b=" + b)
-//                    val filter = JSONObject.parseObject<Filter>(b.toString(), Filter::class.java)
-                    logger.info("循环遍历=" + b)
-                    val outputImageUrl = "${file}_${b}.jpg"
-                    val imageToFilter = ProcessBuilder("/root/miniconda3/bin/python","/root/joy_style/joy_api.py",file.absolutePath,outputImageUrl,b.toString()).start()
+                var filterList = filterImageList(sessionId)
+
+                for ((a,b) in filterList.withIndex()) {
+                    logger.info("遍历a=" + a + "\tb=" + b)
+                    val filter = JSONObject.parseObject<Filter>(b.toString(), Filter::class.java)
+                    logger.info("循环遍历=" + filter)
+                    val outputImageUrl = "${file}_${a}.jpg"
+                    val imageToFilter = ProcessBuilder("/root/miniconda3/bin/python","/root/joy_style/joy_api.py",imageFile.absolutePath,outputImageUrl,filter.id.toString()).start()
                     var retStr = ""
                     var retError = ""
                     BufferedReader(InputStreamReader(imageToFilter.inputStream)).use { reader ->
@@ -382,10 +372,10 @@ class ImageServiceImpl : ImageService {
                         return "生成滤镜图片失败"
                     }
                     logger.info("imageToFilter retStr:$retStr,retError:$retError,retCode:$retCode")
-
+                    continue
                 }
 
-                var url = "${baseUrl}/assets/${filePath}"
+                var url = "${baseUrl}/assets/${file}"
                 return url
             } catch (e: Exception) {
                 logger.error("imageToFilter error:",e)
@@ -395,14 +385,6 @@ class ImageServiceImpl : ImageService {
 
         }
         return "生成滤镜图片数据为空"
-    }
-
-    @Bean
-    fun multipartConfigElement(): MultipartConfigElement {
-        val factory = MultipartConfigFactory()
-        //你的项目地址
-        factory.setLocation("/home/soft")
-        return factory.createMultipartConfig()
     }
 
 }
