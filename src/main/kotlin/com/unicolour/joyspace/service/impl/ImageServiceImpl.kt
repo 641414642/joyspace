@@ -341,12 +341,11 @@ class ImageServiceImpl : ImageService {
         } else {
             try {
 
-                val filePath = "filter/$sessionId"
+                val filePath = "filter/${session.userId}/$sessionId"
                 val file = File(assetsDir, filePath)
                 file.parentFile.mkdirs()
                 imgFile.transferTo(file)
-                val imageFile = File(file,imgFile.toString())
-                imageFile.parentFile.mkdirs()
+
 
                 var filterList = filterImageList(sessionId)
 
@@ -355,7 +354,7 @@ class ImageServiceImpl : ImageService {
                     val filter = JSONObject.parseObject<Filter>(b.toString(), Filter::class.java)
                     logger.info("循环遍历=" + filter)
                     val outputImageUrl = "${file}_${a}.jpg"
-                    val imageToFilter = ProcessBuilder("/root/miniconda3/bin/python","/root/joy_style/joy_api.py",imageFile.absolutePath,outputImageUrl,filter.id.toString()).start()
+                    val imageToFilter = ProcessBuilder("/root/miniconda3/bin/python","/root/joy_style/joy_api.py",file.absolutePath,outputImageUrl,filter.id.toString()).start()
                     var retStr = ""
                     var retError = ""
                     BufferedReader(InputStreamReader(imageToFilter.inputStream)).use { reader ->
