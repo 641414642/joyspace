@@ -60,20 +60,23 @@ class ImageServiceImpl : ImageService {
             return ImageInfo(2, "没有图片文件")
         } else {
             try {
+
                 val fileName = UUID.randomUUID().toString().replace("-", "")
-                val filePath = "user/${session.userId}/${sessionId}/${fileName}"
-                val file = File(assetsDir, filePath)
-                file.parentFile.mkdirs()
+                val filePath : String?
+                val file : File?
+                if (filterImageId != null) {
+                    filePath = "filterTmp/order/${session.userId}/${fileName}.jpg"
+                    file = File(assetsDir, filePath)
+                    file.parentFile.mkdirs()
+                    imgFile.transferTo(file)
+                } else {
+                    filePath = "user/${session.userId}/${sessionId}/${fileName}"
+                    file = File(assetsDir, filePath)
+                    file.parentFile.mkdirs()
+                }
 
 
-                val fileImagePath = "filterTmp/${session.userId}/${fileName}_${filterImageId}.jpg"
-                val fileImage = File(assetsDir, filePath)
-                file.parentFile.mkdirs()
-
-                imgFile.transferTo(file)
-
-
-                logger.info("file.absolutePath:${file.absolutePath}")
+                logger.info("file.absolutePath:${file.absolutePath},fileName=${fileName}")
 
                 val pb = ProcessBuilder("magick", "identify", file.absolutePath)
 
@@ -83,6 +86,7 @@ class ImageServiceImpl : ImageService {
                 BufferedReader(InputStreamReader(process.inputStream)).use { reader ->
                     retStr = reader.readText()
                 }
+
 
                 val retCode = process.waitFor()
 
@@ -104,13 +108,22 @@ class ImageServiceImpl : ImageService {
                     val imgHei = matcher.group(3).toInt()
 
 
-                    val fileWithExt = File(assetsDir, "${filePath}.${imgType}")
+
+                    val fileWithExt = File(assetsDir, "${filePath.split(".").first()}.${imgType}")
                     file.renameTo(fileWithExt)
 
+                    logger.info("fileWithExt=" + fileWithExt)
 
-                    val fileWithExtOut = File(assetsDir, "${filePath}_$filterImageId.${imgType}")
+                    val fileWithExtOut : File?
+                    if (filterImageId != null) {
+                        fileWithExtOut = File(assetsDir, "${filePath.split(".").first()}_${filterImageId}.${imgType}")
+                    } else {
+                        fileWithExtOut = File(assetsDir,"${filePath}.${imgType}")
+                    }
 
-//                    val filterImageInput = "/path/to/input_image"
+
+                    logger.info("fileWithExtOut=" + fileWithExtOut)
+
 
                     val processBuilder = ProcessBuilder("python","/root/joy_style/joy_api.py",fileWithExt.absolutePath,fileWithExtOut.absolutePath,filterImageId).start()
 
@@ -128,12 +141,14 @@ class ImageServiceImpl : ImageService {
                     }
 
 
+
                     val url :String
-                    if(filterImageId != null) {
-                        url = "${baseUrl}/assets/${fileImagePath}"
+                    if (filterImageId != null) {
+                        url = "${baseUrl}/assets/${filePath.split(".").first()}_${filterImageId}.${imgType}"
                     } else {
-                        url = "${baseUrl}/assets/${filePath}.${imgType}"
+                        url = "${baseUrl}/assets/${filePath.split(".").first()}.${imgType}"
                     }
+                    logger.info("uploadImage url=" + url)
                     val userImgFile = UserImageFile()
                     userImgFile.type = imgType
                     userImgFile.fileName = fileName
@@ -142,7 +157,6 @@ class ImageServiceImpl : ImageService {
                     userImgFile.sessionId = sessionId
                     userImgFile.uploadTime = Calendar.getInstance()
                     userImgFile.userId = session.userId
-//                    userImgFile.url = url
 
 
                     userImageFileDao.save(userImgFile)
@@ -360,10 +374,9 @@ class ImageServiceImpl : ImageService {
         if (!jsonFile.exists()) throw ProcessException(3,"没找到filterList.json文件")
         val filterList: List<Filter> = objectMapper.readValue(jsonFile, object : TypeReference<List<Filter>>() {})
         logger.info("filterListInfo=" + filterList)
-        for (i in 101..109) {
-            getFilterImage(srcImgFile,i)
+        filterList.forEach {
+            getFilterImage(srcImgFile,it.id)
         }
-//        filterList.forEach { getFilterImage(srcImgFile,it.id) }
         val url = filePath.split(".").first() + "_##filterId##.jpg"
         logger.info("imageToFilter url=" + url)
         return "$baseUrl/assets/$url"
