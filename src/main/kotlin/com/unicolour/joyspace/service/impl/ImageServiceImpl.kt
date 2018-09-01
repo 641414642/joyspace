@@ -1,6 +1,5 @@
 package com.unicolour.joyspace.service.impl
 
-import com.alibaba.fastjson.JSONObject
 import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.unicolour.joyspace.dao.ProductDao
