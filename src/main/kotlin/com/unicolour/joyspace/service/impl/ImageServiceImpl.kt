@@ -124,7 +124,7 @@ class ImageServiceImpl : ImageService {
                     logger.info("fileWithExtOut=" + fileWithExtOut)
 
 
-                    val processBuilder = ProcessBuilder("python","/root/joy_style/joy_api.py",fileWithExt.absolutePath,fileWithExtOut.absolutePath,filterImageId).start()
+                    val processBuilder = ProcessBuilder("/root/miniconda3/bin/python","/root/joy_style/joy_api.py",fileWithExt.absolutePath,fileWithExtOut.absolutePath,filterImageId).start()
 
 
                     var retStr: String = "";
