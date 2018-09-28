@@ -159,6 +159,7 @@ class ApiOrderRoute {
                              @RequestParam("image") imgFile: MultipartFile?,
                              @RequestParam("filterImageId",required = false)filterImageId: String?): RestResponse {
 
+        logger.info("uploadOrderThumbnail sessionId = " + sessionId + "\torderId = " + orderId + "\tproductId = " + productId + "\timage = " + imgFile + "\tfilterImageId = " + filterImageId)
         //上传缩略图
         val proImage = PrintOrderProductImage()
         proImage.orderId = orderId
