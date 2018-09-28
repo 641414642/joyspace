@@ -21,7 +21,7 @@ class AppImageController {
     fun uploadImage(@RequestParam("sessionId") sessionId: String,
                     @RequestParam("imageFile") imgFiles: Array<MultipartFile>,
                     @RequestParam("imageFileMD5") imgFileMD5s : Array<String>,
-                    @RequestParam("filterImageId",required = false) filterImageId:String) : ResponseEntity<List<ImageInfo>> {
+                    @RequestParam("filterImageId",required = false) filterImageId:String?) : ResponseEntity<List<ImageInfo>> {
         val imgInfoList = ArrayList<ImageInfo>()
         var i = 0;
         for (imgFile in imgFiles) {

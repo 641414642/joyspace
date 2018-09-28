@@ -50,7 +50,7 @@ class ImageServiceImpl : ImageService {
     @Autowired
     lateinit var objectMapper: ObjectMapper
 
-    override fun uploadImage(filterImageId: String,sessionId: String, imgFile: MultipartFile?): ImageInfo {
+    override fun uploadImage(filterImageId: String?,sessionId: String, imgFile: MultipartFile?): ImageInfo {
         val session = userLoginSessionDao.findOne(sessionId);
 
         if (session == null) {

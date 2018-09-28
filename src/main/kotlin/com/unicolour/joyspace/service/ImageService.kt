@@ -7,7 +7,7 @@ import org.springframework.web.multipart.MultipartFile
 import java.io.File
 
 interface ImageService {
-    fun uploadImage(filterImageId: String,sessionId: String, imgFile: MultipartFile?): ImageInfo
+    fun uploadImage(filterImageId: String?,sessionId: String, imgFile: MultipartFile?): ImageInfo
     fun createThumbnail(sessionId: String, userImgFile: UserImageFile, width: Int, height: Int): UserImageFile?
 
     fun deleteImage(sessionId: String, imageId: Int): CommonRequestResult

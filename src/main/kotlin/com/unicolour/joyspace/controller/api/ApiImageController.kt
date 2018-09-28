@@ -21,7 +21,7 @@ class ApiImageController {
     @RequestMapping("/api/image", method = arrayOf(RequestMethod.POST))
     fun uploadImage(@RequestParam("sessionId") sessionId: String,
                     @RequestParam("image") imgFile: MultipartFile?,
-                    @RequestParam("filterImageId",required = false)filterImageId:String) : ResponseEntity<ImageInfo> {
+                    @RequestParam("filterImageId",required = false)filterImageId:String?) : ResponseEntity<ImageInfo> {
         val imgInfo = imageService.uploadImage(filterImageId,sessionId, imgFile)
 
         return ResponseEntity.ok(imgInfo)

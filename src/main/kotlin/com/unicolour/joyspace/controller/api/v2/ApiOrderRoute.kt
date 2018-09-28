@@ -144,7 +144,7 @@ class ApiOrderRoute {
                              @RequestParam("rotate",required = false) rotate: Double?,
                              @RequestParam("totalCount") totalCount: Int?,
                              @RequestParam("image") imgFile: MultipartFile?,
-                             @RequestParam("filterImageId")filterImageId:String): ResponseEntity<UploadOrderImageResult> {
+                             @RequestParam("filterImageId",required = false)filterImageId:String?): ResponseEntity<UploadOrderImageResult> {
 
         val allUploaded = printOrderService.uploadOrderImage(filterImageId,sessionId, orderItemId,name, imgFile, x ?: 0.0, y ?: 0.0, scale ?: 0.0, rotate ?: 0.0,totalCount ?: 0)
         return ResponseEntity.ok(UploadOrderImageResult(allUploaded))
@@ -157,7 +157,7 @@ class ApiOrderRoute {
                              @RequestParam("orderId") orderId: Int,
                              @RequestParam("productId") productId: Int,
                              @RequestParam("image") imgFile: MultipartFile?,
-                             @RequestParam("filterImageId",required = false)filterImageId: String): RestResponse {
+                             @RequestParam("filterImageId",required = false)filterImageId: String?): RestResponse {
 
         //上传缩略图
         val proImage = PrintOrderProductImage()
